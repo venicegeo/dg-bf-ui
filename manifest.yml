@@ -1,0 +1,9 @@
+applications:
+  - name: beachfront
+    env:
+      JBP_CONFIG_JAVA_MAIN: '{arguments: "host=\$HOSTNAME port=\$PORT"}'
+    host: beachfront
+    instances: 1
+    memory: 1G
+    path: beachfront.jar
+    timeout: 180
