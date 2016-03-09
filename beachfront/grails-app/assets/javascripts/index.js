@@ -2,14 +2,16 @@
 //= require bootstrap.min
 //= require ol
 
+var map;
 $(document).ready(
 	function() {
 		setupMap();
+		updateMapSize()
 	}
 );
 
 function setupMap() {
-	var map = new ol.Map({
+	map = new ol.Map({
 		layers: [
 			new ol.layer.Tile({
 				source: new ol.source.OSM()
@@ -21,4 +23,14 @@ function setupMap() {
 			zoom: 2
 		})
 	});
+}
+
+function updateMapSize() {
+	var windowHeight = $(window).height();
+	console.dir(windowHeight);
+	var navigationMenu = $("#navigationMenu");
+	console.dir(navigationMenu.height());
+	var mapHeight = windowHeight - navigationMenu.height();
+	$("#map").height(mapHeight);
+	map.updateSize();
 }
