@@ -1,0 +1,15 @@
+.ol-full-screen {
+	bottom: 0.5em;
+	top: auto;
+}
+
+.ol-mouse-position {
+	background-color: rgba(0, 0, 0, 0.5);
+	bottom: 0.5em;
+	color: white;
+	cursor: pointer;
+	left: 0.5em;
+	right: auto;
+	top: auto;
+}
+
