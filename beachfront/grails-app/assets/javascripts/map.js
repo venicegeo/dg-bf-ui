@@ -23,6 +23,29 @@ function createMousePositionControl() {
 	return mousePositionControl;
 }
 
+function disableMapRotation() {
+	map.removeInteraction(bf.mapInteractions.dragRotate);
+	map.addInteraction(bf.mapInteractions.dragPan);
+}
+
+function enableDisableMapRotation(button) {
+	var text = button.innerHTML;
+	if (text.contains("Enable")) {
+		enableMapRotation();
+		text = text.replace("Enable", "Disable");
+	}
+	else {
+		disableMapRotation();
+		text = text.replace("Disable", "Enable");
+	}
+	button.innerHTML = text;
+}
+
+function enableMapRotation() {
+	map.removeInteraction(bf.mapInteractions.dragPan);
+	map.addInteraction(bf.mapInteractions.dragRotate);
+}
+
 function setupMap() {
 	map = new ol.Map({
 		controls: ol.control.defaults().extend([
@@ -37,6 +60,10 @@ function setupMap() {
 				})
 			})
 		],
+		interactions: ol.interaction.defaults({
+			altShiftDragRotate: false,
+			dragPan: false
+                }),
 		logo: false,
 		target: "map",
 		view: new ol.View({
@@ -44,6 +71,14 @@ function setupMap() {
 			zoom: 2
 		})
 	});
+
+	bf.mapInteractions = {
+		altDragRotate: new ol.interaction.DragRotate({ condition: ol.events.condition.altKeyOnly }),
+		dragPan: new ol.interaction.DragPan({ condition: ol.events.condition.noModifierKeys }),
+		dragRotate: new ol.interaction.DragRotate({ condition: ol.events.condition.always })
+	};
+	map.addInteraction(bf.mapInteractions.altDragRotate);
+	map.addInteraction(bf.mapInteractions.dragPan);
 }
 
 function updateMapSize() {
