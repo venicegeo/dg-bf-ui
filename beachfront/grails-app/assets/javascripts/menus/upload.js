@@ -42,8 +42,8 @@ function updateUploadStatusTable(files) {
 	var dialogBody = $("#uploadStatusDialog .modal-body");
 	var maxDialogBodyHeight = $(window).height() * 0.7;
 	var dialogBodyIsTooTall = dialogBody.height() > maxDialogBodyHeight;
-	dialogBody.css("max-height", dialogBodyTooTall ? maxDialogBodyHeight : "");
-	dialogBody.css("overflow-y", dialogBodyTooTall ? "auto" : "");
+	dialogBody.css("max-height", dialogBodyIsTooTall ? maxDialogBodyHeight : "");
+	dialogBody.css("overflow-y", dialogBodyIsTooTall ? "auto" : "");
 }
 
 function uploadFiles(files) {
@@ -79,7 +79,21 @@ function uploadFiles(files) {
 						uploadFiles(this.files);
 					},
 					type: "post",
- 					url: contextPath + "/upload/upload"
+ 					url: contextPath + "/upload/upload",
+					// handle uploading progress
+					xhr: function(){
+						var xhr = $.ajaxSettings.xhr();
+						xhr.upload.addEventListener("progress", function(event){
+							if (event.lengthComputable) {
+								var percentComplete = parseInt(event.loaded / event.total * 100);
+								x.status = percentComplete + "%";
+								updateUploadStatusTable(files);
+							}
+						}, false);
+        
+       
+						return xhr;
+					}
 				});
 				
 
