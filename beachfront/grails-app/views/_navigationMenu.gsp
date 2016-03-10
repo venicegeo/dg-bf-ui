@@ -6,10 +6,8 @@
 			</div>
 			<div class = "collapse navbar-collapse">
 				<ul class = "nav navbar-nav">
-					<g:render template="menus/mapControls"/>
-					<li>
-						<a href = javascript:void(0) onclick = 'javascript:alert("Still under construction...")'>Upload</a>
-					</li>	
+					<g:render template = "menus/mapControls"/>
+					<g:render template = "menus/upload"/>
 				</ul>
 				<ul class="nav navbar-nav navbar-right">
 					<li><a href = javascript:void(0) onclick = $("#helpDialog").modal("show")>Help</a></li>

@@ -6,6 +6,7 @@
 //= require prototype
 //= require common
 //= require map
+//= require menus/upload
 
 var bf = {};
 var map;
