@@ -9,6 +9,9 @@
 		<title>Beachfront</title>
 		<asset:stylesheet src = "index.css"/>
 		<asset:javascript src = "index.js"/>
+		<script type = "text/javascript">
+			var contextPath = "${request.contextPath}";
+		</script>
   	</head>
 	<body>
 		<div class = "container-fluid">
