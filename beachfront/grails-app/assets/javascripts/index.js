@@ -4,6 +4,7 @@
 //= require coordinateConversion.js
 
 //= require prototype
+//= require common
 //= require map
 
 var bf = {};

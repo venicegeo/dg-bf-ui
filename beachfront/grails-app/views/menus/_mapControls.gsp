@@ -6,6 +6,6 @@
 		<li><a href = javascript:void(0) onclick = enableDisableMapRotation($(this).children()[0])>
 			<span>Enable Map Rotation</span>
 		</a></li>
-		<%--<li><a href = javascript:void(0) onclick = $("#geoJumpDialog").modal("show")>Geo-Jump</a></li>--%>
+		<li><a href = javascript:void(0) onclick = $("#geoJumpDialog").modal("show");$("#geoJumpLocationInput").focus()>Geo-Jump</a></li>
 	</ul>
 </li>
