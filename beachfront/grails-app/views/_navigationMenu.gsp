@@ -6,6 +6,7 @@
 			</div>
 			<div class = "collapse navbar-collapse">
 				<ul class = "nav navbar-nav">
+					<g:render template="menus/mapControls"/>
 					<li>
 						<a href = javascript:void(0) onclick = 'javascript:alert("Still under construction...")'>Upload</a>
 					</li>	
