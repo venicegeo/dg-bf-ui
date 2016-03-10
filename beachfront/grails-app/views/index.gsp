@@ -7,6 +7,7 @@
 		<!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
 
 		<title>Beachfront</title>
+		<link href = "${request.contextPath}/assets/beachfront_icon.ico" rel = "shortcut icon" type = "image/x-icon">
 		<asset:stylesheet src = "index.css"/>
 		<asset:javascript src = "index.js"/>
   	</head>
