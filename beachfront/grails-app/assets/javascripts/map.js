@@ -46,6 +46,11 @@ function enableMapRotation() {
 	map.addInteraction(bf.mapInteractions.dragRotate);
 }
 
+function geoJump(location) {
+	var point = convertGeospatialCoordinateFormat(location);
+	map.getView().setCenter(point);
+}
+
 function setupMap() {
 	map = new ol.Map({
 		controls: ol.control.defaults().extend([
