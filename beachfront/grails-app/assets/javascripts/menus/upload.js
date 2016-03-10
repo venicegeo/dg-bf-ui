@@ -87,8 +87,10 @@ function uploadFiles(files) {
 							if (event.lengthComputable) {
 								var percentComplete = parseInt(event.loaded / event.total * 100);
 								x.status = percentComplete + "%";
-								updateUploadStatusTable(files);
 							}
+							else { x.status = "In Progress..."; }
+
+							updateUploadStatusTable(files);
 						}, false);
         
        
