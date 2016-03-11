@@ -10,14 +10,14 @@ function convertGeospatialCoordinateFormat(inputString) {
 		var longitude = coordinateConversion.dmsToDd(RegExp.$5, RegExp.$6, RegExp.$7, RegExp.$8);
 
 
-		return [longitude, latitude];
+		return [parseFloat(longitude), parseFloat(latitude)];
 	}
 	else if (inputString.match(ddPattern)) {
 		var latitude = RegExp.$1;
 		var longitude = RegExp.$2;
 
 
-		return [longitude, latitude];
+		return [parseFloat(longitude), parseFloat(latitude)];
 	}
 	else if (inputString.match(mgrsPattern)) {
 		var location = coordinateConversion.mgrsToDd(RegExp.$1, RegExp.$2, RegExp.$3, RegExp.$4, RegExp.$5, RegExp.$6);
