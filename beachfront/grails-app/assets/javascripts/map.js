@@ -51,6 +51,19 @@ function geoJump(location) {
 	map.getView().setCenter(point);
 }
 
+function setupContextMenu() {
+	map.getViewport().addEventListener("contextmenu", 
+		function (event) {	
+			event.preventDefault();
+			var pixel = [event.layerX, event.layerY];
+			var coordinate = ol.proj.transform(map.getCoordinateFromPixel(pixel), "EPSG:3857", "EPSG:4326");
+			var dd = coordinate[1].toFixed(6) + ", " + coordinate[0].toFixed(6);
+			$("#contextDialog").modal("show");
+			$("#contextDialog .modal-body").html("You clicked here: " + dd);
+		}
+	);
+}
+
 function setupMap() {
 	map = new ol.Map({
 		controls: ol.control.defaults().extend([
