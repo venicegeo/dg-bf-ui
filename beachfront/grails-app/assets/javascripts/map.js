@@ -48,7 +48,7 @@ function enableMapRotation() {
 
 function geoJump(location) {
 	var point = convertGeospatialCoordinateFormat(location);
-	map.getView().setCenter(point);
+	map.getView().setCenter(ol.proj.transform(point, "EPSG:4326", "EPSG:3857"));
 }
 
 function setupContextMenu() {
