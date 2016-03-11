@@ -13,6 +13,7 @@ var map;
 $(document).ready(
 	function() {
 		setupMap();
+		setupContextMenu();
 		updateMapSize();
 	}
 );
