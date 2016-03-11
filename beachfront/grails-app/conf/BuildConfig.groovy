@@ -77,3 +77,6 @@ grails.project.dependency.resolution = {
 	compile ":standalone:1.3"
     }
 }
+
+
+grails.plugin.location.networkSpecific = "../plugins/networkSpecific"

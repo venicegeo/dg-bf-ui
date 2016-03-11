@@ -10,12 +10,11 @@
 		<link href = "${request.contextPath}/assets/beachfront_icon.ico" rel = "shortcut icon" type = "image/x-icon">
 		<asset:stylesheet src = "index.css"/>
 		<asset:javascript src = "index.js"/>
-		<script type = "text/javascript">
-			var contextPath = "${request.contextPath}";
-		</script>
+		<script type = "text/javascript">var contextPath = "${request.contextPath}";</script>
   	</head>
 	<body>
 		<div class = "container-fluid">
+			<g:render template = "securityClassificationHeader"/> 
 			<g:render template = "navigationMenu"/> 
 			<div class = "row">
 	 			<div class = "map" id = "map"></div>
