@@ -1,7 +1,7 @@
 <div class = "modal" id = "uploadDialog">
 	<div class = "modal-dialog">
  		<div class = "modal-content">
-			<div class = "modal-header"><h4>Upload File</h4></div>
+			<div class = "modal-header"><h4>Upload File(s)</h4></div>
 			<div class = "modal-body">
 					<input id = "uploadFilesInput" multiple type = "file">
 			</div>

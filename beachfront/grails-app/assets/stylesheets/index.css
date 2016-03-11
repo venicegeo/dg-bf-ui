@@ -1,5 +1,9 @@
 /*
 *= require bootstrap_cerulean.min
 *= require ol
+*=
+*= require indexPlugin
 *= require map
 */
+
+body { overflow: hidden; }

@@ -1,0 +1,13 @@
+.security-classification {
+	color: white;
+	background: green;
+	font-weight: bold;
+	left: 0;
+	margin: 0 auto;
+	position: relative;
+	right: 0;
+	text-align: center;
+	top: 0;
+	width: 100%;
+	z-index: 9999;
+}
