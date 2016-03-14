@@ -112,9 +112,8 @@ function setupMap() {
 
 function updateMapSize() {
 	var windowHeight = $(window).height();
-	var securityClassificationHeader = $(".security-classification");
 	var navigationMenu = $("#navigationMenu");
-	var mapHeight = windowHeight - securityClassificationHeader.height() - navigationMenu.height();
+	var mapHeight = windowHeight - navigationMenu.height();
 	$("#map").height(mapHeight);
 	map.updateSize();
 }
