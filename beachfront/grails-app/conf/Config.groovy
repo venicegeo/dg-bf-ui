@@ -117,5 +117,4 @@ log4j.main = {
 }
 
 
-securityClassification = "UNCLASSIFIED // FOUO"
 tempDirectory = "${System.getProperty("java.io.tmpdir")}"
