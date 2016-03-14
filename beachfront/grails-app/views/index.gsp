@@ -14,7 +14,6 @@
   	</head>
 	<body>
 		<div class = "container-fluid">
-			<g:render template = "securityClassificationHeader"/> 
 			<g:render template = "navigationMenu"/> 
 			<div class = "row">
 	 			<div class = "map" id = "map"></div>
