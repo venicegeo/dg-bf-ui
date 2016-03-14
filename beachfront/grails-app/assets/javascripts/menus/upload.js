@@ -1,7 +1,7 @@
 function prepareUpload() {
 	// setup up an array to keep track of what's been uploaded
 	var files = [];
-	$.each($("#uploadFilesInput")[0].files, function(i, x) { files.push( {file: x, status: null} ); });
+	$.each($("#uploadFilesInput")[0].files, function(i, x) { files.push({ file: x, status: null }); });
 
 	$("#uploadStatusDialog").modal("show");
 	$("#uploadStatusDialog .modal-body").html("<table class = 'table table-striped' id = 'uploadStatusTable'></table>");
