@@ -1,3 +1,15 @@
+function createContextMenuContent(coordinate) {
+	var coordConvert = new CoordinateConversion();
+	var latitude = coordinate[1];
+	var longitude = coordinate[0];
+	var dd = latitude.toFixed(6) + ", " + longitude.toFixed(6);
+	var dms = coordConvert.ddToDms(latitude, "lat") + " " + coordConvert.ddToDms(longitude, "lon");
+	var mgrs = coordConvert.ddToMgrs(latitude, longitude);
+
+	$("#contextDialog .modal-body").html("<div align = 'center' class = 'row'>You clicked here:</div>");
+	$("#contextDialog .modal-body").append("<div align = 'center' class = 'row'>" + dd + " // " + dms + " // " + mgrs + "</div>");
+}
+
 function createMousePositionControl() {
 	var mousePositionControl = new ol.control.MousePosition({
 		coordinateFormat: function(coordinate) {
@@ -57,9 +69,8 @@ function setupContextMenu() {
 			event.preventDefault();
 			var pixel = [event.layerX, event.layerY];
 			var coordinate = ol.proj.transform(map.getCoordinateFromPixel(pixel), "EPSG:3857", "EPSG:4326");
-			var dd = coordinate[1].toFixed(6) + ", " + coordinate[0].toFixed(6);
+			createContextMenuContent(coordinate);
 			$("#contextDialog").modal("show");
-			$("#contextDialog .modal-body").html("You clicked here: " + dd);
 		}
 	);
 }
