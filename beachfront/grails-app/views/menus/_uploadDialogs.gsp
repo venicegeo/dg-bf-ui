@@ -3,7 +3,7 @@
  		<div class = "modal-content">
 			<div class = "modal-header"><h4>Upload File(s)</h4></div>
 			<div class = "modal-body">
-					<input id = "uploadFilesInput" multiple type = "file">
+					<input accept = ".geojson,.shp" id = "uploadFilesInput" multiple type = "file">
 			</div>
 			<div class = "modal-footer">
 				<button type = "button" class = "btn btn-primary" data-dismiss = "modal" onclick = prepareUpload()>Submit</button>
