@@ -117,4 +117,4 @@ log4j.main = {
 }
 
 
-securityClassification = "UNCLASSIFIED // FOUO"
+securityClassification = "UNCLASSIFIED"
