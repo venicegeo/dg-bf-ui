@@ -1,6 +1,7 @@
 .ol-full-screen {
-	bottom: 0.5em;
-	top: auto;
+	left: 0.5em;
+	right: auto;
+	top: 90px;
 }
 
 .ol-mouse-position {
@@ -13,3 +14,10 @@
 	top: auto;
 }
 
+.ol-rotate, .ol-rotate.ol-hidden {
+	left: 0.5em;
+	opacity: 1;
+	right: auto;
+	top: 60px;
+	visibility: visible;
+}
