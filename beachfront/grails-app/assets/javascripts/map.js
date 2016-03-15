@@ -1,30 +1,52 @@
-function createLayerSwitcherControl() {
-        var layerSwitcherControl = function(opt_options) {
+function addBaseLayers() {
+	bf.baseLayers = {};
+	
+	bf.baseLayers.openStreetMap = new ol.layer.Tile({
+		source: new ol.source.OSM({
+			// take away the default attributions button
+			attributions: []
+		}),
+		title: "Open Street Map",
+		visible: false
+	});
 
-        var options = opt_options || {};
+	var bingMapsKey = "DhP2StHGLfc9t3NOjOlN~f8DtDayAYJnhZTchKJt4MQ~Atf9K5qheUlh1o4rJkTVrzKKDmKsL_jue9ZBN6imZnK_00taby3mtvt2_RNdq2tO";
+	bf.baseLayers.bingMapsAerial = new ol.layer.Tile({
+		source: new ol.source.BingMaps({
+			imagerySet: "Aerial",
+			key: bingMapsKey
+		}),
+		title: "Bing: Aerial",
+		visible: false
+	});
 
-        var button = document.createElement('button');
-        button.innerHTML = 'N';
+	bf.baseLayers.bingMapsAerialWithLabels = new ol.layer.Tile({
+		source: new ol.source.BingMaps({
+			imagerySet: "AerialWithLabels",
+			key: bingMapsKey
+		}),
+		title: "Bing: Aerial w/ Labels",
+		visible: false
+	});
 
-        var this_ = this;
-        var handleRotateNorth = function() {
-          this_.getMap().getView().setRotation(0);
-        };
+	bf.baseLayers.bingMapsRoad = new ol.layer.Tile({
+		source: new ol.source.BingMaps({
+			imagerySet: "Road",
+			key: bingMapsKey
+		}),
+		title: "Bing: Road",
+		visible: false
+	});
 
-        button.addEventListener('click', handleRotateNorth, false);
-        button.addEventListener('touchstart', handleRotateNorth, false);
+	$.each(
+		bf.baseLayers,
+		function(i, x) {
+			map.addLayer(x);
+			if (i == "bingMapsAerial") { x.setVisible(true); }
+		}
+	);
 
-        var element = document.createElement('div');
-        element.className = 'rotate-north ol-unselectable ol-control';
-        element.appendChild(button);
-
-        ol.control.Control.call(this, {
-          element: element,
-          target: options.target
-        });
-
-      };
-      ol.inherits(app.RotateNorthControl, ol.control.Control);
+	addBaseLayersToLayerSwitcher();
 }
 
 function createContextMenuContent(coordinate) {
@@ -107,17 +129,10 @@ function setupContextMenu() {
 function setupMap() {
 	map = new ol.Map({
 		controls: ol.control.defaults().extend([
+			createLayerSwitcherControl(),
 			createMousePositionControl(),
 			new ol.control.FullScreen()
 		]),
-		layers: [
-			new ol.layer.Tile({
-				source: new ol.source.OSM({ 
-					// take away the default attributions button
-					attributions: [] 
-				})
-			})
-		],
 		interactions: ol.interaction.defaults({
 			altShiftDragRotate: false,
 			dragPan: false
@@ -126,7 +141,7 @@ function setupMap() {
 		target: "map",
 		view: new ol.View({
 			center: [0, 0],
-			zoom: 2
+			zoom: 3
 		})
 	});
 
@@ -137,6 +152,8 @@ function setupMap() {
 	};
 	map.addInteraction(bf.mapInteractions.altDragRotate);
 	map.addInteraction(bf.mapInteractions.dragPan);
+
+	addBaseLayers();
 }
 
 function updateMapSize() {

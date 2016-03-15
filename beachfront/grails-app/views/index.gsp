@@ -18,6 +18,7 @@
 			<div class = "row">
 	 			<div class = "map" id = "map"></div>
 			</div>
+			<g:render template = "layerSwitcher"/>
 		</div>
 
 		<g:render template = "dialogs"/> 
