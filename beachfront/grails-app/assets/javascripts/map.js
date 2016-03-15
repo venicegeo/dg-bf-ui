@@ -61,6 +61,21 @@ function createContextMenuContent(coordinate) {
 	$("#contextDialog .modal-body").append("<div align = 'center' class = 'row'>" + dd + " // " + dms + " // " + mgrs + "</div>");
 }
 
+function createControls() {
+	var controls = [];
+
+	controls.push(createLayerSwitcherControl());
+
+	controls.push(createMousePositionControl());
+
+	var span = document.createElement("span");
+        span.className = "glyphicon glyphicon-fullscreen";
+	controls.push(new ol.control.FullScreen({ label: span }));
+
+
+	return controls;
+}
+
 function createMousePositionControl() {
 	var mousePositionControl = new ol.control.MousePosition({
 		coordinateFormat: function(coordinate) {
@@ -128,11 +143,7 @@ function setupContextMenu() {
 
 function setupMap() {
 	map = new ol.Map({
-		controls: ol.control.defaults().extend([
-			createLayerSwitcherControl(),
-			createMousePositionControl(),
-			new ol.control.FullScreen()
-		]),
+		controls: ol.control.defaults().extend(createControls()),
 		interactions: ol.interaction.defaults({
 			altShiftDragRotate: false,
 			dragPan: false
