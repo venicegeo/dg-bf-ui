@@ -15,6 +15,8 @@ $(document).ready(
 	function() {
 		setupMap();
 		setupContextMenu();
+
+		$(window).resize(function() { updateMapSize(); });
 		updateMapSize();
 	}
 );
