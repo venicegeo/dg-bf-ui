@@ -1,6 +1,7 @@
 //= require jquery
 //= require bootstrap.min
-//= require ol
+//= require bootstrap-slider.min
+//= require ol-debug
 //= require coordinateConversion.js
 
 //= require prototype
@@ -9,7 +10,9 @@
 //= require layerSwitcher
 //= require menus/upload
 
-var bf = {};
+var bf = {
+	layers: []
+};
 var map;
 $(document).ready(
 	function() {
