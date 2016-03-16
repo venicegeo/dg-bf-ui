@@ -1,3 +1,25 @@
+function addGeoJsonLayerToMap(geoJson) {
+	// to differentiate between multiple vector layers, make them a different color
+	var hue = generateRandomHue();
+	var style = new ol.style.Style({
+		fill: new ol.style.Fill({ color: hue }),
+		stroke: new ol.style.Stroke({ color: hue })
+	});
+
+	var vectorLayer = new ol.layer.Vector({
+		source: new ol.source.Vector({
+			features: new ol.format.GeoJSON().readFeatures(geoJson, { featureProjection: "EPSG:3857" })
+		}),
+		style: style,
+		title: geoJson.title,
+		visible: true
+	});
+
+	map.addLayer(vectorLayer);
+	addOtherLayerToLayerSwitcher(vectorLayer);
+	map.getView().fit(vectorLayer.getSource().getExtent(), map.getSize())
+}
+
 function prepareUpload() {
 	// setup up an array to keep track of what's been uploaded
 	var files = [];
@@ -6,8 +28,19 @@ function prepareUpload() {
 	$("#uploadStatusDialog").modal("show");
 	$("#uploadStatusDialog .modal-body").html("<table class = 'table table-striped' id = 'uploadStatusTable'></table>");
 	updateUploadStatusTable(files);
-	
+
 	uploadFiles(files);
+}
+
+function processUploadedFile(data) {
+	if (data.geoJson) {
+		var geoJson = data.geoJson;
+		geoJson.title = data.filename;
+		addGeoJsonLayerToMap(geoJson);
+	}
+	else if (data.shapefile) {
+		
+	}
 }
 
 function updateUploadStatusTable(files) {
@@ -76,6 +109,10 @@ function uploadFiles(files) {
 						else { file.status = "Error: Incomplete upload. :(" }
 
 						updateUploadStatusTable(this.files);
+
+						processUploadedFile(data);
+
+						// start the next upload
 						uploadFiles(this.files);
 					},
 					type: "post",

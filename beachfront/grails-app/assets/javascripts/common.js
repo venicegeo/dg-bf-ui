@@ -27,3 +27,14 @@ function convertGeospatialCoordinateFormat(inputString) {
 	}
 	else { return false; }
 }
+
+function generateRandomHue() {
+	var hue = "rgb(" + 
+		(Math.floor(Math.random() * 256)) + "," + 
+		(Math.floor(Math.random() * 256)) + "," + 
+		(Math.floor(Math.random() * 256)) + 
+	")";
+
+	
+	return hue;
+}
