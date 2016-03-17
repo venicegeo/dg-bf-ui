@@ -7,6 +7,7 @@
 			<div class = "collapse navbar-collapse">
 				<ul class = "nav navbar-nav">
 					<g:render template = "menus/mapControls"/>
+					<g:render template = "menus/export"/>
 					<g:render template = "menus/upload"/>
 				</ul>
 				<ul class="nav navbar-nav navbar-right">

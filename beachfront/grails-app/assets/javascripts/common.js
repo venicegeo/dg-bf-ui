@@ -28,6 +28,11 @@ function convertGeospatialCoordinateFormat(inputString) {
 	else { return false; }
 }
 
+function displayLoadingDialog(message) {
+	$("#loadingDialogMessageDiv").html(message || "");
+	$("#loadingDialog").modal("show");
+}
+
 function generateRandomHue() {
 	var hue = "rgb(" + 
 		(Math.floor(Math.random() * 256)) + "," + 
@@ -38,3 +43,5 @@ function generateRandomHue() {
 	
 	return hue;
 }
+
+function hideLoadingDialog() { $("#loadingDialog").modal("hide"); }

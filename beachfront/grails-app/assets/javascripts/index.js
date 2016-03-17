@@ -8,6 +8,7 @@
 //= require common
 //= require map
 //= require layerSwitcher
+//= require menus/export
 //= require menus/upload
 
 var bf = {
