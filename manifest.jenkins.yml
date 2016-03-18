@@ -2,9 +2,10 @@ applications:
 - name: beachfront
   host: beachfront
   path: beachfront.jar
-  command: java -jar beachfront.jar host=127.0.0.1 port=$PORT
+  env:
+    JBP_CONFIG_JAVA_MAIN: '{arguments: "host=\$HOSTNAME port=\$PORT"}'
   buildpack: java_buildpack_offline
   domain: stage.geointservices.io
   memory: 512M
   instances: 1
-  timeout: 80
+  timeout: 180
