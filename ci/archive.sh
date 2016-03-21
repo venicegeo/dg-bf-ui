@@ -10,6 +10,7 @@ source $root/ci/vars.sh
 ! type grails >/dev/null 2>&1 && source $root/ci/grails.sh
 
 pushd $root/$APP > /dev/null
+pwd
   grails compile
   grails -Dbuild.compiler=javac1.7 build-standalone $root/$APP.$EXT
 popd > /dev/null
