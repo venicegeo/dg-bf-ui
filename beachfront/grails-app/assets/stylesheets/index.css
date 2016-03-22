@@ -6,4 +6,14 @@
 *= require map
 */
 
+
+#aboutDialog .modal-content {
+	background-image: url('beachfront.jpg');
+	background-position:left bottom;
+	background-size:cover;
+	color: white;
+}
+#aboutDialog h4 { color: white; }
+
+
 body { overflow: hidden; } 

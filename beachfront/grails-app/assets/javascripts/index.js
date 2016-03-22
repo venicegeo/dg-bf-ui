@@ -9,6 +9,7 @@
 //= require map
 //= require layerSwitcher
 //= require menus/export
+//= require menus/runAlgorithm
 //= require menus/upload
 
 var bf = {
