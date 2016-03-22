@@ -9,11 +9,9 @@
 					<g:render template = "menus/mapControls"/>
 					<g:render template = "menus/export"/>
 					<li>
-						<a href = javascript:void(0) onclick = javascript:alert("Still under construction...")>Job Status</a>
+						<a href = javascript:void(0) onclick = 'javascript:alert("Still under construction...")'>Job Status</a>
 					</li>
-					<li>
-						<a href = javascript:void(0) onclick = javascript:alert("Still under construction...")>Run Algorithm</a>
-					</li>
+					<g:render template = "menus/runAlgorithm"/>
 					<g:render template = "menus/upload"/>
 				</ul>
 				<ul class="nav navbar-nav navbar-right">
