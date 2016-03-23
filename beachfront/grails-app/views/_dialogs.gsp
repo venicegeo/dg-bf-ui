@@ -5,3 +5,4 @@
 <g:render template = "menus/mapControlsDialogs"/>
 <g:render template = "menus/runAlgorithmDialogs"/>
 <g:render template = "menus/uploadDialogs"/>
+<g:render template = "popupMapDialog"/>
