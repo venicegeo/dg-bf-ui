@@ -9,10 +9,11 @@
 //= require map
 //= require layerSwitcher
 //= require menus/export
+//= require menus/jobStatus
 //= require menus/runAlgorithm
 //= require menus/upload
 //= require popupMap
-
+//
 var bf = {
 	layers: []
 };
