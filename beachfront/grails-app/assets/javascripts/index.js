@@ -11,6 +11,7 @@
 //= require menus/export
 //= require menus/runAlgorithm
 //= require menus/upload
+//= require popupMap
 
 var bf = {
 	layers: []
