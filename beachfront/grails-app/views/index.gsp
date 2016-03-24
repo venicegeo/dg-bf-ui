@@ -18,7 +18,6 @@
 			<div class = "row">
 	 			<div class = "map" id = "map"></div>
 			</div>
-			<div class = "map" id = "proxyMap" style = "display: none"></div>
 			<g:render template = "layerSwitcher"/>
 		</div>
 
