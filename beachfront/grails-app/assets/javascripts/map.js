@@ -49,6 +49,28 @@ function addBaseLayers() {
 	addBaseLayersToLayerSwitcher();
 }
 
+function addGeoJsonLayerToMap(geoJson) {
+        // to differentiate between multiple vector layers, make them a different color
+        var hue = generateRandomHue();
+        var style = new ol.style.Style({
+                fill: new ol.style.Fill({ color: hue }),
+                stroke: new ol.style.Stroke({ color: hue })
+        });
+
+        var vectorLayer = new ol.layer.Vector({
+                source: new ol.source.Vector({
+                        features: new ol.format.GeoJSON().readFeatures(geoJson, { featureProjection: "EPSG:3857" })
+                }),
+                style: style,
+                title: geoJson.title,
+                visible: true
+        });
+
+        map.addLayer(vectorLayer);
+        addOtherLayerToLayerSwitcher(vectorLayer);
+        map.getView().fit(vectorLayer.getSource().getExtent(), map.getSize())
+}
+
 function createContextMenuContent(coordinate) {
 	var coordConvert = new CoordinateConversion();
 	var latitude = coordinate[1];

@@ -1,9 +1,31 @@
 package beachfront
 
 
+import groovy.json.JsonOutput
+
+
 class AlgorithmService {
 
-	def results() {
+	def checkStatus() {	
+		AlgorithmJob.findAll().each() {
+			// if the algorithm is not complete, check the status
+			if (it.status != "done") {
+				def status = new URL("http://localhost:8080/checkStatus?procIndex=${it.piazzaJobId}").getText()
+
+				// if the status is anything different than what is in the database, update it
+				if (status != it.status) {
+					it.status = status
+					it.save()
+				}
+			}
+		}
+	}
+
+	def results(params) {
+		def json = new URL("http://localhost:8080/getResult?resultIndex=${params.piazzaJobId}").getText()
+	
+	
+		return json
 	}
 
 	def search(params) {
@@ -45,21 +67,39 @@ class AlgorithmService {
 			algorithm.name = "Cool Algorithm ${it}"
 			algorithms.push(new LinkedHashMap(algorithm))
 		}
-			
+
+		sleep(2000)			
 
 		return algorithms
 	}
 
-	def status() {
+	def status(params) {
+		checkStatus()
+
+		def algorithmJobs = []
+		AlgorithmJob.findAll().each() {
+			algorithmJobs.push(it.properties)
+		}
+		sleep(3000)	
+
+	
+		return algorithmJobs
 	}
 
 	def submit(params) {
-		def http = 1 // new URL("http://localhost:8080/dummyAlgo").getText()
+		// assemble the parameters to submit to the algorithm
+		def map = [
+			BoundBox: params.bbox.split(",").collect({ it as Double }),
+			ImageLink: params.image
+		]
+
+		def submitResponse = new URL("http://localhost:8080/dummyAlgo?aoi=${new JsonOutput().toJson(map)}").getText()
 
 		def algorithmJob = new AlgorithmJob(
-			algorithm: params.name,
+			algorithmName: params.name,
 			date: new Date(),
-			piazzaJobId: http
+			piazzaJobId: submitResponse,
+			status: "Submitted"
 		)
 
 
@@ -70,6 +110,5 @@ class AlgorithmService {
 			return [status: true]
 		}
 		else { return [status: false] }
-		
 	}
 }
