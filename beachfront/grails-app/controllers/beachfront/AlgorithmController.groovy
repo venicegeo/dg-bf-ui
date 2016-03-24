@@ -9,31 +9,39 @@ class AlgorithmController {
 	def algorithmService	
 
 
-	def result() {
-		def response = algorithmService.result(params)		
+	def checkStatus() {
+		def status = algorithmService.checkStatus()
+
+		
+		render "Done"
+	}
+
+	def results() {
+		def results = algorithmService.results(params)		
 
 
-		render new JsonOutput().toJson(response)
+		response.contentType = "application/json"
+		render results
 	}
 
 	def search() {
-		def response = algorithmService.search(params)
+		def search = algorithmService.search(params)
 
 	
-		render new JsonOutput().toJson(response)
+		render new JsonOutput().toJson(search)
 	}
 
 	def status() {
-		def response = algorithmService.status(params)
-
+		def status = algorithmService.status(params)
 		
-		render new JsonOutput().toJson(response)
+		
+		render new JsonOutput().toJson(status)
 	}
 
 	def submit() {
-		def response = algorithmService.submit(params)
+		def submit = algorithmService.submit(params)
 
 	
-		render new JsonOutput().toJson(response)
+		render new JsonOutput().toJson(submit)
 	}
 }

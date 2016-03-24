@@ -3,10 +3,11 @@ package beachfront
 class AlgorithmJob {
 	//String bbox
 	Date date
-	String algorithm
+	String algorithmName
 	//String image
 	//Double percision
 	String piazzaJobId
+	String status
 	//Integer sensetivity
 
 

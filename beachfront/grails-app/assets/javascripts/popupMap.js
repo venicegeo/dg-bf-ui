@@ -1,3 +1,41 @@
+function addFeatureOverlay() {
+	bf.featureOverlayFeatures = new ol.Collection()
+	bf.featureOverlay = new ol.layer.Vector({
+		source: new ol.source.Vector({ features: bf.featureOverlayFeatures }),
+		style: new ol.style.Style({
+			fill: new ol.style.Fill({ color: "rgba(255, 255, 0, 0.25)" }),
+			stroke: new ol.style.Stroke({
+				color: "rgba(255, 255, 0, 1)",
+				width: 2
+			})
+		})
+	});
+	bf.featureOverlay.setMap(bf.popupMap);
+}
+
+function clearPopupMap() {
+	$.each(
+		bf.featureOverlay.getSource().getFeatures(), 
+		function(i,x) {
+			bf.featureOverlay.getSource().removeFeature(x);
+		}
+	);
+}
+
+function drawPolygon() {
+	var draw = new ol.interaction.Draw({
+		features: bf.featureOverlayFeatures,
+		style: bf.featureOverlay.getStyle(),
+		type: "Polygon"
+	});
+
+	draw.on("drawstart", function(event) { clearPopupMap(); });
+	bf.popupMap.addInteraction(draw);
+
+	var modify = new ol.interaction.Modify({ features: bf.featureOverlayFeatures });
+	bf.popupMap.addInteraction(modify);
+}
+
 function prepareBoundingBoxInput() {
 	$("#popupMapDialog").modal("show");
 	setupPopupMap();
@@ -32,6 +70,7 @@ function setupPopupMap() {
 		}
 	);
 	bf.popupMap = new ol.Map({
+		controls: ol.control.defaults(),
 		layers: [baseLayer],
 		logo: false,
 		target: "popupMap",
@@ -40,4 +79,7 @@ function setupPopupMap() {
 			zoom: 2
 		})
 	});
+
+	addFeatureOverlay();
+	drawPolygon();
 }
