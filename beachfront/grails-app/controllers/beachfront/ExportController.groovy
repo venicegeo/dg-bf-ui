@@ -17,7 +17,7 @@ class ExportController {
 				token.split('=').with { map[it[0]] = java.net.URLDecoder.decode(it[1]) }
 				map
 			}
-                
+		println requestMap                
                 
 
 
