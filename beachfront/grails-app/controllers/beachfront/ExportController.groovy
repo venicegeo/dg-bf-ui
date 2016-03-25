@@ -12,21 +12,21 @@ class ExportController {
 
 	def exportCanvas() {
 
-		def requestMap
-		if (!params.imageData) {
-		requestMap = request.reader.text.split('&').inject([:]) {
-			map, token ->
-				token.split('=').with { map[it[0]] = java.net.URLDecoder.decode(it[1]) }
-				map
-			}
-		println requestMap      } 
-		else { requestMap = params }         
+		//def requestMap
+		//if (!params.imageData) {
+		//requestMap = request.reader.text.split('&').inject([:]) {
+		//	map, token ->
+		//		token.split('=').with { map[it[0]] = java.net.URLDecoder.decode(it[1]) }
+		//		map
+		//	}
+		//println requestMap      } 
+		//else { requestMap = params }         
                 
 
 
 
 
-		//def requestMap = restApiService.normalizeRequestParams(params, request)
+		def requestMap = restApiService.normalizeRequestParams(params, request)
 		def image = exportService.canvasToImage([imageData: requestMap.imageData])
 
 
