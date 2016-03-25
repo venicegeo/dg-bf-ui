@@ -6,16 +6,9 @@
 				Need help? Let us know; we do this stuff for a living... literally!
 				<br><br>
 
-				<table align = "center" class = "table table-striped">
-					<tr>
-						<td><b>Dion, Mark</b></td>
-						<td><b><a href = "mailto:mdion@radiantblue.com">mdion@radiantblue.com</a></b></td>
-					</tr>
-					<tr>
-						<td><b>Naquin, Kevin</b></td>
-						<td><b><a href = "mailto:knaquin@radiantblue.com">knaquin@radiantblue.com</a></b></td>
-					</tr>
-				</table>
+				<div align = "center">
+					<b><a href = "mailto:venice@radiantblue.com">venice@radiantblue.com</a></b>
+				</div>
 			</div>
                         <div class = "modal-footer"><button type = "button" class = "btn btn-default" data-dismiss = "modal">Close</button></div>
                 </div>
