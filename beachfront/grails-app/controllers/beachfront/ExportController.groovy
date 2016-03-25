@@ -12,12 +12,15 @@ class ExportController {
 
 	def exportCanvas() {
 
-		def requestMap = request.reader.text.split('&').inject([:]) {
+		def requestMap
+		if (!params.imageData) {
+		requestMap = request.reader.text.split('&').inject([:]) {
 			map, token ->
 				token.split('=').with { map[it[0]] = java.net.URLDecoder.decode(it[1]) }
 				map
 			}
-		println requestMap                
+		println requestMap      } 
+		else { requestMap = params }         
                 
 
 
