@@ -10,7 +10,7 @@ class AlgorithmService {
 		AlgorithmJob.findAll().each() {
 			// if the algorithm is not complete, check the status
 			if (it.status != "done") {
-				def status = new URL("http://localhost:8080/checkStatus?procIndex=${it.piazzaJobId}").getText()
+				def status = new URL("http://localhost:8080/checkStatus?procIndex=${it.jobId}").getText()
 
 				// if the status is anything different than what is in the database, update it
 				if (status != it.status) {
@@ -22,7 +22,7 @@ class AlgorithmService {
 	}
 
 	def results(params) {
-		def json = new URL("http://localhost:8080/getResult?resultIndex=${params.piazzaJobId}").getText()
+		def json = new URL("http://localhost:8080/getResult?resultIndex=${params.jobId}").getText()
 	
 	
 		return json
@@ -92,13 +92,16 @@ class AlgorithmService {
 			BoundBox: params.bbox.split(",").collect({ it as Double }),
 			ImageLink: params.image
 		]
-
-		def submitResponse = new URL("http://localhost:8080/dummyAlgo?aoi=${new JsonOutput().toJson(map)}").getText()
+		def submit = new URL("http://localhost:8080/dummyAlgo?aoi=${new JsonOutput().toJson(map)}")
+		def response = submit.getText()
 
 		def algorithmJob = new AlgorithmJob(
-			algorithmName: params.name,
+			algorithmName: params.algorithmName,
+			bbox: params.bbox,
 			date: new Date(),
-			piazzaJobId: submitResponse,
+			image: params.image,
+			jobId: response,
+			jobName: params.jobName,
 			status: "Submitted"
 		)
 

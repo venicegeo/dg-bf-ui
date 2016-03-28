@@ -8,7 +8,7 @@ function buildJobList() {
 	// table headers
 	row = document.createElement("tr");
 	$.each(
-		["Algorithm Name", "Date", "Status"],
+		["Job Name", "Date", "Status"],
 		function(i, x) {
 			cell = document.createElement("td");
 			cell.innerHTML = "<b>" + x + "</b>"
@@ -24,7 +24,7 @@ function buildJobList() {
 			row = document.createElement("tr");
 
 			cell = document.createElement("td");
-			cell.innerHTML = x.algorithmName;
+			cell.innerHTML = x.jobName;
 			row.appendChild(cell);
 			
 			cell = document.createElement("td");
