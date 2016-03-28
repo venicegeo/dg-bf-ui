@@ -2,6 +2,17 @@ function buildAlgorithmInputList(algorithm) {
 	var table = document.createElement("table");
 	table.className = "table";
 
+	var row = document.createElement("tr");
+	var cell = document.createElement("td");
+	cell.align = "right";
+	cell.innerHTML = "<b>Job Name:</b>";
+	row.appendChild(cell);
+
+	cell = document.createElement("td");
+	cell.innerHTML = "<input id = 'jobNameInput' type = 'text' value = 'BF_Run_" + new Date().getTime() + "'>";
+	row.appendChild(cell);
+	table.appendChild(row);
+
 	var inputs = algorithm.inputs;
 	$.each(
 		inputs,
@@ -22,6 +33,7 @@ function buildAlgorithmInputList(algorithm) {
 					cell.innerHTML = "<input id = '" + x.key + "Input' placeholder = 's3://my-bucket/my-file' type = 'text'>"; break;
 				case "integer" :
 					cell.innerHTML = "<input id = '" + x.key + "Input' max = '" + x.max + "' min = '" + x.min + "' step = '1' value = '" + x.default + "' type = 'number'>"; break;
+				case "text" : cell.innerHTML = "<input id = '" + x.key + "Input' type = 'text'>";
 			}
 			row.appendChild(cell);
 
@@ -144,7 +156,10 @@ function selectAlgorithm() {
 function submitAlgorithmInputs() {
 	var algorithm = getSelectedAlgorithm();
 
-	var params = { name: algorithm.name };
+	var params = { 
+		algorithmName: algorithm.name, 
+		jobName: $("#jobNameInput").val()
+	};
 	$.each(
 		algorithm.inputs,
 		function(i, x) {

@@ -1,14 +1,13 @@
 package beachfront
 
 class AlgorithmJob {
-	//String bbox
+	String bbox
 	Date date
 	String algorithmName
-	//String image
-	//Double percision
-	String piazzaJobId
+	String image
+	String jobId
+	String jobName
 	String status
-	//Integer sensetivity
 
 
 	static mapping = { 
