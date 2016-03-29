@@ -8,7 +8,7 @@ function buildJobList() {
 	// table headers
 	row = document.createElement("tr");
 	$.each(
-		["Job Name", "Date", "Status"],
+		["Job Name", "Algo.", "Date", "Status"],
 		function(i, x) {
 			cell = document.createElement("td");
 			cell.innerHTML = "<b>" + x + "</b>"
@@ -26,9 +26,13 @@ function buildJobList() {
 			cell = document.createElement("td");
 			cell.innerHTML = x.jobName;
 			row.appendChild(cell);
-			
+	
 			cell = document.createElement("td");
-			cell.innerHTML = x.date;
+			cell.innerHTML = convertDateFormat(x.algorithmName);
+			row.appendChild(cell);
+		
+			cell = document.createElement("td");
+			cell.innerHTML = convertDateFormat(x.date);
 			row.appendChild(cell);
 
 			cell = document.createElement("td");
@@ -56,31 +60,6 @@ function buildJobList() {
 			table.appendChild(row);
 		}
 	);
-
-// create a details div section for the algorithm
-//var div = document.createElement("div");
-//div.id = "details";
-//var details = "<b>Description: </b>" + x.description + "<br>";
-//details += "<b>Inputs: </b><br>";
-//$.each(
-//x.inputs,
-//function(j, y) {
-//details += "&nbsp;&nbsp;&nbsp;" + y.name + " (" + y.type + ")<br>";
-//}
-//);
-//div.innerHTML = details;
-//div.style.display = "none";
-
-//cell.appendChild(div);
-
-// handle click events
-//row.onclick = function() {
-//resetAlgorithmListTable();
-//$(this).addClass("success");
-//$(this).find("div#details").show();
-//}
-//}
-//);
 }
 
 function checkJobStatus() {

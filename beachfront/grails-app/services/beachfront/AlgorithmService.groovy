@@ -45,18 +45,18 @@ class AlgorithmService {
 				],
 				[
 					default: 1,
-					key: "percision",
+					key: "precision",
 					max: 1,
 					min: 0,
-					name: "Percision",
+					name: "Precision",
 					type: "float"
 				],
 				[
 					default: 1,
-					key: "sensetivity",
+					key: "sensitivity",
 					max: 100,
 					min: 0,
-					name: "Sensetivity",
+					name: "Sensitivity",
 					type: "integer"
 				]
 			]
