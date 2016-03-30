@@ -20,7 +20,7 @@ function buildAlgorithmInputList(algorithm) {
 			var row = document.createElement("tr");
 			var cell = document.createElement("td");
 			cell.align = "right";
-			cell.innerHTML = "<b>" + x.name + ":</b>";
+			cell.innerHTML = "<b>" + x.displayName + ":</b>";
 			row.appendChild(cell);
 
 			cell = document.createElement("td");
@@ -28,12 +28,12 @@ function buildAlgorithmInputList(algorithm) {
 				case "bbox" : 
 					cell.appendChild(createBboxInput(x)); break;
 				case "float" :
-					cell.innerHTML = "<input id = '" + x.key + "Input' max = '" + x.max + "' min = '" + x.min + "' step = '0.1' value = '" + x.default + "' type = 'number'>"; break;
+					cell.innerHTML = "<input id = '" + x.formKey + "Input' max = '" + x.max + "' min = '" + x.min + "' step = '0.1' value = '" + x.default + "' type = 'number'>"; break;
 				case "image" :
-					cell.innerHTML = "<input id = '" + x.key + "Input' placeholder = 's3://my-bucket/my-file' type = 'text'>"; break;
+					cell.innerHTML = "<input id = '" + x.formKey + "Input' placeholder = 's3://my-bucket/my-file' type = 'text'>"; break;
 				case "integer" :
-					cell.innerHTML = "<input id = '" + x.key + "Input' max = '" + x.max + "' min = '" + x.min + "' step = '1' value = '" + x.default + "' type = 'number'>"; break;
-				case "text" : cell.innerHTML = "<input id = '" + x.key + "Input' type = 'text'>";
+					cell.innerHTML = "<input id = '" + x.formKey + "Input' max = '" + x.max + "' min = '" + x.min + "' step = '1' value = '" + x.default + "' type = 'number'>"; break;
+				case "text" : cell.innerHTML = "<input id = '" + x.formKey + "Input' type = 'text'>";
 			}
 			row.appendChild(cell);
 
@@ -57,17 +57,17 @@ function buildAlgorithmList() {
 		function(i, x) {
 			row = table.insertRow(i);
 			var cell = row.insertCell(row.cells.length);
-			$(cell).append(x.name + "<br>");		
+			$(cell).append(x.resourceMetadata.name + "<br>");		
 
 			// create a details div section for the algorithm
 			var div = document.createElement("div");
 			div.id = "details";
-			var details = "<b>Description: </b>" + x.description + "<br>"; 
+			var details = "<b>Description: </b>" + x.resourceMetadata.description + "<br>"; 
 			details += "<b>Inputs: </b><br>";
 			$.each(
 				x.inputs,
 				function(j, y) {
-					details += "&nbsp;&nbsp;&nbsp;" + y.name + " (" + y.type + ")<br>";
+					details += "&nbsp;&nbsp;&nbsp;" + y.displayName + " (" + y.type + ")<br>";
 				}
 			);
 			div.innerHTML = details;
