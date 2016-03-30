@@ -2,6 +2,7 @@ package beachfront
 
 
 import groovy.json.JsonOutput
+import groovy.json.JsonSlurper
 import groovyx.net.http.*
 import org.apache.http.entity.mime.content.StringBody
 import org.apache.http.entity.mime.MultipartEntity
@@ -24,7 +25,7 @@ class PiazzaService {
 	}
 
 	def postToPiazza(postBody) {
-		def http = new HTTPBuilder("https://pz-gateway.stage.geointservices.io/job")
+		def http = new HTTPBuilder("http://pz-gateway.stage.geointservices.io/job")
 		http.request(POST) { req ->
 			requestContentType: "multipart/form-data"
 
@@ -33,13 +34,12 @@ class PiazzaService {
 			req.setEntity(multiPartContent)
 
 			response.failure = { resp ->
-				println resp
-
+				//println reesp
 
 				return null
 			}
 			response.success = { resp, reader ->
-				println resp
+				//println reader
 
 				return reader
 			}
