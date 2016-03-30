@@ -39,7 +39,7 @@ class PiazzaService {
 				return null
 			}
 			response.success = { resp, reader ->
-
+				println resp
 
 				return reader
 			}
