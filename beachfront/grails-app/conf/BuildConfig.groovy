@@ -53,9 +53,8 @@ grails.project.dependency.resolution = {
         test "org.grails:grails-datastore-test-support:1.0.2-grails-2.4"
 
 
-	//runtime "org.apache.httpcomponents:httpcore:4.1"
-	runtime "org.apache.httpcomponents:httpmime:4.5.2"
-        runtime "org.codehaus.groovy.modules.http-builder:http-builder:0.7.1"
+	compile "org.apache.httpcomponents:httpmime:4.5.2"
+        compile "org.codehaus.groovy.modules.http-builder:http-builder:0.7.1"
     }
 
     plugins {
