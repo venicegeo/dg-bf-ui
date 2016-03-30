@@ -2,9 +2,13 @@ package beachfront
 
 
 import groovy.json.JsonOutput
+import groovy.json.JsonSlurper
 
 
 class AlgorithmService {
+
+	def piazzaService	
+
 
 	def checkStatus() {	
 		AlgorithmJob.findAll().each() {
@@ -29,46 +33,27 @@ class AlgorithmService {
 	}
 
 	def search(params) {
-		def algorithm = [
-			name: "Cool Algorithm 1",
-			description: "This algorithm is far better than anything you've ever used before, trust me.",
-			inputs: [
-				[
-					key: "bbox",
-					name: "Bounding Box",
-					type: "bbox"
-				],
-				[
-					key: "image",
-					name: "Image",
-					type: "image"
-				],
-				[
-					default: 1,
-					key: "precision",
-					max: 1,
-					min: 0,
-					name: "Precision",
-					type: "float"
-				],
-				[
-					default: 1,
-					key: "sensitivity",
-					max: 100,
-					min: 0,
-					name: "Sensitivity",
-					type: "integer"
-				]
-			]
+		// get a list of all beachfront applicable algorithms from Piazza
+		def jobType = [
+			data: [
+				field: "name",
+				pattern: "BFAlgo"
+			],
+			type: "search-service"
 		]
+		def response = piazzaService.submitJob([ jobType: jobType, waitForCompletion: true ])
+		def json = response ? new JsonSlurper().parseText(response.result.text) : []
+		def algorithms = json.findAll({ it.resourceMetadata.availability != "OUT OF SERVICE" })
 
-		def algorithms = []
-		(0..5).each() {
-			algorithm.name = "Cool Algorithm ${it}"
-			algorithms.push(new LinkedHashMap(algorithm))
+		// transform the list so that the inputs can be handled more easily
+		algorithms.eachWithIndex() { algorithm, algorithmIndex ->
+			algorithm.inputs.eachWithIndex() { input, inputIndex ->
+				def inputParams = new JsonSlurper().parseText(input.metadata.about)
+				algorithm.inputs[inputIndex] = inputParams
+			}
+			algorithms[algorithmIndex] = algorithm
 		}
 
-		sleep(2000)			
 
 		return algorithms
 	}
@@ -80,7 +65,6 @@ class AlgorithmService {
 		AlgorithmJob.findAll().each() {
 			algorithmJobs.push(it.properties)
 		}
-		sleep(3000)	
 
 	
 		return algorithmJobs
