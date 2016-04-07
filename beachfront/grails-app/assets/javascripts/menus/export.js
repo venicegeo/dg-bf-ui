@@ -17,18 +17,20 @@ function exportScreenshot() {
 	map.once(
 		"postcompose", 
 		function(event) {
-			var canvasData = event.context.canvas.toDataURL().replace(/\S+,/, ""); 		
-			
+			var canvasData = event.context.canvas.toDataURL(); 		
+			document.location.href = canvasData;
+/*			
 			var elements = createForm();
 			var form = elements[0];
 			var input = elements[1];
 
 			form.action = contextPath + "/export/exportCanvas";
 			input.name = "imageData";
-			input.value = canvasData;
+			input.value = canvasData.replace(/\S+,/, "");
 
 			form.submit();
 			form.remove();
+*/
 		}
 	);
 	map.renderSync();
