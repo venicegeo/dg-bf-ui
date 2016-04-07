@@ -163,7 +163,7 @@ function submitAlgorithmInputs() {
 	$.each(
 		algorithm.inputs,
 		function(i, x) {
-			params[x.key] = $("#" + x.key + "Input").val();
+			params[x.formKey] = $("#" + x.formKey + "Input").val();
 		}
 	);
 
