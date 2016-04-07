@@ -7,7 +7,8 @@ popd > /dev/null
 # gather some data about the repo
 source $root/ci/vars.sh
 
-! type grails >/dev/null 2>&1 && source $root/ci/grails.sh
+#! type grails >/dev/null 2>&1 && 
+source $root/ci/grails.sh
 grails -version
 pushd $root/$APP > /dev/null
   grails --verbose --stacktrace compile
