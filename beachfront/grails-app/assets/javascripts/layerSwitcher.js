@@ -62,7 +62,8 @@ function addOtherLayerToLayerSwitcher(layer) {
 		tooltip: "hide",
 		value: 1
 	});
-	var hue = layer.getStyle().getFill().getColor();
+	
+	var hue = "rgba(255,255,0,1)"
 	$("#" + $(slider).attr("data-slider-id")).find(".slider-selection").css("background", hue);
 	$("#" + slider.id).on("change", function(event) { layer.setOpacity(event.value.newValue); });
 }
