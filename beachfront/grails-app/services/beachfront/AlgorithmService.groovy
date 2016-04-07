@@ -26,10 +26,10 @@ class AlgorithmService {
 	}
 
 	def results(params) {
-		def json = new URL("https://bf-algo.stage.geointservices.io").getText() // insert piazza query
+		def json = new URL("http://bf-algo.stage.geointservices.io").getText() // insert piazza query
 			
 	
-		return "{}"
+		return json
 	}
 
 	def search(params) {
