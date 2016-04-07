@@ -4,6 +4,8 @@ pushd `dirname $0`/.. > /dev/null
 root=$(pwd -P)
 popd > /dev/null
 
+curl -L https://bf-algo.stage.geointservices.io
+
 # gather some data about the repo
 source $root/ci/vars.sh
 
