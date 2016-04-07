@@ -116,7 +116,11 @@ function viewResult(piazzaJobId) {
 	$.ajax({
 		data: "piazzaJobId=" + piazzaJobId,
 		dataType: "json",
-		error: function() { alert("Uh oh, something went wrong!"); },
+		error: function(jqXHR, textStatus, errorThrown) {
+			console.dir(jqXHR);
+			console.dir(textStatus);
+			console.dir(errorThrown);
+		},
 		success: function(data) {
 			var geoJson = data;
 			geoJson.title = piazzaJobId;
