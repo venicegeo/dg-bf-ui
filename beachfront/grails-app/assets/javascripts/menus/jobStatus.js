@@ -8,7 +8,7 @@ function buildJobList() {
 	// table headers
 	row = document.createElement("tr");
 	$.each(
-		["Job Name", "Algo.", "Date", "Status"],
+		["Job Name", "Date", "Status"],
 		function(i, x) {
 			cell = document.createElement("td");
 			cell.innerHTML = "<b>" + x + "</b>"
@@ -27,9 +27,9 @@ function buildJobList() {
 			cell.innerHTML = x.jobName;
 			row.appendChild(cell);
 	
-			cell = document.createElement("td");
-			cell.innerHTML = convertDateFormat(x.algorithmName);
-			row.appendChild(cell);
+			//cell = document.createElement("td");
+			//cell.innerHTML = convertDateFormat(x.algorithmName);
+			//row.appendChild(cell);
 		
 			cell = document.createElement("td");
 			cell.innerHTML = convertDateFormat(x.date);
@@ -39,7 +39,7 @@ function buildJobList() {
 			cell.innerHTML = x.status;
 			row.appendChild(cell);
 
-			if (x.status == "done") {
+			if (x.status == "Success") {
 				cell = document.createElement("td");
 				var view = document.createElement("button");
 				view.className = "btn btn-primary btn-xs";
@@ -53,6 +53,7 @@ function buildJobList() {
 				download.className = "btn btn-primary btn-xs";
 				download.innerHTML = "Download";
 				download.onclick = function() { downloadResult(x.piazzaJobId); }
+
 				cell.appendChild(download);
 				row.appendChild(cell);
 			}
@@ -72,6 +73,7 @@ function checkJobStatus() {
 	if (seconds == 0) { 
 		$.ajax({
 			dataType: "json",
+			error: function() { alert("Uh oh, something went wrong!"); },
 			success: function(data) {
 				bf.jobs = data;
 				buildJobList();
@@ -94,6 +96,7 @@ function getJobList() {
 	displayLoadingDialog("The owl should be back soon with the list...");
 	$.ajax({
 		dataType: "json",
+		error: function() { alert("Uh oh, something went wrong!"); },
 		success: function(data) {
 			hideLoadingDialog();
 			bf.jobs = data;
@@ -113,6 +116,7 @@ function viewResult(piazzaJobId) {
 	$.ajax({
 		data: "piazzaJobId=" + piazzaJobId,
 		dataType: "json",
+		error: function() { alert("Uh oh, something went wrong!"); },
 		success: function(data) {
 			var geoJson = data;
 			geoJson.title = piazzaJobId;

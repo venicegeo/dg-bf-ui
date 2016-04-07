@@ -12,6 +12,7 @@ import static groovyx.net.http.Method.POST
 class PiazzaService {
 
 	def getJobStatus(params) {
+		println "CHeese: " + params
 		def postBody = new JsonOutput().toJson([
 			apiKey: "my-api-key",
 			jobType: [
@@ -19,7 +20,7 @@ class PiazzaService {
 				type: "get"
 			]
 		])
-
+println postBody
 
 		return postToPiazza(postBody)
 	}
@@ -33,13 +34,13 @@ class PiazzaService {
 			multiPartContent.addPart("body", new StringBody(postBody))
 			req.setEntity(multiPartContent)
 
-			response.failure = { resp ->
-				//println reesp
+			response.failure = { resp, reader ->
+println "Error: " + reader
 
 				return null
 			}
 			response.success = { resp, reader ->
-				//println reader
+println "Success: " + reader
 
 				return reader
 			}

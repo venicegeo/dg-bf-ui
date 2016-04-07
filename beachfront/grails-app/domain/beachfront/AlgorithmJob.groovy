@@ -1,12 +1,11 @@
 package beachfront
 
 class AlgorithmJob {
-	String bbox
 	Date date
 	String algorithmName
 	String image
-	String jobId
 	String jobName
+	String piazzaJobId
 	String status
 
 

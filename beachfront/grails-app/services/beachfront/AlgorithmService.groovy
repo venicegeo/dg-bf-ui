@@ -14,7 +14,7 @@ class AlgorithmService {
 		AlgorithmJob.findAll().each() {
 			// if the algorithm is not complete, check the status
 			if (it.status != "done") {
-				def status = new URL("http://localhost:8080/checkStatus?procIndex=${it.jobId}").getText()
+				def status = "Success" // insert piazza query
 
 				// if the status is anything different than what is in the database, update it
 				if (status != it.status) {
@@ -26,7 +26,7 @@ class AlgorithmService {
 	}
 
 	def results(params) {
-		def json = new URL("http://localhost:8080/getResult?resultIndex=${params.jobId}").getText()
+		def json = new URL("https://bf-algo.stage.geointservices.io").getText() // insert piazza query
 	
 	
 		return json
@@ -34,17 +34,35 @@ class AlgorithmService {
 
 	def search(params) {
 		// get a list of all beachfront applicable algorithms from Piazza
-		def jobType = [
-			data: [
-				field: "name",
-				pattern: "BFAlgo"
-			],
-			type: "search-service"
+		//def jobType = [
+		//	data: [
+		//		field: "name",
+		//		pattern: "BFAlgo"
+		//	],
+		//	type: "search-service"
+		//]
+		//def response = piazzaService.submitJob([ jobType: jobType, waitForCompletion: true ])
+		
+		//def json = response ? new JsonSlurper().parseText(response.result.text) : []
+		//def algorithms = json.findAll({ it.resourceMetadata.availability != "OUT OF SERVICE" })
+		def algorithms = [
+			[
+				inputs: [
+					[ 
+						metadata: [ about: "{\"displayName\":\"Images\",\"formKey\":\"--image\",\"type\":\"image\"}" ],
+						name: "images"
+					]
+				],
+				resourceMetadata: [
+					description: "This Normalized Difference Water Index (DWI) algorithm uses the Open Source Software Image Map (OSSIM) to examine image pixels in an effort to extract shoreline vector data.",
+					method: "GET",
+					name: "BF_Algo_NDWI",
+					url: "https://pzsvc-ossim.stage.geointservices.io/execute"
+				]
+			]
 		]
-		def response = piazzaService.submitJob([ jobType: jobType, waitForCompletion: true ])
-		def json = response ? new JsonSlurper().parseText(response.result.text) : []
-		def algorithms = json.findAll({ it.resourceMetadata.availability != "OUT OF SERVICE" })
 
+		
 		// transform the list so that the inputs can be handled more easily
 		algorithms.eachWithIndex() { algorithm, algorithmIndex ->
 			algorithm.inputs.eachWithIndex() { input, inputIndex ->
@@ -70,22 +88,20 @@ class AlgorithmService {
 		return algorithmJobs
 	}
 
-	def submit(params) {
+	def submit(params) { 
 		// assemble the parameters to submit to the algorithm
 		def map = [
-			BoundBox: params.bbox.split(",").collect({ it as Double }),
-			ImageLink: params.image
 		]
-		def submit = new URL("http://localhost:8080/dummyAlgo?aoi=${new JsonOutput().toJson(map)}")
-		def response = submit.getText()
+		//def submit = new URL("http://localhost:8080/dummyAlgo?aoi=${new JsonOutput().toJson(map)}")
+		//println submit.properties
+		def response = UUID.randomUUID() //submit.getText()
 
 		def algorithmJob = new AlgorithmJob(
 			algorithmName: params.algorithmName,
-			bbox: params.bbox,
 			date: new Date(),
-			image: params.image,
-			jobId: response,
+			image: params."--image",
 			jobName: params.jobName,
+			piazzaJobId: response,
 			status: "Submitted"
 		)
 

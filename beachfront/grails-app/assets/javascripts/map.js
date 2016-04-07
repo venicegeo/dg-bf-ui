@@ -52,20 +52,35 @@ function addBaseLayers() {
 function addGeoJsonLayerToMap(geoJson) {
         // to differentiate between multiple vector layers, make them a different color
         var hue = generateRandomHue();
-        var style = new ol.style.Style({
-                fill: new ol.style.Fill({ color: hue }),
-                stroke: new ol.style.Stroke({ color: hue })
-        });
+
+	var styleFunction = function(feature) {
+		var properties = feature.getProperties();
+		var detection = properties.Detection;
+
+
+		var blue = "rbga(0, 0, 255, 1)";
+		var red = "rgba(255, 0, 0, 1)";
+		var yellow = "rgba(255, 255, 0, 1)";
+		var color = yellow;
+		//if (detection == "New Detection") { color = blue; }
+		//else if (detection == "Undetected") { color = red; }
+		var style = new ol.style.Style({
+			fill: new ol.style.Fill({ color: color }),
+			stroke: new ol.style.Stroke({ color: color }) 
+		});
+		
+
+		return [style];
+	}
 
         var vectorLayer = new ol.layer.Vector({
                 source: new ol.source.Vector({
-                        features: new ol.format.GeoJSON().readFeatures(geoJson, { featureProjection: "EPSG:3857" })
+                        features: new ol.Collection(new ol.format.GeoJSON().readFeatures(geoJson, { featureProjection: "EPSG:3857" }))
                 }),
-                style: style,
+                style: styleFunction,
                 title: geoJson.title,
                 visible: true
-        });
-
+        });		
         map.addLayer(vectorLayer);
         addOtherLayerToLayerSwitcher(vectorLayer);
         map.getView().fit(vectorLayer.getSource().getExtent(), map.getSize())
