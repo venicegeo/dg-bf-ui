@@ -4,6 +4,7 @@ pushd `dirname $0`/.. > /dev/null
 root=$(pwd -P)
 popd > /dev/null
 
+df -h
 # gather some data about the repo
 source $root/ci/vars.sh
 
