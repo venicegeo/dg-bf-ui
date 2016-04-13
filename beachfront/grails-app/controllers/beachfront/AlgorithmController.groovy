@@ -19,8 +19,8 @@ class AlgorithmController {
 	def results() {
 		def results = algorithmService.results(params)		
 
-		println new JsonOutput().toJson(results)
-		//response.contentType = "application/json"
+		
+		response.contentType = "application/json"
 		render new JsonOutput().toJson(results)
 	}
 
