@@ -132,10 +132,8 @@ function viewResult(piazzaDataId) {
 			console.dir(errorThrown);
 		},
 		success: function(data) {
-			console.dir(data);
 			var geoJson = data;
 			geoJson.title = piazzaDataId;
-			console.dir(geoJson);
 			addGeoJsonLayerToMap(geoJson);
 		},
 		url: contextPath + "/algorithm/results"
