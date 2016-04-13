@@ -4,6 +4,6 @@ applications:
   path: beachfront.jar
   buildpack: java_buildpack_offline
   domain: stage.geointservices.io
-  memory: 1G
+  memory: 2G
   instances: 1
   timeout: 180
