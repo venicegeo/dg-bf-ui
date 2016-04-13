@@ -123,15 +123,18 @@ function stopAutomaticStatusUpdate() {
 }
 
 function viewResult(piazzaDataId) {
+	displayLoadingDialog("Let's see, I know the data is around here somewhere...");
 	$.ajax({
 		data: "piazzaDataId=" + piazzaDataId,
 		dataType: "json",
 		error: function(jqXHR, textStatus, errorThrown) {
+			hideLoadingDialog();
 			console.dir(jqXHR);
 			console.dir(textStatus);
 			console.dir(errorThrown);
 		},
 		success: function(data) {
+			hideLoadingDialog();
 			var geoJson = data;
 			geoJson.title = piazzaDataId;
 			addGeoJsonLayerToMap(geoJson);
