@@ -62,7 +62,7 @@ class PiazzaService {
 			req.setEntity(multiPartContent)
 
 			response.failure = { resp, reader ->
-
+println "Error: " + reader
 
 				return null
 			}
