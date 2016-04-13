@@ -14,5 +14,5 @@ source $root/ci/grails.sh
 
 pushd $root/$APP > /dev/null
   grails compile
-  grails -Dbuild.compiler=javac1.7 build-standalone $root/$APP.$EXT
+  grails prod -Dbuild.compiler=javac1.7 build-standalone $root/$APP.$EXT
 popd > /dev/null
