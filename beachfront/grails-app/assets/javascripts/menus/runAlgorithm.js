@@ -122,7 +122,7 @@ function createBboxInput(inputObject) {
 }
 
 function getAlgorithmList() {
-	displayLoadingDialog("Dispatching a pigeon to fetch a list of algorithms...");
+	displayLoadingDialog("Please wait...");
 	$.ajax({
 		dataType: "json",
 		error: function(jqXHR, textStatus, errorThrown) {

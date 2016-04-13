@@ -66,7 +66,7 @@ function buildJobList() {
 function checkJobStatus() {
 	var countdownSpan = $("#jobStatusUpdateCountdownSpan");
 
-	var seconds = parseFloat(countdownSpan.html());
+	var seconds = parseInt(countdownSpan.html());
 	seconds--;
 	countdownSpan.html(seconds);
 
@@ -98,7 +98,7 @@ function downloadResult(piazzaDataId) {
 }
 
 function getJobList() {
-	displayLoadingDialog("The owl should be back soon with the list...");
+	displayLoadingDialog("Please wait...");
 	$.ajax({
 		dataType: "json",
 		error: function(jqXHR, textStatus, errorThrown) {
@@ -123,7 +123,7 @@ function stopAutomaticStatusUpdate() {
 }
 
 function viewResult(piazzaDataId) {
-	//displayLoadingDialog("Let's see, I know the data is around here somewhere...");
+	//displayLoadingDialog("Please wait...");
 	$.ajax({
 		data: "piazzaDataId=" + piazzaDataId,
 		dataType: "json",
