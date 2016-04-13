@@ -26,13 +26,27 @@ function buildAlgorithmInputList(algorithm) {
 			cell = document.createElement("td");
 			switch (x.type) {
 				case "bbox" : 
-					cell.appendChild(createBboxInput(x)); break;
+					cell.appendChild(createBboxInput(x)); 
+					break;
 				case "float" :
-					cell.innerHTML = "<input id = '" + x.formKey + "Input' max = '" + x.max + "' min = '" + x.min + "' step = '0.1' value = '" + x.default + "' type = 'number'>"; break;
+					cell.innerHTML = "<input id = '" + x.formKey + "Input' " + 
+						"max = '" + x.max + "' min = '" + x.min + "' step = '0.1' value = '" + x.default + "' type = 'number'>"; 
+					break;
 				case "image" :
-					cell.innerHTML = "<input id = '" + x.formKey + "Input' placeholder = 's3://my-bucket/my-file' type = 'text'>"; break;
+					cell.innerHTML = "<input id = '" + x.formKey + "Input' placeholder = 's3://my-bucket/my-file' type = 'text'>"; 
+					cell.innerHTML = "<select id = '" + x.formKey + "Input'>" + 
+							"<option value = 'LC80090472014280LGN00_B3.TIF,LC80090472014280LGN00_B6.TIF'>LC80090472014280LGN00</option>" +
+							"<option value = 'LC80150442014002LGN00_B3.TIF,LC80150442014002LGN00_B6.TIF'>LC80150442014002LGN00</option>" +
+							"<option value = 'LC80340432016061LGN00_B3.TIF,LC80340432016061LGN00_B6.TIF'>LC80340432016061LGN00</option>" +
+							"<option value = 'LC81190532015078LGN00_B3.TIF,LC81190532015078LGN00_B6.TIF'>LC81190532015078LGN00</option>" +
+							"<option value = 'LC81600422014314LGN00_B3.TIF,LC81600422014314LGN00_B6.TIF'>LC81600422014314LGN00</option>" +
+							"<option value = 'LC82010352014217LGN00_B3.TIF,LC82010352014217LGN00_B6.TIF'>LC82010352014217LGN00</option>" +
+						"</select>";
+					break;
 				case "integer" :
-					cell.innerHTML = "<input id = '" + x.formKey + "Input' max = '" + x.max + "' min = '" + x.min + "' step = '1' value = '" + x.default + "' type = 'number'>"; break;
+					cell.innerHTML = "<input id = '" + x.formKey + "Input' " + 
+						"max = '" + x.max + "' min = '" + x.min + "' step = '1' value = '" + x.default + "' type = 'number'>"; 
+					break;
 				case "text" : cell.innerHTML = "<input id = '" + x.formKey + "Input' type = 'text'>";
 			}
 			row.appendChild(cell);
@@ -158,8 +172,10 @@ function submitAlgorithmInputs() {
 	var algorithm = getSelectedAlgorithm();
 
 	var params = { 
+		algorithm: algorithm,
 		algorithmName: algorithm.resourceMetadata.name, 
-		jobName: $("#jobNameInput").val()
+		jobName: $("#jobNameInput").val(),
+		serviceId: algorithm.id
 	};
 	$.each(
 		algorithm.inputs,

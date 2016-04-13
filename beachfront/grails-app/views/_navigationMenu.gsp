@@ -10,7 +10,7 @@
 					<g:render template = "menus/export"/>
 					<g:render template = "menus/jobStatus"/>
 					<g:render template = "menus/runAlgorithm"/>
-					<g:render template = "menus/upload"/>
+				<%--	<g:render template = "menus/upload"/> --%>
 				</ul>
 				<ul class="nav navbar-nav navbar-right">
 					<li><a href = javascript:void(0) onclick = $("#helpDialog").modal("show")>Help</a></li>

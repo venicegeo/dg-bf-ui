@@ -1,7 +1,7 @@
 //= require jquery
 //= require bootstrap.min
 //= require bootstrap-slider.min
-//= require ol
+//= require ol-debug
 //= require coordinateConversion.js
 
 //= require prototype

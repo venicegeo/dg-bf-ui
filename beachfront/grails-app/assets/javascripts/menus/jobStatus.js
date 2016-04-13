@@ -44,7 +44,7 @@ function buildJobList() {
 				var view = document.createElement("button");
 				view.className = "btn btn-primary btn-xs";
 				view.innerHTML = "View";
-				view.onclick = function() { viewResult(x.piazzaJobId); }
+				view.onclick = function() { viewResult(x.piazzaDataId); }
 				cell.appendChild(view);
 				row.appendChild(cell);
 	
@@ -52,7 +52,7 @@ function buildJobList() {
 				var download = document.createElement("button");
 				download.className = "btn btn-primary btn-xs";
 				download.innerHTML = "Download";
-				download.onclick = function() { downloadResult(x.piazzaJobId); }
+				download.onclick = function() { downloadResult(x.piazzaDataId); }
 
 				cell.appendChild(download);
 				row.appendChild(cell);
@@ -88,8 +88,8 @@ function checkJobStatus() {
 	}
 }
 
-function downloadResult(piazzaJobId) {
-	window.open(contextPath + "/algorithm/results?piazzaJobId=" + piazzaJobId);
+function downloadResult(piazzaDataId) {
+	window.open(contextPath + "/algorithm/results?piazzaDataId=" + piazzaDataId);
 }
 
 function getJobList() {
@@ -112,9 +112,9 @@ function stopAutomaticStatusUpdate() {
 	clearTimeout(bf.automaticStatusUpdate);
 }
 
-function viewResult(piazzaJobId) {
+function viewResult(piazzaDataId) {
 	$.ajax({
-		data: "piazzaJobId=" + piazzaJobId,
+		data: "piazzaDataId=" + piazzaDataId,
 		dataType: "json",
 		error: function(jqXHR, textStatus, errorThrown) {
 			console.dir(jqXHR);
@@ -122,8 +122,10 @@ function viewResult(piazzaJobId) {
 			console.dir(errorThrown);
 		},
 		success: function(data) {
+			console.dir(data);
 			var geoJson = data;
-			geoJson.title = piazzaJobId;
+			geoJson.title = piazzaDataId;
+			console.dir(geoJson);
 			addGeoJsonLayerToMap(geoJson);
 		},
 		url: contextPath + "/algorithm/results"
