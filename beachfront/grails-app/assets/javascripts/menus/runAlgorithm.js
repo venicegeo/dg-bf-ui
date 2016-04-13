@@ -125,7 +125,12 @@ function getAlgorithmList() {
 	displayLoadingDialog("Dispatching a pigeon to fetch a list of algorithms...");
 	$.ajax({
 		dataType: "json",
-		error: function() { alert("Uh oh, something went wrong!"); },
+		error: function(jqXHR, textStatus, errorThrown) {
+                        console.dir(jqXHR);
+                        console.dir(textStatus);
+                        console.dir(errorThrown);
+                	alert("Uh oh, something went wrong!"); 
+		},
 		success: function(data) {
 			hideLoadingDialog();
 			bf.algorithms = data;
@@ -187,7 +192,12 @@ function submitAlgorithmInputs() {
 	$.ajax({
 		data: params,
 		dataType: "json",
-		error: function() { alert("Uh oh, something went wrong!"); },
+		error: function(jqXHR, textStatus, errorThrown) {
+                        console.dir(jqXHR);
+                        console.dir(textStatus);
+                        console.dir(errorThrown);
+                	alert("Uh oh, something went wrong!"); 
+		},
 		success: function(data) {
 			if (data.status) { alert("You have successfully submitted your algorithm inputs!"); }
 			else { alert("Uh oh, something went wrong!"); }

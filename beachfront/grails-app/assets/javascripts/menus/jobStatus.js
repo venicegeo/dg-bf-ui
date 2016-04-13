@@ -73,7 +73,12 @@ function checkJobStatus() {
 	if (seconds == 0) { 
 		$.ajax({
 			dataType: "json",
-			error: function() { alert("Uh oh, something went wrong!"); },
+			error: function(jqXHR, textStatus, errorThrown) {
+                        	console.dir(jqXHR);
+				console.dir(textStatus);
+				console.dir(errorThrown);
+				alert("Uh oh, something went wrong!"); 
+			},
 			success: function(data) {
 				bf.jobs = data;
 				buildJobList();
@@ -96,7 +101,12 @@ function getJobList() {
 	displayLoadingDialog("The owl should be back soon with the list...");
 	$.ajax({
 		dataType: "json",
-		error: function() { alert("Uh oh, something went wrong!"); },
+		error: function(jqXHR, textStatus, errorThrown) {
+                        console.dir(jqXHR);
+                        console.dir(textStatus);
+                        console.dir(errorThrown);
+                	alert("Uh oh, something went wrong!"); 
+		},
 		success: function(data) {
 			hideLoadingDialog();
 			bf.jobs = data;
