@@ -1,0 +1,78 @@
+@import '../styles/constants/typography.less';
+@import '../styles/constants/layout.less';
+
+.root {
+  z-index: @ZIndexPrimaryMap;
+  position: absolute;
+  top: 50px;
+  left: 0;
+  right: 0;
+  bottom: 0;
+}
+
+.export-button {
+  composes: global(ol-unselectable);
+  display: inline-block;
+  z-index: 100;
+  position: absolute;
+  top: 38px;
+  right: 6px;
+}
+
+.export-button a {
+  display: inline-block;
+  padding: .3em;
+  border-radius: 3px;
+  background-color: black;
+  opacity: .3;
+  line-height: 1em;
+  font-size: 17px;
+  color: white;
+  &:hover {
+    opacity: .3;
+  }
+  &:active {
+    opacity: .5;
+  }
+}
+
+/* =========================================================================
+   OpenLayers Control Overrides
+   ========================================================================= */
+
+:global(.ol-scale-line) {
+  background-color: transparent;
+  bottom: 28px;
+}
+
+:global(.ol-scale-line-inner) {
+  opacity: .5;
+  border-color: inherit;
+  color: black;
+  font-family: @FontMonospace;
+}
+
+:global(.ol-attribution.ol-uncollapsible) {
+  height: 1.5em;
+  border-radius: 3px 0 0;
+  line-height: inherit;
+  font-family: @FontBody;
+  font-size: 11px;
+
+  ul {
+    font-size: inherit;
+    line-height: 1.2em;
+  }
+}
+
+:global(.ol-mouse-position) {
+  top: auto;
+  right: auto;
+  bottom: 10px;
+  left: 10px;
+  line-height: 11px;
+  color: black;
+  opacity: .4;
+  font-family: @FontMonospace;
+  font-size: 11px;
+}

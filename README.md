@@ -1,3 +1,36 @@
 # Beachfront UI
-This repository will hold all code necessary for the Beachfront web-application.
 
+## Client
+
+### Running Locally
+
+```
+~/beachfront-client$ npm install
+~/beachfront-client$ npm run watch
+```
+
+### Building
+
+```
+~/beachfront-client$ NODE_ENV=production npm run build
+```
+
+Check `dist` folder afterwards.
+
+
+## Server
+
+### Running Locally
+
+```
+$ cd server
+$ go run
+$
+```
+
+### Building
+
+```
+~/beachfront-server$ go get
+~/beachfront-server$ go build
+```
