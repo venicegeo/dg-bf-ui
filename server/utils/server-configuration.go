@@ -37,7 +37,7 @@ func LoadServerConfiguration() ApplicationConfiguration {
 
 func getString(key, fallback string) (value string) {
     value = strings.TrimSpace(os.Getenv(key))
-    if value != "" {
+    if value == "" {
         value = strings.TrimSpace(fallback)
     }
     return
