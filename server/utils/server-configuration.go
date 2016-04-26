@@ -3,6 +3,7 @@ package utils
 import (
     "strings"
     "os"
+    "path"
 )
 
 const (
@@ -13,7 +14,7 @@ const (
     _DefaultEnableBackgroundTasks = true
     _DefaultServerAddress = ":5000"
     _DefaultApiNamespace = "/api/v1"
-    _DefaultStaticAssetPath = "/Users/dbazile/code/prototype-bf-ui-spa/dist"
+    _DefaultStaticAssetPath = "./public"
 )
 
 type ApplicationConfiguration struct {
@@ -26,7 +27,7 @@ type ApplicationConfiguration struct {
 func LoadServerConfiguration() ApplicationConfiguration {
     return ApplicationConfiguration{
         ServerAddress: getString(_KeyForServerAddress, _DefaultServerAddress),
-        StaticAssetPath: getString(_KeyForStaticAssetPath, _DefaultStaticAssetPath),
+        StaticAssetPath: getString(_KeyForStaticAssetPath, resolve(_DefaultStaticAssetPath)),
         Namespace: getString(_KeyForApiNamespace, _DefaultApiNamespace),
         EnableBackgroundTasks: getBoolean(_KeyForEnableBackgroundTasks, _DefaultEnableBackgroundTasks)}
 }
@@ -50,4 +51,8 @@ func getBoolean(key string, fallback bool) bool {
     case "": return fallback
     default: return true
     }
+}
+
+func resolve(relativePath string) string {
+    return path.Join(path.Dir(os.Args[0]), relativePath)
 }
