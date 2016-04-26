@@ -4,26 +4,27 @@ pushd `dirname $0`/.. > /dev/null
 root=$(pwd -P)
 popd > /dev/null
 
-# curl -L https://bf-algo.stage.geointservices.io
+#
+# Define Variables
+#
 
-# gather some data about the repo
 source $root/ci/vars.sh
-
 build_target=$root/$APP
+
+#
+# Perform Build
+#
 
 mkdir $build_target
 
-# pushd $root/client > /dev/null
-#   npm install
-#   # npm run test
-#   NODE_ENV=production npm run build
-#   mv dist $build_target/public
-# popd > /dev/null
+source $root/ci/build_client.sh
+source $root/ci/build_server.sh
 
-pushd $root/server > /dev/null
-  echo $GOPATH
-  go get
-  go build -o $build_target/server
-popd > /dev/null
+build_server $root $build_target
+build_client $root $build_target
 
-zip -r ${APP}.zip $APP
+#
+# Bundle Artifacts
+#
+
+zip -mr ${APP}.${EXT} $APP
