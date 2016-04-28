@@ -174,14 +174,16 @@ function selectAlgorithm() {
 }
 
 function submitAlgorithmInputs() {
+	displayLoadingDialog("Please wait...");
 	var algorithm = getSelectedAlgorithm();
 
 	var params = { 
 		algorithm: algorithm,
 		algorithmName: algorithm.resourceMetadata.name, 
 		jobName: $("#jobNameInput").val(),
-		serviceId: algorithm.id
+		serviceId: algorithm.serviceId
 	};
+	console.dir(params);
 	$.each(
 		algorithm.inputs,
 		function(i, x) {
@@ -196,9 +198,11 @@ function submitAlgorithmInputs() {
                         console.dir(jqXHR);
                         console.dir(textStatus);
                         console.dir(errorThrown);
+			hideLoadingDialog();
                 	alert("Uh oh, something went wrong!"); 
 		},
 		success: function(data) {
+			hideLoadingDialog();
 			if (data.status) { alert("You have successfully submitted your algorithm inputs!"); }
 			else { alert("Uh oh, something went wrong!"); }
 		},

@@ -7,6 +7,8 @@ import groovyx.net.http.*
 import org.apache.http.entity.mime.content.StringBody
 import org.apache.http.entity.mime.MultipartEntity
 import static groovyx.net.http.Method.POST
+import static groovyx.net.http.ContentType.*
+
 
 
 class PiazzaService {
@@ -52,15 +54,14 @@ class PiazzaService {
 		return postToPiazza(postBody)
 	}
 
-	def postToPiazza(postBody) { println postBody
-		def http = new HTTPBuilder("http://pz-gateway.stage.geointservices.io/job")
+	def postToPiazza(postBody) { println JsonOutput.toJson(postBody)
+		def http = new HTTPBuilder("http://pz-gateway.stage.geointservices.io/v2/job")
+		http.headers."Accept" = "application/json"
+		http.headers."Content-Type" = "application/json"
 		http.request(POST) { req ->
-			requestContentType: "multipart/form-data"
-
-			def multiPartContent = new MultipartEntity()
-			multiPartContent.addPart("body", new StringBody(postBody))
-			req.setEntity(multiPartContent)
-
+			headers."Accept" = "application/json"
+			headers."Content-Type" = "application/json"
+			send JSON, JsonOutput.toJson(postBody)
 			response.failure = { resp, reader ->
 println "Error: " + reader
 
@@ -75,10 +76,7 @@ println "Success: " + reader
 	}
 
 	def submitJob(params) {
-		def postBody = new JsonOutput().toJson([
-			userName: "myUserName",
-			jobType: params.jobType
-		])
+		def postBody = params.data
 
 		def response = postToPiazza(postBody)
 
