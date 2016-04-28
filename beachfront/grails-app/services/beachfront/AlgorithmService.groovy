@@ -14,7 +14,7 @@ class AlgorithmService {
 		AlgorithmJob.findAll().each() {
 			// if the algorithm is not complete, check the status
 			if (it.status != "Success" || !it.piazzaDataId) {
-				def response = new URL("https://pz-gateway.stage.geointservices.io/job/${it.piazzaJobId}").getText()
+				def response = new URL("http://pz-gateway.stage.geointservices.io/job/${it.piazzaJobId}").getText()
 				def json = new JsonSlurper().parseText(response)
 				println response
 				def status = json.status 
@@ -31,13 +31,13 @@ class AlgorithmService {
 
 	def results(params) {
 		//def text = piazzaService.getFile([ dataId: params.piazzaDataId ])
-		def text = new URL("https://pz-gateway.stage.geointservices.io/file/${params.piazzaDataId}").getText()
+		def text = new URL("http://pz-gateway.stage.geointservices.io/file/${params.piazzaDataId}").getText()
 		println text
 		def outputFilename = AlgorithmJob.findByPiazzaDataId(params.piazzaDataId).outputFilename
 		def dataId = text.find(/${outputFilename}\\["]:\\["]([a-z0-9|-]*)\\["]/) { matcher, geojsonDataId -> return geojsonDataId }
 	
 		//def file = piazzaService.getFile([ dataId: dataId ])
-		def file = new URL("https://pz-gateway.stage.geointservices.io/file/${dataId}").getText()
+		def file = new URL("http://pz-gateway.stage.geointservices.io/file/${dataId}").getText()
 		def json = new JsonSlurper().parseText(file)
 
 	
@@ -46,7 +46,7 @@ class AlgorithmService {
 
 	def search(params) {
 		// get a list of all beachfront applicable algorithms from Piazza
-		def response = new URL("https://pz-gateway.stage.geointservices.io/service?per_page=100&keyword=BF_Algo").getText()
+		def response = new URL("http://pz-gateway.stage.geointservices.io/service?per_page=100&keyword=BF_Algo").getText()
 		def json = response ? new JsonSlurper().parseText(response) : []
 		def algorithms = json.data.findAll({ it.resourceMetadata?.name?.contains("BF_Algo") && it.serviceId })
 		
