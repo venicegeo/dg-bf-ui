@@ -34,18 +34,14 @@ func GetJobs() ([]beachfront.Job, error) {
 
 func GetImageList() ([]beachfront.Image, error) {
     return []beachfront.Image{
-        beachfront.Image{"LC80090472014280LGN00_B3.TIF", "643dd0a6-5128-49a4-9dbc-ac5ba0530e95"},
-        beachfront.Image{"LC80090472014280LGN00_B6.TIF", "22b85cb1-7b2c-4a51-874f-22fc4e439b8b"},
-        beachfront.Image{"LC80150442014002LGN00_B3.TIF", "f51e7576-1245-455a-a683-707aa79e7e46"},
-        beachfront.Image{"LC80150442014002LGN00_B6.TIF", "92741ab8-96ae-4a1f-841c-a05bc6d2f661"},
-        beachfront.Image{"LC80340432016061LGN00_B3.TIF", "8cac8caa-cbdc-46fa-8e55-fa507522efc6"},
-        beachfront.Image{"LC80340432016061LGN00_B6.TIF", "13299df7-37b5-445e-bc06-70c26c3e72c2"},
-        beachfront.Image{"LC81190532015078LGN00_B3.TIF", "37c61870-f464-4c82-824c-29fe5d1d6528"},
-        beachfront.Image{"LC81190532015078LGN00_B6.TIF", "fb143d27-570c-4993-90da-1120612b1662"},
-        beachfront.Image{"LC81600422014314LGN00_B3.TIF", "742718f0-7f5f-4a7b-a431-ee55a4bedd16"},
-        beachfront.Image{"LC81600422014314LGN00_B6.TIF", "f01c4f71-d19b-4ce6-81ec-1f83001f25f9"},
-        beachfront.Image{"LC82010352014217LGN00_B3.TIF", "c392a815-3edf-4254-884c-27197e17a273"},
-        beachfront.Image{"LC82010352014217LGN00_B6.TIF", "9b8f64ef-76ad-492c-8cc1-3842d6fbd4e9"},
+        beachfront.Image{"LC80090472014280LGN00_B3.TIF", "0d625dbd-30e8-40ad-8d9a-4529a68c1687"},
+        beachfront.Image{"LC80090472014280LGN00_B6.TIF", "e386efe8-563c-4939-87c0-9c630d391178"},
+        beachfront.Image{"LC80150442014002LGN00_B3.TIF", "99a8c1e9-575e-415c-954d-052d95a105f4"},
+        beachfront.Image{"LC80150442014002LGN00_B6.TIF", "cc998be5-faab-472f-ba1b-08da47e4515c"},
+        beachfront.Image{"LC80340432016061LGN00_B3.TIF", "c6329155-10fd-4e46-af79-c10f9ea5d283"},
+        beachfront.Image{"LC80340432016061LGN00_B6.TIF", "a4be2d78-6079-42bc-8477-bed4f8b96f78"},
+        beachfront.Image{"LC82010352014217LGN00_B3.TIF", "c58cd36d-152b-4106-aba7-24653e276d46"},
+        beachfront.Image{"LC82010352014217LGN00_B6.TIF", "b0f85df4-4ce9-4734-a50c-c64728c0c0cf"},
     }, nil
 }
 
