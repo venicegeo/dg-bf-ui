@@ -8,14 +8,8 @@ import (
     "time"
 )
 
-func InitializeBackgroundTasks(config utils.ApplicationConfiguration) {
-    logger := utils.ContextLogger{"InitializeBackgroundTasks"}
-    if config.EnableBackgroundTasks {
-        logger.Info("Starting goroutines")
-        go piazza.WorkerForAlgorithmCache()
-    } else {
-        logger.Info("Background tasks are disabled by config")
-    }
+func Initialize(config utils.Configuration) {
+    piazza.Initialize(config)
 }
 
 func SubmitJob(job beachfront.Job) error {

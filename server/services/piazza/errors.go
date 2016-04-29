@@ -1,27 +1,24 @@
 package piazza
 
-import "fmt"
+import (
+	"fmt"
+	"net/http"
+)
 
-type FileRetrievalError struct {
-    Message string
+type (
+	HttpError struct {
+		Response *http.Response
+	}
+
+	JobError struct {
+		Message string
+	}
+)
+
+func (e HttpError) Error() string {
+	return fmt.Sprintf("HttpError: (code=%d)", e.Response.StatusCode)
 }
 
-func (e FileRetrievalError) Error() string {
-    return fmt.Sprintf("FileRetrievalError: %s", e.Message)
-}
-
-type StatusError struct {
-    Message string
-}
-
-func (e StatusError) Error() string {
-    return fmt.Sprintf("StatusError: %s", e.Message)
-}
-
-type TooManyAttemptsError struct {
-    Count int
-}
-
-func (e TooManyAttemptsError) Error() string {
-    return fmt.Sprintf("TooManyAttemptsError: (max=%d)", e.Count)
+func (e JobError) Error() string {
+	return fmt.Sprintf("JobError: %s", e.Message)
 }
