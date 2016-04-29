@@ -3,7 +3,6 @@ package piazza
 import (
     "bytes"
     "encoding/json"
-    "fmt"
     "github.com/venicegeo/bf-ui/server/domain"
     "github.com/venicegeo/bf-ui/server/utils"
     "io"
@@ -277,32 +276,4 @@ func serialize(payload interface{}) (string, io.Reader) {
     writer.Close()
     contentType := writer.FormDataContentType()
     return contentType, buffer
-}
-
-//
-// Errors
-//
-
-type FileRetrievalError struct {
-    Message string
-}
-
-func (e FileRetrievalError) Error() string {
-    return fmt.Sprintf("FileRetrievalError: %s", e.Message)
-}
-
-type StatusError struct {
-    Message string
-}
-
-func (e StatusError) Error() string {
-    return fmt.Sprintf("StatusError: %s", e.Message)
-}
-
-type TooManyAttemptsError struct {
-    Count int
-}
-
-func (e TooManyAttemptsError) Error() string {
-    return fmt.Sprintf("TooManyAttemptsError: (max=%d)", e.Count)
 }
