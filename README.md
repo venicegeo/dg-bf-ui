@@ -5,14 +5,20 @@
 ### Running Locally
 
 ```
-~/beachfront-client$ npm install
-~/beachfront-client$ npm run watch
+~/bf-ui/client$ npm install
+~/bf-ui/client$ npm run watch
+```
+
+### Testing
+
+```
+~/bf-ui/client$ npm run test
 ```
 
 ### Building
 
 ```
-~/beachfront-client$ NODE_ENV=production npm run build
+~/bf-ui/client$ NODE_ENV=production npm run build
 ```
 
 Check `dist` folder afterwards.
@@ -23,14 +29,19 @@ Check `dist` folder afterwards.
 ### Running Locally
 
 ```
-$ cd server
-$ go run
-$
+~/bf-ui/server$ go get
+~/bf-ui/server$ go run
+```
+
+### Testing
+
+```
+~/bf-ui/server$ go test
 ```
 
 ### Building
 
 ```
-~/beachfront-server$ go get
-~/beachfront-server$ go build
+~/bf-ui/server$ go get
+~/bf-ui/server$ go build
 ```
