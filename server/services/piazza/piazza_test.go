@@ -190,7 +190,7 @@ func TestPost(t *testing.T) {
 	httpmock.RegisterResponder("POST", "http://mock-gateway/v2/job",
 		httpmock.NewStringResponder(200, PZ_JOB_CREATED_RESPONSE))
 
-	id, err := Post(map[string]string{"lorem": "ipsum"})
+	id, err := Post(Message{Type: "test-type", Data: "test-data"})
 	assert.Equal(t, id, "test-id")
 	assert.Nil(t, err)
 }
@@ -203,11 +203,11 @@ func TestPost_ProperlySerializesMessage(t *testing.T) {
 		func(req *http.Request) (*http.Response, error) {
 			body, _ := ioutil.ReadAll(req.Body)
 			assert.Equal(t, req.Header.Get("content-type"), "application/json")
-			assert.Equal(t, string(body), `{"lorem":"ipsum"}`)
+			assert.Equal(t, string(body), `{"type":"test-type","data":"test-data"}`)
 			return httpmock.NewStringResponse(200, PZ_JOB_CREATED_RESPONSE), nil
 		})
 
-	Post(map[string]string{"lorem": "ipsum"})
+	Post(Message{Type: "test-type", Data: "test-data"})
 }
 
 func TestPost_HandlesHttpErrorsGracefully(t *testing.T) {
@@ -217,7 +217,7 @@ func TestPost_HandlesHttpErrorsGracefully(t *testing.T) {
 	httpmock.RegisterResponder("POST", "http://mock-gateway/v2/job",
 		httpmock.NewStringResponder(500, PZ_CREATE_JOB_ERROR_RESPONSE))
 
-	id, err := Post(map[string]string{"lorem": "ipsum"})
+	id, err := Post(Message{Type: "test-type", Data: "test-data"})
 	assert.Empty(t, id)
 	assert.Error(t, err)
 }

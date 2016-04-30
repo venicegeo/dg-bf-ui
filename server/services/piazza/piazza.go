@@ -89,7 +89,7 @@ func GetStatus(id string) (*Status, error) {
 	return status, nil
 }
 
-func Post(message interface{}) (jobId string, err error) {
+func Post(message Message) (jobId string, err error) {
 	url := fmt.Sprintf("%s/v2/job", gateway)
 
 	payload, _ := json.Marshal(message)

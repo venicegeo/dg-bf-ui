@@ -21,21 +21,17 @@ type (
 		JobID   string
 		Status  string
 		Message string
-		Result  Result
-	}
-
-	Result struct {
-		DataID string
+		Result  struct {
+			DataID string
+		}
 	}
 
 	Service struct {
 		ID               string `json:"serviceId"`
-		ResourceMetadata ResourceMetadata
-	}
-
-	ResourceMetadata struct {
-		Name         string
-		Description  string
-		Availability string
+		ResourceMetadata struct {
+			Name         string
+			Description  string
+			Availability string
+		}
 	}
 )
