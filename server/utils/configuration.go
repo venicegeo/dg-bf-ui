@@ -8,20 +8,20 @@ import (
 )
 
 const (
-	apiNamespace        = "API_NAMESPACE"
-	defaultApiNamespace = "/api/v1"
+	API_NAMESPACE                = "API_NAMESPACE"
+	defaultApiNamespace          = "/api/v1"
 
-	enableBackgroundTasks        = "ENABLE_BACKGROUND_TASKS"
+	ENABLE_BACKGROUND_TASKS      = "ENABLE_BACKGROUND_TASKS"
 	defaultEnableBackgroundTasks = true
 
-	piazzaGateway        = "PIAZZA_GATEWAY"
-	defaultPiazzaGateway = "http://localhost:3000"
+	PIAZZA_GATEWAY               = "PIAZZA_GATEWAY"
+	defaultPiazzaGateway         = "http://localhost:3000"
 
-	serverAddress        = "SERVER_ADDRESS"
-	defaultServerAddress = ":5000"
+	SERVER_ADDRESS               = "SERVER_ADDRESS"
+	defaultServerAddress         = ":5000"
 
-	staticAssetPath        = "STATIC_ASSET_PATH"
-	defaultStaticAssetPath = "./public"
+	STATIC_ASSET_PATH            = "STATIC_ASSET_PATH"
+	defaultStaticAssetPath       = "./public"
 )
 
 type Configuration struct {
@@ -34,11 +34,11 @@ type Configuration struct {
 
 func Load() Configuration {
 	return Configuration{
-		EnableBackgroundTasks: getBoolean(enableBackgroundTasks, defaultEnableBackgroundTasks),
-		Namespace:             getString(apiNamespace, defaultApiNamespace),
-		PiazzaGateway:         getString(piazzaGateway, defaultPiazzaGateway),
-		ServerAddress:         getString(serverAddress, defaultServerAddress),
-		StaticAssetPath:       getString(staticAssetPath, resolve(defaultStaticAssetPath)),
+		EnableBackgroundTasks: getBoolean(ENABLE_BACKGROUND_TASKS, defaultEnableBackgroundTasks),
+		Namespace:             getString(API_NAMESPACE, defaultApiNamespace),
+		PiazzaGateway:         getString(PIAZZA_GATEWAY, defaultPiazzaGateway),
+		ServerAddress:         getString(SERVER_ADDRESS, defaultServerAddress),
+		StaticAssetPath:       getString(STATIC_ASSET_PATH, resolve(defaultStaticAssetPath)),
 	}
 }
 
