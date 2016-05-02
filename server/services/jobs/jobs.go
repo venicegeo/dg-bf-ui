@@ -15,7 +15,6 @@ const (
 
 var (
 	cache map[string]*beachfront.Job
-
 	pollingInterval = defaultPollingInterval
 	pollingMaximumAttempts = defaultPollingMaximumAttempts
 )
@@ -35,6 +34,14 @@ func Reset() {
 	cache = nil
 	pollingInterval = defaultPollingInterval
 	pollingMaximumAttempts = defaultPollingMaximumAttempts
+}
+
+func SetPollingInterval(value time.Duration) {
+	pollingInterval = value
+}
+
+func PollingMaxAttempts(value int) {
+	pollingMaximumAttempts = value
 }
 
 func List() []beachfront.Job {
@@ -131,19 +138,21 @@ func dispatch(client piazza.JobRetriever, job *beachfront.Job) {
 	var err error
 
 	attempt := 0
-	for {
-		attempt++
+	for err == nil {
+		attempt += 1
 		time.Sleep(pollingInterval)
 		status, err = client.GetStatus(job.ID)
+		if err != nil {
+			break
+		}
 		logger.Debug("[job:%s] poll #%d (%s)", status.JobID, attempt, status.Status)
 		switch {
 		case status.Status == piazza.StatusSuccess:
 			job.Status = status.Status
 			job.ResultID = status.Result.DataID
-			break
-		case attempt == pollingMaximumAttempts:
+			return
+		case attempt >= pollingMaximumAttempts:
 			err = TooManyAttemptsError{Count: pollingMaximumAttempts}
-			break
 		}
 	}
 

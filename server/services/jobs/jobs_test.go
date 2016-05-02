@@ -5,6 +5,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/venicegeo/bf-ui/server/domain"
 	"github.com/venicegeo/bf-ui/server/services/piazza"
+	"net/http"
 	"regexp"
 	"testing"
 	"time"
@@ -36,13 +37,61 @@ func TestExecute_SubmitsProperlyFormattedMessage(t *testing.T) {
 	Execute(client, newJob())
 }
 
+func TestExecute_AddsNewJobsToCache(t *testing.T) {
+	setup()
+	defer teardown()
+
+	client := spy{}
+
+	Execute(client, newJob())
+
+	assert.Len(t, cache, 1)
+	assert.Equal(t, cache["test-id"].Status, piazza.StatusRunning)
+}
+
+func TestExecute_DoesNotAddFailedSubmissionToCache(t *testing.T) {
+	setup()
+	defer teardown()
+
+	client := spy{
+		post: func(piazza.Message) (string, error) {
+			return "", piazza.HttpError{
+				&http.Response{StatusCode: http.StatusServiceUnavailable}}
+		}}
+
+	Execute(client, newJob())
+
+	assert.Len(t, cache, 0)
+}
+
+func TestExecute_GracefullyHandlesErrors(t *testing.T) {
+	setup()
+	defer teardown()
+
+	SetPollingInterval(0)
+	PollingMaxAttempts(2)
+
+	timesCalled := 0
+
+	client := spy{
+		post: func(piazza.Message) (string, error) {
+			timesCalled += 1
+			return "", piazza.HttpError{
+				&http.Response{StatusCode: http.StatusServiceUnavailable}}
+		}}
+
+	Execute(client, newJob())
+
+	time.Sleep(5 * time.Millisecond)
+	assert.Equal(t, 1, timesCalled)
+}
+
 func TestExecute_Dispatches(t *testing.T) {
 	setup()
 	defer teardown()
 
-	// FIXME -- make this concrete
-	pollingInterval = 1 * time.Nanosecond
-	pollingMaximumAttempts = 1
+	SetPollingInterval(0)
+	PollingMaxAttempts(0)
 
 	statusRequested := expectedIn(10 * time.Millisecond)
 
@@ -50,6 +99,7 @@ func TestExecute_Dispatches(t *testing.T) {
 		get: func(id string) (*piazza.Status, error) {
 			statusRequested <- true
 			return &piazza.Status{
+				JobID:  "test-id",
 				Type:   "status",
 				Status: piazza.StatusSuccess,
 				Result: struct{ DataID string }{"test-result-id"},
@@ -59,6 +109,80 @@ func TestExecute_Dispatches(t *testing.T) {
 	Execute(client, newJob())
 
 	assert.True(t, <-statusRequested)
+}
+
+func TestDispatch_HaltsAfterMaxAttemptsReached(t *testing.T) {
+	setup()
+	defer teardown()
+
+	SetPollingInterval(0)
+	PollingMaxAttempts(2)
+
+	timesCalled := 0
+
+	client := spy{
+		get: func(id string) (*piazza.Status, error) {
+			timesCalled += 1
+			return &piazza.Status{
+				JobID:  "test-zombie",
+				Type:   "status",
+				Status: piazza.StatusRunning,
+			}, nil
+		}}
+
+	job := newJob()
+	job.ID = "test-zombie"
+	dispatch(client, &job)
+
+	time.Sleep(5 * time.Millisecond)
+	assert.Equal(t, 2, timesCalled)
+}
+
+func TestDispatch_HaltsOnError(t *testing.T) {
+	setup()
+	defer teardown()
+
+	SetPollingInterval(0)
+	PollingMaxAttempts(2)
+
+	timesCalled := 0
+
+	client := spy{
+		get: func(id string) (*piazza.Status, error) {
+			timesCalled += 1
+			return nil, piazza.JobError{"Forced error"}
+		}}
+
+	job := newJob()
+	job.ID = "test-throws-pz-error"
+	dispatch(client, &job)
+
+	time.Sleep(5 * time.Millisecond)
+	assert.Equal(t, 1, timesCalled)
+}
+
+func TestDispatch_GracefullyHandlesErrors(t *testing.T) {
+	setup()
+	defer teardown()
+
+	SetPollingInterval(0)
+	PollingMaxAttempts(2)
+
+	timesCalled := 0
+
+	client := spy{
+		get: func(id string) (*piazza.Status, error) {
+			timesCalled += 1
+			return nil, piazza.HttpError{
+				&http.Response{StatusCode: http.StatusServiceUnavailable}}
+		}}
+
+	job := newJob()
+	job.ID = "test-throws-http-error"
+	dispatch(client, &job)
+
+	time.Sleep(5 * time.Millisecond)
+	assert.Equal(t, 1, timesCalled)
 }
 
 func TestList(t *testing.T) {
@@ -137,6 +261,7 @@ func (s spy) GetStatus(id string) (*piazza.Status, error) {
 		return s.get(id)
 	}
 	return &piazza.Status{
+		JobID:  "test-id",
 		Type:   "status",
 		Status: piazza.StatusSuccess,
 		Result: struct{ DataID string }{"test-result-id"},
