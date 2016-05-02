@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/venicegeo/bf-ui/server/domain"
 	"github.com/venicegeo/bf-ui/server/services/piazza"
+	"github.com/venicegeo/bf-ui/server/utils"
 	"time"
 )
 
@@ -29,11 +30,11 @@ func Reset() {
 }
 
 func List() []beachfront.Job {
-		jobs := make([]beachfront.Job, 0)
-		for _, job := range cache {
-			jobs = append(jobs, *job)
-		}
-		return jobs
+	jobs := make([]beachfront.Job, 0)
+	for _, job := range cache {
+		jobs = append(jobs, *job)
+	}
+	return jobs
 }
 
 func Execute(client piazza.JobSubmitter, job beachfront.Job) (id string, err error) {
@@ -169,9 +170,9 @@ func newExecutionMessage(algorithmId, inputFilenames, outputFilename, imageIds s
 			OutputFilename value `json:"outGeoJson"`
 		}
 		data struct {
-			DataInputs  inputs `json:"dataInputs"`
+			DataInputs  inputs   `json:"dataInputs"`
 			DataOutput  []output `json:"dataOutput"`
-			AlgorithmId string `json:"serviceId"`
+			AlgorithmId string   `json:"serviceId"`
 		}
 	)
 
