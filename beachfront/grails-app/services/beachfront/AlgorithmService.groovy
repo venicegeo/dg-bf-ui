@@ -14,7 +14,7 @@ class AlgorithmService {
 		AlgorithmJob.findAll().each() {
 			// if the algorithm is not complete, check the status
 			if (it.status != "Success" || !it.piazzaDataId) {
-				def response = new URL("http://pz-gateway.stage.geointservices.io/job/${it.piazzaJobId}").getText()
+				def response = new URL("http://pz-gateway.venicegeo.io/job/${it.piazzaJobId}").getText()
 				def json = new JsonSlurper().parseText(response)
 				println response
 				def status = json.status 
@@ -31,13 +31,13 @@ class AlgorithmService {
 
 	def results(params) {
 		//def text = piazzaService.getFile([ dataId: params.piazzaDataId ])
-		def text = new URL("http://pz-gateway.stage.geointservices.io/file/${params.piazzaDataId}").getText()
+		def text = new URL("http://pz-gateway.venicegeo.io/file/${params.piazzaDataId}").getText()
 		println text
 		def outputFilename = AlgorithmJob.findByPiazzaDataId(params.piazzaDataId).outputFilename
 		def dataId = text.find(/${outputFilename}\\["]:\\["]([a-z0-9|-]*)\\["]/) { matcher, geojsonDataId -> return geojsonDataId }
 	
 		//def file = piazzaService.getFile([ dataId: dataId ])
-		def file = new URL("http://pz-gateway.stage.geointservices.io/file/${dataId}").getText()
+		def file = new URL("http://pz-gateway.venicegeo.io/file/${dataId}").getText()
 		def json = new JsonSlurper().parseText(file)
 
 	
@@ -46,9 +46,10 @@ class AlgorithmService {
 
 	def search(params) {
 		// get a list of all beachfront applicable algorithms from Piazza
-		def response = new URL("http://pz-gateway.stage.geointservices.io/service?per_page=100&keyword=BF_Algo").getText()
+		def response = new URL("http://pz-gateway.venicegeo.io/service?per_page=100&keyword=BF_Algo").getText()
+println response
 		def json = response ? new JsonSlurper().parseText(response) : []
-		def algorithms = json.data.findAll({ it.resourceMetadata?.name?.contains("BF_Algo") && it.serviceId })
+		def algorithms = json.data.findAll({ it.resourceMetadata?.name?.contains("BF_Algo") && it.serviceId && it.resourceMetadata?.availability != "OUT OF SERVICE" })
 		
 		// transform the list so that the inputs can be handled more easily
 		algorithms.eachWithIndex() { algorithm, algorithmIndex ->
@@ -84,14 +85,14 @@ class AlgorithmService {
 	def submit(params) { println params 
 		// assemble the parameters to submit to the algorithm
 		def dataIdMap = [
-			"LC80090472014280LGN00_B3.TIF": "0d625dbd-30e8-40ad-8d9a-4529a68c1687",
-			"LC80090472014280LGN00_B6.TIF": "e386efe8-563c-4939-87c0-9c630d391178",
-			"LC80150442014002LGN00_B3.TIF": "99a8c1e9-575e-415c-954d-052d95a105f4",
-			"LC80150442014002LGN00_B6.TIF": "cc998be5-faab-472f-ba1b-08da47e4515c",
-			"LC80340432016061LGN00_B3.TIF": "c6329155-10fd-4e46-af79-c10f9ea5d283",
-			"LC80340432016061LGN00_B6.TIF": "a4be2d78-6079-42bc-8477-bed4f8b96f78",
-			"LC82010352014217LGN00_B3.TIF": "c58cd36d-152b-4106-aba7-24653e276d46",
-			"LC82010352014217LGN00_B6.TIF": "b0f85df4-4ce9-4734-a50c-c64728c0c0cf"
+			"LC80090472014280LGN00_B3.TIF": "df44ad97-5b39-4a19-b668-a1311444d439",
+			"LC80090472014280LGN00_B6.TIF": "d2004fac-d55c-4eaf-8e7a-051d1ecf134d",
+			"LC80150442014002LGN00_B3.TIF": "6aa8c5a2-90a7-417f-8424-5b7bb41bcef5",
+			"LC80150442014002LGN00_B6.TIF": "d76aa544-f8a8-416e-b0c0-f0c11645a997",
+			"LC80340432016061LGN00_B3.TIF": "c4353694-026c-402d-80c6-694698f16c31",
+			"LC80340432016061LGN00_B6.TIF": "769dca25-deaa-4e12-9d9e-25c6c5963058",
+			"LC82010352014217LGN00_B3.TIF": "3c6f1cd4-b1fb-44a6-9bd9-ab5c1d5d60e6",
+			"LC82010352014217LGN00_B6.TIF": "d7b2aba9-c362-4014-9d9e-70a75398c69c"
 		]
 		def dataIds = []
 		params."--image".split(",").each() { dataIds.push(dataIdMap["${it}"]) }

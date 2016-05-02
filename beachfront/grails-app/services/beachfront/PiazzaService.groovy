@@ -19,7 +19,7 @@ class PiazzaService {
 			userName: "myUserName"
 		])
 
-		def http = new HTTPBuilder("http://pz-gateway.stage.geointservices.io/file")
+		def http = new HTTPBuilder("http://pz-gateway.venicegeo.io/file")
 		http.request(POST) { req ->
 			requestContentType: "multipart/form-data"
 
@@ -55,7 +55,7 @@ class PiazzaService {
 	}
 
 	def postToPiazza(postBody) { println JsonOutput.toJson(postBody)
-		def http = new HTTPBuilder("http://pz-gateway.stage.geointservices.io/v2/job")
+		def http = new HTTPBuilder("http://pz-gateway.venicegeo.io/v2/job")
 		http.headers."Accept" = "application/json"
 		http.headers."Content-Type" = "application/json"
 		http.request(POST) { req ->
