@@ -9,15 +9,21 @@ import (
 )
 
 const (
-	pollingInterval        = 15 * time.Second
-	pollingMaximumAttempts = 60
+	defaultPollingInterval = 15 * time.Second
+	defaultPollingMaximumAttempts = 60
 )
 
-var cache map[string]*beachfront.Job
+var (
+	cache map[string]*beachfront.Job
+
+	pollingInterval = defaultPollingInterval
+	pollingMaximumAttempts = defaultPollingMaximumAttempts
+)
 
 type (
-	TooManyAttemptsError struct {
-		Count int
+	client interface {
+		piazza.JobRetriever
+		piazza.JobSubmitter
 	}
 )
 
@@ -27,6 +33,8 @@ func Initialize() {
 
 func Reset() {
 	cache = nil
+	pollingInterval = defaultPollingInterval
+	pollingMaximumAttempts = defaultPollingMaximumAttempts
 }
 
 func List() []beachfront.Job {
@@ -37,7 +45,7 @@ func List() []beachfront.Job {
 	return jobs
 }
 
-func Execute(client piazza.JobSubmitter, job beachfront.Job) (id string, err error) {
+func Execute(client client, job beachfront.Job) (jobId string, err error) {
 	logger := utils.ContextLogger{"Execute"}
 
 	job.CreatedOn = time.Now()
@@ -45,16 +53,17 @@ func Execute(client piazza.JobSubmitter, job beachfront.Job) (id string, err err
 
 	message := newExecutionMessage(job.AlgorithmID, job.ImageFilenames(), job.ResultFilename, job.ImageIDs())
 
-	id, err = client.Post(message)
+	jobId, err = client.Post(message)
 	if err != nil {
 		logger.Error("%s: %s", err, job)
 		return
 	}
 
-	job.ID = id
+	logger.Info("[job:%s] started", jobId)
+	job.ID = jobId
 	job.Status = piazza.StatusRunning
-	logger.Info("[job:%s] started", id)
-	//go dispatchJobSubmissionFollowup(&job)
+	cache[jobId] = &job
+	go dispatch(client, &job)
 
 	return
 }
@@ -110,45 +119,37 @@ func Execute(client piazza.JobSubmitter, job beachfront.Job) (id string, err err
 //	return ioutil.ReadAll(response.Body)
 //}
 //
-//func dispatchJobSubmissionFollowup(job *beachfront.Job) {
-//	jobCache[job.ID] = job
-//	message := buildGetMessage(job.ID)
-//	response, err := await(JobEndpoint, message, JobStatusPollingInterval, JobStatusPollingMaximumAttempts)
-//	if err == nil {
-//		job.Status = response.Status
-//		job.ResultID = response.Result.DataID
-//	} else {
-//		job.Status = Error
-//	}
-//}
-//
-//func await(endpoint string, message Message, interval time.Duration, maximumAttempts int) (response JobResponse, err error) {
-//	logger := utils.ContextLogger{"await"}
-//	attempt := 0
-//	for err == nil {
-//		attempt++
-//		time.Sleep(interval)
-//		response, err = sendMessage(endpoint, message)
-//		logger.Debug("[job:%s] poll #%d (%s)", response.JobID, attempt, response.Status)
-//		switch {
-//		case response.Status == Success:
-//			return
-//		case attempt == maximumAttempts:
-//			err = TooManyAttemptsError{Count: maximumAttempts}
-//		}
-//	}
-//	logger.Error("[job:%s] polling failed: %s", response.JobID, err)
-//	return
-//}
-//
-//
-//func (e TooManyAttemptsError) Error() string {
-//	return fmt.Sprintf("TooManyAttemptsError: (max=%d)", e.Count)
-//}
 
 //
 // Internals
 //
+
+func dispatch(client piazza.JobRetriever, job *beachfront.Job) {
+	logger := utils.ContextLogger{"dispatch"}
+
+	var status *piazza.Status
+	var err error
+
+	attempt := 0
+	for {
+		attempt++
+		time.Sleep(pollingInterval)
+		status, err = client.GetStatus(job.ID)
+		logger.Debug("[job:%s] poll #%d (%s)", status.JobID, attempt, status.Status)
+		switch {
+		case status.Status == piazza.StatusSuccess:
+			job.Status = status.Status
+			job.ResultID = status.Result.DataID
+			break
+		case attempt == pollingMaximumAttempts:
+			err = TooManyAttemptsError{Count: pollingMaximumAttempts}
+			break
+		}
+	}
+
+	job.Status = piazza.StatusError
+	logger.Error("[job:%s] polling failed: %s", job.ID, err)
+}
 
 func generateOutputFilename() string {
 	return fmt.Sprintf("Beachfront_%s.geojson", time.Now().UTC().Format("20060102.150405.99999"))
@@ -190,4 +191,16 @@ func newExecutionMessage(algorithmId, inputFilenames, outputFilename, imageIds s
 			algorithmId,
 		},
 	}
+}
+
+//
+// Errors
+//
+
+type TooManyAttemptsError struct {
+	Count int
+}
+
+func (e TooManyAttemptsError) Error() string {
+	return fmt.Sprintf("TooManyAttemptsError: (max=%d)", e.Count)
 }

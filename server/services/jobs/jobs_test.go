@@ -14,9 +14,8 @@ func TestExecute(t *testing.T) {
 	setup()
 	defer teardown()
 
-	client := _submitter{ReturnID: "test-id"}
-	job := newJob()
-	id, err := Execute(&client, job)
+	client := spy{}
+	id, err := Execute(client, newJob())
 	assert.Nil(t, err)
 	assert.Equal(t, "test-id", id)
 }
@@ -25,14 +24,39 @@ func TestExecute_SubmitsProperlyFormattedMessage(t *testing.T) {
 	setup()
 	defer teardown()
 
-	client := _submitter{ReturnID: "test-id"}
-	job := newJob()
-	Execute(&client, job)
+	client := spy{post: func(message piazza.Message) (string, error) {
+		serialized, _ := json.Marshal(message)
+		pattern := regexp.MustCompile(`Beachfront_[^"]+\.geojson`)
+		assert.JSONEq(t, PZ_EXECUTION_MESSAGE, pattern.ReplaceAllString(string(serialized), "test-output-filename.geojson"))
 
-	serialized, _ := json.Marshal(client.Message)
+		return "test-id", nil
+	}}
 
-	pattern := regexp.MustCompile(`Beachfront_[^"]+\.geojson`)
-	assert.JSONEq(t, PZ_EXECUTION_MESSAGE, pattern.ReplaceAllString(string(serialized), "test-output-filename.geojson"))
+	Execute(client, newJob())
+}
+
+func TestExecute_Dispatches(t *testing.T) {
+	setup()
+	defer teardown()
+
+	// FIXME -- make this concrete
+	pollingInterval = 1 * time.Nanosecond
+	pollingMaximumAttempts = 1
+
+	statusRequested := expectedIn(10 * time.Millisecond)
+
+	client := spy{get: func(id string) (*piazza.Status, error) {
+		statusRequested <-true
+		return &piazza.Status{
+			Type: "status",
+			Status: piazza.StatusSuccess,
+			Result: struct{ DataID string }{"test-result-id"},
+		}, nil
+	}}
+
+	Execute(client, newJob())
+
+	assert.True(t, <-statusRequested)
 }
 
 func TestList(t *testing.T) {
@@ -55,6 +79,15 @@ func TestList_ReturnsCachedJobs(t *testing.T) {
 //
 // Helpers
 //
+
+func expectedIn(duration time.Duration) chan bool {
+	happened := make(chan bool)
+	go func() {
+		time.Sleep(duration)
+		happened <-false
+	}()
+	return happened
+}
 
 func setup() {
 	Initialize()
@@ -83,19 +116,29 @@ func populateCache() {
 // Mocks
 //
 
-type _submitter struct {
+type spy struct {
 	piazza.JobSubmitter
-	ReturnID    string
-	ReturnError error
-	Message     piazza.Message
+	piazza.JobRetriever
+	post func(piazza.Message) (string, error)
+	get func(string) (*piazza.Status, error)
 }
 
-func (s *_submitter) Post(message piazza.Message) (string, error) {
-	s.Message = message
-	if s.ReturnError != nil {
-		return "", s.ReturnError
+func (s spy) Post(message piazza.Message) (string, error) {
+	if s.post != nil {
+		return s.post(message)
 	}
-	return s.ReturnID, nil
+	return "test-id", nil
+}
+
+func (s spy) GetStatus(id string) (*piazza.Status, error) {
+	if s.get != nil {
+		return s.get(id)
+	}
+	return &piazza.Status{
+		Type: "status",
+		Status: piazza.StatusSuccess,
+		Result: struct{ DataID string }{"test-result-id"},
+	}, nil
 }
 
 //
