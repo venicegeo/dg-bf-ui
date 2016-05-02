@@ -89,14 +89,6 @@ func expectedIn(duration time.Duration) chan bool {
 	return happened
 }
 
-func setup() {
-	Initialize()
-}
-
-func teardown() {
-	Reset()
-}
-
 func newJob() beachfront.Job {
 	return beachfront.Job{
 		CreatedOn:     time.Now(),
@@ -110,6 +102,14 @@ func newJob() beachfront.Job {
 func populateCache() {
 	job := newJob()
 	cache["test"] = &job
+}
+
+func setup() {
+	Initialize()
+}
+
+func teardown() {
+	Reset()
 }
 
 //
