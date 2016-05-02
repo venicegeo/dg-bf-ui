@@ -11,6 +11,13 @@ import (
 	"time"
 )
 
+func TestInitialize(t *testing.T) {
+	Initialize()
+	defer teardown()
+
+	assert.Len(t, cache, 0)
+}
+
 func TestExecute(t *testing.T) {
 	setup()
 	defer teardown()
@@ -71,19 +78,25 @@ func TestExecute_GracefullyHandlesErrors(t *testing.T) {
 	SetPollingInterval(0)
 	PollingMaxAttempts(2)
 
-	timesCalled := 0
+	timesPolled := 0
 
 	client := spy{
 		post: func(piazza.Message) (string, error) {
-			timesCalled += 1
 			return "", piazza.HttpError{
 				&http.Response{StatusCode: http.StatusServiceUnavailable}}
+		},
+		get: func(id string) (*piazza.Status, error) {
+			timesPolled += 1
+			return nil, nil
 		}}
 
-	Execute(client, newJob())
+	id, err := Execute(client, newJob())
 
 	time.Sleep(5 * time.Millisecond)
-	assert.Equal(t, 1, timesCalled)
+
+	assert.Error(t, err)
+	assert.Empty(t, id)
+	assert.Equal(t, 0, timesPolled)
 }
 
 func TestExecute_Dispatches(t *testing.T) {
@@ -138,7 +151,31 @@ func TestDispatch_HaltsAfterMaxAttemptsReached(t *testing.T) {
 	assert.Equal(t, 2, timesCalled)
 }
 
-func TestDispatch_HaltsOnError(t *testing.T) {
+func TestDispatch_HaltsOnHttpError(t *testing.T) {
+	setup()
+	defer teardown()
+
+	SetPollingInterval(0)
+	PollingMaxAttempts(2)
+
+	timesCalled := 0
+
+	client := spy{
+		get: func(id string) (*piazza.Status, error) {
+			timesCalled += 1
+			return nil, piazza.HttpError{
+				&http.Response{StatusCode: http.StatusServiceUnavailable}}
+		}}
+
+	job := newJob()
+	job.ID = "test-throws-http-error"
+	dispatch(client, &job)
+
+	time.Sleep(5 * time.Millisecond)
+	assert.Equal(t, 1, timesCalled)
+}
+
+func TestDispatch_HaltsOnPiazzaError(t *testing.T) {
 	setup()
 	defer teardown()
 
@@ -161,7 +198,7 @@ func TestDispatch_HaltsOnError(t *testing.T) {
 	assert.Equal(t, 1, timesCalled)
 }
 
-func TestDispatch_GracefullyHandlesErrors(t *testing.T) {
+func TestDispatch_HaltsOnSuccess(t *testing.T) {
 	setup()
 	defer teardown()
 
@@ -173,16 +210,65 @@ func TestDispatch_GracefullyHandlesErrors(t *testing.T) {
 	client := spy{
 		get: func(id string) (*piazza.Status, error) {
 			timesCalled += 1
-			return nil, piazza.HttpError{
-				&http.Response{StatusCode: http.StatusServiceUnavailable}}
+			return &piazza.Status{
+				JobID:  "test-great-success",
+				Type:   "status",
+				Status: piazza.StatusSuccess,
+				Result: struct{ DataID string }{"test-result-id"},
+			}, nil
 		}}
 
 	job := newJob()
-	job.ID = "test-throws-http-error"
+	job.ID = "test-great-success"
 	dispatch(client, &job)
 
 	time.Sleep(5 * time.Millisecond)
 	assert.Equal(t, 1, timesCalled)
+}
+
+func TestDispatch_SetsJobStatusOnError(t *testing.T) {
+	setup()
+	defer teardown()
+
+	SetPollingInterval(0)
+	PollingMaxAttempts(2)
+
+	client := spy{
+		get: func(id string) (*piazza.Status, error) {
+			return nil, piazza.JobError{"Forced error"}
+		}}
+
+	job := newJob()
+	job.ID = "test-throws-pz-error"
+	dispatch(client, &job)
+
+	time.Sleep(5 * time.Millisecond)
+	assert.Equal(t, job.Status, piazza.StatusError)
+}
+
+func TestDispatch_SetsJobStatusOnSuccess(t *testing.T) {
+	setup()
+	defer teardown()
+
+	SetPollingInterval(0)
+	PollingMaxAttempts(2)
+
+	client := spy{
+		get: func(id string) (*piazza.Status, error) {
+			return &piazza.Status{
+				JobID:  "test-great-success",
+				Type:   "status",
+				Status: piazza.StatusSuccess,
+				Result: struct{ DataID string }{"test-result-id"},
+			}, nil
+		}}
+
+	job := newJob()
+	job.ID = "test-great-success"
+	dispatch(client, &job)
+
+	time.Sleep(5 * time.Millisecond)
+	assert.Equal(t, job.Status, piazza.StatusSuccess)
 }
 
 func TestList(t *testing.T) {
