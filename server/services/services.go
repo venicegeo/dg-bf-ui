@@ -9,7 +9,7 @@ import (
 )
 
 func Initialize(config utils.Configuration) {
-    piazza.Initialize(config)
+	piazza.Initialize(config.PiazzaGateway)
 }
 
 func SubmitJob(job beachfront.Job) error {
