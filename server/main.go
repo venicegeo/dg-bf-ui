@@ -63,7 +63,7 @@ func handleGetResult(context echo.Context) error {
 func handlePostJob(context echo.Context) error {
     job := beachfront.Job{}
     context.Bind(&job)
-    if err := job.ValidateForSubmission(); err == nil {
+    if err := job.Validate(); err == nil {
         if err := services.SubmitJob(job); err == nil {
             return context.NoContent(http.StatusCreated)
         } else {

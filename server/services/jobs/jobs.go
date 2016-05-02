@@ -12,9 +12,7 @@ const (
 	pollingMaximumAttempts = 60
 )
 
-var (
-	cache = make(map[string]*beachfront.Job)
-)
+var cache map[string]*beachfront.Job
 
 type (
 	TooManyAttemptsError struct {
@@ -22,42 +20,20 @@ type (
 	}
 )
 
-func executionMessage(algorithmId, inputFilenames, outputFilename, imageIds string) piazza.Message {
-	type (
-		output struct {
-			MimeType string `json:"mimeType"`
-			Type     string `json:"type"`
-		}
-		value struct {
-			Type    string `json:"type"`
-			Content string `json:"content"`
-		}
-		inputs struct {
-			Command        value `json:"cmd"`
-			InputFiles     value `json:"inFiles"`
-			OutputFilename value `json:"outGeoJson"`
-		}
-		data struct {
-			DataInputs  inputs `json:"dataInputs"`
-			DataOutput  []output `json:"dataOutput"`
-			AlgorithmId string `json:"serviceId"`
-		}
-	)
+func Initialize() {
+	cache = make(map[string]*beachfront.Job)
+}
 
-	command := fmt.Sprintf("shoreline --image %s --projection geo-scaled --threshold 0.5 --tolerance 0 %s", inputFilenames, outputFilename)
+func Reset() {
+	cache = nil
+}
 
-	return piazza.Message{
-		"execute-service",
-		data{
-			inputs{
-				value{"urlparameter", command},
-				value{"urlparameter", imageIds},
-				value{"urlparameter", outputFilename},
-			},
-			[]output{{"application/json", "text"}},
-			algorithmId,
-		},
-	}
+func List() []beachfront.Job {
+		jobs := make([]beachfront.Job, 0)
+		for _, job := range cache {
+			jobs = append(jobs, *job)
+		}
+		return jobs
 }
 
 //func GetCachedBeachfrontJobs() []beachfront.Job {
@@ -123,10 +99,6 @@ func executionMessage(algorithmId, inputFilenames, outputFilename, imageIds stri
 //
 //}
 //
-//func List() ([]beachfront.Job, error) {
-//
-//}
-//
 //func retrieveFileContents(dataId string) ([]byte, error) {
 //	contentType, body := serialize(buildFileRetrievalMessage(dataId))
 //	response, err := http.Post(FileEndpoint, contentType, body)
@@ -170,10 +142,53 @@ func executionMessage(algorithmId, inputFilenames, outputFilename, imageIds stri
 //	return
 //}
 //
-//func generateJobResultFilename() string {
-//	return fmt.Sprintf("Beachfront_%s.geojson", time.Now().UTC().Format("20060102.150405.99999"))
-//}
 //
 //func (e TooManyAttemptsError) Error() string {
 //	return fmt.Sprintf("TooManyAttemptsError: (max=%d)", e.Count)
 //}
+
+//
+// Internals
+//
+
+func generateOutputFilename() string {
+	return fmt.Sprintf("Beachfront_%s.geojson", time.Now().UTC().Format("20060102.150405.99999"))
+}
+
+func newExecutionMessage(algorithmId, inputFilenames, outputFilename, imageIds string) piazza.Message {
+	type (
+		output struct {
+			MimeType string `json:"mimeType"`
+			Type     string `json:"type"`
+		}
+		value struct {
+			Type    string `json:"type"`
+			Content string `json:"content"`
+		}
+		inputs struct {
+			Command        value `json:"cmd"`
+			InputFiles     value `json:"inFiles"`
+			OutputFilename value `json:"outGeoJson"`
+		}
+		data struct {
+			DataInputs  inputs `json:"dataInputs"`
+			DataOutput  []output `json:"dataOutput"`
+			AlgorithmId string `json:"serviceId"`
+		}
+	)
+
+	command := fmt.Sprintf("shoreline --image %s --projection geo-scaled --threshold 0.5 --tolerance 0 %s", inputFilenames, outputFilename)
+
+	return piazza.Message{
+		"execute-service",
+		data{
+			inputs{
+				value{"urlparameter", command},
+				value{"urlparameter", imageIds},
+				value{"urlparameter", outputFilename},
+			},
+			[]output{{"application/json", "text"}},
+			algorithmId,
+		},
+	}
+}

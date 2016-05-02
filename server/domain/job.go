@@ -17,30 +17,30 @@ type Job struct {
     Status         string `json:"status"`
 }
 
-func (self Job) ImageIDs() string {
+func (j Job) ImageIDs() string {
     ids := make([]string, 0)
-    for _, image := range self.Images {
+    for _, image := range j.Images {
         ids = append(ids, image.ID)
     }
     return strings.Join(ids, ",")
 }
 
-func (self Job) ImageFilenames() string {
+func (j Job) ImageFilenames() string {
     filenames := make([]string, 0)
-    for _, image := range self.Images {
+    for _, image := range j.Images {
         filenames = append(filenames, image.Filename)
     }
     return strings.Join(filenames, ",")
 }
 
-func (self Job) AddImage(id, filename string) {
-    self.Images = append(self.Images, Image{ID: id, Filename: filename})
+func (j Job) AddImage(id, filename string) {
+    j.Images = append(j.Images, Image{ID: id, Filename: filename})
 }
 
-func (self Job) ValidateForSubmission() error {
-    if self.Name == "" { return ExtractionError{"`JobName` must not be blank"} }
-    if self.AlgorithmID == "" { return ExtractionError{"`AlgorithmID` must not be blank"} }
-    if self.AlgorithmName == "" { return ExtractionError{"`AlgorithmName` must not be blank"} }
-    if len(self.Images) == 0 { return ExtractionError{"`Images` must not be empty"} }
+func (j Job) Validate() error {
+    if j.Name == "" { return ExtractionError{"`JobName` must not be blank"} }
+    if j.AlgorithmID == "" { return ExtractionError{"`AlgorithmID` must not be blank"} }
+    if j.AlgorithmName == "" { return ExtractionError{"`AlgorithmName` must not be blank"} }
+    if len(j.Images) == 0 { return ExtractionError{"`Images` must not be empty"} }
     return nil
 }
