@@ -9,12 +9,6 @@ import (
 	"time"
 )
 
-func TestNewExecutionMessage_FormatsMessageProperly(t *testing.T) {
-	message := newExecutionMessage("test-algorithm-id", "TEST-IMG-1.TIF,TEST-IMG-2.TIF", "test-output-filename.geojson", "test-image-id1,test-image-id2")
-	serialized, _ := json.Marshal(message)
-	assert.JSONEq(t, string(serialized), PZ_EXECUTION_MESSAGE)
-}
-
 func TestList(t *testing.T) {
 	setup()
 	defer teardown()
@@ -32,35 +26,40 @@ func TestList_ReturnsCachedJobs(t *testing.T) {
 	assert.Len(t, jobs, 1)
 }
 
+func TestNewExecutionMessage_FormatsMessageProperly(t *testing.T) {
+	message := newExecutionMessage("test-algorithm-id", "TEST-IMG-1.TIF,TEST-IMG-2.TIF", "test-output-filename.geojson", "test-image-id1,test-image-id2")
+	serialized, _ := json.Marshal(message)
+	assert.JSONEq(t, string(serialized), PZ_EXECUTION_MESSAGE)
+}
+
 //
 // Helpers
 //
 
 func setup() {
-	piazza.Initialize("http://m")
 	Initialize()
 }
 
 func teardown() {
-	piazza.Reset()
 	Reset()
 }
 
-func newMockJob() *beachfront.Job {
-	return &beachfront.Job{
+func newJob() beachfront.Job {
+	return beachfront.Job{
 		CreatedOn:     time.Now(),
 		AlgorithmID:   "test-algorithm-id",
 		AlgorithmName: "test-algorithm-name",
 		Name:          "test-name",
 		//Images: []beachfront.Image{}
 		ResultFilename: "test-output-filename.geojson",
-		ResultID:       "test-resultid",
-		Status:         "test-status",
+		//ResultID:       "test-resultid",
+		//Status:         "test-status",
 	}
 }
 
 func populateCache() {
-	cache["test"] = newMockJob()
+	job := newJob()
+	cache["test"] = &job
 }
 
 //
