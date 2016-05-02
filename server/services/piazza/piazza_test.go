@@ -24,7 +24,7 @@ func TestGetFile(t *testing.T) {
 	setup()
 	defer teardown()
 
-	httpmock.RegisterResponder("GET", "http://mock-gateway/file/test-id",
+	httpmock.RegisterResponder("GET", "http://m/file/test-id",
 		httpmock.NewStringResponder(200, PZ_FILE_RESPONSE))
 
 	_, err := GetFile("test-id")
@@ -35,7 +35,7 @@ func TestGetFile_HandlesHttpErrorsGracefully(t *testing.T) {
 	setup()
 	defer teardown()
 
-	httpmock.RegisterResponder("GET", "http://mock-gateway/file/test-id",
+	httpmock.RegisterResponder("GET", "http://m/file/test-id",
 		httpmock.NewStringResponder(500, PZ_FILE_ERROR_RESPONSE))
 
 	contents, err := GetFile("test-id")
@@ -47,7 +47,7 @@ func TestGetFile_DoesNotModifyPayload(t *testing.T) {
 	setup()
 	defer teardown()
 
-	httpmock.RegisterResponder("GET", "http://mock-gateway/file/test-id",
+	httpmock.RegisterResponder("GET", "http://m/file/test-id",
 		httpmock.NewStringResponder(200, PZ_FILE_RESPONSE))
 
 	contents, _ := GetFile("test-id")
@@ -58,7 +58,7 @@ func TestGetServices(t *testing.T) {
 	defer teardown()
 	setup()
 
-	httpmock.RegisterResponder("GET", "http://mock-gateway/service",
+	httpmock.RegisterResponder("GET", "http://m/service",
 		httpmock.NewStringResponder(200, PZ_SERVICE_RESPONSE))
 
 	services, err := GetServices(SearchParameters{"test-pattern"})
@@ -70,7 +70,7 @@ func TestGetServices_DeserializesMetadata(t *testing.T) {
 	setup()
 	defer teardown()
 
-	httpmock.RegisterResponder("GET", "http://mock-gateway/service",
+	httpmock.RegisterResponder("GET", "http://m/service",
 		httpmock.NewStringResponder(200, PZ_SERVICE_RESPONSE))
 
 	services, _ := GetServices(SearchParameters{"test-pattern"})
@@ -84,7 +84,7 @@ func TestGetServices_SpecifiesCriteria(t *testing.T) {
 	setup()
 	defer teardown()
 
-	httpmock.RegisterResponder("GET", "http://mock-gateway/service",
+	httpmock.RegisterResponder("GET", "http://m/service",
 		func(req *http.Request) (*http.Response, error) {
 			assert.Equal(t, req.URL.Query().Get("keyword"), "test-pattern")
 			return httpmock.NewStringResponse(200, PZ_SERVICE_RESPONSE), nil
@@ -97,7 +97,7 @@ func TestGetServices_HandlesHttpErrorsGracefully(t *testing.T) {
 	setup()
 	defer teardown()
 
-	httpmock.RegisterResponder("GET", "http://mock-gateway/service",
+	httpmock.RegisterResponder("GET", "http://m/service",
 		httpmock.NewStringResponder(500, PZ_FILE_ERROR_RESPONSE))
 
 	services, err := GetServices(SearchParameters{"test-pattern"})
@@ -109,7 +109,7 @@ func TestGetStatus(t *testing.T) {
 	setup()
 	defer teardown()
 
-	httpmock.RegisterResponder("GET", "http://mock-gateway/job/test-id",
+	httpmock.RegisterResponder("GET", "http://m/job/test-id",
 		httpmock.NewStringResponder(200, PZ_JOB_RUNNING_RESPONSE))
 
 	status, err := GetStatus("test-id")
@@ -121,7 +121,7 @@ func TestGetStatus_JobRunning(t *testing.T) {
 	setup()
 	defer teardown()
 
-	httpmock.RegisterResponder("GET", "http://mock-gateway/job/test-id",
+	httpmock.RegisterResponder("GET", "http://m/job/test-id",
 		httpmock.NewStringResponder(200, PZ_JOB_RUNNING_RESPONSE))
 
 	status, _ := GetStatus("test-id")
@@ -135,7 +135,7 @@ func TestGetStatus_JobSucceeded(t *testing.T) {
 	setup()
 	defer teardown()
 
-	httpmock.RegisterResponder("GET", "http://mock-gateway/job/test-id",
+	httpmock.RegisterResponder("GET", "http://m/job/test-id",
 		httpmock.NewStringResponder(200, PZ_JOB_SUCCESS_RESPONSE))
 
 	status, _ := GetStatus("test-id")
@@ -149,7 +149,7 @@ func TestGetStatus_JobFailed(t *testing.T) {
 	setup()
 	defer teardown()
 
-	httpmock.RegisterResponder("GET", "http://mock-gateway/job/test-id",
+	httpmock.RegisterResponder("GET", "http://m/job/test-id",
 		httpmock.NewStringResponder(200, PZ_JOB_ERROR_RESPONSE))
 
 	status, _ := GetStatus("test-id")
@@ -163,7 +163,7 @@ func TestGetStatus_JobNotFound(t *testing.T) {
 	setup()
 	defer teardown()
 
-	httpmock.RegisterResponder("GET", "http://mock-gateway/job/test-id",
+	httpmock.RegisterResponder("GET", "http://m/job/test-id",
 		httpmock.NewStringResponder(500, PZ_JOB_NOT_FOUND_RESPONSE))
 
 	status, err := GetStatus("test-id")
@@ -175,7 +175,7 @@ func TestGetStatus_HandlesHttpErrorsGracefully(t *testing.T) {
 	setup()
 	defer teardown()
 
-	httpmock.RegisterResponder("GET", "http://mock-gateway/job/test-id",
+	httpmock.RegisterResponder("GET", "http://m/job/test-id",
 		httpmock.NewStringResponder(500, PZ_JOB_ERROR_RESPONSE))
 
 	status, err := GetStatus("test-id")
@@ -187,7 +187,7 @@ func TestPost(t *testing.T) {
 	setup()
 	defer teardown()
 
-	httpmock.RegisterResponder("POST", "http://mock-gateway/v2/job",
+	httpmock.RegisterResponder("POST", "http://m/v2/job",
 		httpmock.NewStringResponder(200, PZ_JOB_CREATED_RESPONSE))
 
 	id, err := Post(Message{Type: "test-type", Data: "test-data"})
@@ -199,7 +199,7 @@ func TestPost_ProperlySerializesMessage(t *testing.T) {
 	setup()
 	defer teardown()
 
-	httpmock.RegisterResponder("POST", "http://mock-gateway/v2/job",
+	httpmock.RegisterResponder("POST", "http://m/v2/job",
 		func(req *http.Request) (*http.Response, error) {
 			body, _ := ioutil.ReadAll(req.Body)
 			assert.Equal(t, req.Header.Get("content-type"), "application/json")
@@ -214,7 +214,7 @@ func TestPost_HandlesHttpErrorsGracefully(t *testing.T) {
 	setup()
 	defer teardown()
 
-	httpmock.RegisterResponder("POST", "http://mock-gateway/v2/job",
+	httpmock.RegisterResponder("POST", "http://m/v2/job",
 		httpmock.NewStringResponder(500, PZ_CREATE_JOB_ERROR_RESPONSE))
 
 	id, err := Post(Message{Type: "test-type", Data: "test-data"})
@@ -227,7 +227,7 @@ func TestPost_HandlesHttpErrorsGracefully(t *testing.T) {
 //
 
 func setup() {
-	Initialize("http://mock-gateway")
+	Initialize("http://m")
 	httpmock.Activate()
 }
 
