@@ -41,11 +41,11 @@ func NewClient(gateway string) Client {
 		gateway: strings.TrimRight(gateway, "/")}
 }
 
-func (c *Client) Gateway() string {
+func (c Client) Gateway() string {
 	return c.gateway
 }
 
-func (c *Client) GetFile(id string) ([]byte, error) {
+func (c Client) GetFile(id string) ([]byte, error) {
 	url := fmt.Sprintf("%s/file/%s", c.gateway, id)
 	response, err := http.Get(url)
 	if err != nil {
@@ -59,7 +59,7 @@ func (c *Client) GetFile(id string) ([]byte, error) {
 	return ioutil.ReadAll(response.Body)
 }
 
-func (c *Client) GetServices(criteria SearchParameters) ([]Service, error) {
+func (c Client) GetServices(criteria SearchParameters) ([]Service, error) {
 	params := url.Values{}
 	params.Set("keyword", criteria.Pattern)
 	params.Set("per_page", "100")
@@ -88,7 +88,7 @@ func (c *Client) GetServices(criteria SearchParameters) ([]Service, error) {
 	return envelope.Data, nil
 }
 
-func (c *Client) GetStatus(id string) (*Status, error) {
+func (c Client) GetStatus(id string) (*Status, error) {
 	url := fmt.Sprintf("%s/job/%s", c.gateway, id)
 
 	response, err := http.Get(url)
@@ -118,7 +118,7 @@ func (c *Client) GetStatus(id string) (*Status, error) {
 	return status, nil
 }
 
-func (c *Client) Post(message Message) (jobId string, err error) {
+func (c Client) Post(message Message) (jobId string, err error) {
 	url := fmt.Sprintf("%s/v2/job", c.gateway)
 
 	payload, _ := json.Marshal(message)
