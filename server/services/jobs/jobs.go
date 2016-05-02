@@ -36,14 +36,28 @@ func List() []beachfront.Job {
 		return jobs
 }
 
-//func GetCachedBeachfrontJobs() []beachfront.Job {
-//	jobs := make([]beachfront.Job, 0)
-//	for _, job := range jobCache {
-//		jobs = append(jobs, *job)
-//	}
-//	return jobs
-//}
-//
+func Execute(client piazza.JobSubmitter, job beachfront.Job) (id string, err error) {
+	logger := utils.ContextLogger{"Execute"}
+
+	job.CreatedOn = time.Now()
+	job.ResultFilename = generateOutputFilename()
+
+	message := newExecutionMessage(job.AlgorithmID, job.ImageFilenames(), job.ResultFilename, job.ImageIDs())
+
+	id, err = client.Post(message)
+	if err != nil {
+		logger.Error("%s: %s", err, job)
+		return
+	}
+
+	job.ID = id
+	job.Status = piazza.StatusRunning
+	logger.Info("[job:%s] started", id)
+	//go dispatchJobSubmissionFollowup(&job)
+
+	return
+}
+
 //func FetchGeoJSON(resultId string) ([]byte, error) {
 //	logger := utils.ContextLogger{"FetchGeoJSON"}
 //
@@ -82,22 +96,6 @@ func List() []beachfront.Job {
 //
 //}
 //
-//func Execute(job beachfront.Job) (id string, err error) {
-//	job.CreatedOn = time.Now()
-//	job.ResultFilename = generateJobResultFilename()
-//	logger := utils.ContextLogger{"SubmitJob"}
-//	message := buildSubmitMessage(job.AlgorithmID, job.ImageFilenames(), job.ResultFilename, job.ImageIDs())
-//	if response, err := sendMessage(JobEndpoint, message); err != nil {
-//		logger.Error("%s: %s", err, job)
-//	} else {
-//		job.ID = response.JobID
-//		job.Status = Submitted
-//		logger.Info("[job:%s] started", job.ID)
-//		go dispatchJobSubmissionFollowup(&job)
-//	}
-//	return
-//
-//}
 //
 //func retrieveFileContents(dataId string) ([]byte, error) {
 //	contentType, body := serialize(buildFileRetrievalMessage(dataId))

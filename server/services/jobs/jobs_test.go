@@ -9,6 +9,17 @@ import (
 	"time"
 )
 
+func TestExecute(t *testing.T) {
+	setup()
+	defer teardown()
+
+	client := _submitter{IDToReturn: "test-id"}
+	job := newJob()
+	id, err := Execute(client, job)
+	assert.Nil(t, err)
+	assert.Equal(t, "test-id", id)
+}
+
 func TestList(t *testing.T) {
 	setup()
 	defer teardown()
