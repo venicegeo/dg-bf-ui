@@ -16,6 +16,10 @@ func Initialize(_gateway string) {
 	gateway = strings.TrimRight(_gateway, "/")
 }
 
+func Reset() {
+	gateway = ""
+}
+
 func GetFile(id string) ([]byte, error) {
 	url := fmt.Sprintf("%s/file/%s", gateway, id)
 	response, err := http.Get(url)

@@ -232,7 +232,7 @@ func setup() {
 }
 
 func teardown() {
-	gateway = ""
+	Reset()
 	httpmock.DeactivateAndReset()
 }
 
