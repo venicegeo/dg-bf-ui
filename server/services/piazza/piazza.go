@@ -10,18 +10,43 @@ import (
 	"strings"
 )
 
-var gateway string
+type (
+	Client struct {
+		FileRetriever
+		ServiceRetriever
+		JobRetriever
+		JobSubmitter
+		gateway string
+	}
 
-func Initialize(_gateway string) {
-	gateway = strings.TrimRight(_gateway, "/")
+	FileRetriever interface {
+		GetFile(id string) ([]byte, error)
+	}
+
+	ServiceRetriever interface {
+		GetServices(criteria SearchParameters) ([]Service, error)
+	}
+
+	JobRetriever interface {
+		GetStatus(id string) (*Status, error)
+	}
+
+	JobSubmitter interface {
+		Post(message Message) (jobId string, err error)
+	}
+)
+
+func NewClient(gateway string) Client {
+	return Client{
+		gateway: strings.TrimRight(gateway, "/")}
 }
 
-func Reset() {
-	gateway = ""
+func (c *Client) Gateway() string {
+	return c.gateway
 }
 
-func GetFile(id string) ([]byte, error) {
-	url := fmt.Sprintf("%s/file/%s", gateway, id)
+func (c *Client) GetFile(id string) ([]byte, error) {
+	url := fmt.Sprintf("%s/file/%s", c.gateway, id)
 	response, err := http.Get(url)
 	if err != nil {
 		return nil, err
@@ -34,12 +59,12 @@ func GetFile(id string) ([]byte, error) {
 	return ioutil.ReadAll(response.Body)
 }
 
-func GetServices(criteria SearchParameters) ([]Service, error) {
+func (c *Client) GetServices(criteria SearchParameters) ([]Service, error) {
 	params := url.Values{}
 	params.Set("keyword", criteria.Pattern)
 	params.Set("per_page", "100")
 
-	url := fmt.Sprintf("%s/service?%s", gateway, params.Encode())
+	url := fmt.Sprintf("%s/service?%s", c.gateway, params.Encode())
 	response, err := http.Get(url)
 	if err != nil {
 		return nil, err
@@ -63,8 +88,8 @@ func GetServices(criteria SearchParameters) ([]Service, error) {
 	return envelope.Data, nil
 }
 
-func GetStatus(id string) (*Status, error) {
-	url := fmt.Sprintf("%s/job/%s", gateway, id)
+func (c *Client) GetStatus(id string) (*Status, error) {
+	url := fmt.Sprintf("%s/job/%s", c.gateway, id)
 
 	response, err := http.Get(url)
 	if err != nil {
@@ -93,8 +118,8 @@ func GetStatus(id string) (*Status, error) {
 	return status, nil
 }
 
-func Post(message Message) (jobId string, err error) {
-	url := fmt.Sprintf("%s/v2/job", gateway)
+func (c *Client) Post(message Message) (jobId string, err error) {
+	url := fmt.Sprintf("%s/v2/job", c.gateway)
 
 	payload, _ := json.Marshal(message)
 	response, err := http.Post(url, "application/json", bytes.NewBuffer(payload))
