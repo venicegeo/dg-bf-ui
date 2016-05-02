@@ -52,7 +52,7 @@ func TestGetFile_DoesNotModifyPayload(t *testing.T) {
 
 	client := NewClient("http://m")
 	contents, _ := client.GetFile("test-id")
-	assert.Equal(t, contents, []byte(PZ_FILE_RESPONSE))
+	assert.Equal(t, []byte(PZ_FILE_RESPONSE), contents)
 }
 
 func TestGetServices(t *testing.T) {
@@ -77,10 +77,10 @@ func TestGetServices_DeserializesMetadata(t *testing.T) {
 
 	client := NewClient("http://m")
 	services, _ := client.GetServices(SearchParameters{"test-pattern"})
-	assert.Equal(t, services[0].ID, "test-id-1")
-	assert.Equal(t, services[0].ResourceMetadata.Name, "test-name")
-	assert.Equal(t, services[0].ResourceMetadata.Description, "test-description")
-	assert.Equal(t, services[0].ResourceMetadata.Availability, "test-availability")
+	assert.Equal(t, "test-id-1", services[0].ID)
+	assert.Equal(t, "test-name", services[0].ResourceMetadata.Name)
+	assert.Equal(t, "test-description", services[0].ResourceMetadata.Description)
+	assert.Equal(t, "test-availability", services[0].ResourceMetadata.Availability)
 }
 
 func TestGetServices_SpecifiesCriteria(t *testing.T) {
@@ -89,7 +89,7 @@ func TestGetServices_SpecifiesCriteria(t *testing.T) {
 
 	httpmock.RegisterResponder("GET", "http://m/service",
 		func(req *http.Request) (*http.Response, error) {
-			assert.Equal(t, req.URL.Query().Get("keyword"), "test-pattern")
+			assert.Equal(t, "test-pattern", req.URL.Query().Get("keyword"))
 			return httpmock.NewStringResponse(200, PZ_SERVICE_RESPONSE), nil
 		})
 
@@ -132,8 +132,8 @@ func TestGetStatus_JobRunning(t *testing.T) {
 
 	client := NewClient("http://m")
 	status, _ := client.GetStatus("test-id")
-	assert.Equal(t, status.JobID, "test-id")
-	assert.Equal(t, status.Status, StatusRunning)
+	assert.Equal(t, "test-id", status.JobID)
+	assert.Equal(t, StatusRunning, status.Status)
 	assert.Empty(t, status.Result.DataID)
 	assert.Empty(t, status.Message)
 }
@@ -147,8 +147,8 @@ func TestGetStatus_JobSucceeded(t *testing.T) {
 
 	client := NewClient("http://m")
 	status, _ := client.GetStatus("test-id")
-	assert.Equal(t, status.JobID, "test-id")
-	assert.Equal(t, status.Status, StatusSuccess)
+	assert.Equal(t, "test-id", status.JobID)
+	assert.Equal(t, StatusSuccess, status.Status)
 	assert.Equal(t, status.Result.DataID, "test-data-id")
 	assert.Empty(t, status.Message)
 }
@@ -162,8 +162,8 @@ func TestGetStatus_JobFailed(t *testing.T) {
 
 	client := NewClient("http://m")
 	status, _ := client.GetStatus("test-id")
-	assert.Equal(t, status.JobID, "test-id")
-	assert.Equal(t, status.Status, StatusError)
+	assert.Equal(t, "test-id", status.JobID)
+	assert.Equal(t, StatusError, status.Status)
 	assert.Empty(t, status.Message)
 	assert.Empty(t, status.Result.DataID)
 }
@@ -203,7 +203,7 @@ func TestPost(t *testing.T) {
 
 	client := NewClient("http://m")
 	id, err := client.Post(Message{Type: "test-type", Data: "test-data"})
-	assert.Equal(t, id, "test-id")
+	assert.Equal(t, "test-id", id)
 	assert.Nil(t, err)
 }
 
@@ -214,8 +214,8 @@ func TestPost_ProperlySerializesMessage(t *testing.T) {
 	httpmock.RegisterResponder("POST", "http://m/v2/job",
 		func(req *http.Request) (*http.Response, error) {
 			body, _ := ioutil.ReadAll(req.Body)
-			assert.Equal(t, req.Header.Get("content-type"), "application/json")
-			assert.Equal(t, string(body), `{"type":"test-type","data":"test-data"}`)
+			assert.Equal(t, "application/json", req.Header.Get("content-type"), )
+			assert.Equal(t, `{"type":"test-type","data":"test-data"}`, string(body))
 			return httpmock.NewStringResponse(200, PZ_JOB_CREATED_RESPONSE), nil
 		})
 
