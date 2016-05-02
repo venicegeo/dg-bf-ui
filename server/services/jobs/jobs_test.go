@@ -24,13 +24,14 @@ func TestExecute_SubmitsProperlyFormattedMessage(t *testing.T) {
 	setup()
 	defer teardown()
 
-	client := spy{post: func(message piazza.Message) (string, error) {
-		serialized, _ := json.Marshal(message)
-		pattern := regexp.MustCompile(`Beachfront_[^"]+\.geojson`)
-		assert.JSONEq(t, PZ_EXECUTION_MESSAGE, pattern.ReplaceAllString(string(serialized), "test-output-filename.geojson"))
+	client := spy{
+		post: func(message piazza.Message) (string, error) {
+			serialized, _ := json.Marshal(message)
+			pattern := regexp.MustCompile(`Beachfront_[^"]+\.geojson`)
+			assert.JSONEq(t, PZ_EXECUTION_MESSAGE, pattern.ReplaceAllString(string(serialized), "test-output-filename.geojson"))
 
-		return "test-id", nil
-	}}
+			return "test-id", nil
+		}}
 
 	Execute(client, newJob())
 }
@@ -45,14 +46,15 @@ func TestExecute_Dispatches(t *testing.T) {
 
 	statusRequested := expectedIn(10 * time.Millisecond)
 
-	client := spy{get: func(id string) (*piazza.Status, error) {
-		statusRequested <-true
-		return &piazza.Status{
-			Type: "status",
-			Status: piazza.StatusSuccess,
-			Result: struct{ DataID string }{"test-result-id"},
-		}, nil
-	}}
+	client := spy{
+		get: func(id string) (*piazza.Status, error) {
+			statusRequested <- true
+			return &piazza.Status{
+				Type:   "status",
+				Status: piazza.StatusSuccess,
+				Result: struct{ DataID string }{"test-result-id"},
+			}, nil
+		}}
 
 	Execute(client, newJob())
 
@@ -84,7 +86,7 @@ func expectedIn(duration time.Duration) chan bool {
 	happened := make(chan bool)
 	go func() {
 		time.Sleep(duration)
-		happened <-false
+		happened <- false
 	}()
 	return happened
 }
@@ -120,7 +122,7 @@ type spy struct {
 	piazza.JobSubmitter
 	piazza.JobRetriever
 	post func(piazza.Message) (string, error)
-	get func(string) (*piazza.Status, error)
+	get  func(string) (*piazza.Status, error)
 }
 
 func (s spy) Post(message piazza.Message) (string, error) {
@@ -135,7 +137,7 @@ func (s spy) GetStatus(id string) (*piazza.Status, error) {
 		return s.get(id)
 	}
 	return &piazza.Status{
-		Type: "status",
+		Type:   "status",
 		Status: piazza.StatusSuccess,
 		Result: struct{ DataID string }{"test-result-id"},
 	}, nil
