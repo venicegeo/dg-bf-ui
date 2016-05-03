@@ -64,7 +64,21 @@ func TestGetResult_GracefullyHandlesFunkyMetadata(t *testing.T) {
 	assert.Error(t, err)
 	assert.Nil(t, data)
 	assert.Equal(t, 1, timesCalled)
+}
 
+func TestGetResult_GracefullyHandlesAbsentMetadata(t *testing.T) {
+	timesCalled := 0
+
+	client := fileSpy{
+		get: func(id string) ([]byte, error) {
+			timesCalled += 1
+			return []byte(`[]`), nil
+		}}
+
+	data, err := Get(client, "test-yields-absent-metadata")
+	assert.Error(t, err)
+	assert.Nil(t, data)
+	assert.Equal(t, 1, timesCalled)
 }
 
 //
