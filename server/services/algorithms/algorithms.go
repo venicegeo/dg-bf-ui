@@ -96,7 +96,7 @@ func convert(services []piazza.Service) []beachfront.Algorithm {
 func fetch(client client) ([]beachfront.Algorithm, error) {
 	logger := utils.ContextLogger{"fetch"}
 
-	services, err := client.GetServices(piazza.SearchParameters{Pattern: "^(pzsvc-ossim|BF_Algo)$"})
+	services, err := client.GetServices(piazza.SearchParameters{Pattern: "^BF_Algo_"})
 	if err != nil {
 		err := ServiceTranslationError{"Fetch failed: " + err.Error()}
 		logger.Error("%s", err)
