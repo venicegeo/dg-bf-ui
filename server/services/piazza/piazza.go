@@ -53,7 +53,7 @@ func (c Client) GetFile(id string) ([]byte, error) {
 	}
 
 	if response.StatusCode != http.StatusOK {
-		return nil, HttpError{response}
+		return nil, ErrHttp{response}
 	}
 
 	return ioutil.ReadAll(response.Body)
@@ -71,7 +71,7 @@ func (c Client) GetServices(criteria SearchParameters) ([]Service, error) {
 	}
 
 	if response.StatusCode != http.StatusOK {
-		return nil, HttpError{response}
+		return nil, ErrHttp{response}
 	}
 
 	contents, err := ioutil.ReadAll(response.Body)
@@ -97,7 +97,7 @@ func (c Client) GetStatus(id string) (*Status, error) {
 	}
 
 	if response.StatusCode != http.StatusOK {
-		return nil, HttpError{response}
+		return nil, ErrHttp{response}
 	}
 
 	contents, err := ioutil.ReadAll(response.Body)
@@ -112,7 +112,7 @@ func (c Client) GetStatus(id string) (*Status, error) {
 	}
 
 	if status.Status == "" || status.Type == "error" {
-		return nil, InvalidResponseError{contents, "Status is ambiguous"}
+		return nil, ErrInvalidResponse{contents, "Status is ambiguous"}
 	}
 
 	return status, nil
@@ -128,7 +128,7 @@ func (c Client) Post(message Message) (jobId string, err error) {
 	}
 
 	if response.StatusCode != http.StatusOK {
-		return "", HttpError{response}
+		return "", ErrHttp{response}
 	}
 
 	contents, err := ioutil.ReadAll(response.Body)
@@ -146,7 +146,7 @@ func (c Client) Post(message Message) (jobId string, err error) {
 
 	jobId = metadata.JobID
 	if jobId == "" {
-		return "", InvalidResponseError{contents, "No job ID assigned"}
+		return "", ErrInvalidResponse{contents, "No job ID assigned"}
 	}
 
 	return

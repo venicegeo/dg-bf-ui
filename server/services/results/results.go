@@ -31,7 +31,7 @@ func Get(client client, resultId string) ([]byte, error) {
 	// Follow the trail to the GeoJSON
 	geojsonId := extractFileId(*metadata)
 	if geojsonId == "" {
-		err := RetrievalError{"Could not find GeoJSON file in metadata"}
+		err := ErrRetrieval{"Could not find GeoJSON file in metadata"}
 		logger.Error("<%s> %s", resultId, err)
 		return nil, err
 	}
@@ -39,7 +39,7 @@ func Get(client client, resultId string) ([]byte, error) {
 	logger.Info("<%s> Fetching GeoJSON", resultId)
 	contents, err := client.GetFile(geojsonId)
 	if err != nil {
-		err := RetrievalError{"Could not fetch GeoJSON from server: " + err.Error()}
+		err := ErrRetrieval{"Could not fetch GeoJSON from server: " + err.Error()}
 		logger.Error("<%s> %s", resultId, err)
 		return nil, err
 	}
@@ -64,14 +64,14 @@ func extractFileId(metadata metadata) string {
 func fetchMetadata(client client, id string) (*metadata, error) {
 	raw, err := client.GetFile(id)
 	if err != nil {
-		return nil, RetrievalError{"Could not fetch metadata: " + err.Error()}
+		return nil, ErrRetrieval{"Could not fetch metadata: " + err.Error()}
 	}
 
 	// HACK HACK HACK HACK HACK HACK HACK HACK HACK HACK HACK HACK
 	var __hackaroundFor2610__ []string
 	err = json.Unmarshal(raw, &__hackaroundFor2610__)
 	if err != nil || len(__hackaroundFor2610__) == 0 {
-		return nil, MetadataParsingError{err, raw}
+		return nil, ErrMetadataParsing{err, raw}
 	}
 	raw = []byte(__hackaroundFor2610__[0]) // FIXME - refer to #2610
 	// HACK HACK HACK HACK HACK HACK HACK HACK HACK HACK HACK HACK
@@ -79,7 +79,7 @@ func fetchMetadata(client client, id string) (*metadata, error) {
 	var metadata *metadata
 	err = json.Unmarshal(raw, &metadata)
 	if err != nil {
-		return nil, MetadataParsingError{err, raw}
+		return nil, ErrMetadataParsing{err, raw}
 	}
 
 	return metadata, nil
@@ -90,19 +90,19 @@ func fetchMetadata(client client, id string) (*metadata, error) {
 //
 
 type (
-	MetadataParsingError struct {
+	ErrMetadataParsing struct {
 		OriginalError error
 		Raw           []byte
 	}
-	RetrievalError struct {
+	ErrRetrieval struct {
 		Message string
 	}
 )
 
-func (e MetadataParsingError) Error() string {
-	return fmt.Sprintf("MetadataError: (%s) %s", e.OriginalError, e.Raw)
+func (e ErrMetadataParsing) Error() string {
+	return fmt.Sprintf("ErrMetadataParsing: (%s) %s", e.OriginalError, e.Raw)
 }
 
-func (e RetrievalError) Error() string {
-	return fmt.Sprintf("RetrievalError: %s", e.Message)
+func (e ErrRetrieval) Error() string {
+	return fmt.Sprintf("ErrRetrieval: %s", e.Message)
 }

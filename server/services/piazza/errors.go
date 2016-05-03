@@ -6,20 +6,20 @@ import (
 )
 
 type (
-	HttpError struct {
+	ErrHttp struct {
 		Response *http.Response
 	}
 
-	InvalidResponseError struct {
+	ErrInvalidResponse struct {
 		Contents []byte
 		Message string
 	}
 )
 
-func (e HttpError) Error() string {
-	return fmt.Sprintf("HttpError: (code=%d)", e.Response.StatusCode)
+func (e ErrHttp) Error() string {
+	return fmt.Sprintf("ErrHttp: (code=%d)", e.Response.StatusCode)
 }
 
-func (e InvalidResponseError) Error() string {
-	return fmt.Sprintf("InvalidResponseError: %s (%s)", e.Message, e.Contents)
+func (e ErrInvalidResponse) Error() string {
+	return fmt.Sprintf("ErrInvalidResponse: %s (%s)", e.Message, e.Contents)
 }

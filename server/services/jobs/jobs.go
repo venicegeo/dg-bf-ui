@@ -123,9 +123,9 @@ func dispatch(client piazza.JobRetriever, job *beachfront.Job) {
 			job.ResultID = status.Result.DataID
 			return
 		case status.Status == piazza.StatusError:
-			err = ExecutionError{status.Message}
+			err = ErrExecution{status.Message}
 		case attempt >= pollingMaximumAttempts:
-			err = TooManyAttemptsError{Count: pollingMaximumAttempts}
+			err = ErrTooManyAttempts{Count: pollingMaximumAttempts}
 		}
 	}
 
@@ -159,18 +159,18 @@ func newExecutionMessage(algorithmId, inputFilenames, outputFilename, imageIds s
 //
 
 type (
-	ExecutionError struct {
+	ErrExecution struct {
 		Message string
 	}
-	TooManyAttemptsError struct {
+	ErrTooManyAttempts struct {
 		Count int
 	}
 )
 
-func (e TooManyAttemptsError) Error() string {
-	return fmt.Sprintf("TooManyAttemptsError: (max=%d)", e.Count)
+func (e ErrTooManyAttempts) Error() string {
+	return fmt.Sprintf("ErrTooManyAttempts: (max=%d)", e.Count)
 }
 
-func (e ExecutionError) Error() string {
-	return fmt.Sprintf("ExecutionError: %s", e.Message)
+func (e ErrExecution) Error() string {
+	return fmt.Sprintf("ErrExecution: %s", e.Message)
 }

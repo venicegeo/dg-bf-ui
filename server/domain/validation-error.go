@@ -2,10 +2,10 @@ package beachfront
 
 import "fmt"
 
-type ValidationError struct {
+type ErrValidation struct {
 	Description string
 }
 
-func (e ValidationError) Error() string {
-	return fmt.Sprintf("ExtractionError: %s", e.Description)
+func (e ErrValidation) Error() string {
+	return fmt.Sprintf("ErrValidation: %s", e.Description)
 }

@@ -21,7 +21,7 @@ func TestGetResult_GracefullyHandlesErrorsBeforeResolution(t *testing.T) {
 	client := fileSpy{
 		get: func(id string) ([]byte, error) {
 			timesCalled += 1
-			return nil, piazza.HttpError{
+			return nil, piazza.ErrHttp{
 				&http.Response{StatusCode: http.StatusServiceUnavailable}}
 		}}
 
@@ -40,7 +40,7 @@ func TestGetResult_GracefullyHandlesErrorsAfterResolution(t *testing.T) {
 			if id != ID_GEOJSON {
 				return []byte(COMMAND_OUTPUT), nil
 			}
-			return nil, piazza.HttpError{
+			return nil, piazza.ErrHttp{
 				&http.Response{StatusCode: http.StatusServiceUnavailable}}
 		}}
 
@@ -100,7 +100,7 @@ func (f fileSpy) GetFile(id string) ([]byte, error) {
 	case ID_COMMAND_OUTPUT:
 		return []byte(COMMAND_OUTPUT), nil
 	}
-	return nil, piazza.HttpError{
+	return nil, piazza.ErrHttp{
 		&http.Response{StatusCode: http.StatusNotFound}}
 }
 

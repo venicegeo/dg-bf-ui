@@ -62,7 +62,7 @@ func TestExecute_DoesNotAddFailedSubmissionToCache(t *testing.T) {
 
 	client := spy{
 		post: func(piazza.Message) (string, error) {
-			return "", piazza.HttpError{
+			return "", piazza.ErrHttp{
 				&http.Response{StatusCode: http.StatusServiceUnavailable}}
 		}}
 
@@ -82,7 +82,7 @@ func TestExecute_GracefullyHandlesErrors(t *testing.T) {
 
 	client := spy{
 		post: func(piazza.Message) (string, error) {
-			return "", piazza.HttpError{
+			return "", piazza.ErrHttp{
 				&http.Response{StatusCode: http.StatusServiceUnavailable}}
 		},
 		get: func(id string) (*piazza.Status, error) {
@@ -163,7 +163,7 @@ func TestDispatch_HaltsOnHttpError(t *testing.T) {
 	client := spy{
 		get: func(id string) (*piazza.Status, error) {
 			timesCalled += 1
-			return nil, piazza.HttpError{
+			return nil, piazza.ErrHttp{
 				&http.Response{StatusCode: http.StatusServiceUnavailable}}
 		}}
 
@@ -187,7 +187,7 @@ func TestDispatch_HaltsOnPiazzaError(t *testing.T) {
 	client := spy{
 		get: func(id string) (*piazza.Status, error) {
 			timesCalled += 1
-			return nil, piazza.InvalidResponseError{[]byte{}, "Forced error"}
+			return nil, piazza.ErrInvalidResponse{[]byte{}, "Forced error"}
 		}}
 
 	job := newJob()
@@ -262,7 +262,7 @@ func TestDispatch_SetsJobStatusOnError(t *testing.T) {
 
 	client := spy{
 		get: func(id string) (*piazza.Status, error) {
-			return nil, piazza.InvalidResponseError{[]byte{}, "Forced error"}
+			return nil, piazza.ErrInvalidResponse{[]byte{}, "Forced error"}
 		}}
 
 	job := newJob()

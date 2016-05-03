@@ -39,16 +39,16 @@ func (j Job) AddImage(id, filename string) {
 
 func (j Job) Validate() error {
 	if j.Name == "" {
-		return ValidationError{"`JobName` must not be blank"}
+		return ErrValidation{"`JobName` must not be blank"}
 	}
 	if j.AlgorithmID == "" {
-		return ValidationError{"`AlgorithmID` must not be blank"}
+		return ErrValidation{"`AlgorithmID` must not be blank"}
 	}
 	if j.AlgorithmName == "" {
-		return ValidationError{"`AlgorithmName` must not be blank"}
+		return ErrValidation{"`AlgorithmName` must not be blank"}
 	}
 	if len(j.Images) == 0 {
-		return ValidationError{"`Images` must not be empty"}
+		return ErrValidation{"`Images` must not be empty"}
 	}
 	return nil
 }
