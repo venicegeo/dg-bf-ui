@@ -292,6 +292,32 @@ func TestList_ReturnsCachedJobs(t *testing.T) {
 // Helpers
 //
 
+type spy struct {
+		piazza.JobSubmitter
+		piazza.JobRetriever
+		post func(piazza.Message) (string, error)
+		get  func(string) (*piazza.Status, error)
+	}
+
+func (s spy) Post(message piazza.Message) (string, error) {
+	if s.post != nil {
+		return s.post(message)
+	}
+	return "test-id", nil
+}
+
+func (s spy) GetStatus(id string) (*piazza.Status, error) {
+	if s.get != nil {
+		return s.get(id)
+	}
+	return &piazza.Status{
+		JobID:  "test-id",
+		Type:   "status",
+		Status: piazza.StatusSuccess,
+		Result: struct{ DataID string }{"test-result-id"},
+	}, nil
+}
+
 func expectedIn(duration time.Duration) chan bool {
 	happened := make(chan bool)
 	go func() {
@@ -322,36 +348,6 @@ func setup() {
 
 func teardown() {
 	Reset()
-}
-
-//
-// Mocks
-//
-
-type spy struct {
-	piazza.JobSubmitter
-	piazza.JobRetriever
-	post func(piazza.Message) (string, error)
-	get  func(string) (*piazza.Status, error)
-}
-
-func (s spy) Post(message piazza.Message) (string, error) {
-	if s.post != nil {
-		return s.post(message)
-	}
-	return "test-id", nil
-}
-
-func (s spy) GetStatus(id string) (*piazza.Status, error) {
-	if s.get != nil {
-		return s.get(id)
-	}
-	return &piazza.Status{
-		JobID:  "test-id",
-		Type:   "status",
-		Status: piazza.StatusSuccess,
-		Result: struct{ DataID string }{"test-result-id"},
-	}, nil
 }
 
 //
