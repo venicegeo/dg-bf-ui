@@ -14,10 +14,10 @@ import (
 )
 
 func main() {
-    config := utils.LoadServerConfiguration()
-    configureLogging(config)
-    services.InitializeBackgroundTasks(config)
-    mountEndpoints(config)
+	config := utils.Load()
+	configureLogging(config)
+	services.Initialize(config)
+	mountEndpoints(config)
 }
 
 //
@@ -25,27 +25,19 @@ func main() {
 //
 
 func handleGetAlgorithms(context echo.Context) error {
-    algorithms, err := services.GetAlgorithms()
-    if err == nil {
-        return context.JSON(http.StatusOK, map[string][]beachfront.Algorithm{"algorithms": algorithms})
-    }
-    return echo.NewHTTPError(http.StatusServiceUnavailable, err.Error())
+	return context.JSON(http.StatusOK, map[string][]beachfront.Algorithm{"algorithms": services.GetAlgorithms()})
 }
 
 func handleGetImages(context echo.Context) error {
-    images, err := services.GetImageList()
-    if err == nil {
-        return context.JSON(http.StatusOK, map[string][]beachfront.Image{"images": images})
-    }
-    return echo.NewHTTPError(http.StatusServiceUnavailable, err.Error())
+	images, err := services.GetImageList()
+	if err == nil {
+		return context.JSON(http.StatusOK, map[string][]beachfront.Image{"images": images})
+	}
+	return echo.NewHTTPError(http.StatusServiceUnavailable, err.Error())
 }
 
 func handleGetJobs(context echo.Context) error {
-    jobs, err := services.GetJobs()
-    if err == nil {
-        return context.JSON(http.StatusOK, map[string][]beachfront.Job{"jobs": jobs})
-    }
-    return echo.NewHTTPError(http.StatusServiceUnavailable, err.Error())
+	return context.JSON(http.StatusOK, map[string][]beachfront.Job{"jobs": services.GetJobs()})
 }
 
 func handleGetResult(context echo.Context) error {
