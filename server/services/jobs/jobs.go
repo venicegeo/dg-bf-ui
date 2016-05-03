@@ -26,32 +26,6 @@ type (
 	}
 )
 
-func Initialize() {
-	cache = make(map[string]*beachfront.Job)
-}
-
-func Reset() {
-	cache = nil
-	pollingInterval = defaultPollingInterval
-	pollingMaximumAttempts = defaultPollingMaximumAttempts
-}
-
-func SetPollingInterval(value time.Duration) {
-	pollingInterval = value
-}
-
-func PollingMaxAttempts(value int) {
-	pollingMaximumAttempts = value
-}
-
-func List() []beachfront.Job {
-	jobs := make([]beachfront.Job, 0)
-	for _, job := range cache {
-		jobs = append(jobs, *job)
-	}
-	return jobs
-}
-
 func Execute(client client, job beachfront.Job) (jobId string, err error) {
 	logger := utils.ContextLogger{"Execute"}
 
@@ -73,6 +47,32 @@ func Execute(client client, job beachfront.Job) (jobId string, err error) {
 	go dispatch(client, &job)
 
 	return
+}
+
+func Initialize() {
+	cache = make(map[string]*beachfront.Job)
+}
+
+func List() []beachfront.Job {
+	jobs := make([]beachfront.Job, 0)
+	for _, job := range cache {
+		jobs = append(jobs, *job)
+	}
+	return jobs
+}
+
+func PollingMaxAttempts(value int) {
+	pollingMaximumAttempts = value
+}
+
+func Reset() {
+	cache = nil
+	pollingInterval = defaultPollingInterval
+	pollingMaximumAttempts = defaultPollingMaximumAttempts
+}
+
+func SetPollingInterval(value time.Duration) {
+	pollingInterval = value
 }
 
 //
