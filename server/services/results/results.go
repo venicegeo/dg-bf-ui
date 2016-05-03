@@ -21,26 +21,26 @@ type (
 func Get(client client, resultId string) ([]byte, error) {
 	logger := utils.ContextLogger{"GetResult"}
 
-	logger.Debug("[result:%s] Fetching metadata", resultId)
+	logger.Debug("<%s> Fetching metadata", resultId)
 	metadata, err := fetchMetadata(client, resultId)
 	if err != nil {
-		logger.Error("[result:%s] %s", resultId, err)
+		logger.Error("<%s> %s", resultId, err)
 		return nil, err
 	}
 
 	// Follow the trail to the GeoJSON
-	geojsonId := extractFileId(metadata)
+	geojsonId := extractFileId(*metadata)
 	if geojsonId == "" {
 		err := RetrievalError{"Could not find GeoJSON file in metadata"}
-		logger.Error("[result:%s] %s", resultId, err)
+		logger.Error("<%s> %s", resultId, err)
 		return nil, err
 	}
 
-	logger.Info("[result:%s] Fetching GeoJSON", resultId)
+	logger.Info("<%s> Fetching GeoJSON", resultId)
 	contents, err := client.GetFile(geojsonId)
 	if err != nil {
 		err := RetrievalError{"Could not fetch GeoJSON from server: " + err.Error()}
-		logger.Error("[result:%s] %s", resultId, err)
+		logger.Error("<%s> %s", resultId, err)
 		return nil, err
 	}
 

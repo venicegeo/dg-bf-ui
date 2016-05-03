@@ -1,35 +1,43 @@
 package utils
 
 import (
+	"flag"
 	"fmt"
 	"log"
+	"os"
 )
 
 type ContextLogger struct {
 	Name string
 }
 
-func (self ContextLogger) Debug(template string, params ...interface{}) {
-	write(self, "DEBUG", template, params...)
+var debug bool
+
+func init() {
+	flag.BoolVar(&debug, "debug", false, "Enables debugging log messages")
+	log.SetFlags(log.Lshortfile)
+	log.SetOutput(os.Stdout)
 }
 
-func (self ContextLogger) DebugBordered(template string, params ...interface{}) {
-	border := "--------------------------------------------------------------------------------"
-	write(self, "DEBUG", fmt.Sprintf("\n%s\n%s\n%s", border, template, border), params...)
+func (c ContextLogger) Debug(template string, params ...interface{}) {
+	if !debug {
+		return
+	}
+	write(c, "debug", template, params...)
 }
 
-func (self ContextLogger) Error(template string, params ...interface{}) {
-	write(self, "ERROR", template, params...)
+func (c ContextLogger) Error(template string, params ...interface{}) {
+	write(c, "error", template, params...)
 }
 
-func (self ContextLogger) Info(template string, params ...interface{}) {
-	write(self, "INFO", template, params...)
+func (c ContextLogger) Info(template string, params ...interface{}) {
+	write(c, "info", template, params...)
 }
 
-func (self ContextLogger) Warn(template string, params ...interface{}) {
-	write(self, "WARN", template, params...)
+func (c ContextLogger) Warn(template string, params ...interface{}) {
+	write(c, "warn", template, params...)
 }
 
 func write(contextLogger ContextLogger, level, template string, params ...interface{}) {
-	log.Output(3, fmt.Sprintf("%s: %-5s - %s", contextLogger.Name, level, fmt.Sprintf(template, params...)))
+	log.Output(3, fmt.Sprintf("(%s:) %-5s - %s", contextLogger.Name, level, fmt.Sprintf(template, params...)))
 }

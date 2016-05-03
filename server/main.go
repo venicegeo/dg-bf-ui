@@ -7,15 +7,12 @@ import (
 	"github.com/venicegeo/bf-ui/server/domain"
 	"github.com/venicegeo/bf-ui/server/services"
 	"github.com/venicegeo/bf-ui/server/utils"
-	"log"
 	"net/http"
-	"os"
 	"strings"
 )
 
 func main() {
 	config := utils.Load()
-	configureLogging(config)
 	services.Initialize(config)
 	mountEndpoints(config)
 }
@@ -69,11 +66,6 @@ func handlePostJob(context echo.Context) error {
 //
 // Internals
 //
-
-func configureLogging(config utils.Configuration) {
-	log.SetFlags(log.LstdFlags | log.Lshortfile | log.Lmicroseconds | log.LUTC)
-	log.SetOutput(os.Stdout)
-}
 
 func generateErrorHandler(config utils.Configuration, server *echo.Echo) echo.HTTPErrorHandler {
 	return func(originalError error, context echo.Context) {

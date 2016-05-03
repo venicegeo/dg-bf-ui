@@ -62,7 +62,7 @@ func Execute(client client, job beachfront.Job) (jobId string, err error) {
 		return
 	}
 
-	logger.Info("[job:%s] started", jobId)
+	logger.Info("<%s> Started", jobId)
 	job.ID = jobId
 	job.Status = piazza.StatusRunning
 	cache[jobId] = &job
@@ -116,7 +116,7 @@ func dispatch(client piazza.JobRetriever, job *beachfront.Job) {
 		if err != nil {
 			break
 		}
-		logger.Debug("[job:%s] poll #%d (%s)", status.JobID, attempt, status.Status)
+		logger.Debug("<%s> Poll #%d (%s)", status.JobID, attempt, status.Status)
 		switch {
 		case status.Status == piazza.StatusSuccess:
 			job.Status = status.Status
@@ -130,7 +130,7 @@ func dispatch(client piazza.JobRetriever, job *beachfront.Job) {
 	}
 
 	job.Status = piazza.StatusError
-	logger.Error("[job:%s] polling failed: %s", job.ID, err)
+	logger.Error("<%s> Polling failed: %s", job.ID, err)
 }
 
 func generateOutputFilename() string {
