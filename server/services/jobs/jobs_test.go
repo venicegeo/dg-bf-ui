@@ -246,6 +246,30 @@ func TestDispatch_SetsJobStatusOnError(t *testing.T) {
 	assert.Equal(t, job.Status, piazza.StatusError)
 }
 
+func TestDispatch_SetsJobStatusOnStatusError(t *testing.T) {
+	setup()
+	defer teardown()
+
+	SetPollingInterval(0)
+	PollingMaxAttempts(2)
+
+	client := spy{
+		get: func(id string) (*piazza.Status, error) {
+			return &piazza.Status{
+				JobID: "test-status-error",
+				Type: "status",
+				Status: piazza.StatusError,
+			},nil
+		}}
+
+	job := newJob()
+	job.ID = "test-status-error"
+	dispatch(client, &job)
+
+	time.Sleep(5 * time.Millisecond)
+	assert.Equal(t, job.Status, piazza.StatusError)
+}
+
 func TestDispatch_SetsJobStatusOnSuccess(t *testing.T) {
 	setup()
 	defer teardown()
