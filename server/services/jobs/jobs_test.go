@@ -293,11 +293,11 @@ func TestList_ReturnsCachedJobs(t *testing.T) {
 //
 
 type spy struct {
-		piazza.JobSubmitter
-		piazza.JobRetriever
-		post func(piazza.Message) (string, error)
-		get  func(string) (*piazza.Status, error)
-	}
+	piazza.JobSubmitter
+	piazza.JobRetriever
+	post func(piazza.Message) (string, error)
+	get  func(string) (*piazza.Status, error)
+}
 
 func (s spy) Post(message piazza.Message) (string, error) {
 	if s.post != nil {

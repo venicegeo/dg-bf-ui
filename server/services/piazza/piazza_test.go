@@ -214,7 +214,7 @@ func TestPost_ProperlySerializesMessage(t *testing.T) {
 	httpmock.RegisterResponder("POST", "http://m/v2/job",
 		func(req *http.Request) (*http.Response, error) {
 			body, _ := ioutil.ReadAll(req.Body)
-			assert.Equal(t, "application/json", req.Header.Get("content-type"), )
+			assert.Equal(t, "application/json", req.Header.Get("content-type"))
 			assert.Equal(t, `{"type":"test-type","data":"test-data"}`, string(body))
 			return httpmock.NewStringResponse(200, PZ_JOB_CREATED_RESPONSE), nil
 		})
