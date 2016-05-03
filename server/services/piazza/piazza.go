@@ -111,8 +111,8 @@ func (c Client) GetStatus(id string) (*Status, error) {
 		return nil, err
 	}
 
-	if status.Status == StatusError || status.Status == "" || status.Type == "error" {
-		err = JobError{status.Message}
+	if status.Status == "" || status.Type == "error" {
+		return nil, InvalidResponseError{contents, "Status is ambiguous"}
 	}
 
 	return status, nil
@@ -146,7 +146,7 @@ func (c Client) Post(message Message) (jobId string, err error) {
 
 	jobId = metadata.JobID
 	if jobId == "" {
-		return "", JobError{fmt.Sprintf("No job ID was assigned %s", contents)}
+		return "", InvalidResponseError{contents, "No job ID assigned"}
 	}
 
 	return

@@ -187,11 +187,38 @@ func TestDispatch_HaltsOnPiazzaError(t *testing.T) {
 	client := spy{
 		get: func(id string) (*piazza.Status, error) {
 			timesCalled += 1
-			return nil, piazza.JobError{"Forced error"}
+			return nil, piazza.InvalidResponseError{[]byte{}, "Forced error"}
 		}}
 
 	job := newJob()
 	job.ID = "test-throws-pz-error"
+	dispatch(client, &job)
+
+	time.Sleep(5 * time.Millisecond)
+	assert.Equal(t, 1, timesCalled)
+}
+
+func TestDispatch_HaltsOnStatusError(t *testing.T) {
+	setup()
+	defer teardown()
+
+	SetPollingInterval(0)
+	PollingMaxAttempts(2)
+
+	timesCalled := 0
+
+	client := spy{
+		get: func(id string) (*piazza.Status, error) {
+			timesCalled += 1
+			return &piazza.Status{
+				JobID: "test-status-error",
+				Type: "status",
+				Status: piazza.StatusError,
+			}, nil
+		}}
+
+	job := newJob()
+	job.ID = "test-status-error"
 	dispatch(client, &job)
 
 	time.Sleep(5 * time.Millisecond)
@@ -235,7 +262,7 @@ func TestDispatch_SetsJobStatusOnError(t *testing.T) {
 
 	client := spy{
 		get: func(id string) (*piazza.Status, error) {
-			return nil, piazza.JobError{"Forced error"}
+			return nil, piazza.InvalidResponseError{[]byte{}, "Forced error"}
 		}}
 
 	job := newJob()
