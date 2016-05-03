@@ -24,6 +24,28 @@ type (
 		piazza.JobRetriever
 		piazza.JobSubmitter
 	}
+
+	data struct {
+		DataInputs  dataInputs   `json:"dataInputs"`
+		DataOutput  []dataOutput `json:"dataOutput"`
+		AlgorithmId string       `json:"serviceId"`
+	}
+
+	dataInputs struct {
+		Command        input `json:"cmd"`
+		InputFiles     input `json:"inFiles"`
+		OutputFilename input `json:"outGeoJson"`
+	}
+
+	dataOutput struct {
+		MimeType string `json:"mimeType"`
+		Type     string `json:"type"`
+	}
+
+	input struct {
+		Type    string `json:"type"`
+		Content string `json:"content"`
+	}
 )
 
 func Execute(client client, job beachfront.Job) (jobId string, err error) {
@@ -44,6 +66,7 @@ func Execute(client client, job beachfront.Job) (jobId string, err error) {
 	job.ID = jobId
 	job.Status = piazza.StatusRunning
 	cache[jobId] = &job
+
 	go dispatch(client, &job)
 
 	return
@@ -113,38 +136,17 @@ func generateOutputFilename() string {
 }
 
 func newExecutionMessage(algorithmId, inputFilenames, outputFilename, imageIds string) piazza.Message {
-	type (
-		output struct {
-			MimeType string `json:"mimeType"`
-			Type     string `json:"type"`
-		}
-		value struct {
-			Type    string `json:"type"`
-			Content string `json:"content"`
-		}
-		inputs struct {
-			Command        value `json:"cmd"`
-			InputFiles     value `json:"inFiles"`
-			OutputFilename value `json:"outGeoJson"`
-		}
-		data struct {
-			DataInputs  inputs   `json:"dataInputs"`
-			DataOutput  []output `json:"dataOutput"`
-			AlgorithmId string   `json:"serviceId"`
-		}
-	)
-
 	command := fmt.Sprintf("shoreline --image %s --projection geo-scaled --threshold 0.5 --tolerance 0 %s", inputFilenames, outputFilename)
 
 	return piazza.Message{
 		"execute-service",
 		data{
-			inputs{
-				value{"urlparameter", command},
-				value{"urlparameter", imageIds},
-				value{"urlparameter", outputFilename},
+			dataInputs{
+				input{"urlparameter", command},
+				input{"urlparameter", imageIds},
+				input{"urlparameter", outputFilename},
 			},
-			[]output{{"application/json", "text"}},
+			[]dataOutput{{"application/json", "text"}},
 			algorithmId,
 		},
 	}

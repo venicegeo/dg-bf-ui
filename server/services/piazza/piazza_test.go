@@ -149,7 +149,7 @@ func TestGetStatus_JobSucceeded(t *testing.T) {
 	status, _ := client.GetStatus("test-id")
 	assert.Equal(t, "test-id", status.JobID)
 	assert.Equal(t, StatusSuccess, status.Status)
-	assert.Equal(t, status.Result.DataID, "test-data-id")
+	assert.Equal(t, "test-data-id", status.Result.DataID)
 	assert.Empty(t, status.Message)
 }
 
