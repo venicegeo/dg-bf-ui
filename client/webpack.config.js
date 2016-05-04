@@ -14,11 +14,11 @@ module.exports = {
       '/api/v1/*': {
         target: 'http://localhost:5000'
       },
-      '/api/stage/*': {
-        target: 'https://beachfront.stage.geointservices.io',
+      '/api/int/*': {
+        target: 'https://beachfront.int.geointservices.io',
         changeOrigin: true,
         rewrite(req) {
-          req.url = req.url.replace('/api/stage/', '/api/v1/')
+          req.url = req.url.replace('/api/int/', '/api/v1/')
         }
       }
     }
