@@ -98,7 +98,7 @@ func fetch(client client) ([]beachfront.Algorithm, error) {
 
 	services, err := client.GetServices(piazza.SearchParameters{Pattern: "^BF_Algo_"})
 	if err != nil {
-		err := ErrServiceTranslation{"Fetch failed: " + err.Error()}
+		err := ErrRetrieval{err.Error()}
 		logger.Error("%s", err)
 		return nil, err
 	}
@@ -116,11 +116,11 @@ func initializeCache() {
 //
 
 type (
-	ErrServiceTranslation struct {
+	ErrRetrieval struct {
 		Message string
 	}
 )
 
-func (e ErrServiceTranslation) Error() string {
-	return fmt.Sprintf("ErrServiceTranslation: %s", e.Message)
+func (e ErrRetrieval) Error() string {
+	return fmt.Sprintf("ErrRetrieval: %s", e.Message)
 }
