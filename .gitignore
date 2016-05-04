@@ -4,6 +4,9 @@
 # MacOS
 .DS_Store
 
+# Temporary GOPATH used for compiling
+gopath
+
 # Build Artifacts
 beachfront/
 beachfront.zip
