@@ -3,7 +3,7 @@ applications:
   host: beachfront
   path: beachfront.zip
   buildpack: binary_buildpack
-  command: ./beachfront/server -bind :8080 -piazza-gateway https://pz-gateway.${DOMAIN}
+  command: chmod 755 ./beachfront/server && ./beachfront/server
   memory: 512M
   instances: 1
   timeout: 15
