@@ -1,0 +1,40 @@
+@import '../constants/colors.less';
+@import '../constants/typography.less';
+
+@viewport { width: device-width; }
+
+html,
+body {
+  margin: 0;
+}
+
+html {
+  background-color: @ColorBackground;
+  color: @ColorText;
+  font-family: @FontBody;
+  font-weight: 200;
+  font-size: 12px;
+  line-height: 1.5em;
+}
+
+a {
+  color: @ColorLink;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: @FontHeading;
+  color: @ColorHeading;
+  font-weight: normal;
+  margin: 0;
+}
+
+a,
+button {
+  outline: none;
+  cursor: pointer;
+}

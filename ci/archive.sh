@@ -4,17 +4,27 @@ pushd `dirname $0`/.. > /dev/null
 root=$(pwd -P)
 popd > /dev/null
 
-curl -L https://bf-algo.stage.geointservices.io
+#
+# Define Variables
+#
 
-# gather some data about the repo
 source $root/ci/vars.sh
+build_target=$root/$APP
 
-#! type grails >/dev/null 2>&1 && 
-source $root/ci/grails.sh
+#
+# Perform Build
+#
 
-pushd $root/$APP > /dev/null
-  grails compile
-  grails -Dbuild.compiler=javac1.7 build-standalone $root/$APP.$EXT
-popd > /dev/null
+mkdir $build_target
 
-# Upgrade to new PZ API
+source $root/ci/build_client.sh
+source $root/ci/build_server.sh
+
+build_server $root $build_target
+build_client $root $build_target
+
+#
+# Bundle Artifacts
+#
+
+zip -mr ${APP}.${EXT} $APP
