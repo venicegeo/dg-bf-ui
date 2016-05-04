@@ -2,10 +2,10 @@ package jobs
 
 import (
 	"fmt"
+	"time"
 	"github.com/venicegeo/bf-ui/server/domain"
 	"github.com/venicegeo/bf-ui/server/services/piazza"
-	"github.com/venicegeo/bf-ui/server/utils"
-	"time"
+	"github.com/venicegeo/bf-ui/server/common/logger"
 )
 
 const (
@@ -49,7 +49,7 @@ type (
 )
 
 func Execute(client client, job beachfront.Job) (jobId string, err error) {
-	logger := utils.ContextLogger{"Execute"}
+	logger := logger.New()
 
 	job.CreatedOn = time.Now()
 	job.ResultFilename = generateOutputFilename()
@@ -103,7 +103,7 @@ func SetPollingInterval(value time.Duration) {
 //
 
 func dispatch(client piazza.JobRetriever, job *beachfront.Job) {
-	logger := utils.ContextLogger{"dispatch"}
+	logger := logger.New()
 
 	var status *piazza.Status
 	var err error

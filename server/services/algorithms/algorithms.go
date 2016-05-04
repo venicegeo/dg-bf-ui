@@ -2,10 +2,10 @@ package algorithms
 
 import (
 	"fmt"
+	"time"
 	"github.com/venicegeo/bf-ui/server/domain"
 	"github.com/venicegeo/bf-ui/server/services/piazza"
-	"github.com/venicegeo/bf-ui/server/utils"
-	"time"
+	"github.com/venicegeo/bf-ui/server/common/logger"
 )
 
 const (
@@ -27,7 +27,7 @@ var (
 func Initialize(client client, disableWorkers bool) {
 	initializeCache()
 
-	logger := utils.ContextLogger{"Initialize"}
+	logger := logger.New()
 	if disableWorkers {
 		logger.Info("Background tasks disabled by config")
 	} else {
@@ -55,8 +55,8 @@ func Reset() {
 
 func cacheWorker(client client) {
 	for {
-		logger := utils.ContextLogger{"cacheWorker"}
-		logger.Info("Updating cache")
+		logger := logger.New()
+		logger.Info("Refreshing algorithm cache")
 		if algorithms, err := fetch(client); err == nil {
 			current := make(map[string]*beachfront.Algorithm, 0)
 			for _, algorithm := range algorithms {
@@ -64,13 +64,13 @@ func cacheWorker(client client) {
 			}
 			cache = current
 		}
-		logger.Info("Next update in %d minute(s)", cacheTTL/time.Minute)
+		logger.Info("Next refresh in %d minute(s)", cacheTTL/time.Minute)
 		time.Sleep(cacheTTL)
 	}
 }
 
 func convert(services []piazza.Service) []beachfront.Algorithm {
-	logger := utils.ContextLogger{"convert"}
+	logger := logger.New()
 
 	logger.Debug("Received %d services: %s", len(services), services)
 	algorithms := make([]beachfront.Algorithm, 0)
@@ -94,7 +94,7 @@ func convert(services []piazza.Service) []beachfront.Algorithm {
 }
 
 func fetch(client client) ([]beachfront.Algorithm, error) {
-	logger := utils.ContextLogger{"fetch"}
+	logger := logger.New()
 
 	services, err := client.GetServices(piazza.SearchParameters{Pattern: "^BF_Algo_"})
 	if err != nil {

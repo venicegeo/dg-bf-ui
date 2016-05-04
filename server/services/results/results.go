@@ -3,9 +3,9 @@ package results
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/venicegeo/bf-ui/server/services/piazza"
-	"github.com/venicegeo/bf-ui/server/utils"
 	"regexp"
+	"github.com/venicegeo/bf-ui/server/services/piazza"
+	"github.com/venicegeo/bf-ui/server/common/logger"
 )
 
 type (
@@ -19,7 +19,7 @@ type (
 )
 
 func Get(client client, resultId string) ([]byte, error) {
-	logger := utils.ContextLogger{"GetResult"}
+	logger := logger.New()
 
 	logger.Debug("<%s> Fetching metadata", resultId)
 	metadata, err := fetchMetadata(client, resultId)

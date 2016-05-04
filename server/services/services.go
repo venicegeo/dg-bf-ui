@@ -8,13 +8,18 @@ import (
 	"github.com/venicegeo/bf-ui/server/services/piazza"
 	"github.com/venicegeo/bf-ui/server/services/results"
 	"github.com/venicegeo/bf-ui/server/common/configuration"
+	"github.com/venicegeo/bf-ui/server/common/logger"
 )
 
 var client piazza.Client
 
 func Initialize(config configuration.Configuration) {
+	logger := logger.New()
+
+	logger.Debug("Using Piazza Gateway: %s", config.PiazzaGateway)
 	client = piazza.NewClient(config.PiazzaGateway)
 
+	logger.Info("Initializing service modules")
 	jobs.Initialize()
 	algorithms.Initialize(client, config.DisableWorkers)
 }
