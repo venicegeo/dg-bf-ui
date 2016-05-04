@@ -1,8 +1,8 @@
-'use strict';
+'use strict'
 
-const path = require('path');
-const webpack = require('webpack');
-const HtmlWebpackPlugin = require('html-webpack-plugin');
+const path = require('path')
+const webpack = require('webpack')
+const HtmlWebpackPlugin = require('html-webpack-plugin')
 
 module.exports = {
   context: path.join(__dirname, 'app'),
@@ -18,7 +18,7 @@ module.exports = {
         target: 'https://beachfront.stage.geointservices.io',
         changeOrigin: true,
         rewrite(req) {
-          req.url = req.url.replace('/api/stage/', '/api/v1/');
+          req.url = req.url.replace('/api/stage/', '/api/v1/')
         }
       }
     }
@@ -61,9 +61,9 @@ module.exports = {
     // Polyfill just in case -- unsure what cutoff is for "modern browsers"
     new webpack.ProvidePlugin({fetch:'isomorphic-fetch'})
   ]
-};
+}
 
 if (process.env.NODE_ENV === 'production') {
-  module.exports.devtool = 'source-map';
-  module.exports.plugins.push(new webpack.optimize.UglifyJsPlugin());
+  module.exports.devtool = 'source-map'
+  module.exports.plugins.push(new webpack.optimize.UglifyJsPlugin())
 }
