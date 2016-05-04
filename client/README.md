@@ -1,4 +1,4 @@
-# prototype-bf-ui-spa
+# beachfront-client
 
 # Installing and Developing
 
