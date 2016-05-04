@@ -3,7 +3,7 @@ applications:
   host: beachfront
   path: beachfront.zip
   buildpack: binary_buildpack
-  command: ./beachfront-server
-  memory: 2G
+  command: ./beachfront-server -bind :8080
+  memory: 512M
   instances: 1
-  timeout: 180
+  timeout: 15
