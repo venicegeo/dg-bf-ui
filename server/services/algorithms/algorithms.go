@@ -24,15 +24,15 @@ var (
 	cacheTTL time.Duration
 )
 
-func Initialize(client client, enableWorker bool) {
+func Initialize(client client, disableWorkers bool) {
 	initializeCache()
 
 	logger := utils.ContextLogger{"Initialize"}
-	if enableWorker {
+	if disableWorkers {
+		logger.Info("Background tasks disabled by config")
+	} else {
 		logger.Info("Starting background tasks")
 		go cacheWorker(client)
-	} else {
-		logger.Info("Background tasks disabled by config")
 	}
 }
 

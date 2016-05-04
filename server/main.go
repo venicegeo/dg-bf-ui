@@ -6,13 +6,14 @@ import (
 	"github.com/labstack/echo/middleware"
 	"github.com/venicegeo/bf-ui/server/domain"
 	"github.com/venicegeo/bf-ui/server/services"
-	"github.com/venicegeo/bf-ui/server/utils"
+	"github.com/venicegeo/bf-ui/server/common/configuration"
 	"net/http"
 	"strings"
 )
 
 func main() {
-	config := utils.Load()
+	config := configuration.New()
+
 	services.Initialize(config)
 	mountEndpoints(config)
 }

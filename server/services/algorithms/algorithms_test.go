@@ -26,7 +26,7 @@ func TestInitialize_CanEnableWorker(t *testing.T) {
 			return nil, nil
 		}}
 
-	Initialize(client, true)
+	Initialize(client, false)
 	time.Sleep(5 * time.Millisecond)
 	assert.Equal(t, 1, timesCalled)
 }
@@ -41,7 +41,7 @@ func TestInitialize_CanDisableWorker(t *testing.T) {
 			return nil, nil
 		}}
 
-	Initialize(client, false)
+	Initialize(client, true)
 	assert.Equal(t, 0, timesCalled)
 }
 

@@ -7,16 +7,16 @@ import (
 	"github.com/venicegeo/bf-ui/server/services/jobs"
 	"github.com/venicegeo/bf-ui/server/services/piazza"
 	"github.com/venicegeo/bf-ui/server/services/results"
-	"github.com/venicegeo/bf-ui/server/utils"
+	"github.com/venicegeo/bf-ui/server/common/configuration"
 )
 
 var client piazza.Client
 
-func Initialize(config utils.Configuration) {
+func Initialize(config configuration.Configuration) {
 	client = piazza.NewClient(config.PiazzaGateway)
 
 	jobs.Initialize()
-	algorithms.Initialize(client, config.EnableBackgroundTasks)
+	algorithms.Initialize(client, config.DisableWorkers)
 }
 
 func SubmitJob(job beachfront.Job) (id string, err error) {
