@@ -6,6 +6,12 @@ import (
 	"path"
 )
 
+// Environment variables provided by Cloud Foundry
+const (
+	environmentKeyDomain = "DOMAIN"
+	environmentKeyPort   = "PORT"
+)
+
 const (
 	defaultBinding        = ":5000"
 	defaultDisableWorkers = false
@@ -15,11 +21,11 @@ const (
 )
 
 var (
-	binding        = flag.String("bind", defaultBinding, "Set the bound server address")
+	bind           = flag.String("bind", generateBinding(), "Set the bound address")
 	disableWorkers = flag.Bool("disable-workers", defaultDisableWorkers, "Disables cache workers")
 	namespace      = flag.String("namespace", defaultNamespace, "Set the root path for the API endpoints")
-	piazzaGateway  = flag.String("piazza-gateway", defaultPiazzaGateway, "Set the URL to Piazza gateway")
-	static         = flag.String("static", resolve(defaultStatic), "Set the path from which static assets will be served")
+	piazzaGateway  = flag.String("piazza-gateway", generateGateway(), "Set the URL to Piazza gateway")
+	static         = flag.String("static", generateStatic(), "Set the path from which static assets will be served")
 )
 
 func init() {
@@ -36,7 +42,7 @@ type Configuration struct {
 
 func New() Configuration {
 	return Configuration{
-		Binding:         *binding,
+		Binding:         *bind,
 		DisableWorkers:  *disableWorkers,
 		Namespace:       *namespace,
 		PiazzaGateway:   *piazzaGateway,
@@ -44,6 +50,20 @@ func New() Configuration {
 	}
 }
 
-func resolve(relativePath string) string {
-	return path.Clean(path.Join(path.Dir(os.Args[0]), relativePath))
+func generateBinding() string {
+	if port := os.Getenv(environmentKeyPort); port != "" {
+		return ":" + port
+	}
+	return defaultBinding
+}
+
+func generateGateway() string {
+	if domain := os.Getenv(environmentKeyDomain); domain != "" {
+		return "https://pz-gateway." + domain
+	}
+	return defaultPiazzaGateway
+}
+
+func generateStatic() string {
+	return path.Clean(path.Join(path.Dir(os.Args[0]), defaultStatic))
 }
