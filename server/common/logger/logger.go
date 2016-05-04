@@ -13,7 +13,7 @@ type logger struct {
 	context string
 }
 
-var debug = flag.Bool("debug", false, "Enable verbose logging")
+var debug = flag.Bool("debug", true, "Enable verbose logging")
 
 func init() {
 	log.SetFlags(log.Lshortfile)
@@ -46,5 +46,5 @@ func (l logger) Warn(template string, params ...interface{}) {
 }
 
 func (l logger) print(level, template string, params ...interface{}) {
-	log.Output(3, fmt.Sprintf("(%s) - %-5s - %s", l.context, level, fmt.Sprintf(template, params...)))
+	log.Output(3, fmt.Sprintf("(%14s) - %-5s - %s", l.context, level, fmt.Sprintf(template, params...)))
 }
