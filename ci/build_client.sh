@@ -6,9 +6,11 @@ function build_client() {
 
   pushd $root/client > /dev/null
 
+  export NODE_ENV=production
+
   npm install
   npm run test
-  NODE_ENV=production npm run build
+  npm run build
 
   mv dist $target/public
 
