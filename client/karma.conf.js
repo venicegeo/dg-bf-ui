@@ -2,7 +2,7 @@ const webpack = require('webpack')
 
 module.exports = (config) => {
   config.set({
-    browsers: [process.env.NODE_ENV === 'production' ? 'PhantomJS' : 'Chrome'],
+    browsers: ['Chrome'],
     frameworks: ['jasmine'],
     singleRun: true,
 
