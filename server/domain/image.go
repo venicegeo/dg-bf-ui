@@ -1,6 +1,7 @@
 package beachfront
 
 type Image struct {
-	ID       string `json:"id"`
-	Filename string `json:"filename"`
+	CompositeID string `json:"id"`
+	CompositeFilename string `json:"filenames"`
+	Name string `json:"name"`
 }

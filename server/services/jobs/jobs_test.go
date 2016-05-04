@@ -384,7 +384,7 @@ func newJob() beachfront.Job {
 		AlgorithmID:   "test-algorithm-id",
 		AlgorithmName: "test-algorithm-name",
 		Name:          "test-name",
-		Images:        []beachfront.Image{{"test-image-id1", "TEST-IMAGE-1.TIF"}, {"test-image-id2", "TEST-IMAGE-2.TIF"}},
+		Image:         beachfront.Image{"test-image-id1,test-image-id2", "TEST-IMAGE-1.TIF,TEST-IMAGE-2.TIF", "test-image"},
 	}
 }
 

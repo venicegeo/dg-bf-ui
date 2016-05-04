@@ -54,7 +54,7 @@ func Execute(client client, job beachfront.Job) (jobId string, err error) {
 	job.CreatedOn = time.Now()
 	job.ResultFilename = generateOutputFilename()
 
-	message := newExecutionMessage(job.AlgorithmID, job.ImageFilenames(), job.ResultFilename, job.ImageIDs())
+	message := newExecutionMessage(job.AlgorithmID, job.Image.CompositeFilename, job.ResultFilename, job.Image.CompositeID)
 
 	jobId, err = client.Post(message)
 	if err != nil {

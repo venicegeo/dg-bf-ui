@@ -23,14 +23,8 @@ export function fetchResult(id) {
 }
 
 export function fetchImageList() {
-  // return _fetch(`/algorithm/images')
-  //   .then(response => response.json())
-  return new Promise(resolve => resolve({images: [
-    {id: 'LC80090472014280LGN00_B3.TIF,LC80090472014280LGN00_B6.TIF', name: 'LC80090472014280LGN00'},
-    {id: 'LC80150442014002LGN00_B3.TIF,LC80150442014002LGN00_B6.TIF', name: 'LC80150442014002LGN00'},
-    {id: 'LC80340432016061LGN00_B3.TIF,LC80340432016061LGN00_B6.TIF', name: 'LC80340432016061LGN00'},
-    {id: 'LC82010352014217LGN00_B3.TIF,LC82010352014217LGN00_B6.TIF', name: 'LC82010352014217LGN00'}
-  ]}))
+  return _fetch('/images')
+    .then(response => response.json())
     .then(data => data.images.map(d => new Image(d)));
 }
 
@@ -41,8 +35,17 @@ export function createJob({name, algorithmId, algorithmName, parameters}) {
   // body.append('jobName', name);
   // body.append('serviceId', algorithmId);
   // parameters.forEach(param => body.append(...param));
+
+  // HACK
+  const image = {}
+  const images = parameters.find(p => p[0] === '--image')
+  if (images) {
+    image.id = images[1]
+  }
+  // HACK
+
   return _fetch('/jobs', {
-    body: JSON.stringify({name, algorithmId, algorithmName, inputs: parameters}),
+    body: JSON.stringify({name, algorithmId, algorithmName, image, inputs: parameters}),
     headers: {'content-type': 'application/json'},
     method: 'post'})
     .then(response => response.json());
@@ -74,6 +77,7 @@ class Image {
   constructor(raw) {
     this.id = raw.id;
     this.name = raw.name;
+    this.filenames = raw.filenames;
   }
 }
 

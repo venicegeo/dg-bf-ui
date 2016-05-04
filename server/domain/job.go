@@ -1,7 +1,6 @@
 package beachfront
 
 import (
-	"strings"
 	"time"
 )
 
@@ -11,30 +10,10 @@ type Job struct {
 	AlgorithmID    string    `json:"algorithmId"`
 	AlgorithmName  string    `json:"algorithmName"`
 	Name           string    `json:"name"`
-	Images         []Image   `json:"images"`
+	Image          Image     `json:"image"`
 	ResultFilename string    `json:"resultFilename,omitempty"`
 	ResultID       string    `json:"resultId,omitempty"` // Piazza Data ID
 	Status         string    `json:"status"`
-}
-
-func (j Job) ImageIDs() string {
-	ids := make([]string, 0)
-	for _, image := range j.Images {
-		ids = append(ids, image.ID)
-	}
-	return strings.Join(ids, ",")
-}
-
-func (j Job) ImageFilenames() string {
-	filenames := make([]string, 0)
-	for _, image := range j.Images {
-		filenames = append(filenames, image.Filename)
-	}
-	return strings.Join(filenames, ",")
-}
-
-func (j Job) AddImage(id, filename string) {
-	j.Images = append(j.Images, Image{ID: id, Filename: filename})
 }
 
 func (j Job) Validate() error {
@@ -47,8 +26,11 @@ func (j Job) Validate() error {
 	if j.AlgorithmName == "" {
 		return ErrValidation{"`AlgorithmName` must not be blank"}
 	}
-	if len(j.Images) == 0 {
-		return ErrValidation{"`Images` must not be empty"}
+	if j.Image.CompositeID == "" {
+		return ErrValidation{"`Image.CompositeID` must not be empty"}
+	}
+	if j.Image.CompositeFilename == "" {
+		return ErrValidation{"`Image.CompositeFilename` must not be empty"}
 	}
 	return nil
 }
