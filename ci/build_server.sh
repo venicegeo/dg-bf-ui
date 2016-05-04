@@ -14,7 +14,7 @@ function build_server() {
 
   go get -v -t ./...
   go test -v ./...
-  go build -o $target/beachfront-server
+  go build -o $target/server
 
   ###
 
