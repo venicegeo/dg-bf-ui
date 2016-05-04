@@ -48,7 +48,7 @@ export function createJob({name, algorithmId, algorithmName, parameters}) {
     body: JSON.stringify({name, algorithmId, algorithmName, image, inputs: parameters}),
     headers: {'content-type': 'application/json'},
     method: 'post'})
-    .then(response => response.json());
+    .then(response => response.text());
 }
 
 //
