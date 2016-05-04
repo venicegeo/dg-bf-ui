@@ -36,7 +36,7 @@ Check `dist` folder afterwards.
 ### Testing
 
 ```
-~/bf-ui/server$ go test
+~/bf-ui/server$ go test ./...
 ```
 
 ### Building
