@@ -4,7 +4,6 @@ module.exports = (config) => {
   config.set({
     browsers: ['Chrome'],
     frameworks: ['jasmine'],
-    singleRun: true,
 
     files: ['app/**/*test.js'],
     preprocessors: {
