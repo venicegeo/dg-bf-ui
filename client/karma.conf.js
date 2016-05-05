@@ -4,6 +4,7 @@ module.exports = (config) => {
   config.set({
     browsers: ['Chrome'],
     frameworks: ['jasmine'],
+    reporters: ['mocha'],
 
     files: ['app/**/*test.js'],
     preprocessors: {
@@ -11,7 +12,7 @@ module.exports = (config) => {
     },
 
     webpack: {
-      devtool: 'cheap-module-eval-source-map',
+      devtool: 'cheap-module-source-map',
       module: {
         loaders: [
           {pattern: /\.jsx?$/, loader: 'babel', exclude: /node_modules/},
