@@ -1,4 +1,4 @@
-export const API_NAMESPACE = process.env.API_NAMESPACE;
+export const API_NAMESPACE = process.env.API_NAMESPACE
 
 export const TILE_PROVIDERS = [
   {
@@ -12,4 +12,4 @@ export const TILE_PROVIDERS = [
     tileSize: 256,
     maxZoom: 16
   }
-];
+]

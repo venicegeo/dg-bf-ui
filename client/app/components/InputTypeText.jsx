@@ -1,12 +1,12 @@
-import React, {Component} from 'react';
-import styles from '../styles/shared/fields.less';
+import React, {Component} from 'react'
+import styles from '../styles/shared/fields.less'
 
-export const TYPE_TEXT = 'text';
+export const TYPE_TEXT = 'text'
 
 export default class InputTypeText extends Component {
   static propTypes = {
     name: React.PropTypes.string
-  };
+  }
 
   render() {
     return (
@@ -14,10 +14,10 @@ export default class InputTypeText extends Component {
         <span>{this.props.name}</span>
         <input ref="input" type="text"/>
       </label>
-    );
+    )
   }
 
   get value() {
-    return this.refs.input.value;
+    return this.refs.input.value
   }
 }

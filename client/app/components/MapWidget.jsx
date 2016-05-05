@@ -1,35 +1,35 @@
-import 'openlayers/dist/ol.css';
-import React, {Component} from 'react';
-import ol from 'openlayers';
-import styles from './MapWidget.less';
-import {TILE_PROVIDERS} from '../config';
+import 'openlayers/dist/ol.css'
+import React, {Component} from 'react'
+import ol from 'openlayers'
+import styles from './MapWidget.less'
+import {TILE_PROVIDERS} from '../config'
 
-const [DEFAULT_TILE_PROVIDER] = TILE_PROVIDERS;
-const INITIAL_CENTER = [-20, 0];
-const INITIAL_ZOOM = 2.5;
-const DETECTED = 'Detected';
-const UNDETECTED = 'Undetected';
-const NEW_DETECTION = 'New Detection';
+const [DEFAULT_TILE_PROVIDER] = TILE_PROVIDERS
+const INITIAL_CENTER = [-20, 0]
+const INITIAL_ZOOM = 2.5
+const DETECTED = 'Detected'
+const UNDETECTED = 'Undetected'
+const NEW_DETECTION = 'New Detection'
 
 export default class MapWidget extends Component {
   static propTypes = {
     featureCollections: React.PropTypes.array
-  };
+  }
 
   constructor() {
-    super();
-    this._layers = [];
-    this._export = this._export.bind(this);
+    super()
+    this._layers = []
+    this._export = this._export.bind(this)
   }
 
   componentDidMount() {
-    this._initializeOpenLayers(DEFAULT_TILE_PROVIDER);
-    this._renderLayers();
+    this._initializeOpenLayers(DEFAULT_TILE_PROVIDER)
+    this._renderLayers()
   }
 
   componentDidUpdate() {
-    this._clearLayers();
-    this._renderLayers();
+    this._clearLayers()
+    this._renderLayers()
   }
 
   render() {
@@ -43,34 +43,34 @@ export default class MapWidget extends Component {
           </a>
         </div>
       </div>
-    );
+    )
   }
 
   _clearLayers() {
-    this._layers.forEach(layer => this._map.removeLayer(layer));
+    this._layers.forEach(layer => this._map.removeLayer(layer))
   }
 
   _renderLayers() {
-    const featureCollections = this.props.featureCollections;
-    if (!featureCollections || !featureCollections.length) { return; }
-    const viewport = ol.extent.createEmpty();
-    const reader = new ol.format.GeoJSON();
+    const featureCollections = this.props.featureCollections
+    if (!featureCollections || !featureCollections.length) { return }
+    const viewport = ol.extent.createEmpty()
+    const reader = new ol.format.GeoJSON()
     featureCollections.forEach(featureCollection => {
-      const bounds = ol.extent.createEmpty();
-      const features = reader.readFeatures(featureCollection.geojson, {featureProjection:'EPSG:3857'});
+      const bounds = ol.extent.createEmpty()
+      const features = reader.readFeatures(featureCollection.geojson, {featureProjection:'EPSG:3857'})
       features.forEach(feature => {
-        const source = new ol.source.Vector({features: [feature]});
-        const layer = new ol.layer.Vector({source, style: generateStyles});
-        ol.extent.extend(bounds, source.getExtent());
-        ol.extent.extend(viewport, source.getExtent());
-        this._layers.push(layer);
-        this._map.addLayer(layer);
-      });
-      const frame = generateFrame(bounds, featureCollection.name);
-      this._layers.push(frame);
-      this._map.addLayer(frame);
-    });
-    this._map.getView().fit(viewport, this._map.getSize());
+        const source = new ol.source.Vector({features: [feature]})
+        const layer = new ol.layer.Vector({source, style: generateStyles})
+        ol.extent.extend(bounds, source.getExtent())
+        ol.extent.extend(viewport, source.getExtent())
+        this._layers.push(layer)
+        this._map.addLayer(layer)
+      })
+      const frame = generateFrame(bounds, featureCollection.name)
+      this._layers.push(frame)
+      this._map.addLayer(frame)
+    })
+    this._map.getView().fit(viewport, this._map.getSize())
   }
 
   _initializeOpenLayers(provider) {
@@ -100,18 +100,18 @@ export default class MapWidget extends Component {
         }),
         new ol.control.FullScreen()
       ])
-    });
+    })
   }
 
   _export() {
-    const timestamp = new Date().toISOString().replace(/(\D+|\.\d+)/g, '');
-    const element = this.refs.downloadButton;
-    element.download = `BEACHFRONT_EXPORT_${timestamp}.png`;
+    const timestamp = new Date().toISOString().replace(/(\D+|\.\d+)/g, '')
+    const element = this.refs.downloadButton
+    element.download = `BEACHFRONT_EXPORT_${timestamp}.png`
     this._map.once('postcompose', event => {
-      const canvas = event.context.canvas;
-      element.href = canvas.toDataURL();
-    });
-    this._map.renderSync();
+      const canvas = event.context.canvas
+      element.href = canvas.toDataURL()
+    })
+    this._map.renderSync()
   }
 }
 
@@ -140,22 +140,22 @@ function generateFrame(bounds, title) {
         })
       })
     })
-  });
+  })
 }
 
 // FIXME - seems inefficient, newing these .style.* things up _every single time_ but looks like an OL convention?
 function generateStyles(feature) {
-  const geometry = feature.getGeometry();
+  const geometry = feature.getGeometry()
   switch (feature.get('detection')) {
     case DETECTED:
-      const [baseline, detection] = geometry.getGeometries();
-      return [generateStyleDetectionBaseline(baseline), generateStyleDetection(detection)];
+      const [baseline, detection] = geometry.getGeometries()
+      return [generateStyleDetectionBaseline(baseline), generateStyleDetection(detection)]
     case UNDETECTED:
-      return [generateStyleUndetected()];
+      return [generateStyleUndetected()]
     case NEW_DETECTION:
-      return [generateStyleNewDetection()];
+      return [generateStyleNewDetection()]
     default:
-      return [generateStyleUnknownDetectionType()];
+      return [generateStyleUnknownDetectionType()]
   }
 }
 
@@ -169,7 +169,7 @@ function generateStyleDetectionBaseline(baseline) {
       lineCap: 'miter',
       lineJoin: 'miter'
     })
-  });
+  })
 }
 
 function generateStyleDetection(detection) {
@@ -182,7 +182,7 @@ function generateStyleDetection(detection) {
       color: 'hsla(160, 100%, 30%, .75)',
       width: 2
     })
-  });
+  })
 }
 
 function generateStyleUndetected() {
@@ -197,7 +197,7 @@ function generateStyleUndetected() {
       lineCap: 'miter',
       lineJoin: 'miter'
     })
-  });
+  })
 }
 
 function generateStyleNewDetection() {
@@ -206,7 +206,7 @@ function generateStyleNewDetection() {
       width: 2,
       color: 'hsl(205, 100%, 50%)'
     })
-  });
+  })
 }
 
 function generateStyleUnknownDetectionType() {
@@ -215,5 +215,5 @@ function generateStyleUnknownDetectionType() {
       color: 'magenta',
       width: 2
     })
-  });
+  })
 }

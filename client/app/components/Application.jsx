@@ -1,40 +1,40 @@
-import styles from './Application.less';
-import React, {Component} from 'react';
-import Navigation from './Navigation';
-import MapWidget from './MapWidget';
-import Help from './Help';
-import About from './About';
-import {fetchResult} from '../api';
+import styles from './Application.less'
+import React, {Component} from 'react'
+import Navigation from './Navigation'
+import MapWidget from './MapWidget'
+import Help from './Help'
+import About from './About'
+import {fetchResult} from '../api'
 
 export default class Application extends Component {
   static contextTypes = {
     router: React.PropTypes.object
-  };
+  }
 
   static propTypes = {
     params: React.PropTypes.object,
     children: React.PropTypes.element,
     location: React.PropTypes.object
-  };
+  }
 
   constructor() {
-    super();
-    this.state = {currentResult: null};
-    this._dismissModal = this._dismissModal.bind(this);
+    super()
+    this.state = {currentResult: null}
+    this._dismissModal = this._dismissModal.bind(this)
   }
 
   componentDidMount() {
-    this._fetchResult(this.props.params.resultId);
+    this._fetchResult(this.props.params.resultId)
   }
 
   componentWillReceiveProps(incomingProps) {
-    this._fetchResult(incomingProps.params.resultId);
+    this._fetchResult(incomingProps.params.resultId)
   }
 
   render() {
-    const results = [];
+    const results = []
     if (this.state.currentResult) {
-      results.push(this.state.currentResult);
+      results.push(this.state.currentResult)
     }
     return (
       <div className={styles.root}>
@@ -44,7 +44,7 @@ export default class Application extends Component {
         {this._showingHelp && <Help dismiss={this._dismissModal}/>}
         {this._showingAbout && <About dismiss={this._dismissModal}/>}
       </div>
-    );
+    )
   }
 
   //
@@ -52,21 +52,21 @@ export default class Application extends Component {
   //
 
   get _showingAbout() {
-    return this.props.location.hash === '#about';
+    return this.props.location.hash === '#about'
   }
 
   get _showingHelp() {
-    return this.props.location.hash === '#help';
+    return this.props.location.hash === '#help'
   }
 
   _fetchResult(resultId) {
     if (resultId) {
-      const {currentResult} = this.state;
+      const {currentResult} = this.state
       if (!currentResult || (currentResult && currentResult.id !== resultId)) {
-        fetchResult(resultId).then(result => this.setState({currentResult: result}));
+        fetchResult(resultId).then(result => this.setState({currentResult: result}))
       }
     } else {
-      this.setState({currentResult: null});
+      this.setState({currentResult: null})
     }
   }
   
@@ -74,6 +74,6 @@ export default class Application extends Component {
     this.context.router.push({
       pathname: this.props.location.pathname,
       hash: ''
-    });
+    })
   }
 }

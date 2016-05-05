@@ -1,36 +1,36 @@
-import React, {Component} from 'react';
-import {Link} from 'react-router';
-import {createJob, fetchAlgorithms, fetchImageList} from '../api';
-import AlgorithmOptions from './AlgorithmOptions';
-import styles from './CreateJob.less';
+import React, {Component} from 'react'
+import {Link} from 'react-router'
+import {createJob, fetchAlgorithms, fetchImageList} from '../api'
+import AlgorithmOptions from './AlgorithmOptions'
+import styles from './CreateJob.less'
 
 export default class CreateJob extends Component {
   static contextTypes = {
     router: React.PropTypes.object
-  };
+  }
 
   static propTypes = {
     children: React.PropTypes.element,
     params: React.PropTypes.object
-  };
+  }
 
   constructor() {
-    super();
-    this.state = {algorithms: [], images: []};
-    this._submit = this._submit.bind(this);
+    super()
+    this.state = {algorithms: [], images: []}
+    this._submit = this._submit.bind(this)
   }
   
   componentDidMount() {
     Promise.all([
       fetchAlgorithms(),
       fetchImageList()
-    ]).then(([algorithms, images]) => this.setState({algorithms, images}));
+    ]).then(([algorithms, images]) => this.setState({algorithms, images}))
   }
 
   render() {
-    const {algorithmId} = this.props.params;
-    const {algorithms, images} = this.state;
-    const selectedAlgorithm = algorithms.find(a => a.id === algorithmId);
+    const {algorithmId} = this.props.params
+    const {algorithms, images} = this.state
+    const selectedAlgorithm = algorithms.find(a => a.id === algorithmId)
     return (
       <div className={styles.root}>
         <h1>Create Job</h1>
@@ -53,18 +53,18 @@ export default class CreateJob extends Component {
           </div>
         )}
       </div>
-    );
+    )
   }
 
   _submit(draft) {
     createJob(draft)
       .then(() => {
         // TODO -- flesh out the ideal interaction
-        this.context.router.push({pathname: '/job'});
+        this.context.router.push({pathname: '/job'})
       })
       .catch(() => {
         // TODO -- flesh out the ideal interaction
-        alert('Submission failed...');  // eslint-disable-line no-alert
-      });
+        alert('Submission failed...')  // eslint-disable-line no-alert
+      })
   }
 }

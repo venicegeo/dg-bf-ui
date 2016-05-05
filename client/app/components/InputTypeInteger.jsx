@@ -1,12 +1,12 @@
-import React, {Component} from 'react';
-import styles from '../styles/shared/fields.less';
+import React, {Component} from 'react'
+import styles from '../styles/shared/fields.less'
 
-export const TYPE_INTEGER = 'integer';
+export const TYPE_INTEGER = 'integer'
 
 export default class InputTypeInteger extends Component {
   static propTypes = {
     name: React.PropTypes.string
-  };
+  }
 
   render() {
     return (
@@ -14,10 +14,10 @@ export default class InputTypeInteger extends Component {
         <span>{this.props.name}</span>
         <input ref="input" type="number" step="1"/>
       </label>
-    );
+    )
   }
 
   get value() {
-    return this.refs.input.value;
+    return this.refs.input.value
   }
 }

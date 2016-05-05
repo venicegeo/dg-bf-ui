@@ -1,13 +1,13 @@
-import React, {Component} from 'react';
-import styles from '../styles/shared/fields.less';
+import React, {Component} from 'react'
+import styles from '../styles/shared/fields.less'
 
-export const TYPE_IMAGE = 'image';
+export const TYPE_IMAGE = 'image'
 
 export default class InputTypeImage extends Component {
   static propTypes = {
     images: React.PropTypes.array,
     name: React.PropTypes.string
-  };
+  }
 
   render() {
     return (
@@ -17,10 +17,10 @@ export default class InputTypeImage extends Component {
           {this.props.images.map(image => <option key={image.id} value={image.id}>{image.name}</option>)}
         </select>
       </label>
-    );
+    )
   }
 
   get value() {
-    return this.refs.input.value;
+    return this.refs.input.value
   }
 }
