@@ -1,6 +1,6 @@
 import 'openlayers/dist/ol.css'
 import React, {Component} from 'react'
-import ol from 'openlayers'
+import openlayers from 'openlayers'
 import styles from './MapWidget.less'
 import {TILE_PROVIDERS} from '../config'
 
@@ -20,6 +20,7 @@ export default class MapWidget extends Component {
     super()
     this._layers = []
     this._export = this._export.bind(this)
+    this._generateStyles = this._generateStyles.bind(this)
   }
 
   componentDidMount() {
@@ -46,6 +47,24 @@ export default class MapWidget extends Component {
     )
   }
 
+  //
+  // Internals
+  //
+
+  _initializeOpenLayers(provider) {
+    this._map = new openlayers.Map({
+      controls: this._generateControls(),
+      layers: this._generateBasemapLayers(provider),
+      target: this.refs.container,
+      view: new openlayers.View({
+        center: openlayers.proj.fromLonLat(INITIAL_CENTER),
+        minZoom: INITIAL_ZOOM,
+        maxZoom: provider.maxZoom,
+        zoom: INITIAL_ZOOM
+      })
+    })
+  }
+
   _clearLayers() {
     this._layers.forEach(layer => this._map.removeLayer(layer))
   }
@@ -53,54 +72,24 @@ export default class MapWidget extends Component {
   _renderLayers() {
     const featureCollections = this.props.featureCollections
     if (!featureCollections || !featureCollections.length) { return }
-    const viewport = ol.extent.createEmpty()
-    const reader = new ol.format.GeoJSON()
+    const viewport = openlayers.extent.createEmpty()
+    const reader = new openlayers.format.GeoJSON()
     featureCollections.forEach(featureCollection => {
-      const bounds = ol.extent.createEmpty()
+      const bounds = openlayers.extent.createEmpty()
       const features = reader.readFeatures(featureCollection.geojson, {featureProjection:'EPSG:3857'})
       features.forEach(feature => {
-        const source = new ol.source.Vector({features: [feature]})
-        const layer = new ol.layer.Vector({source, style: generateStyles})
-        ol.extent.extend(bounds, source.getExtent())
-        ol.extent.extend(viewport, source.getExtent())
+        const source = new openlayers.source.Vector({features: [feature]})
+        const layer = new openlayers.layer.Vector({source, style: this._generateStyles})
+        openlayers.extent.extend(bounds, source.getExtent())
+        openlayers.extent.extend(viewport, source.getExtent())
         this._layers.push(layer)
         this._map.addLayer(layer)
       })
-      const frame = generateFrame(bounds, featureCollection.name)
+      const frame = this._generateFrame(bounds, featureCollection.name)
       this._layers.push(frame)
       this._map.addLayer(frame)
     })
     this._map.getView().fit(viewport, this._map.getSize())
-  }
-
-  _initializeOpenLayers(provider) {
-    this._map = new ol.Map({
-      target: this.refs.container,
-      layers: [
-        new ol.layer.Tile({
-          source: new ol.source.XYZ(Object.assign({crossOrigin: 'anonymous'}, provider))
-        })
-      ],
-      view: new ol.View({
-        center: ol.proj.fromLonLat(INITIAL_CENTER),
-        minZoom: INITIAL_ZOOM,
-        maxZoom: provider.maxZoom,
-        zoom: INITIAL_ZOOM
-      }),
-      controls: ol.control.defaults({
-        attributionOptions: {collapsible: false}
-      }).extend([
-        new ol.control.ScaleLine({
-          minWidth: 250,
-          units: 'nautical'
-        }),
-        new ol.control.ZoomSlider(),
-        new ol.control.MousePosition({
-          coordinateFormat: ol.coordinate.toStringHDMS
-        }),
-        new ol.control.FullScreen()
-      ])
-    })
   }
 
   _export() {
@@ -113,107 +102,126 @@ export default class MapWidget extends Component {
     })
     this._map.renderSync()
   }
-}
 
-//
-// Internals
-//
+  _generateBasemapLayers(provider) {
+    return [
+      new openlayers.layer.Tile({
+        source: new openlayers.source.XYZ(Object.assign({crossOrigin: 'anonymous'}, provider))
+      })
+    ];
+  }
 
-function generateFrame(bounds, title) {
-  return new ol.layer.Vector({
-    source: new ol.source.Vector({
-      features: [new ol.Feature({
-        geometry: ol.geom.Polygon.fromExtent(bounds)
-      })]
-    }),
-    style: new ol.style.Style({
-      stroke: new ol.style.Stroke({
-        color: 'rgba(0, 0, 0, .2)',
-        lineDash: [20, 20],
-        weight: 5
+  _generateControls() {
+    return openlayers.control.defaults({
+      attributionOptions: {collapsible: false}
+    }).extend([
+      new openlayers.control.ScaleLine({
+        minWidth: 250,
+        units: 'nautical'
       }),
-      text: new ol.style.Text({
-        text: title,
-        font: 'bold 15px Menlo, monospace',
-        fill: new ol.style.Fill({
-          color: 'rgba(0, 0, 0, .2)'
+      new openlayers.control.ZoomSlider(),
+      new openlayers.control.MousePosition({
+        coordinateFormat: openlayers.coordinate.toStringHDMS
+      }),
+      new openlayers.control.FullScreen()
+    ])
+  }
+
+  _generateFrame(bounds, title) {
+    return new openlayers.layer.Vector({
+      source: new openlayers.source.Vector({
+        features: [new openlayers.Feature({
+          geometry: openlayers.geom.Polygon.fromExtent(bounds)
+        })]
+      }),
+      style: new openlayers.style.Style({
+        stroke: new openlayers.style.Stroke({
+          color: 'rgba(0, 0, 0, .2)',
+          lineDash: [20, 20],
+          weight: 5
+        }),
+        text: new openlayers.style.Text({
+          text: title,
+          font: 'bold 15px Menlo, monospace',
+          fill: new openlayers.style.Fill({
+            color: 'rgba(0, 0, 0, .2)'
+          })
         })
       })
     })
-  })
-}
-
-// FIXME - seems inefficient, newing these .style.* things up _every single time_ but looks like an OL convention?
-function generateStyles(feature) {
-  const geometry = feature.getGeometry()
-  switch (feature.get('detection')) {
-    case DETECTED:
-      const [baseline, detection] = geometry.getGeometries()
-      return [generateStyleDetectionBaseline(baseline), generateStyleDetection(detection)]
-    case UNDETECTED:
-      return [generateStyleUndetected()]
-    case NEW_DETECTION:
-      return [generateStyleNewDetection()]
-    default:
-      return [generateStyleUnknownDetectionType()]
   }
-}
 
-function generateStyleDetectionBaseline(baseline) {
-  return new ol.style.Style({
-    geometry: baseline,
-    stroke: new ol.style.Stroke({
-      color: 'hsla(160, 100%, 30%, .5)',
-      width: 2,
-      lineDash: [5, 5],
-      lineCap: 'miter',
-      lineJoin: 'miter'
-    })
-  })
-}
+  _generateStyles(feature) {
+    const geometry = feature.getGeometry()
+    switch (feature.get('detection')) {
+      case DETECTED:
+        const [baseline, detection] = geometry.getGeometries()
+        return [this._generateStyleDetectionBaseline(baseline), this._generateStyleDetection(detection)]
+      case UNDETECTED:
+        return [this._generateStyleUndetected()]
+      case NEW_DETECTION:
+        return [this._generateStyleNewDetection()]
+      default:
+        return [this._generateStyleUnknownDetectionType()]
+    }
+  }
 
-function generateStyleDetection(detection) {
-  return new ol.style.Style({
-    geometry: detection,
-    fill: new ol.style.Fill({
-      color: 'hsla(160, 100%, 30%, .2)'
-    }),
-    stroke: new ol.style.Stroke({
-      color: 'hsla(160, 100%, 30%, .75)',
-      width: 2
+  _generateStyleDetectionBaseline(baseline) {
+    return new openlayers.style.Style({
+      geometry: baseline,
+      stroke: new openlayers.style.Stroke({
+        color: 'hsla(160, 100%, 30%, .5)',
+        width: 2,
+        lineDash: [5, 5],
+        lineCap: 'miter',
+        lineJoin: 'miter'
+      })
     })
-  })
-}
+  }
 
-function generateStyleUndetected() {
-  return new ol.style.Style({
-    fill: new ol.style.Fill({
-      color: 'hsla(0, 100%, 75%, .2)'
-    }),
-    stroke: new ol.style.Stroke({
-      color: 'red',
-      width: 2,
-      lineDash: [5, 5],
-      lineCap: 'miter',
-      lineJoin: 'miter'
+  _generateStyleDetection(detection) {
+    return new openlayers.style.Style({
+      geometry: detection,
+      fill: new openlayers.style.Fill({
+        color: 'hsla(160, 100%, 30%, .2)'
+      }),
+      stroke: new openlayers.style.Stroke({
+        color: 'hsla(160, 100%, 30%, .75)',
+        width: 2
+      })
     })
-  })
-}
+  }
 
-function generateStyleNewDetection() {
-  return new ol.style.Style({
-    stroke: new ol.style.Stroke({
-      width: 2,
-      color: 'hsl(205, 100%, 50%)'
+  _generateStyleUndetected() {
+    return new openlayers.style.Style({
+      fill: new openlayers.style.Fill({
+        color: 'hsla(0, 100%, 75%, .2)'
+      }),
+      stroke: new openlayers.style.Stroke({
+        color: 'red',
+        width: 2,
+        lineDash: [5, 5],
+        lineCap: 'miter',
+        lineJoin: 'miter'
+      })
     })
-  })
-}
+  }
 
-function generateStyleUnknownDetectionType() {
-  return new ol.style.Style({
-    stroke: new ol.style.Stroke({
-      color: 'magenta',
-      width: 2
+  _generateStyleNewDetection() {
+    return new openlayers.style.Style({
+      stroke: new openlayers.style.Stroke({
+        width: 2,
+        color: 'hsl(205, 100%, 50%)'
+      })
     })
-  })
+  }
+
+  _generateStyleUnknownDetectionType() {
+    return new openlayers.style.Style({
+      stroke: new openlayers.style.Stroke({
+        color: 'magenta',
+        width: 2
+      })
+    })
+  }
 }
