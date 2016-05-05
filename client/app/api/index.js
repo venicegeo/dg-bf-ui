@@ -29,12 +29,6 @@ export function fetchImageList() {
 }
 
 export function createJob({name, algorithmId, algorithmName, parameters}) {
-  // const
-  // const body = new FormData();
-  // body.append('algorithmName', algorithmName);
-  // body.append('jobName', name);
-  // body.append('serviceId', algorithmId);
-  // parameters.forEach(param => body.append(...param));
 
   // HACK
   const image = {}

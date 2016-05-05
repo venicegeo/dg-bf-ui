@@ -1,10 +1,10 @@
-import React from 'react';
-import {render} from 'react-dom';
-import Application from './components/Application';
-import CreateJob from './components/CreateJob';
-import JobStatusList from './components/JobStatusList';
+import React from 'react'
 import {createHistory} from 'history'
 import {Router, Route, useRouterHistory} from 'react-router'
+import {render} from 'react-dom'
+import Application from './components/Application'
+import CreateJob from './components/CreateJob'
+import JobStatusList from './components/JobStatusList'
 
 export function bootstrap(element) {
   const history = useRouterHistory(createHistory)({
@@ -18,5 +18,5 @@ export function bootstrap(element) {
         <Route path="new" component={CreateJob}/>
         <Route path="new/:algorithmId" component={CreateJob}/>
       </Route>
-    </Router>, element);
+    </Router>, element)
 }
