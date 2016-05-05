@@ -7,7 +7,7 @@ const HtmlWebpackPlugin = require('html-webpack-plugin')
 module.exports = {
   context: path.join(__dirname, 'app'),
   entry: './index.js',
-  devtool: 'eval',
+  devtool: 'cheap-module-eval-source-map',
 
   devServer: {
     proxy: {
@@ -57,8 +57,6 @@ module.exports = {
       hash: true,
       xhtml: true
     }),
-
-    // Polyfill just in case -- unsure what cutoff is for "modern browsers"
     new webpack.ProvidePlugin({fetch:'isomorphic-fetch'})
   ]
 }
