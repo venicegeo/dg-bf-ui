@@ -1,7 +1,7 @@
 import styles from './Application.less'
 import React, {Component} from 'react'
 import Navigation from './Navigation'
-import MapWidget from './MapWidget'
+import PrimaryMap from './PrimaryMap'
 import Help from './Help'
 import About from './About'
 import {fetchResult} from '../api'
@@ -39,7 +39,7 @@ export default class Application extends Component {
     return (
       <div className={styles.root}>
         <Navigation currentLocation={this.props.location}/>
-        <MapWidget featureCollections={results}/>
+        <PrimaryMap featureCollections={results}/>
         {this.props.children}
         {this._showingHelp && <Help dismiss={this._dismissModal}/>}
         {this._showingAbout && <About dismiss={this._dismissModal}/>}

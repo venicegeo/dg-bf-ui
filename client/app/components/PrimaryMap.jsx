@@ -1,7 +1,7 @@
 import 'openlayers/dist/ol.css'
 import React, {Component} from 'react'
 import openlayers from 'openlayers'
-import styles from './MapWidget.less'
+import styles from './PrimaryMap.less'
 import {TILE_PROVIDERS} from '../config'
 
 const [DEFAULT_TILE_PROVIDER] = TILE_PROVIDERS
@@ -11,7 +11,7 @@ const DETECTED = 'Detected'
 const UNDETECTED = 'Undetected'
 const NEW_DETECTION = 'New Detection'
 
-export default class MapWidget extends Component {
+export default class PrimaryMap extends Component {
   static propTypes = {
     featureCollections: React.PropTypes.array
   }
