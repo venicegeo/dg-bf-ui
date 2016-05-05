@@ -57,7 +57,7 @@ export default class MapWidget extends Component {
     const reader = new ol.format.GeoJSON();
     featureCollections.forEach(featureCollection => {
       const bounds = ol.extent.createEmpty();
-      const features = reader.readFeatures(featureCollection.geojson);
+      const features = reader.readFeatures(featureCollection.geojson, {featureProjection:'EPSG:3857'});
       features.forEach(feature => {
         const source = new ol.source.Vector({features: [feature]});
         const layer = new ol.layer.Vector({source, style: generateStyles});
@@ -74,9 +74,7 @@ export default class MapWidget extends Component {
   }
 
   _initializeOpenLayers(provider) {
-    const projection = ol.proj.get('EPSG:4326');
     this._map = new ol.Map({
-      projection,
       target: this.refs.container,
       layers: [
         new ol.layer.Tile({
@@ -84,7 +82,6 @@ export default class MapWidget extends Component {
         })
       ],
       view: new ol.View({
-        projection,
         center: ol.proj.fromLonLat(INITIAL_CENTER),
         minZoom: INITIAL_ZOOM,
         maxZoom: provider.maxZoom,
