@@ -40,13 +40,15 @@
   z-index: @ZIndexPrimaryMap + 1;
   list-style: none;
   position: absolute;
-  bottom: 23px;
-  right: 0;
+  bottom: 35px;
+  right: 10px;
   width: 100px;
   margin: 0;
-  padding: 1em;
+  padding: .5em;
   background-color: white;
-  opacity: .2;
+  opacity: .3;
+  border-radius: 5px;
+  box-shadow: 0 0 0 1px rgba(0,0,0,.2), 0 5px rgba(0,0,0,.1);
 }
 
 .basemaps:hover {
@@ -57,6 +59,12 @@
   padding: .25em;
   margin: 0;
   cursor: pointer;
+  text-align: right;
+  border-radius: 3px;
+}
+
+.basemaps li + li {
+  margin-top: .5em;
 }
 
 .basemaps .active {
