@@ -10,16 +10,16 @@
   bottom: 0;
 }
 
-.export-button {
+.download {
   composes: global(ol-unselectable);
+  z-index: @ZIndexPrimaryMap + 1;
   display: inline-block;
-  z-index: 100;
   position: absolute;
   top: 38px;
   right: 6px;
 }
 
-.export-button a {
+.download a {
   display: inline-block;
   padding: .3em;
   border-radius: 3px;
@@ -34,6 +34,35 @@
   &:active {
     opacity: .5;
   }
+}
+
+.basemaps {
+  z-index: @ZIndexPrimaryMap + 1;
+  list-style: none;
+  position: absolute;
+  bottom: 23px;
+  right: 0;
+  width: 100px;
+  margin: 0;
+  padding: 1em;
+  background-color: white;
+  opacity: .2;
+}
+
+.basemaps:hover {
+  opacity: 1;
+}
+
+.basemaps li {
+  padding: .25em;
+  margin: 0;
+  cursor: pointer;
+}
+
+.basemaps .active {
+  background-color: #175B82;
+  color: white;
+  font-weight: bold;
 }
 
 /* =========================================================================
