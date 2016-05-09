@@ -38,7 +38,12 @@ export function createJob({name, algorithmId, algorithmName, parameters}) {
     body: JSON.stringify({name, algorithmId, algorithmName, imageIds, inputs: parameters}),
     headers: {'content-type': 'application/json'},
     method: 'post'})
-    .then(response => response.text())
+    .then(response => {
+      if (!response.ok) {
+        throw new Error(response.text())
+      }
+      return response.text()
+    })
 }
 
 //
@@ -51,7 +56,6 @@ class Algorithm {
     this.inputs = raw.inputs.map(i => new AlgorithmInput(i))
     this.description = raw.description
     this.name = raw.name
-    this.url = raw.url  // FIXME -- necessary?
   }
 }
 
@@ -73,7 +77,7 @@ class ImageComposite {
 class Job {
   constructor(raw) {
     this.algorithm = raw.algorithmName
-    this.createdOn = new Date(raw.date)  // FIXME - make less naive
+    this.createdOn = new Date(raw.createdOn)
     this.id = raw.id
     this.name = raw.name
     this.resultId = raw.resultId
