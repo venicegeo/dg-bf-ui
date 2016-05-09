@@ -25,7 +25,7 @@ export function fetchResult(id) {
 export function fetchImageList() {
   return _fetch('/images')
     .then(response => response.json())
-    .then(data => data.images.map(d => new Image(d)))
+    .then(data => data.images.map(d => new ImageComposite(d)))
 }
 
 export function createJob({name, algorithmId, algorithmName, parameters}) {
@@ -67,11 +67,10 @@ class AlgorithmInput {
   }
 }
 
-class Image {
+class ImageComposite {
   constructor(raw) {
-    this.id = raw.id
     this.name = raw.name
-    this.filenames = raw.filenames
+    this.ids = raw.ids
   }
 }
 

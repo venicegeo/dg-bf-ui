@@ -38,7 +38,7 @@ func handleGetAlgorithms(context echo.Context) error {
 func handleGetImages(context echo.Context) error {
 	images, err := services.GetImageList()
 	if err == nil {
-		return context.JSON(http.StatusOK, map[string][]beachfront.Image{"images": images})
+		return context.JSON(http.StatusOK, map[string][]beachfront.ImageComposite{"images": images})
 	}
 	return echo.NewHTTPError(http.StatusServiceUnavailable, err.Error())
 }

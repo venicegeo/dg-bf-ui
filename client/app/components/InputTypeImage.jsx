@@ -14,7 +14,7 @@ export default class InputTypeImage extends Component {
       <label className={styles.normal}>
         <span>{this.props.name}</span>
         <select ref="input">
-          {this.props.images.map(image => <option key={image.id} value={image.id}>{image.name}</option>)}
+          {this.props.images.map(image => <option key={image.name} value={image.ids.join(',')}>{image.name}</option>)}
         </select>
       </label>
     )

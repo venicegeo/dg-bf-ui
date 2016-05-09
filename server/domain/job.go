@@ -26,11 +26,6 @@ func (j Job) Validate() error {
 	if j.AlgorithmName == "" {
 		return ErrValidation{"`AlgorithmName` must not be blank"}
 	}
-	if j.Image.CompositeID == "" {
-		return ErrValidation{"`Image.CompositeID` must not be empty"}
-	}
-	if j.Image.CompositeFilename == "" {
-		return ErrValidation{"`Image.CompositeFilename` must not be empty"}
 	}
 	return nil
 }

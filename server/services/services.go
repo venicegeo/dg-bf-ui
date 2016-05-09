@@ -36,7 +36,7 @@ func GetJobs() []beachfront.Job {
 	return jobs.List()
 }
 
-func GetImageList() ([]beachfront.Image, error) {
+func GetImageList() ([]beachfront.ImageComposite, error) {
 	return imagery.List()
 }
 
