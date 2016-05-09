@@ -31,15 +31,11 @@ export function fetchImageList() {
 export function createJob({name, algorithmId, algorithmName, parameters}) {
 
   // HACK
-  const image = {}
-  const images = parameters.find(p => p[0] === '--image')
-  if (images) {
-    image.id = images[1]
-  }
+  const imageIds = parameters.find(p => p[0] === '--image')[1].split(',')
   // HACK
 
   return _fetch('/jobs', {
-    body: JSON.stringify({name, algorithmId, algorithmName, image, inputs: parameters}),
+    body: JSON.stringify({name, algorithmId, algorithmName, imageIds, inputs: parameters}),
     headers: {'content-type': 'application/json'},
     method: 'post'})
     .then(response => response.text())
@@ -82,6 +78,7 @@ class Job {
     this.name = raw.name
     this.resultId = raw.resultId
     this.status = raw.status
+    this.imageIds = raw.imageIds
   }
 }
 

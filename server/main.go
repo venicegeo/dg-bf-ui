@@ -62,16 +62,6 @@ func handleGetResult(context echo.Context) error {
 func handlePostJob(context echo.Context) error {
 	job := beachfront.Job{}
 	context.Bind(&job)
-
-	// HACK
-	images, _ := services.GetImageList()
-	for _, image := range images {
-		if image.CompositeID == job.Image.CompositeID {
-			job.Image = image
-		}
-	}
-	// HACK
-
 	if err := job.Validate(); err == nil {
 		if id, err := services.SubmitJob(job); err == nil {
 			return context.String(http.StatusCreated, id)

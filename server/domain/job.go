@@ -10,7 +10,7 @@ type Job struct {
 	AlgorithmID    string    `json:"algorithmId"`
 	AlgorithmName  string    `json:"algorithmName"`
 	Name           string    `json:"name"`
-	Image          Image     `json:"image"`
+	ImageIDs       []string  `json:"imageIds"`
 	ResultFilename string    `json:"resultFilename,omitempty"`
 	ResultID       string    `json:"resultId,omitempty"` // Piazza Data ID
 	Status         string    `json:"status"`
@@ -26,6 +26,8 @@ func (j Job) Validate() error {
 	if j.AlgorithmName == "" {
 		return ErrValidation{"`AlgorithmName` must not be blank"}
 	}
+	if len(j.ImageIDs) < 2 {
+		return ErrValidation{"`ImageIDs` must have at least two elements"}
 	}
 	return nil
 }

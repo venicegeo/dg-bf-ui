@@ -2,6 +2,7 @@ package jobs
 
 import (
 	"fmt"
+	"strings"
 	"time"
 	"github.com/venicegeo/bf-ui/server/domain"
 	"github.com/venicegeo/bf-ui/server/services/piazza"
@@ -54,7 +55,7 @@ func Execute(client client, job beachfront.Job) (jobId string, err error) {
 	job.CreatedOn = time.Now()
 	job.ResultFilename = generateOutputFilename()
 
-	message := newExecutionMessage(job.AlgorithmID, job.Image.CompositeFilename, job.ResultFilename, job.Image.CompositeID)
+	message := newExecutionMessage(job.AlgorithmID, job.ResultFilename, job.ImageIDs)
 
 	jobId, err = client.Post(message)
 	if err != nil {
@@ -137,15 +138,19 @@ func generateOutputFilename() string {
 	return fmt.Sprintf("Beachfront_%s.geojson", time.Now().UTC().Format("20060102.150405.99999"))
 }
 
-func newExecutionMessage(algorithmId, inputFilenames, outputFilename, imageIds string) piazza.Message {
-	command := fmt.Sprintf("shoreline --image %s --projection geo-scaled --threshold 0.5 --tolerance 0 %s", inputFilenames, outputFilename)
+func newExecutionMessage(algorithmId, outputFilename string, imageIds []string) piazza.Message {
+	filenames := make([]string, 0)
+	for _, id := range imageIds {
+		filenames = append(filenames, id+".TIF")
+	}
+	command := fmt.Sprintf("shoreline --image %s --projection geo-scaled --threshold 0.5 --tolerance 0 %s", strings.Join(filenames, ","), outputFilename)
 
 	return piazza.Message{
 		"execute-service",
 		data{
 			dataInputs{
 				input{"urlparameter", command},
-				input{"urlparameter", imageIds},
+				input{"urlparameter", strings.Join(imageIds, ",")},
 				input{"urlparameter", outputFilename},
 			},
 			[]dataOutput{{"application/json", "text"}},

@@ -384,7 +384,7 @@ func newJob() beachfront.Job {
 		AlgorithmID:   "test-algorithm-id",
 		AlgorithmName: "test-algorithm-name",
 		Name:          "test-name",
-		Image:         beachfront.Image{"test-image-id1,test-image-id2", "TEST-IMAGE-1.TIF,TEST-IMAGE-2.TIF", "test-image"},
+		ImageIDs:      []string{"test-image-id1", "test-image-id2"},
 	}
 }
 
@@ -410,7 +410,7 @@ const (
 		"data": {
 			"dataInputs": {
 				"cmd": {
-					"content": "shoreline --image TEST-IMAGE-1.TIF,TEST-IMAGE-2.TIF --projection geo-scaled --threshold 0.5 --tolerance 0 test-output-filename.geojson",
+					"content": "shoreline --image test-image-id1.TIF,test-image-id2.TIF --projection geo-scaled --threshold 0.5 --tolerance 0 test-output-filename.geojson",
 					"type": "urlparameter"
 				},
 				"inFiles": {
