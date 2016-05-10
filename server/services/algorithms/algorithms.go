@@ -2,6 +2,7 @@ package algorithms
 
 import (
 	"fmt"
+	"strings"
 	"time"
 	"github.com/venicegeo/bf-ui/server/domain"
 	"github.com/venicegeo/bf-ui/server/services/piazza"
@@ -11,6 +12,12 @@ import (
 const (
 	defaultCacheTTL = 1 * time.Minute
 	OutOfService    = "OUT OF SERVICE"
+
+	// Image Requirements
+	RequirementPrefix    = "imageReq - "
+	Bands                = "Bands"
+	CloudCover           = "CloudCover"
+	NormalizedCloudCover = "Cloud Cover"
 )
 
 type (
@@ -32,7 +39,7 @@ func Initialize(client client, disableWorkers bool) {
 		logger.Info("Background tasks disabled by config")
 	} else {
 		logger.Info("Starting background tasks")
-		go cacheWorker(client)
+		go cacheWorker(client, true)
 	}
 }
 
@@ -53,7 +60,7 @@ func Reset() {
 // Internals
 //
 
-func cacheWorker(client client) {
+func cacheWorker(client client, forever bool) {
 	for {
 		logger := logger.New()
 		logger.Info("Refreshing algorithm cache")
@@ -64,33 +71,49 @@ func cacheWorker(client client) {
 			}
 			cache = current
 		}
-		logger.Info("Next refresh in %d minute(s)", cacheTTL/time.Minute)
-		time.Sleep(cacheTTL)
+		if forever {
+			logger.Info("Next refresh in %d minute(s)", cacheTTL/time.Minute)
+			time.Sleep(cacheTTL)
+		} else {
+			return
+		}
 	}
 }
 
 func convert(services []piazza.Service) []beachfront.Algorithm {
 	logger := logger.New()
-
 	logger.Debug("Received %d services: %s", len(services), services)
 	algorithms := make([]beachfront.Algorithm, 0)
 	for _, service := range services {
 		if service.ID != "" && service.ResourceMetadata.Availability != OutOfService {
 			algorithm := beachfront.Algorithm{
-				ID:          service.ID,
-				Name:        service.ResourceMetadata.Name,
-				Description: service.ResourceMetadata.Description}
+				ID:           service.ID,
+				Name:         service.ResourceMetadata.Name,
+				Description:  service.ResourceMetadata.Description,
+				Requirements: extractRequirements(service.ResourceMetadata.Extended),
 
-			// HACK HACK HACK HACK HACK HACK HACK HACK HACK HACK HACK HACK HACK HACK HACK
-			// HACK -- overriding because it doesn't look like the current algos actually _list_ inputs
-			algorithm.Inputs = []beachfront.AlgorithmInput{{"--image", "Images", beachfront.AlgorithmTypeImage}}
-			// HACK HACK HACK HACK HACK HACK HACK HACK HACK HACK HACK HACK HACK HACK HACK
-			// HACK HACK HACK HACK HACK HACK HACK HACK HACK HACK HACK HACK HACK HACK HACK
-
+				// HACK HACK HACK HACK HACK HACK HACK HACK HACK HACK HACK HACK HACK HACK HACK
+				// HACK -- overriding because it doesn't look like the current algos actually _list_ inputs
+				Inputs: []beachfront.AlgorithmInput{{"--image", "Images", beachfront.InputTypeImage}},
+				// HACK HACK HACK HACK HACK HACK HACK HACK HACK HACK HACK HACK HACK HACK HACK
+				// HACK HACK HACK HACK HACK HACK HACK HACK HACK HACK HACK HACK HACK HACK HACK
+			}
 			algorithms = append(algorithms, algorithm)
 		}
 	}
 	return algorithms
+}
+
+func extractRequirements(metadata map[string]string) []beachfront.AlgorithmRequirement {
+	requirements := make([]beachfront.AlgorithmRequirement, 0)
+	for key, value := range metadata {
+		if strings.HasPrefix(key, RequirementPrefix) {
+			name, description := normalizeRequirement(key, value)
+			requirement := beachfront.AlgorithmRequirement{name, description}
+			requirements = append(requirements, requirement)
+		}
+	}
+	return requirements
 }
 
 func fetch(client client) ([]beachfront.Algorithm, error) {
@@ -109,6 +132,21 @@ func fetch(client client) ([]beachfront.Algorithm, error) {
 func initializeCache() {
 	cacheTTL = defaultCacheTTL
 	cache = make(map[string]*beachfront.Algorithm)
+}
+
+func normalizeRequirement(key, value string) (name, description string) {
+	name = strings.Replace(key, RequirementPrefix, "", 1)
+	value = strings.TrimSpace(value)
+	switch name {
+	case Bands:
+		description = strings.Join(strings.Split(value, ","), " and ")
+	case CloudCover:
+		name = NormalizedCloudCover
+		description = fmt.Sprintf("Less than %s", value)
+	default:
+		description = value
+	}
+	return
 }
 
 //

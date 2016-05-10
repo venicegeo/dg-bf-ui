@@ -32,6 +32,7 @@ type (
 			Name         string
 			Description  string
 			Availability string
+			Extended     map[string]string `json:"metadata"`
 		}
 	}
 )
