@@ -22,7 +22,7 @@ export default class AlgorithmOptions extends Component {
   }
 
   componentDidMount() {
-    this.refs.name.value = 'BF_something'  // autogenerate
+    this.refs.name.value = 'Beachfront_Job_' + Date.now()
   }
   
   render() {
