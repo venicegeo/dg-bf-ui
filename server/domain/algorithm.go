@@ -1,10 +1,10 @@
 package beachfront
 
-const AlgorithmTypeImage = "image"
-const AlgorithmTypeBoundingBox = "bbox"
-const AlgorithmTypeInteger = "integer"
-const AlgorithmTypeFloat = "float"
-const AlgorithmTypeText = "text"
+const InputTypeImage = "image"
+const InputTypeBoundingBox = "bbox"
+const InputTypeInteger = "integer"
+const InputTypeFloat = "float"
+const InputTypeText = "text"
 
 type Algorithm struct {
 	ID          string           `json:"id"`
