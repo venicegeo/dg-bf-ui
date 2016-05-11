@@ -56,6 +56,7 @@ class Algorithm {
     this.inputs = raw.inputs.map(i => new AlgorithmInput(i))
     this.description = raw.description
     this.name = raw.name
+    this.requirements = raw.requirements
   }
 }
 

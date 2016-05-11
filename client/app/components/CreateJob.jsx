@@ -41,6 +41,13 @@ export default class CreateJob extends Component {
               <Link to={`/new/${a.id}`}>
                 <h3>{a.name}</h3>
                 <p>{a.description}</p>
+
+                <h4>Requirements</h4>
+                <table>
+                  <tbody>
+                    {a.requirements.map(r => <tr key={r.name}><th>{r.name}</th><td>{r.description}</td></tr>)}
+                  </tbody>
+                </table>
               </Link>
             </li>
           )}
