@@ -212,9 +212,9 @@ func generateService(id, availability string) piazza.Service {
 			"test-description",
 			availability,
 			map[string]string{
-				"imageReq - Bands":      "3,6",
-				"imageReq - CloudCover": "10%",
-				"imageReq - Coastline":  "Yes",
+				"imgReq - Bands":      "3,6",
+				"imgReq - CloudCover": "10%",
+				"imgReq - Coastline":  "Yes",
 			},
 		}}
 }

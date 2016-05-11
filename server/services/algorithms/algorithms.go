@@ -15,7 +15,7 @@ const (
 	OutOfService    = "OUT OF SERVICE"
 
 	// Image Requirements
-	RequirementPrefix    = "imageReq - "
+	RequirementPrefix    = "imgReq - "
 	Bands                = "Bands"
 	CloudCover           = "CloudCover"
 	NormalizedCloudCover = "Cloud Cover"
