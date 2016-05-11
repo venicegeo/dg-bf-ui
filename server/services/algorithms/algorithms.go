@@ -29,17 +29,19 @@ type (
 var (
 	cache    map[string]*beachfront.Algorithm
 	cacheTTL time.Duration
+	quit     chan struct{}
 )
 
 func Initialize(client client, disableWorkers bool) {
-	initializeCache()
+	initializeCache(defaultCacheTTL)
+	initializeQuitChannel()
 
 	logger := logger.New()
 	if disableWorkers {
 		logger.Info("Background tasks disabled by config")
 	} else {
 		logger.Info("Starting background tasks")
-		go cacheWorker(client, true)
+		go cacheWorker(client, quit)
 	}
 }
 
@@ -53,14 +55,18 @@ func List() []beachfront.Algorithm {
 
 func Reset() {
 	cache = nil
-	cacheTTL = defaultCacheTTL
+	cacheTTL = 0
+	if quit != nil {
+		close(quit)
+		quit = nil
+	}
 }
 
 //
 // Internals
 //
 
-func cacheWorker(client client, forever bool) {
+func cacheWorker(client client, quit chan struct{}) {
 	for {
 		logger := logger.New()
 		logger.Info("Refreshing algorithm cache")
@@ -71,11 +77,13 @@ func cacheWorker(client client, forever bool) {
 			}
 			cache = current
 		}
-		if forever {
+		select {
+		case <-quit:
+			logger.Debug("Received quit signal")
+			return
+		default:
 			logger.Info("Next refresh in %d minute(s)", cacheTTL/time.Minute)
 			time.Sleep(cacheTTL)
-		} else {
-			return
 		}
 	}
 }
@@ -129,9 +137,13 @@ func fetch(client client) ([]beachfront.Algorithm, error) {
 	return convert(services), nil
 }
 
-func initializeCache() {
-	cacheTTL = defaultCacheTTL
+func initializeCache(ttl time.Duration) {
+	cacheTTL = ttl
 	cache = make(map[string]*beachfront.Algorithm)
+}
+
+func initializeQuitChannel() {
+	quit = make(chan struct{})
 }
 
 func normalizeRequirement(key, value string) (name, description string) {

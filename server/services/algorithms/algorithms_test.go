@@ -8,6 +8,8 @@ import (
 	"time"
 )
 
+const cacheTTLOverride = 1 * time.Millisecond
+
 func TestInitialize_BootstrapsCache(t *testing.T) {
 	defer teardown()
 
@@ -62,13 +64,12 @@ func TestList_ReturnsCachedAlgorithms(t *testing.T) {
 	assert.Len(t, algorithms, 1)
 }
 
-func TestWorker_GracefullyHandlesErrors(t *testing.T) { t.Skip() }
 func TestCacheWorker_PopulatesCache(t *testing.T) {
 	setup()
 	defer teardown()
 
 	client := spy{}
-	cacheWorker(client, false)
+	cacheWorker(client, closeImmediately())
 
 	assert.Len(t, cache, 1)
 	assert.Contains(t, cache, "test-algo-1")
@@ -79,7 +80,7 @@ func TestCacheWorker_ExtractsRequirementsFromMetadata(t *testing.T) {
 	defer teardown()
 
 	client := spy{}
-	cacheWorker(client, false)
+	cacheWorker(client, closeImmediately())
 
 	algorithm := cache["test-algo-1"]
 	assert.Len(t, algorithm.Requirements, 3)
@@ -88,9 +89,67 @@ func TestCacheWorker_ExtractsRequirementsFromMetadata(t *testing.T) {
 	assert.Contains(t, algorithm.Requirements, beachfront.AlgorithmRequirement{"Coastline", "Yes"})
 }
 
-func TestWorker_RecoversFromErrors(t *testing.T) { t.Skip() }
+func TestCacheWorker_IgnoresDisabledServices(t *testing.T) {
+	setup()
+	defer teardown()
 
-func TestWorker_RespectsCacheTTL(t *testing.T) { t.Skip() }
+	client := &spy{
+		get: func(params piazza.SearchParameters) ([]piazza.Service, error) {
+			return []piazza.Service{generateService("test-disabled-algo", OutOfService)}, nil
+		}}
+	channel := closeImmediately()
+	cacheWorker(client, channel)
+
+	assert.Len(t, cache, 0)
+}
+
+func TestCacheWorker_GracefullyHandlesErrors(t *testing.T) {
+	setup()
+	defer teardown()
+
+	client := &spy{
+		get: func(params piazza.SearchParameters) ([]piazza.Service, error) {
+			return nil, errors.New("forced-error")
+		}}
+	channel := closeImmediately()
+	cacheWorker(client, channel)
+
+	assert.Len(t, cache, 0, "Smoke check (no panic means success)")
+}
+
+func TestCacheWorker_RecoversFromErrors(t *testing.T) {
+	setup()
+	defer teardown()
+
+	timesCalled := 0
+	client := &spy{
+		get: func(params piazza.SearchParameters) ([]piazza.Service, error) {
+			timesCalled += 1
+			return nil, errors.New("forced-error")
+		}}
+	channel := closeIn(2 * time.Millisecond)
+	go cacheWorker(client, channel)
+
+	time.Sleep(2 * time.Millisecond)
+	assert.Equal(t, 2, timesCalled)
+}
+
+func TestCacheWorker_CompliesWithCacheTTL(t *testing.T) {
+	setup()
+	defer teardown()
+
+	timesCalled := 0
+	client := &spy{
+		get: func(params piazza.SearchParameters) ([]piazza.Service, error) {
+			timesCalled += 1
+			return []piazza.Service{generateService("test-algo-id", "")}, nil
+		}}
+	channel := closeIn(2 * time.Millisecond)
+	go cacheWorker(client, channel)
+
+	time.Sleep(2 * time.Millisecond)
+	assert.Equal(t, 2, timesCalled)
+}
 
 //
 // Helpers
@@ -105,10 +164,24 @@ func (s spy) GetServices(params piazza.SearchParameters) ([]piazza.Service, erro
 	if s.get != nil {
 		return s.get(params)
 	}
-	return []piazza.Service{
-		generateService("test-algo-1", ""),
-		generateService("test-algo-2", OutOfService),
-	}, nil
+	return []piazza.Service{generateService("test-algo-1", "")}, nil
+}
+
+func closeImmediately() chan struct{} {
+	return closeIn(0 * time.Millisecond)
+}
+
+func closeIn(duration time.Duration) chan struct{} {
+	channel := make(chan struct{})
+	if duration == 0*time.Millisecond {
+		close(channel)
+	} else {
+		go func() {
+			time.Sleep(duration)
+			close(channel)
+		}()
+	}
+	return channel
 }
 
 func generateService(id, availability string) piazza.Service {
@@ -132,7 +205,8 @@ func generateService(id, availability string) piazza.Service {
 }
 
 func setup() {
-	initializeCache()
+	initializeCache(cacheTTLOverride)
+	initializeQuitChannel()
 }
 
 func teardown() {
