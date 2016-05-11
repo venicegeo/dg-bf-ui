@@ -11,8 +11,7 @@ export default class About extends Component {
     return (
       <Modal className={styles.root} dismiss={this.props.dismiss}>
         <h1>Welcome to Beachfront</h1>
-        <p>This isn't your average sandcastle...</p>
-        <p>Beachfront is an application that is dedicated to producing shoreline vector data all over the world as new imagery becomes available. And the best part, it does it automatically while you sit with your toes in the sand.</p>
+        <p>Beachfront is an NGA Services project aimed at providing automated near real time feature extraction of global shoreline captured at the best possible resolution based on available sources. Beachfront leverages computer vision algorithm services, the Piazza Platform, and incoming satellite imagery to provide this capability.</p>
       </Modal>
     )
   }
