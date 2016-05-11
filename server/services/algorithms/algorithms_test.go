@@ -1,11 +1,13 @@
 package algorithms
 
 import (
+	"errors"
+	"testing"
+	"time"
+
 	"github.com/stretchr/testify/assert"
 	"github.com/venicegeo/bf-ui/server/domain"
 	"github.com/venicegeo/bf-ui/server/services/piazza"
-	"testing"
-	"time"
 )
 
 const cacheTTLOverride = 1 * time.Millisecond
@@ -14,6 +16,7 @@ func TestInitialize_BootstrapsCache(t *testing.T) {
 	defer teardown()
 
 	Initialize(spy{}, true)
+
 	assert.NotNil(t, cache)
 	assert.Len(t, cache, 0)
 }
@@ -29,6 +32,7 @@ func TestInitialize_CanEnableWorker(t *testing.T) {
 		}}
 
 	Initialize(client, false)
+
 	time.Sleep(5 * time.Millisecond)
 	assert.Equal(t, 1, timesCalled)
 }
@@ -44,6 +48,7 @@ func TestInitialize_CanDisableWorker(t *testing.T) {
 		}}
 
 	Initialize(client, true)
+
 	assert.Equal(t, 0, timesCalled)
 }
 
@@ -52,6 +57,7 @@ func TestList(t *testing.T) {
 	defer teardown()
 
 	algorithms := List()
+
 	assert.Len(t, algorithms, 0)
 }
 
@@ -61,6 +67,7 @@ func TestList_ReturnsCachedAlgorithms(t *testing.T) {
 
 	cache["test"] = &beachfront.Algorithm{}
 	algorithms := List()
+
 	assert.Len(t, algorithms, 1)
 }
 
@@ -69,7 +76,9 @@ func TestCacheWorker_PopulatesCache(t *testing.T) {
 	defer teardown()
 
 	client := spy{}
-	cacheWorker(client, closeImmediately())
+	channel := closeImmediately()
+
+	cacheWorker(client, channel)
 
 	assert.Len(t, cache, 1)
 	assert.Contains(t, cache, "test-algo-1")
@@ -80,7 +89,9 @@ func TestCacheWorker_ExtractsRequirementsFromMetadata(t *testing.T) {
 	defer teardown()
 
 	client := spy{}
-	cacheWorker(client, closeImmediately())
+	channel := closeImmediately()
+
+	cacheWorker(client, channel)
 
 	algorithm := cache["test-algo-1"]
 	assert.Len(t, algorithm.Requirements, 3)
@@ -98,6 +109,7 @@ func TestCacheWorker_IgnoresDisabledServices(t *testing.T) {
 			return []piazza.Service{generateService("test-disabled-algo", OutOfService)}, nil
 		}}
 	channel := closeImmediately()
+
 	cacheWorker(client, channel)
 
 	assert.Len(t, cache, 0)
@@ -112,6 +124,7 @@ func TestCacheWorker_GracefullyHandlesErrors(t *testing.T) {
 			return nil, errors.New("forced-error")
 		}}
 	channel := closeImmediately()
+
 	cacheWorker(client, channel)
 
 	assert.Len(t, cache, 0, "Smoke check (no panic means success)")
@@ -128,6 +141,7 @@ func TestCacheWorker_RecoversFromErrors(t *testing.T) {
 			return nil, errors.New("forced-error")
 		}}
 	channel := closeIn(2 * time.Millisecond)
+
 	go cacheWorker(client, channel)
 
 	time.Sleep(2 * time.Millisecond)
@@ -145,6 +159,7 @@ func TestCacheWorker_CompliesWithCacheTTL(t *testing.T) {
 			return []piazza.Service{generateService("test-algo-id", "")}, nil
 		}}
 	channel := closeIn(2 * time.Millisecond)
+
 	go cacheWorker(client, channel)
 
 	time.Sleep(2 * time.Millisecond)

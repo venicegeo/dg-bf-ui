@@ -1,14 +1,14 @@
 package services
 
 import (
+	"github.com/venicegeo/bf-ui/server/common/configuration"
+	"github.com/venicegeo/bf-ui/server/common/logger"
 	"github.com/venicegeo/bf-ui/server/domain"
 	"github.com/venicegeo/bf-ui/server/services/algorithms"
 	"github.com/venicegeo/bf-ui/server/services/imagery"
 	"github.com/venicegeo/bf-ui/server/services/jobs"
 	"github.com/venicegeo/bf-ui/server/services/piazza"
 	"github.com/venicegeo/bf-ui/server/services/results"
-	"github.com/venicegeo/bf-ui/server/common/configuration"
-	"github.com/venicegeo/bf-ui/server/common/logger"
 )
 
 var client piazza.Client

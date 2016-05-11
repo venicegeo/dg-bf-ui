@@ -1,16 +1,17 @@
 package results
 
 import (
-	"github.com/stretchr/testify/assert"
-	"github.com/venicegeo/bf-ui/server/services/piazza"
 	"net/http"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
+	"github.com/venicegeo/bf-ui/server/services/piazza"
 )
 
 func TestGetResult(t *testing.T) {
 	client := fileSpy{}
-
 	data, err := Get(client, ID_COMMAND_OUTPUT)
+
 	assert.Nil(t, err)
 	assert.Equal(t, []byte(GEOJSON), data)
 }
@@ -26,6 +27,7 @@ func TestGetResult_GracefullyHandlesErrorsBeforeResolution(t *testing.T) {
 		}}
 
 	data, err := Get(client, "test-throws-http-error")
+
 	assert.Error(t, err)
 	assert.Nil(t, data)
 	assert.Equal(t, 1, timesCalled)
@@ -45,10 +47,10 @@ func TestGetResult_GracefullyHandlesErrorsAfterResolution(t *testing.T) {
 		}}
 
 	data, err := Get(client, "test-throws-http-error-after-resolution")
+
 	assert.Error(t, err)
 	assert.Nil(t, data)
 	assert.Equal(t, 2, timesCalled)
-
 }
 
 func TestGetResult_GracefullyHandlesFunkyMetadata(t *testing.T) {
@@ -61,6 +63,7 @@ func TestGetResult_GracefullyHandlesFunkyMetadata(t *testing.T) {
 		}}
 
 	data, err := Get(client, "test-yields-funky-metadata")
+
 	assert.Error(t, err)
 	assert.Nil(t, data)
 	assert.Equal(t, 1, timesCalled)
@@ -76,6 +79,7 @@ func TestGetResult_GracefullyHandlesAbsentMetadata(t *testing.T) {
 		}}
 
 	data, err := Get(client, "test-yields-absent-metadata")
+
 	assert.Error(t, err)
 	assert.Nil(t, data)
 	assert.Equal(t, 1, timesCalled)

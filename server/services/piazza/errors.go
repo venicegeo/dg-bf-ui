@@ -12,7 +12,7 @@ type (
 
 	ErrInvalidResponse struct {
 		Contents []byte
-		Message string
+		Message  string
 	}
 )
 

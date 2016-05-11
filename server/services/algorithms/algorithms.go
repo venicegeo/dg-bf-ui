@@ -4,9 +4,10 @@ import (
 	"fmt"
 	"strings"
 	"time"
+
+	"github.com/venicegeo/bf-ui/server/common/logger"
 	"github.com/venicegeo/bf-ui/server/domain"
 	"github.com/venicegeo/bf-ui/server/services/piazza"
-	"github.com/venicegeo/bf-ui/server/common/logger"
 )
 
 const (
@@ -67,8 +68,8 @@ func Reset() {
 //
 
 func cacheWorker(client client, quit chan struct{}) {
+	logger := logger.New()
 	for {
-		logger := logger.New()
 		logger.Info("Refreshing algorithm cache")
 		if algorithms, err := fetch(client); err == nil {
 			current := make(map[string]*beachfront.Algorithm, 0)

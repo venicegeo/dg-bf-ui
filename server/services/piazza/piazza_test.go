@@ -1,11 +1,12 @@
 package piazza
 
 import (
-	"github.com/jarcoal/httpmock"
-	"github.com/stretchr/testify/assert"
 	"io/ioutil"
 	"net/http"
 	"testing"
+
+	"github.com/jarcoal/httpmock"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestInstantiate(t *testing.T) {
@@ -27,6 +28,7 @@ func TestGetFile(t *testing.T) {
 
 	client := NewClient("http://m")
 	_, err := client.GetFile("test-id")
+
 	assert.NoError(t, err)
 }
 
@@ -39,6 +41,7 @@ func TestGetFile_HandlesHttpErrorsGracefully(t *testing.T) {
 
 	client := NewClient("http://m")
 	contents, err := client.GetFile("test-id")
+
 	assert.Nil(t, contents)
 	assert.Error(t, err)
 }
@@ -52,6 +55,7 @@ func TestGetFile_DoesNotModifyPayload(t *testing.T) {
 
 	client := NewClient("http://m")
 	contents, _ := client.GetFile("test-id")
+
 	assert.Equal(t, []byte(PZ_FILE_RESPONSE), contents)
 }
 
@@ -64,6 +68,7 @@ func TestGetServices(t *testing.T) {
 
 	client := NewClient("http://m")
 	services, err := client.GetServices(SearchParameters{"test-pattern"})
+
 	assert.NoError(t, err)
 	assert.Len(t, services, 2)
 }
@@ -77,6 +82,7 @@ func TestGetServices_DeserializesMetadata(t *testing.T) {
 
 	client := NewClient("http://m")
 	services, _ := client.GetServices(SearchParameters{"test-pattern"})
+
 	assert.Equal(t, "test-id-1", services[0].ID)
 	assert.Equal(t, "test-name", services[0].ResourceMetadata.Name)
 	assert.Equal(t, "test-description", services[0].ResourceMetadata.Description)
@@ -106,6 +112,7 @@ func TestGetServices_HandlesHttpErrorsGracefully(t *testing.T) {
 
 	client := NewClient("http://m")
 	services, err := client.GetServices(SearchParameters{"test-pattern"})
+
 	assert.Nil(t, services)
 	assert.Error(t, err)
 }
@@ -119,6 +126,7 @@ func TestGetStatus(t *testing.T) {
 
 	client := NewClient("http://m")
 	status, err := client.GetStatus("test-id")
+
 	assert.Nil(t, err)
 	assert.NotNil(t, status)
 }
@@ -132,6 +140,7 @@ func TestGetStatus_JobRunning(t *testing.T) {
 
 	client := NewClient("http://m")
 	status, _ := client.GetStatus("test-id")
+
 	assert.Equal(t, "test-id", status.JobID)
 	assert.Equal(t, StatusRunning, status.Status)
 	assert.Empty(t, status.Result.DataID)
@@ -147,6 +156,7 @@ func TestGetStatus_JobSucceeded(t *testing.T) {
 
 	client := NewClient("http://m")
 	status, _ := client.GetStatus("test-id")
+
 	assert.Equal(t, "test-id", status.JobID)
 	assert.Equal(t, StatusSuccess, status.Status)
 	assert.Equal(t, "test-data-id", status.Result.DataID)
@@ -162,6 +172,7 @@ func TestGetStatus_JobFailed(t *testing.T) {
 
 	client := NewClient("http://m")
 	status, _ := client.GetStatus("test-id")
+
 	assert.Equal(t, "test-id", status.JobID)
 	assert.Equal(t, StatusError, status.Status)
 	assert.Empty(t, status.Message)
@@ -177,6 +188,7 @@ func TestGetStatus_JobNotFound(t *testing.T) {
 
 	client := NewClient("http://m")
 	status, err := client.GetStatus("test-id")
+
 	assert.Nil(t, status)
 	assert.Error(t, err)
 }
@@ -190,6 +202,7 @@ func TestGetStatus_HandlesHttpErrorsGracefully(t *testing.T) {
 
 	client := NewClient("http://m")
 	status, err := client.GetStatus("test-id")
+
 	assert.Nil(t, status)
 	assert.Error(t, err)
 }
@@ -203,6 +216,7 @@ func TestPost(t *testing.T) {
 
 	client := NewClient("http://m")
 	id, err := client.Post(Message{Type: "test-type", Data: "test-data"})
+
 	assert.Equal(t, "test-id", id)
 	assert.Nil(t, err)
 }
@@ -232,6 +246,7 @@ func TestPost_HandlesHttpErrorsGracefully(t *testing.T) {
 
 	client := NewClient("http://m")
 	id, err := client.Post(Message{Type: "test-type", Data: "test-data"})
+
 	assert.Empty(t, id)
 	assert.Error(t, err)
 }

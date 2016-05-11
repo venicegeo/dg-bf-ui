@@ -4,8 +4,9 @@ import (
 	"encoding/json"
 	"fmt"
 	"regexp"
-	"github.com/venicegeo/bf-ui/server/services/piazza"
+
 	"github.com/venicegeo/bf-ui/server/common/logger"
+	"github.com/venicegeo/bf-ui/server/services/piazza"
 )
 
 type (

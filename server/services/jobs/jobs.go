@@ -4,9 +4,10 @@ import (
 	"fmt"
 	"strings"
 	"time"
+
+	"github.com/venicegeo/bf-ui/server/common/logger"
 	"github.com/venicegeo/bf-ui/server/domain"
 	"github.com/venicegeo/bf-ui/server/services/piazza"
-	"github.com/venicegeo/bf-ui/server/common/logger"
 )
 
 const (
@@ -68,7 +69,7 @@ func Execute(client client, job beachfront.Job) (jobId string, err error) {
 	job.Status = piazza.StatusRunning
 	cache[jobId] = &job
 
-	go dispatch(client, &job)
+	go dispatchWorker(client, &job)
 
 	return
 }
@@ -85,7 +86,7 @@ func List() []beachfront.Job {
 	return jobs
 }
 
-func PollingMaxAttempts(value int) {
+func SetPollingMaxAttempts(value int) {
 	pollingMaximumAttempts = value
 }
 
@@ -103,7 +104,7 @@ func SetPollingInterval(value time.Duration) {
 // Internals
 //
 
-func dispatch(client piazza.JobRetriever, job *beachfront.Job) {
+func dispatchWorker(client piazza.JobRetriever, job *beachfront.Job) {
 	logger := logger.New()
 
 	var status *piazza.Status

@@ -1,15 +1,16 @@
 package main
 
 import (
+	"net/http"
+	"strings"
+
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/engine/standard"
 	"github.com/labstack/echo/middleware"
-	"github.com/venicegeo/bf-ui/server/domain"
-	"github.com/venicegeo/bf-ui/server/services"
 	"github.com/venicegeo/bf-ui/server/common/configuration"
 	"github.com/venicegeo/bf-ui/server/common/logger"
-	"net/http"
-	"strings"
+	"github.com/venicegeo/bf-ui/server/domain"
+	"github.com/venicegeo/bf-ui/server/services"
 )
 
 func main() {

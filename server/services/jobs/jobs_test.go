@@ -2,13 +2,14 @@ package jobs
 
 import (
 	"encoding/json"
-	"github.com/stretchr/testify/assert"
-	"github.com/venicegeo/bf-ui/server/domain"
-	"github.com/venicegeo/bf-ui/server/services/piazza"
 	"net/http"
 	"regexp"
 	"testing"
 	"time"
+
+	"github.com/stretchr/testify/assert"
+	"github.com/venicegeo/bf-ui/server/domain"
+	"github.com/venicegeo/bf-ui/server/services/piazza"
 )
 
 func TestInitialize(t *testing.T) {
@@ -24,6 +25,7 @@ func TestExecute(t *testing.T) {
 
 	client := spy{}
 	id, err := Execute(client, newJob())
+
 	assert.Nil(t, err)
 	assert.Equal(t, "test-id", id)
 }
@@ -37,7 +39,6 @@ func TestExecute_SubmitsProperlyFormattedMessage(t *testing.T) {
 			serialized, _ := json.Marshal(message)
 			pattern := regexp.MustCompile(`Beachfront_[^"]+\.geojson`)
 			assert.JSONEq(t, PZ_EXECUTION_MESSAGE, pattern.ReplaceAllString(string(serialized), "test-output-filename.geojson"))
-
 			return "test-id", nil
 		}}
 
@@ -76,7 +77,7 @@ func TestExecute_GracefullyHandlesErrors(t *testing.T) {
 	defer teardown()
 
 	SetPollingInterval(0)
-	PollingMaxAttempts(2)
+	SetPollingMaxAttempts(2)
 
 	timesPolled := 0
 
@@ -93,7 +94,6 @@ func TestExecute_GracefullyHandlesErrors(t *testing.T) {
 	id, err := Execute(client, newJob())
 
 	time.Sleep(5 * time.Millisecond)
-
 	assert.Error(t, err)
 	assert.Empty(t, id)
 	assert.Equal(t, 0, timesPolled)
@@ -104,7 +104,7 @@ func TestExecute_Dispatches(t *testing.T) {
 	defer teardown()
 
 	SetPollingInterval(0)
-	PollingMaxAttempts(0)
+	SetPollingMaxAttempts(0)
 
 	statusRequested := expectedIn(10 * time.Millisecond)
 
@@ -129,7 +129,7 @@ func TestDispatch_HaltsAfterMaxAttemptsReached(t *testing.T) {
 	defer teardown()
 
 	SetPollingInterval(0)
-	PollingMaxAttempts(2)
+	SetPollingMaxAttempts(2)
 
 	timesCalled := 0
 
@@ -142,10 +142,10 @@ func TestDispatch_HaltsAfterMaxAttemptsReached(t *testing.T) {
 				Status: piazza.StatusRunning,
 			}, nil
 		}}
-
 	job := newJob()
 	job.ID = "test-zombie"
-	dispatch(client, &job)
+
+	dispatchWorker(client, &job)
 
 	time.Sleep(5 * time.Millisecond)
 	assert.Equal(t, 2, timesCalled)
@@ -156,7 +156,7 @@ func TestDispatch_HaltsOnHttpError(t *testing.T) {
 	defer teardown()
 
 	SetPollingInterval(0)
-	PollingMaxAttempts(2)
+	SetPollingMaxAttempts(2)
 
 	timesCalled := 0
 
@@ -166,10 +166,10 @@ func TestDispatch_HaltsOnHttpError(t *testing.T) {
 			return nil, piazza.ErrHttp{
 				&http.Response{StatusCode: http.StatusServiceUnavailable}}
 		}}
-
 	job := newJob()
 	job.ID = "test-throws-http-error"
-	dispatch(client, &job)
+
+	dispatchWorker(client, &job)
 
 	time.Sleep(5 * time.Millisecond)
 	assert.Equal(t, 1, timesCalled)
@@ -180,19 +180,18 @@ func TestDispatch_HaltsOnPiazzaError(t *testing.T) {
 	defer teardown()
 
 	SetPollingInterval(0)
-	PollingMaxAttempts(2)
+	SetPollingMaxAttempts(2)
 
 	timesCalled := 0
-
 	client := spy{
 		get: func(id string) (*piazza.Status, error) {
 			timesCalled += 1
 			return nil, piazza.ErrInvalidResponse{[]byte{}, "Forced error"}
 		}}
-
 	job := newJob()
 	job.ID = "test-throws-pz-error"
-	dispatch(client, &job)
+
+	dispatchWorker(client, &job)
 
 	time.Sleep(5 * time.Millisecond)
 	assert.Equal(t, 1, timesCalled)
@@ -203,23 +202,22 @@ func TestDispatch_HaltsOnStatusError(t *testing.T) {
 	defer teardown()
 
 	SetPollingInterval(0)
-	PollingMaxAttempts(2)
+	SetPollingMaxAttempts(2)
 
 	timesCalled := 0
-
 	client := spy{
 		get: func(id string) (*piazza.Status, error) {
 			timesCalled += 1
 			return &piazza.Status{
-				JobID: "test-status-error",
-				Type: "status",
+				JobID:  "test-status-error",
+				Type:   "status",
 				Status: piazza.StatusError,
 			}, nil
 		}}
-
 	job := newJob()
 	job.ID = "test-status-error"
-	dispatch(client, &job)
+
+	dispatchWorker(client, &job)
 
 	time.Sleep(5 * time.Millisecond)
 	assert.Equal(t, 1, timesCalled)
@@ -230,10 +228,9 @@ func TestDispatch_HaltsOnSuccess(t *testing.T) {
 	defer teardown()
 
 	SetPollingInterval(0)
-	PollingMaxAttempts(2)
+	SetPollingMaxAttempts(2)
 
 	timesCalled := 0
-
 	client := spy{
 		get: func(id string) (*piazza.Status, error) {
 			timesCalled += 1
@@ -244,10 +241,10 @@ func TestDispatch_HaltsOnSuccess(t *testing.T) {
 				Result: struct{ DataID string }{"test-result-id"},
 			}, nil
 		}}
-
 	job := newJob()
 	job.ID = "test-great-success"
-	dispatch(client, &job)
+
+	dispatchWorker(client, &job)
 
 	time.Sleep(5 * time.Millisecond)
 	assert.Equal(t, 1, timesCalled)
@@ -258,16 +255,16 @@ func TestDispatch_SetsJobStatusOnError(t *testing.T) {
 	defer teardown()
 
 	SetPollingInterval(0)
-	PollingMaxAttempts(2)
+	SetPollingMaxAttempts(2)
 
 	client := spy{
 		get: func(id string) (*piazza.Status, error) {
 			return nil, piazza.ErrInvalidResponse{[]byte{}, "Forced error"}
 		}}
-
 	job := newJob()
 	job.ID = "test-throws-pz-error"
-	dispatch(client, &job)
+
+	dispatchWorker(client, &job)
 
 	time.Sleep(5 * time.Millisecond)
 	assert.Equal(t, job.Status, piazza.StatusError)
@@ -278,20 +275,20 @@ func TestDispatch_SetsJobStatusOnStatusError(t *testing.T) {
 	defer teardown()
 
 	SetPollingInterval(0)
-	PollingMaxAttempts(2)
+	SetPollingMaxAttempts(2)
 
 	client := spy{
 		get: func(id string) (*piazza.Status, error) {
 			return &piazza.Status{
-				JobID: "test-status-error",
-				Type: "status",
+				JobID:  "test-status-error",
+				Type:   "status",
 				Status: piazza.StatusError,
-			},nil
+			}, nil
 		}}
-
 	job := newJob()
 	job.ID = "test-status-error"
-	dispatch(client, &job)
+
+	dispatchWorker(client, &job)
 
 	time.Sleep(5 * time.Millisecond)
 	assert.Equal(t, job.Status, piazza.StatusError)
@@ -302,7 +299,7 @@ func TestDispatch_SetsJobStatusOnSuccess(t *testing.T) {
 	defer teardown()
 
 	SetPollingInterval(0)
-	PollingMaxAttempts(2)
+	SetPollingMaxAttempts(2)
 
 	client := spy{
 		get: func(id string) (*piazza.Status, error) {
@@ -313,10 +310,10 @@ func TestDispatch_SetsJobStatusOnSuccess(t *testing.T) {
 				Result: struct{ DataID string }{"test-result-id"},
 			}, nil
 		}}
-
 	job := newJob()
 	job.ID = "test-great-success"
-	dispatch(client, &job)
+
+	dispatchWorker(client, &job)
 
 	time.Sleep(5 * time.Millisecond)
 	assert.Equal(t, job.Status, piazza.StatusSuccess)
@@ -327,6 +324,7 @@ func TestList(t *testing.T) {
 	defer teardown()
 
 	jobs := List()
+
 	assert.Len(t, jobs, 0)
 }
 
@@ -335,7 +333,9 @@ func TestList_ReturnsCachedJobs(t *testing.T) {
 	defer teardown()
 
 	populateCache()
+
 	jobs := List()
+
 	assert.Len(t, jobs, 1)
 }
 
