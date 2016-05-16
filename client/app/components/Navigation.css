@@ -1,37 +1,31 @@
-@import '../styles/constants/layout.less';
+@import '../styles/base/layout.css';
 
 .root {
-  z-index: @ZIndexNavigation;
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 50px;
+  composes: navigation from '../styles/common/layout.css';
   background-image: linear-gradient(to bottom, #54b4eb, #2fa4e7 60%, #1d9ce5);
-  border-bottom: 1px solid #178acc;
+  border-right: 1px solid #178acc;
   color: white;
-  text-shadow: 1px 1px fade(black, 20%);
+  text-shadow: 1px 1px rgba(0,0,0, .2);
 }
 
 .root ul {
   display: flex;
+  flex-direction: column;
   list-style: none;
   margin: 0;
   padding: 0;
-  align-items: center;
+  align-items: stretch;
 }
 
 .root li {
   margin: 0;
   padding: 0;
-  min-width: 100px;
 }
 
 .banner {
   color: inherit;
   font-weight: bold;
   font-size: 20px;
-  min-width: 150px;
 }
 
 .root a {
@@ -40,7 +34,8 @@
   padding: 0 .5em;
   color: inherit;
   text-decoration: none;
-  &:hover {
-    background-image: linear-gradient(to bottom, hsla(199, 100%, 37%, 0.2) 30%, hsla(202, 100%, 100%, 0.2));
-  }
+}
+
+.root a:hover {
+  background-color: rgba(0,0,0,.1);
 }

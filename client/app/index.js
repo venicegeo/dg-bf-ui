@@ -1,5 +1,4 @@
-import 'font-awesome/css/font-awesome.css'
-import './styles/index.less'
+import './styles/index.css'
 import {bootstrap} from './router'
 
 const root = document.createElement('div')

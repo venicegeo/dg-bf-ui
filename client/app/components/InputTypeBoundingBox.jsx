@@ -1,7 +1,7 @@
 import React, {Component} from 'react'
 import ol from 'openlayers'
 import {TILE_PROVIDERS} from '../config'
-import styles from './InputTypeBoundingBox.less'
+import styles from './InputTypeBoundingBox.css'
 
 const [DEFAULT_TILE_PROVIDER] = TILE_PROVIDERS
 

@@ -1,5 +1,5 @@
 import React, {Component} from 'react'
-import styles from '../styles/shared/fields.less'
+import styles from '../styles/common/forms.css'
 
 export const TYPE_TEXT = 'text'
 

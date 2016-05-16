@@ -1,4 +1,4 @@
-import styles from './Application.less'
+import styles from './Application.css'
 import React, {Component} from 'react'
 import Navigation from './Navigation'
 import PrimaryMap from './PrimaryMap'

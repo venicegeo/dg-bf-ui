@@ -1,7 +1,7 @@
 import 'openlayers/dist/ol.css'
 import React, {Component} from 'react'
 import openlayers from 'openlayers'
-import styles from './PrimaryMap.less'
+import styles from './PrimaryMap.css'
 import {TILE_PROVIDERS} from '../config'
 
 const INITIAL_CENTER = [-20, 0]

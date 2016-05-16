@@ -40,8 +40,8 @@ module.exports = {
     ],
     loaders: [
       {test: /\.jsx?$/, loader: 'babel', exclude: /node_modules/},
-      {test: /\.css$/, loader: 'style!css'},
-      {test: /\.less$/, loader: 'style!css?module&localIdentName=[name]__[local]!less'},
+      {test: /\.css$/, loader: 'style!css', include: /node_modules/},
+      {test: /\.css$/, loader: 'style!css?module&localIdentName=[name]__[local]', exclude: /node_modules/},
       {test: /\.(png|jpg|gif)$/, loader: 'file'},
       {test: /\.(otf|eot|svg|ttf|woff)[^/]*$/, loader: 'file'}
     ]

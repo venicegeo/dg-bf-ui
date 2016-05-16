@@ -1,19 +1,5 @@
 .root {
-  position: absolute;
-  left: 50px;
-  bottom: 75px;
-  padding: 0;
-  width: 400px;
-  height: 500px;
-  background-color: white;
-  z-index: 9999;
-  list-style: none;
-  overflow-y: auto;
-  border-radius: 3px;
-  box-shadow:
-      0 0 0 1px rgba(0,0,0,.5),
-      0 0 0 15px rgba(255,255,255,.6);
-  font-size: 16px;
+  composes: submenu from '../styles/common/menus.css';
 }
 
 .header {
@@ -47,9 +33,10 @@
   font-weight: normal;
   font-size: 13px;
   color: #175B82;
-  &:hover {
-    color: forestgreen;
-  }
+}
+
+.job a:hover {
+  color: forestgreen;
 }
 
 .job a + a {
