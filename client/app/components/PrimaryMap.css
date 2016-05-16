@@ -1,5 +1,3 @@
-@import 'openlayers/dist/ol.css';
-
 .root {
   composes: map from '../styles/common/layout.css';
 }
