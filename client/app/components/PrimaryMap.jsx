@@ -1,6 +1,8 @@
 import 'openlayers/dist/ol.css'
 import React, {Component} from 'react'
 import openlayers from 'openlayers'
+import ExportControl from '../utils/openlayers.ExportControl.js'
+import SearchControl from '../utils/openlayers.SearchControl.js'
 import styles from './PrimaryMap.css'
 import {TILE_PROVIDERS} from '../config'
 
@@ -40,13 +42,6 @@ export default class PrimaryMap extends Component {
   render() {
     return (
       <div className={styles.root} ref="container">
-        <div className={styles.download} title="Click to export an image of this map">
-          <a ref="downloadButton"
-             download="map.png"
-             onClick={this._export}>
-            <i className="fa fa-download"/>
-          </a>
-        </div>
         <ul className={styles.basemaps}>
           {this._basemaps.map((layer, i) => <li className={this.state.basemapIndex === i ? styles.active : ''} key={i} onClick={() => this.setState({basemapIndex: i})}>{layer.get('name')}</li>)}
         </ul>
@@ -138,7 +133,9 @@ function generateControls() {
     new openlayers.control.MousePosition({
       coordinateFormat: openlayers.coordinate.toStringHDMS
     }),
-    new openlayers.control.FullScreen()
+    new openlayers.control.FullScreen(),
+    new ExportControl(styles.export),
+    new SearchControl(styles.search)
   ])
 }
 

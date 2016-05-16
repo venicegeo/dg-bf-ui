@@ -2,31 +2,44 @@
   composes: map from '../styles/common/layout.css';
 }
 
-.download {
-  composes: global(ol-unselectable);
+.search {
+  composes: global(ol-unselectable) global(ol-control);
+  z-index: 2;
+  position: absolute;
+  top: 3em;
+  right: .5em;
+}
+
+.export {
+  composes: global(ol-unselectable) global(ol-control);
+  z-index: 2;
   display: inline-block;
   position: absolute;
-  top: 38px;
-  right: 6px;
+  top: .5em;
+  right: 3em;
 }
 
-.download a {
-  display: inline-block;
-  padding: .3em;
-  border-radius: 3px;
-  background-color: black;
-  opacity: .3;
-  line-height: 1em;
-  font-size: 17px;
-  color: white;
+.export a {
+  display: block;
+  margin: 1px;
+  padding: 0;
+  color: #fff;
+  font-size: 1.14em;
+  font-weight: 700;
+  text-decoration: none;
+  text-align: center;
+  height: 1.375em;
+  width: 1.375em;
+  vertical-align: text-bottom;
+  line-height: 1.5em;
+  background-color: rgba(0,60,136,.5);
+  border: none;
+  border-radius: 2px;
 }
 
-.download a:hover {
-  opacity: .3;
-}
-
-.download a:active {
-  opacity: .5;
+.export a:hover {
+  text-decoration: none;
+  background-color: rgba(0,60,136,.7);
 }
 
 .basemaps {
