@@ -62,6 +62,7 @@ export default class PrimaryMap extends Component {
     this._basemaps = generateBasemapLayers(TILE_PROVIDERS)
     this._map = new openlayers.Map({
       controls: generateControls(),
+      interactions: generateInteractions(),
       layers: this._basemaps,
       target: this.refs.container,
       view: new openlayers.View({
@@ -163,6 +164,14 @@ function generateFrame(bounds, title) {
       })
     })
   })
+}
+
+function generateInteractions() {
+  return openlayers.interaction.defaults().extend([
+    new openlayers.interaction.DragRotate({
+      condition: openlayers.events.condition.altKeyOnly
+    })
+  ]);
 }
 
 function generateStyles(feature) {
