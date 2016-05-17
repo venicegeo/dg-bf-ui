@@ -2,8 +2,6 @@ import styles from './Application.css'
 import React, {Component} from 'react'
 import Navigation from './Navigation'
 import PrimaryMap from './PrimaryMap'
-import Help from './Help'
-import About from './About'
 import {fetchResult} from '../api'
 
 export default class Application extends Component {
@@ -41,8 +39,6 @@ export default class Application extends Component {
         <Navigation currentLocation={this.props.location}/>
         <PrimaryMap featureCollections={results}/>
         {this.props.children}
-        {this._showingHelp && <Help dismiss={this._dismissModal}/>}
-        {this._showingAbout && <About dismiss={this._dismissModal}/>}
       </div>
     )
   }
@@ -50,14 +46,6 @@ export default class Application extends Component {
   //
   // Internal API
   //
-
-  get _showingAbout() {
-    return this.props.location.hash === '#about'
-  }
-
-  get _showingHelp() {
-    return this.props.location.hash === '#help'
-  }
 
   _fetchResult(resultId) {
     if (resultId) {

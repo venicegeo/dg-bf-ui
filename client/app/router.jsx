@@ -5,6 +5,8 @@ import {render} from 'react-dom'
 import Application from './components/Application'
 import CreateJob from './components/CreateJob'
 import JobStatusList from './components/JobStatusList'
+import Help from './components/Help'
+import About from './components/About'
 
 export function bootstrap(element) {
   const history = useRouterHistory(createHistory)({
@@ -17,6 +19,8 @@ export function bootstrap(element) {
         <Route path="job/:resultId" component={JobStatusList}/>
         <Route path="new" component={CreateJob}/>
         <Route path="new/:algorithmId" component={CreateJob}/>
+        <Route path="help" component={Help}/>
+        <Route path="about" component={About}/>
       </Route>
     </Router>, element)
 }
