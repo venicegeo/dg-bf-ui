@@ -15,10 +15,9 @@ export function bootstrap(element) {
   render(
     <Router history={history}>
       <Route path="/" component={Application}>
-        <Route path="job" component={JobStatusList}/>
-        <Route path="job/:resultId" component={JobStatusList}/>
-        <Route path="new" component={CreateJob}/>
-        <Route path="new/:algorithmId" component={CreateJob}/>
+        <Route path="jobs" component={JobStatusList}/>
+        <Route path="jobs/:resultId" component={JobStatusList}/>
+        <Route path="create-job" component={CreateJob}/>
         <Route path="help" component={Help}/>
         <Route path="about" component={About}/>
       </Route>

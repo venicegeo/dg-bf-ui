@@ -18,7 +18,7 @@ export default class JobStatus extends Component {
       <li className={this.props.className}>
         <h3>{job.name} ({job.status})</h3>
         {job.status === 'Success' && <div className="controls">
-          <Link to={`/job/${job.resultId}`}>View</Link>
+          <Link to={`/jobs/${job.resultId}`}>View</Link>
           <a download={`${job.name}.geojson`} href={`${API_NAMESPACE}/results/${job.resultId}`}>Download</a>
         </div>}
       </li>
