@@ -2,7 +2,7 @@ import React, {Component} from 'react'
 import {Link} from 'react-router'
 import {createJob, fetchAlgorithms, fetchImageList} from '../api'
 import AlgorithmOptions from './AlgorithmOptions'
-import styles from './CreateJob.less'
+import styles from './CreateJob.css'
 
 export default class CreateJob extends Component {
   static contextTypes = {

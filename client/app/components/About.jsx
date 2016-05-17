@@ -1,6 +1,6 @@
 import React, {Component} from 'react'
 import Modal from './Modal'
-import styles from './About.less'
+import styles from './About.css'
 
 export default class About extends Component {
   static propTypes = {

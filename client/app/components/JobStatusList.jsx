@@ -1,5 +1,5 @@
 import React, {Component} from 'react'
-import styles from './JobStatusList.less'
+import styles from './JobStatusList.css'
 import JobStatus from './JobStatus'
 import {fetchJobs} from '../api'
 

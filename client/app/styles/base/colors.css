@@ -1,0 +1,13 @@
+html {
+  background-color: hsl(202, 40%, 35%);
+  color: #555;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  color: hsl(202, 70%, 30%);
+}

@@ -4,8 +4,8 @@ import InputTypeFloat, {TYPE_FLOAT} from './InputTypeFloat'
 import InputTypeImage, {TYPE_IMAGE} from './InputTypeImage'
 import InputTypeInteger, {TYPE_INTEGER} from './InputTypeInteger'
 import InputTypeText, {TYPE_TEXT} from './InputTypeText'
-import styles from './AlgorithmOptions.less'
-import fieldStyles from '../styles/shared/fields.less'
+import styles from './AlgorithmOptions.css'
+import fieldStyles from '../styles/common/forms.css'
 
 export default class AlgorithmOptions extends Component {
   static propTypes = {
