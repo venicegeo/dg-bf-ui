@@ -4,7 +4,7 @@ export default class ExportControl extends openlayers.control.Control {
   constructor(className) {
     const element = document.createElement('div')
     super({element})
-    element.className = className
+    element.className = `${className || ''} ol-unselectable ol-control`
     element.title = 'Click to export an image of this map'
     element.innerHTML = '<a href="map.png"><i class="fa fa-download"/></a>'
     element.addEventListener('click', () => this._clicked())
