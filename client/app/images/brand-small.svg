@@ -4,8 +4,8 @@
     <title>brand-small</title>
     <desc>Created with Sketch.</desc>
     <defs>
-        <rect id="path-1" x="0" y="0" width="30" height="60" rx="15"></rect>
-        <mask id="mask-2" maskContentUnits="userSpaceOnUse" maskUnits="objectBoundingBox" x="0" y="0" width="30" height="60" fill="white">
+        <path d="M1,14.4905251 C1,6.76377145 7.26631345,0.5 15,0.5 L15,0.5 C22.7319865,0.5 29,6.77164808 29,14.4952011 L29,41.5 L1,28.6875 L1,14.4905251 Z" id="path-1"></path>
+        <mask id="mask-2" maskContentUnits="userSpaceOnUse" maskUnits="objectBoundingBox" x="0" y="0" width="28" height="41" fill="white">
             <use xlink:href="#path-1"></use>
         </mask>
         <linearGradient x1="50%" y1="0%" x2="50%" y2="100%" id="linearGradient-3">
@@ -13,14 +13,14 @@
             <stop stop-color="#1ECAFB" offset="45.1590402%"></stop>
             <stop stop-color="#4EB4FF" offset="83.4941008%"></stop>
         </linearGradient>
-        <path d="M0,26 L30,38 L30,53.9994349 C30,62.2840182 23.2860927,69 15,69 L15,69 C6.71572875,69 0,62.28125 0,53.9908751 L0,26 Z" id="path-4"></path>
-        <mask id="mask-5" maskContentUnits="userSpaceOnUse" maskUnits="objectBoundingBox" x="0" y="0" width="30" height="43" fill="white">
+        <path d="M1,23.5 L29,36.4230769 L29,55.8868972 C29,63.6167737 22.7336865,69.8830766 15,69.8830766 L15,69.8830766 C7.2680135,69.8830766 1,63.615594 1,55.8879878 L1,23.5 Z" id="path-4"></path>
+        <mask id="mask-5" maskContentUnits="userSpaceOnUse" maskUnits="objectBoundingBox" x="0" y="0" width="28" height="46.3830766" fill="white">
             <use xlink:href="#path-4"></use>
         </mask>
     </defs>
     <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
         <g id="brand-small" stroke="#FFFFFF" stroke-width="6">
-            <use id="Rectangle-7" mask="url(#mask-2)" fill="#4990E2" xlink:href="#path-1"></use>
+            <use id="Rectangle-7" mask="url(#mask-2)" fill="#4A90E2" xlink:href="#path-1"></use>
             <use id="Rectangle" mask="url(#mask-5)" fill="url(#linearGradient-3)" xlink:href="#path-4"></use>
         </g>
     </g>
