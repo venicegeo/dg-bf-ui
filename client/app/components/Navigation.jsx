@@ -17,7 +17,7 @@ export default class Navigation extends Component {
         </Link>
         <ul>
           <li className={styles.home}>
-            <Link className={styles.link} to="/">
+            <Link className={styles.link} activeClassName={styles.active} onlyActiveOnIndex={true} to="/">
               <img className={styles.complexIcon} src={brandSmall} alt="Beachfront"/>
               <svg className={styles.icon} viewBox="0 0 30 70"><path d="M3,14.9981077 C3,8.37173577 8.37112582,3 15,3 C21.627417,3 27,8.37134457 27,14.9981077 L27,54.0018923 C27,60.6282642 21.6288742,66 15,66 C8.372583,66 3,60.6286554 3,54.0018923 L3,14.9981077 Z M3,33.1954106 L27,40 L27,35.3445904 L3.00000003,28.5400009 L3,33.1954106 Z" fillRule="evenodd"/></svg>
             </Link>
