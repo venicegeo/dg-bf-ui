@@ -191,6 +191,7 @@ li.home {
 
 .home .icon {
   opacity: 0;
+  fill: #85C8F1 !important;
 }
 
 .atHome .home .complexIcon {
