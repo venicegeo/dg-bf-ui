@@ -3,6 +3,7 @@ import React, {Component} from 'react'
 import openlayers from 'openlayers'
 import ExportControl from '../utils/openlayers.ExportControl.js'
 import SearchControl from '../utils/openlayers.SearchControl.js'
+import BasemapSelect from './BasemapSelect.jsx'
 import styles from './PrimaryMap.css'
 import {TILE_PROVIDERS} from '../config'
 
@@ -41,11 +42,11 @@ export default class PrimaryMap extends Component {
 
   render() {
     return (
-      <div className={styles.root} ref="container">
-        <ul className={styles.basemaps}>
-          {this._basemaps.map((layer, i) => <li className={this.state.basemapIndex === i ? styles.active : ''} key={i} onClick={() => this.setState({basemapIndex: i})}>{layer.get('name')}</li>)}
-        </ul>
-      </div>
+      <main className={styles.root} ref="container">
+        <BasemapSelect className={styles.basemapSelect}
+                       basemaps={this._basemaps.map(b => b.get('name'))}
+                       changed={basemapIndex => this.setState({basemapIndex})}/>
+      </main>
     )
   }
 
