@@ -34,7 +34,12 @@ export default class CreateJob extends Component {
     return (
       <div className={styles.root}>
         <h1>Create Job</h1>
-        <h2>Select Algorithm</h2>
+        <div style={{marginTop: '150px', textAlign: 'center'}}>
+          <p>Draw bounding box to search for imagery</p>
+          <p style={{fontSize: '.9em', marginTop: '100px', marginBottom: '1em'}}>or</p>
+          <button style={{border: '2px solid', backgroundColor: 'transparent', fontSize: '1.2em', color: 'hsl(202, 70%, 30%)', borderRadius: '3px', padding: '.5em 2em', display: 'block', margin: 'auto'}}>Upload my own image</button>
+        </div>
+        {/*<h2>Select Algorithm</h2>
         <ul className={styles.algorithms}>
           {algorithms.map(a =>
             <li key={a.id} className={`${styles.algorithm} ${((algorithmId === a.id) && styles.selected) || ''}`}>
@@ -58,7 +63,7 @@ export default class CreateJob extends Component {
                               images={images}
                               onSubmit={this._submit}/>
           </div>
-        )}
+        )}*/}
       </div>
     )
   }
