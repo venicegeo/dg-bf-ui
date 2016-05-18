@@ -21,6 +21,7 @@ export class Client {
         }
         throw new HttpError(response)
       })
+      .then(page => page.data)
   }
 }
 

@@ -4,6 +4,8 @@ const PZ_FILE_RESPONSE = `{
   "foo": "bar"
 }`
 
+const PZ_AUTH_ERROR_RESPONSE = `HTTP Status 401 - pz-gateway is unable to authenticate the provided user`
+
 const PZ_FILE_ERROR_RESPONSE = `{
   "timestamp": 1461978715800,
   "status": 500,
@@ -103,6 +105,57 @@ describe('Piazza Client', () => {
         })
     })
   })
+  
+  describe('getServices()', () => {
+    it ('calls correct URL', (done) => {
+      const stub = spyOn(window, 'fetch').and.returnValue(resolve(PZ_SERVICE_RESPONSE))
+      const client = new Client('http://m')
+      client.getServices({pattern: 'test-pattern'})
+        .then(() => {
+          expect(stub).toHaveBeenCalledWith('http://m/service?keyword=test-pattern&per_page=100')
+          done()
+        })
+        .catch(done.fail)
+    })
+
+    it('can list services', (done) => {
+      spyOn(window, 'fetch').and.returnValue(resolveJson(PZ_SERVICE_RESPONSE))
+      const client = new Client('http://m')
+      client.getServices({pattern: 'test-pattern'})
+        .then(services => {
+          expect(services instanceof Array).toEqual(true)
+          expect(services.length).toEqual(2)
+          done()
+        })
+        .catch(done.fail)
+    })
+
+    it('deserializes metadata', (done) => {
+      spyOn(window, 'fetch').and.returnValue(resolveJson(PZ_SERVICE_RESPONSE))
+      const client = new Client('http://m')
+      client.getServices({pattern: 'test-pattern'})
+        .then(([firstService]) => {
+          expect(firstService.serviceId).toEqual('test-id-1')
+          expect(firstService.resourceMetadata.availability).toEqual('test-availability')
+          expect(firstService.resourceMetadata.description).toEqual('test-description')
+          expect(firstService.resourceMetadata.name).toEqual('test-name')
+          done()
+        })
+        .catch(done.fail)
+    })
+
+    it('handles HTTP errors gracefully', (done) => {
+      spyOn(window, 'fetch').and.returnValue(resolve(PZ_AUTH_ERROR_RESPONSE, 500))
+      const client = new Client('http://m')
+      client.getServices({pattern: 'test-pattern'})
+        .then(() => done.fail('Should have thrown'))
+        .catch(error => {
+          expect(error.status).toEqual(500)
+          done()
+        })
+    })
+  })
+})
 
 //
 // Helpers
