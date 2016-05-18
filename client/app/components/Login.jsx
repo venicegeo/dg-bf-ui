@@ -1,6 +1,6 @@
 import React, {Component} from 'react'
 import Modal from './Modal'
-import styles from './About.less'
+import styles from './Login.css'
 import { withRouter } from 'react-router'
 import auth from '../utils/auth.js'
 
@@ -14,6 +14,7 @@ export default class Login extends Component {
     constructor(props) {
         super();
         this.state = {error: null}
+        this.handleSubmit = this.handleSubmit.bind(this);
 
     }
 
@@ -30,6 +31,7 @@ export default class Login extends Component {
 
             const { location } = this.props
 
+            debugger
             if (location.state && location.state.nextPathname) {
                 this.props.router.replace(location.state.nextPathname)
             } else {

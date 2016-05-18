@@ -1,6 +1,6 @@
 import React from 'react'
 import {createHistory} from 'history'
-import {Router, Route, useRouterHistory} from 'react-router'
+import {Router, Route, useRouterHistory, IndexRoute} from 'react-router'
 import {render} from 'react-dom'
 import Application from './components/Application'
 import Login from './components/Login'
@@ -14,9 +14,13 @@ function redirectToLogin(nextState, replace) {
   if (!auth.loggedIn()) {
     replace({
       pathname: '/login',
-      state: { nextPathname: nextState.location.pathname }
+      state: { nextPathname: nextState.location.pathname || "/" }
     })
   }
+}
+
+function FakeIndex() {
+    return <div/>
 }
 
 function redirectToDashboard(nextState, replace) {
@@ -31,7 +35,8 @@ export function bootstrap(element) {
   })
   render(
     <Router history={history}>
-      <Route path="/" component={Application}>
+      <Route path="/" component={Application} >
+        <IndexRoute component={FakeIndex} onEnter={redirectToLogin}/>
           <Route path="login" component={Login}/>
         <Route path="jobs" component={JobStatusList} onEnter={redirectToLogin}/>
         <Route path="jobs/:resultId" component={JobStatusList} onEnter={redirectToLogin}/>

@@ -1,33 +1,29 @@
 module.exports = {
     login(email, pass, cb) {
         cb = arguments[arguments.length - 1]
-        if (localStorage.token) {
-            if (cb===true)
-            {
-                this.onChange(true)
-                return
-            }
+        if (sessionStorage.token) {
+            if (cb) cb(true)
+            this.onChange(true)
+            return
         }
         pretendRequest(email, pass, (res) => {
             if (res.authenticated) {
-                localStorage.token = res.token
-                if (cb === true) {
-                    this.onChange(true)
-                }
-                else {(cb === false)
-                        this.onChange(false)
-                    }
-                }
-
+                sessionStorage.token = res.token
+                if (cb) cb(true)
+                this.onChange(true)
+            } else {
+                if (cb) cb(false)
+                this.onChange(false)
+            }
         })
     },
 
     getToken: function () {
-        return localStorage.token
+        return sessionStorage.token
     },
 
     logout: function (cb) {
-        delete localStorage.token
+        delete sessionStorage.token
         if (cb)
         {
             this.onChange(false)
@@ -35,7 +31,7 @@ module.exports = {
     },
 
     loggedIn: function () {
-        return !!localStorage.token
+        return !!sessionStorage.token
     },
 
     onChange: function () {}
