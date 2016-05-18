@@ -1,4 +1,4 @@
-import {Client} from './piazza-client'
+import {Client, STATUS_ERROR, STATUS_RUNNING, STATUS_SUCCESS} from './piazza-client'
 
 const ERROR_UNAUTHORIZED = 'HTTP Status 401 - pz-gateway is unable to authenticate the provided user'
 
@@ -15,6 +15,47 @@ const RESPONSE_FILE = `{
   "foo": "bar"
 }`
 
+const RESPONSE_JOB_RUNNING = `{
+  "type": "status",
+  "jobId": "test-id",
+  "status": "Running",
+  "jobType": "execute-service",
+  "submittedBy": "test-user",
+  "progress": {}
+}`
+
+const RESPONSE_JOB_SUCCESS = `{
+  "type": "status",
+  "jobId": "test-id",
+  "result": {
+    "type": "data",
+    "dataId": "test-data-id"
+  },
+  "status": "Success",
+  "jobType": "execute-service",
+  "submittedBy": "test-user",
+  "progress": {}
+}`
+
+const RESPONSE_JOB_ERROR = `{
+  "type": "status",
+  "jobId": "test-id",
+  "result": {
+    "type": "error",
+    "message": "Service not found."
+  },
+  "status": "Error",
+  "jobType": "execute-service",
+  "submittedBy": "test-user",
+  "progress": {}
+}`
+
+const RESPONSE_JOB_NOT_FOUND = `{
+  "type": "error",
+  "jobId": "test-id",
+  "message": "Job Not Found.",
+  "origin": "Job Manager"
+}`
 
 const RESPONSE_SERVICE_LIST = `{
   "type": "service-list",
@@ -149,6 +190,81 @@ describe('Piazza Client', () => {
       spyOn(window, 'fetch').and.returnValue(resolve(ERROR_GENERIC, 500))
       const client = new Client('http://m')
       client.getServices({pattern: 'test-pattern'})
+        .then(() => done.fail('Should have thrown'))
+        .catch(error => {
+          expect(error.status).toEqual(500)
+          done()
+        })
+    })
+  })
+
+  describe('getStatus()', () => {
+    it('calls correct URL', (done) => {
+      const stub = spyOn(window, 'fetch').and.returnValue(resolve(RESPONSE_JOB_RUNNING))
+      const client = new Client('http://m')
+      client.getStatus('test-id')
+        .then(() => {
+          expect(stub).toHaveBeenCalledWith('http://m/job/test-id')
+          done()
+        })
+        .catch(done.fail)
+    })
+
+    it('properly deserializes running job', (done) => {
+      spyOn(window, 'fetch').and.returnValue(resolve(RESPONSE_JOB_RUNNING))
+      const client = new Client('http://m')
+      client.getStatus('test-id')
+        .then(status => {
+          expect(status.jobId).toEqual('test-id')
+          expect(status.status).toEqual(STATUS_RUNNING)
+          expect(status.result).toBeNull()
+          done()
+        })
+        .catch(done.fail)
+    })
+
+    it('properly deserializes successful job', (done) => {
+      spyOn(window, 'fetch').and.returnValue(resolve(RESPONSE_JOB_SUCCESS))
+      const client = new Client('http://m')
+      client.getStatus('test-id')
+        .then(status => {
+          expect(status.jobId).toEqual('test-id')
+          expect(status.status).toEqual(STATUS_SUCCESS)
+          expect(status.result.dataId).toEqual('test-data-id')
+          done()
+        })
+        .catch(done.fail)
+    })
+
+    it('properly deserializes failed job', (done) => {
+      spyOn(window, 'fetch').and.returnValue(resolve(RESPONSE_JOB_ERROR))
+      const client = new Client('http://m')
+      client.getStatus('test-id')
+        .then(status => {
+          expect(status.jobId).toEqual('test-id')
+          expect(status.status).toEqual(STATUS_ERROR)
+          expect(status.result.dataId).toBeUndefined()
+          done()
+        })
+        .catch(done.fail)
+    })
+
+    it('properly handles non-existent job', (done) => {
+      spyOn(window, 'fetch').and.returnValue(resolve(RESPONSE_JOB_NOT_FOUND))
+      const client = new Client('http://m')
+      client.getStatus('test-id')
+        .then(() => done.fail('Should have thrown'))
+        .catch(error => {
+          expect(error instanceof Error).toEqual(true)
+          expect(error.message).toMatch(/^InvalidResponse: Job Not Found/i)
+          done()
+        })
+    })
+
+    it('handles HTTP errors gracefully', (done) => {
+      spyOn(window, 'fetch').and.returnValue(resolve(ERROR_GENERIC, 500))
+      const client = new Client('http://m')
+      client.getStatus('test-id')
         .then(() => done.fail('Should have thrown'))
         .catch(error => {
           expect(error.status).toEqual(500)
