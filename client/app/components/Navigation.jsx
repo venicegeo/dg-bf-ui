@@ -1,5 +1,7 @@
+import styles from './Navigation.less'
 import React, {Component} from 'react'
 import Link from 'react-router/lib/Link'
+import auth from '../utils/auth'
 import styles from './Navigation.css'
 import brand from '../images/brand-experimental.svg'
 import brandSmall from '../images/brand-experimental-small.svg'
@@ -8,7 +10,28 @@ export default class Navigation extends Component {
   static propTypes = {
     currentLocation: React.PropTypes.object
   }
-  
+
+  constructor () {
+    super();
+    this.state = {
+      loggedIn: null,
+    };
+    this.updateAuth = this.updateAuth.bind(this);
+  }
+
+
+
+  updateAuth(loggedIn) {
+
+    this.setState({
+      loggedIn: !!loggedIn
+    })
+  }
+
+  componentWillMount() {
+    auth.onChange = this.updateAuth
+    auth.login()
+  }
   render() {
     return (
       <nav className={`${styles.root} ${this.props.currentLocation.pathname === '/' ? styles.atHome : ''}`}>
