@@ -1,17 +1,19 @@
 import {Client} from './piazza-client'
 
-const PZ_FILE_RESPONSE = {"foo": "bar"}
+const PZ_FILE_RESPONSE = `{
+  "foo": "bar"
+}`
 
-const PZ_FILE_ERROR_RESPONSE = {
+const PZ_FILE_ERROR_RESPONSE = `{
   "timestamp": 1461978715800,
   "status": 500,
   "error": "Internal Server Error",
   "exception": "java.lang.Exception",
   "message": "Error downloading file for Data test-id by user UNAUTHENTICATED: 500 Internal Server Error",
   "path": "/file/test-id"
-}
+}`
 
-const PZ_SERVICE_RESPONSE = {
+const PZ_SERVICE_RESPONSE = `{
   "type": "service-list",
   "data": [
     {
@@ -40,7 +42,7 @@ const PZ_SERVICE_RESPONSE = {
     "page": 0,
     "per_page": 100
   }
-}
+}`
 
 describe('Piazza Client', () => {
   jasmine.DEFAULT_TIMEOUT_INTERVAL = 500
@@ -58,7 +60,7 @@ describe('Piazza Client', () => {
 
   describe('getFile()', () => {
     it('can retrieve file', (done) => {
-      spyOn(window, 'fetch').and.returnValue(resolveString(PZ_FILE_RESPONSE))
+      spyOn(window, 'fetch').and.returnValue(resolve(PZ_FILE_RESPONSE))
       const client = new Client('http://m')
       client.getFile('test-id')
         .then(content => {
@@ -69,23 +71,23 @@ describe('Piazza Client', () => {
     })
 
     it('does not modify payload', (done) => {
-      spyOn(window, 'fetch').and.returnValue(resolveString(PZ_FILE_RESPONSE))
+      spyOn(window, 'fetch').and.returnValue(resolve(PZ_FILE_RESPONSE))
       const client = new Client('http://m')
       client.getFile('test-id')
         .then(actual => {
-          expect(actual).toEqual(JSON.stringify(PZ_FILE_RESPONSE))
+          expect(actual).toEqual(PZ_FILE_RESPONSE)
           done()
         })
         .catch(done.fail)
     })
 
     it('handles HTTP errors gracefully', (done) => {
-      spyOn(window, 'fetch').and.returnValue(resolveString(PZ_FILE_ERROR_RESPONSE, 500))
+      spyOn(window, 'fetch').and.returnValue(resolveJson(PZ_FILE_ERROR_RESPONSE, 500))
       const client = new Client('http://m')
       client.getFile('test-id')
         .then(() => done.fail('Should have thrown'))
         .catch(error => {
-          expect(error.status).toBe(500)
+          expect(error.status).toEqual(500)
           done()
         })
     })
@@ -95,7 +97,7 @@ describe('Piazza Client', () => {
 // Helpers
 //
 
-function resolve(content, status = 200, type = 'application/json') {
+function resolve(content, status = 200, type = 'text/plain') {
   return Promise.resolve(new Response(content, {
     status,
     headers: {
@@ -104,7 +106,6 @@ function resolve(content, status = 200, type = 'application/json') {
   }))
 }
 
-function resolveString(content, status = 200) {
-  const string = typeof content === 'string' ? content : JSON.stringify(content)
-  return resolve(string, status, 'text/plain')
+function resolveJson(string, status = 200) {
+  return resolve(string, status, 'application/json')
 }
