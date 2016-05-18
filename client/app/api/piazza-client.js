@@ -3,39 +3,25 @@ export const STATUS_SUCCESS = 'Success'
 export const STATUS_ERROR = 'Error'
 
 export class Client {
-  constructor(gateway) {
+  constructor(gateway, authToken) {
     this.gateway = gateway.replace(/\/+$/g, '')
+    this.authToken = authToken
   }
 
   getFile(id) {
-    return fetch(`${this.gateway}/file/${id}`)
-      .then(response => {
-        if (!response.ok) {
-          throw new HttpError(response)
-        }
-        return response.text()
-      })
+    return this._fetch(`/file/${id}`)
+      .then(asText)
   }
 
   getServices({pattern}) {
-    return fetch(`${this.gateway}/service?keyword=${pattern}&per_page=100`)
-      .then(response => {
-        if (!response.ok) {
-          throw new HttpError(response)
-        }
-        return response.json()
-      })
+    return this._fetch(`/service?keyword=${pattern}&per_page=100`)
+      .then(asJson)
       .then(page => page.data)
   }
   
   getStatus(jobId) {
-    return fetch(`${this.gateway}/job/${jobId}`)
-      .then(response => {
-        if (!response.ok) {
-          throw new HttpError(response)
-        }
-        return response.json()
-      })
+    return this._fetch(`/job/${jobId}`)
+      .then(asJson)
       .then(status => {
         if (!status.status || status.type === 'error') {
           throw new InvalidResponse(status, status.message || 'Status is ambiguous')
@@ -49,19 +35,14 @@ export class Client {
 
   post(type, data) {
     const message = {type, data}
-    return fetch(`${this.gateway}/v2/job`, {
+    return this._fetch('/v2/job', {
       method: 'POST',
       body: JSON.stringify(message),
       headers: {
         'content-type': 'application/json'
       }
     })
-      .then(response => {
-        if (!response.ok) {
-          throw new HttpError(response)
-        }
-        return response.json()
-      })
+      .then(asJson)
       .then(metadata => {
         if (!metadata.jobId) {
           throw new InvalidResponse(metadata, 'No job ID assigned')
@@ -69,6 +50,33 @@ export class Client {
         return metadata.jobId
       })
   }
+
+  _fetch(endpoint, overrides = {}) {
+    const options = Object.assign({}, overrides, {
+      headers: Object.assign({}, overrides.headers, {
+        'authorization': this.authToken
+      })
+    })
+    return fetch(`${this.gateway}${endpoint}`, options)
+  }
+}
+
+//
+// Helpers
+//
+
+function asJson(response) {
+  if (!response.ok) {
+    throw new HttpError(response)
+  }
+  return response.json()
+}
+
+function asText(response) {
+  if (!response.ok) {
+    throw new HttpError(response)
+  }
+  return response.text()
 }
 
 //
@@ -87,11 +95,4 @@ class InvalidResponse extends Error {
     super(`InvalidResponse: ${message} (${JSON.stringify(contents)})`)
     this.contents = contents
   }
-}
-
-function generateError(response) {
-  return response.json().then(payload => {
-    const error = new Error(payload.message || '')
-
-  })
 }
