@@ -59,6 +59,17 @@ describe('Piazza Client', () => {
   })
 
   describe('getFile()', () => {
+    it ('calls correct URL', (done) => {
+      const stub = spyOn(window, 'fetch').and.returnValue(resolve(PZ_FILE_RESPONSE))
+      const client = new Client('http://m')
+      client.getFile('test-id')
+        .then(() => {
+          expect(stub).toHaveBeenCalledWith('http://m/file/test-id')
+          done()
+        })
+        .catch(done.fail)
+    })
+
     it('can retrieve file', (done) => {
       spyOn(window, 'fetch').and.returnValue(resolve(PZ_FILE_RESPONSE))
       const client = new Client('http://m')
