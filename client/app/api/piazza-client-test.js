@@ -15,6 +15,11 @@ const RESPONSE_FILE = `{
   "foo": "bar"
 }`
 
+const RESPONSE_JOB_CREATED = `{
+  "type": "job",
+  "jobId": "test-id"
+}`
+
 const RESPONSE_JOB_RUNNING = `{
   "type": "status",
   "jobId": "test-id",
@@ -265,6 +270,56 @@ describe('Piazza Client', () => {
       spyOn(window, 'fetch').and.returnValue(resolve(ERROR_GENERIC, 500))
       const client = new Client('http://m')
       client.getStatus('test-id')
+        .then(() => done.fail('Should have thrown'))
+        .catch(error => {
+          expect(error.status).toEqual(500)
+          done()
+        })
+    })
+  })
+
+  describe('post()', () => {
+    it('calls correct URL', (done) => {
+      const stub = spyOn(window, 'fetch').and.returnValue(resolve(RESPONSE_JOB_CREATED))
+      const client = new Client('http://m')
+      client.post('test-type', 'test-data')
+        .then(() => {
+          expect(stub.calls.first().args[0]).toEqual('http://m/v2/job')
+          done()
+        })
+        .catch(done.fail)
+    })
+
+    it('returns new job ID', (done) => {
+      spyOn(window, 'fetch').and.returnValue(resolve(RESPONSE_JOB_CREATED))
+      const client = new Client('http://m')
+      client.post('test-type', 'test-data')
+        .then(id => {
+          expect(id).toEqual('test-id')
+          done()
+        })
+        .catch(done.fail)
+    })
+
+    it('properly serializes message', (done) => {
+      const stub = spyOn(window, 'fetch').and.returnValue(resolve(RESPONSE_JOB_CREATED))
+      const client = new Client('http://m')
+      client.post('test-type', 'test-data')
+        .then(() => {
+          expect(stub.calls.first().args[1]).toEqual({
+            method: 'POST',
+            body: '{"type":"test-type","data":"test-data"}',
+            headers: {'content-type': 'application/json'}
+          })
+          done()
+        })
+        .catch(done.fail)
+    })
+
+    it('handles HTTP errors gracefully', (done) => {
+      spyOn(window, 'fetch').and.returnValue(resolve(ERROR_GENERIC, 500))
+      const client = new Client('http://m')
+      client.post('test-type', 'test-data')
         .then(() => done.fail('Should have thrown'))
         .catch(error => {
           expect(error.status).toEqual(500)

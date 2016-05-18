@@ -46,6 +46,29 @@ export class Client {
         }, status)
       })
   }
+
+  post(type, data) {
+    const message = {type, data}
+    return fetch(`${this.gateway}/v2/job`, {
+      method: 'POST',
+      body: JSON.stringify(message),
+      headers: {
+        'content-type': 'application/json'
+      }
+    })
+      .then(response => {
+        if (!response.ok) {
+          throw new HttpError(response)
+        }
+        return response.json()
+      })
+      .then(metadata => {
+        if (!metadata.jobId) {
+          throw new InvalidResponse(metadata, 'No job ID assigned')
+        }
+        return metadata.jobId
+      })
+  }
 }
 
 //
