@@ -34,10 +34,9 @@ export class Client {
   }
 
   post(type, data) {
-    const message = {type, data}
     return this._fetch('/v2/job', {
       method: 'POST',
-      body: JSON.stringify(message),
+      body: JSON.stringify({type, data}),
       headers: {
         'content-type': 'application/json'
       }
