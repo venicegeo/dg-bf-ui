@@ -1,21 +1,22 @@
 import {Client} from './piazza-client'
 
-const PZ_FILE_RESPONSE = `{
-  "foo": "bar"
-}`
+const ERROR_UNAUTHORIZED = 'HTTP Status 401 - pz-gateway is unable to authenticate the provided user'
 
-const PZ_AUTH_ERROR_RESPONSE = `HTTP Status 401 - pz-gateway is unable to authenticate the provided user`
-
-const PZ_FILE_ERROR_RESPONSE = `{
+const ERROR_GENERIC = `{
   "timestamp": 1461978715800,
   "status": 500,
   "error": "Internal Server Error",
-  "exception": "java.lang.Exception",
-  "message": "Error downloading file for Data test-id by user UNAUTHENTICATED: 500 Internal Server Error",
-  "path": "/file/test-id"
+  "exception": "java.lang.NullPointerException",
+  "message": "No message available",
+  "path": "/any/where"
 }`
 
-const PZ_SERVICE_RESPONSE = `{
+const RESPONSE_FILE = `{
+  "foo": "bar"
+}`
+
+
+const RESPONSE_SERVICE_LIST = `{
   "type": "service-list",
   "data": [
     {
@@ -62,7 +63,7 @@ describe('Piazza Client', () => {
 
   describe('getFile()', () => {
     it ('calls correct URL', (done) => {
-      const stub = spyOn(window, 'fetch').and.returnValue(resolve(PZ_FILE_RESPONSE))
+      const stub = spyOn(window, 'fetch').and.returnValue(resolve(RESPONSE_FILE))
       const client = new Client('http://m')
       client.getFile('test-id')
         .then(() => {
@@ -73,7 +74,7 @@ describe('Piazza Client', () => {
     })
 
     it('can retrieve file', (done) => {
-      spyOn(window, 'fetch').and.returnValue(resolve(PZ_FILE_RESPONSE))
+      spyOn(window, 'fetch').and.returnValue(resolve(RESPONSE_FILE))
       const client = new Client('http://m')
       client.getFile('test-id')
         .then(content => {
@@ -84,18 +85,18 @@ describe('Piazza Client', () => {
     })
 
     it('does not modify payload', (done) => {
-      spyOn(window, 'fetch').and.returnValue(resolve(PZ_FILE_RESPONSE))
+      spyOn(window, 'fetch').and.returnValue(resolve(RESPONSE_FILE))
       const client = new Client('http://m')
       client.getFile('test-id')
         .then(actual => {
-          expect(actual).toEqual(PZ_FILE_RESPONSE)
+          expect(actual).toEqual(RESPONSE_FILE)
           done()
         })
         .catch(done.fail)
     })
 
     it('handles HTTP errors gracefully', (done) => {
-      spyOn(window, 'fetch').and.returnValue(resolveJson(PZ_FILE_ERROR_RESPONSE, 500))
+      spyOn(window, 'fetch').and.returnValue(resolveJson(ERROR_GENERIC, 500))
       const client = new Client('http://m')
       client.getFile('test-id')
         .then(() => done.fail('Should have thrown'))
@@ -108,7 +109,7 @@ describe('Piazza Client', () => {
   
   describe('getServices()', () => {
     it ('calls correct URL', (done) => {
-      const stub = spyOn(window, 'fetch').and.returnValue(resolve(PZ_SERVICE_RESPONSE))
+      const stub = spyOn(window, 'fetch').and.returnValue(resolve(RESPONSE_SERVICE_LIST))
       const client = new Client('http://m')
       client.getServices({pattern: 'test-pattern'})
         .then(() => {
@@ -119,7 +120,7 @@ describe('Piazza Client', () => {
     })
 
     it('can list services', (done) => {
-      spyOn(window, 'fetch').and.returnValue(resolveJson(PZ_SERVICE_RESPONSE))
+      spyOn(window, 'fetch').and.returnValue(resolveJson(RESPONSE_SERVICE_LIST))
       const client = new Client('http://m')
       client.getServices({pattern: 'test-pattern'})
         .then(services => {
@@ -131,7 +132,7 @@ describe('Piazza Client', () => {
     })
 
     it('deserializes metadata', (done) => {
-      spyOn(window, 'fetch').and.returnValue(resolveJson(PZ_SERVICE_RESPONSE))
+      spyOn(window, 'fetch').and.returnValue(resolveJson(RESPONSE_SERVICE_LIST))
       const client = new Client('http://m')
       client.getServices({pattern: 'test-pattern'})
         .then(([firstService]) => {
@@ -145,7 +146,7 @@ describe('Piazza Client', () => {
     })
 
     it('handles HTTP errors gracefully', (done) => {
-      spyOn(window, 'fetch').and.returnValue(resolve(PZ_AUTH_ERROR_RESPONSE, 500))
+      spyOn(window, 'fetch').and.returnValue(resolve(ERROR_GENERIC, 500))
       const client = new Client('http://m')
       client.getServices({pattern: 'test-pattern'})
         .then(() => done.fail('Should have thrown'))
