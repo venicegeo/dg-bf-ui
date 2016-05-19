@@ -1,5 +1,10 @@
 export const GATEWAY = process.env.GATEWAY
 
+export const JOBS_WORKER = {
+  POLL_INTERVAL:     15 * 1000,
+  POLL_MAX_ATTEMPTS: 60
+}
+
 export const TILE_PROVIDERS = [
   {
     name: 'Grey (Default)',

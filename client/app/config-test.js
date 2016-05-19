@@ -1,11 +1,15 @@
-import {GATEWAY, TILE_PROVIDERS} from './config'
+import * as config from './config'
 
 describe('config', () => {
   it('reads gateway URL from environment', () => {
-    expect(GATEWAY).toEqual('/test-gateway')
+    expect(config.GATEWAY).toEqual('/test-gateway')
+  })
+
+  it('defines jobs worker timing properties', () => {
+    expect(config.JOBS_WORKER).toContain('POLL_INTERVAL', 'POLL_MAX_ATTEMPTS')
   })
 
   it('defines at least one tile provider', () => {
-    expect(TILE_PROVIDERS.length).toBeGreaterThan(0)
+    expect(config.TILE_PROVIDERS.length).toBeGreaterThan(0)
   })
 })
