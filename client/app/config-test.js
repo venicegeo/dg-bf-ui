@@ -6,7 +6,8 @@ describe('config', () => {
   })
 
   it('defines jobs worker timing properties', () => {
-    expect(config.JOBS_WORKER).toContain('POLL_INTERVAL', 'POLL_MAX_ATTEMPTS')
+    expect(typeof config.JOBS_WORKER.POLL_INTERVAL).toBe('number')
+    expect(typeof config.JOBS_WORKER.POLL_MAX_ATTEMPTS).toBe('number')
   })
 
   it('defines at least one tile provider', () => {
