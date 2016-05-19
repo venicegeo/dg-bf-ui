@@ -9,14 +9,6 @@ module.exports = {
   entry: './index.js',
   devtool: 'cheap-module-eval-source-map',
 
-  devServer: {
-    proxy: {
-      '/gateway/*': {
-        target: 'http://localhost:5000'
-      }
-    }
-  },
-
   resolve: {
     extensions: ['', '.js', '.jsx']
   },
@@ -43,7 +35,7 @@ module.exports = {
   plugins: [
     new webpack.DefinePlugin({
       'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV || 'development'),
-      'process.env.GATEWAY': JSON.stringify(process.env.GATEWAY || '/gateway')
+      'process.env.GATEWAY': JSON.stringify(process.env.GATEWAY || 'http://localhost:3000')
     }),
     new HtmlWebpackPlugin({
       template: 'index.ejs',
