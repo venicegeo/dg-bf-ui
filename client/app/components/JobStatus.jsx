@@ -1,6 +1,5 @@
 import React, {Component} from 'react'
 import {Link} from 'react-router'
-import {API_NAMESPACE} from '../config'
 
 export default class JobStatus extends Component {
   static propTypes = {
@@ -14,12 +13,13 @@ export default class JobStatus extends Component {
 
   render() {
     const {job} = this.props
+    // TODO -- need to rethink download re: auth
     return (
       <li className={this.props.className}>
         <h3>{job.name} ({job.status})</h3>
         {job.status === 'Success' && <div className="controls">
           <Link to={`/jobs/${job.resultId}`}>View</Link>
-          <a download={`${job.name}.geojson`} href={`${API_NAMESPACE}/results/${job.resultId}`}>Download</a>
+          <a download={`${job.name}.geojson`} href={job.geojsonUrl}>Download</a>
         </div>}
       </li>
     )

@@ -1,9 +1,4 @@
 import React, {Component} from 'react'
-import InputTypeBoundingBox, {TYPE_BOUNDINGBOX} from './InputTypeBoundingBox'
-import InputTypeFloat, {TYPE_FLOAT} from './InputTypeFloat'
-import InputTypeImage, {TYPE_IMAGE} from './InputTypeImage'
-import InputTypeInteger, {TYPE_INTEGER} from './InputTypeInteger'
-import InputTypeText, {TYPE_TEXT} from './InputTypeText'
 import styles from './AlgorithmOptions.css'
 import fieldStyles from '../styles/common/forms.css'
 
@@ -26,33 +21,21 @@ export default class AlgorithmOptions extends Component {
   }
   
   render() {
-    const {inputs} = this.props.algorithm
     return (
       <form className={styles.root} onSubmit={this._onSubmit}>
         <h2>Algorithm Options</h2>
         <label className={fieldStyles.normal}><span>Job Name</span><input ref="name" type="text" placeholder="Enter a name"/></label>
-        {inputs.map(input => this._renderInput(input))}
+
+        <label className={styles.normal}>
+          <span>Image</span>
+          <select ref="image">
+            {this.props.images.map(image => <option key={image.name} value={image.ids.join(',')}>{image.name}</option>)}
+          </select>
+        </label>
+
         <button type="submit">Create Job</button>
       </form>
     )
-  }
-
-  _renderInput({key, name, type}) {
-    const props = {name, key, ref: key}
-    switch (type) {
-      case TYPE_BOUNDINGBOX: return <InputTypeBoundingBox {...props}/>
-      case TYPE_FLOAT:       return <InputTypeFloat {...props}/>
-      case TYPE_IMAGE:       return <InputTypeImage {...props} images={this.props.images}/>
-      case TYPE_INTEGER:     return <InputTypeInteger {...props}/>
-      case TYPE_TEXT:        return <InputTypeText {...props}/>
-    }
-    console.warn('Encountered unknown input type `%s`', type)
-  }
-
-  get _inputValues() {
-    return this.props.algorithm.inputs
-      .filter(algorithm => this.refs[algorithm.key])
-      .map(algorithm => [algorithm.key, this.refs[algorithm.key].value || null])
   }
 
   _onSubmit(event) {
@@ -62,7 +45,7 @@ export default class AlgorithmOptions extends Component {
       algorithmId:   this.props.algorithm.id,
       algorithmName: this.props.algorithm.name,
       name:          this.refs.name.value,
-      parameters:    this._inputValues
+      imageIds:      this.refs.image.value.split(',')
     }
     this.props.onSubmit(draftJob)
   }

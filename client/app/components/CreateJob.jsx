@@ -1,5 +1,4 @@
 import React, {Component} from 'react'
-import {Link} from 'react-router'
 import {createJob, fetchAlgorithms, fetchImageList} from '../api'
 import AlgorithmOptions from './AlgorithmOptions'
 import styles from './CreateJob.css'
@@ -10,7 +9,6 @@ export default class CreateJob extends Component {
   }
 
   static propTypes = {
-    children: React.PropTypes.element,
     params: React.PropTypes.object
   }
 
@@ -30,7 +28,7 @@ export default class CreateJob extends Component {
   render() {
     const {algorithmId} = this.props.params
     const {algorithms, images} = this.state
-    const selectedAlgorithm = algorithms.find(a => a.id === algorithmId)
+    const [selectedAlgorithm] = algorithms
     return (
       <div className={styles.root}>
         <h1>Create Job</h1>
@@ -38,7 +36,7 @@ export default class CreateJob extends Component {
         <ul className={styles.algorithms}>
           {algorithms.map(a =>
             <li key={a.id} className={`${styles.algorithm} ${((algorithmId === a.id) && styles.selected) || ''}`}>
-              <Link to={`/new/${a.id}`}>
+              {/*<Link to={`/create-job/${a.id}`}>*/}
                 <h3>{a.name}</h3>
                 <p>{a.description}</p>
 
@@ -48,11 +46,11 @@ export default class CreateJob extends Component {
                     {a.requirements.map(r => <tr key={r.name}><th>{r.name}</th><td>{r.description}</td></tr>)}
                   </tbody>
                 </table>
-              </Link>
+              {/*</Link>*/}
             </li>
           )}
         </ul>
-        {selectedAlgorithm && (
+        {selectedAlgorithm && images && (
           <div>
             <AlgorithmOptions algorithm={selectedAlgorithm}
                               images={images}
@@ -67,7 +65,7 @@ export default class CreateJob extends Component {
     createJob(draft)
       .then(() => {
         // TODO -- flesh out the ideal interaction
-        this.context.router.push({pathname: '/job'})
+        this.context.router.push({pathname: '/jobs'})
       })
       .catch(() => {
         // TODO -- flesh out the ideal interaction

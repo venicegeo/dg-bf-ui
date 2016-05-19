@@ -4,7 +4,14 @@ import * as jobs from './jobs'
 import * as imagery from './imagery'
 import {GATEWAY} from '../config'
 
-const client = new Client(GATEWAY, 'auth token placeholder')
+// HACK HACK HACK HACK HACK HACK HACK HACK
+let authToken = sessionStorage.getItem('authToken')
+if (!authToken) {
+  authToken = prompt('Authorization:')  // eslint-disable-line
+  sessionStorage.setItem('authToken', authToken)
+}
+const client = new Client(GATEWAY, authToken)
+// HACK HACK HACK HACK HACK HACK HACK HACK
 
 export function fetchAlgorithms() {
   return algorithms.list(client)
