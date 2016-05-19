@@ -11,15 +11,8 @@ module.exports = {
 
   devServer: {
     proxy: {
-      '/api/v1/*': {
+      '/gateway/*': {
         target: 'http://localhost:5000'
-      },
-      '/api/int/*': {
-        target: 'https://beachfront.int.geointservices.io',
-        changeOrigin: true,
-        rewrite(req) {
-          req.url = req.url.replace('/api/int/', '/api/v1/')
-        }
       }
     }
   },
