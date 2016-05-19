@@ -41,7 +41,7 @@ export class Client {
         'authorization': this.authToken
       })
     })
-    return fetch(`${this.gateway}${endpoint}`, options)
+    return fetch(encodeURI(this.gateway + endpoint), options)
   }
 }
 
