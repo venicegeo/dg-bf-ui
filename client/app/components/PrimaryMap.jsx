@@ -169,7 +169,7 @@ function generateInteractions() {
     new openlayers.interaction.DragRotate({
       condition: openlayers.events.condition.altKeyOnly
     })
-  ]);
+  ])
 }
 
 function generateStyles(feature) {

@@ -311,7 +311,7 @@ describe('Piazza Client', () => {
       const client = new Client('http://m', 'test-auth-token')
       client.post('test-type', 'test-data')
         .then(() => {
-          const [, options] = stub.calls.first().args;
+          const [, options] = stub.calls.first().args
           expect(options.method).toEqual('POST')
           expect(options.headers['content-type']).toEqual('application/json')
           expect(options.body).toEqual('{"type":"test-type","data":"test-data"}')
