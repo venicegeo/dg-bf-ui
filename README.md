@@ -1,47 +1,22 @@
-# Beachfront UI
+# beachfront-client
 
-## Client
-
-### Running Locally
+# Installing and Developing
 
 ```
-~/bf-ui/client$ npm install
-~/bf-ui/client$ npm run watch
+$ npm install
+$ npm run watch
 ```
 
-### Testing
+Open browser to http://localhost:8080 .  Changes will automatically reload the browser.
+
+# Building
 
 ```
-~/bf-ui/client$ npm run test
+npm run build
 ```
 
-### Building
+# Testing
 
 ```
-~/bf-ui/client$ NODE_ENV=production npm run build
-```
-
-Check `dist` folder afterwards.
-
-
-## Server
-
-### Running Locally
-
-```
-~/bf-ui/server$ go get
-~/bf-ui/server$ go run
-```
-
-### Testing
-
-```
-~/bf-ui/server$ go test ./...
-```
-
-### Building
-
-```
-~/bf-ui/server$ go get
-~/bf-ui/server$ go build
+$ npm run lint && npm run test
 ```
