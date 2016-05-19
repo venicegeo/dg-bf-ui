@@ -8,5 +8,6 @@ source $root/ci/vars.sh
 
 npm install
 npm run test:ci
-npm run build
-# NODE_ENV=production npm run build
+NODE_ENV=production GATEWAY="https://pz-gateway.${PCF_DOMAIN}" npm run build
+
+echo "pushstate: enabled" > dist/Staticfile
