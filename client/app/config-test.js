@@ -1,8 +1,8 @@
-import {API_NAMESPACE, TILE_PROVIDERS} from './config'
+import {GATEWAY, TILE_PROVIDERS} from './config'
 
 describe('config', () => {
-  it('reads API namespace from environment', () => {
-    expect(API_NAMESPACE).toEqual('/api/test')
+  it('reads gateway URL from environment', () => {
+    expect(GATEWAY).toEqual('/test-gateway')
   })
 
   it('defines at least one tile provider', () => {

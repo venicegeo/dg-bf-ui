@@ -22,7 +22,7 @@ module.exports = (config) => {
       plugins: [
         new webpack.DefinePlugin({
           'process.env.NODE_ENV': JSON.stringify('test'),
-          'process.env.API_NAMESPACE': JSON.stringify('/api/test')
+          'process.env.GATEWAY': JSON.stringify('/test-gateway')
         })
       ]
     }

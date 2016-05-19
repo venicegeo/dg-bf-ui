@@ -43,7 +43,7 @@ module.exports = {
   plugins: [
     new webpack.DefinePlugin({
       'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV || 'development'),
-      'process.env.API_NAMESPACE': JSON.stringify(process.env.API_NAMESPACE || '/api/v1')
+      'process.env.GATEWAY': JSON.stringify(process.env.GATEWAY || '/gateway')
     }),
     new HtmlWebpackPlugin({
       template: 'index.ejs',
