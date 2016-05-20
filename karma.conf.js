@@ -25,6 +25,9 @@ module.exports = (config) => {
           'process.env.GATEWAY': JSON.stringify('/test-gateway')
         })
       ]
+    },
+    webpackMiddleware: {
+      noInfo: true
     }
   })
 }
