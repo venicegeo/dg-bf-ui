@@ -1,6 +1,6 @@
 html {
-  font-family: 'Helvetica Neue', sans-serif;
-  font-weight: 200;
+  font-family: Catamaran, sans-serif;
+  font-weight: 300;
   font-size: 12px;
 }
 
@@ -10,7 +10,7 @@ p {
 
 code,
 pre {
-  font-family: Menlo, 'Courier New', monospace;
+  font-family: Inconsolata, monospace;
 }
 
 h1,
@@ -19,5 +19,7 @@ h3,
 h4,
 h5,
 h6 {
+  font-family: Montserrat, sans-serif;
+  font-weight: 400;
   margin: 0;
 }
