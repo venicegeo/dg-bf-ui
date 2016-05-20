@@ -119,8 +119,7 @@ function resolutionWorker(client, job, status) {
   client.getFile(metadataId).then(metadataString => {
     let outputFiles
     try {
-      const [metadata] = JSON.parse(metadataString)
-      outputFiles = metadata.OutFiles
+      outputFiles = JSON.parse(metadataString).OutFiles
     } catch (err) {
       throw new Error(`MetadataParsingError: \`${metadataString}\``)
     }
