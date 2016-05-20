@@ -11,6 +11,7 @@ if (!authToken) {
   sessionStorage.setItem('authToken', authToken)
 }
 const client = new Client(GATEWAY, authToken)
+jobs.initialize(client)
 // HACK HACK HACK HACK HACK HACK HACK HACK
 
 export function fetchAlgorithms() {
@@ -18,7 +19,7 @@ export function fetchAlgorithms() {
 }
 
 export function fetchJobs() {
-  return jobs.list(client)
+  return jobs.list()
 }
 
 export function fetchResult(id) {

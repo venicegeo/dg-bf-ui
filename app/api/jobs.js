@@ -1,13 +1,17 @@
 import {JOBS_WORKER} from '../config'
 
-const {POLL_INTERVAL, POLL_MAX_ATTEMPTS} = JOBS_WORKER
-
 const STATUS_ERROR = 'Error'
 const STATUS_RUNNING = 'Running'
 const STATUS_SUCCESS = 'Success'
 const STATUS_TIMED_OUT = 'Timed Out'
 
-const cache = {}
+let cache
+
+export function initialize(client) {
+  deserializeCache()
+  return cacheWorker(client)
+}
+
 export function execute(client, {name, algorithmId, algorithmName, imageIds}) {
   const outputFilename = generateOutputFilename()
   const imageFilenames = imageIds.map(s => s + '.TIF').join(',')
@@ -35,27 +39,20 @@ export function execute(client, {name, algorithmId, algorithmName, imageIds}) {
     serviceId: algorithmId
   })
     .then(id => {
-      const job = new Job({
+      appendToCache(new Job({
         algorithmName,
         id,
         imageIds,
         name,
         createdOn: Date.now(),
         status: STATUS_RUNNING
-      })
-
-      cache[id] = job
-      dispatchWorker(client, job)
+      }))
       return id
     })
 }
 
-export function list(/*client*/) {
-  return Promise.resolve(
-    Object.keys(cache)
-      .map(k => cache[k])
-      .sort((a, b) => b.createdOn - a.createdOn)
-  )
+export function list() {
+  return Promise.resolve(cache.sort((a, b) => b.createdOn - a.createdOn))
 }
 
 export function getResult(client, resultId) {
@@ -66,38 +63,78 @@ export function getResult(client, resultId) {
 // Internals
 //
 
-function dispatchWorker(client, job) {
-  let attempt = 0
-  const maxAttempts = POLL_MAX_ATTEMPTS
-  const handle = setInterval(__poll__, POLL_INTERVAL)
+function appendToCache(job) {
+  cache.push(job)
+  serializeCache()
+}
+
+function cacheWorker(client) {
+  const handle = setInterval(work, JOBS_WORKER.INTERVAL)
   const terminate = () => clearTimeout(handle)
+  work()
 
-  function __poll__() {
-    attempt += 1
-    client.getStatus(job.id).then(status => {
-      console.debug('(jobs.dispatchWorker) <%s> poll #%s (%s)', job.id, attempt, status.status)
+  function work() {
 
-      if (status.status === STATUS_SUCCESS) {
-        job.status = STATUS_SUCCESS
-        resolutionWorker(client, job, status)
-        terminate()
-      }
+    const outstanding = cache.filter(j => j.status === STATUS_RUNNING)
+    if (!outstanding.length) {
+      console.debug('(jobs.cacheWorker) nothing to do')
+      return
+    }
 
-      else if (status.error === STATUS_ERROR) {
+    console.debug('(jobs.cacheWorker) updating %d records', outstanding.length)
+
+    // todo -- don't interlace the status and resolve calls
+
+    // get updates
+
+    // for all success, resolve result id
+
+    const promises = outstanding.map((job, index) => {
+
+      return client.getStatus(job.id).then(status => {
+        console.debug('(jobs.cacheWorker) [%d/%d] <%s> poll (%s)', index + 1, outstanding.length, job.id, status.status)
+
+        if (status.status === STATUS_SUCCESS) {
+          job.status = STATUS_SUCCESS
+          return resolveResultId(client, job, status)
+        }
+
+        else if (status.status === STATUS_ERROR) {
+          job.status = STATUS_ERROR
+          return
+        }
+
+        // if still not resolved, stop tracking
+        const age = Date.now() - new Date(job.createdOn).getTime()
+        if (age > JOBS_WORKER.JOB_TTL) {
+          console.warn('(jobs.cacheWorker) <%s> disregarding stalled job', job.id)
+          job.status = STATUS_TIMED_OUT
+        }
+
+      }).catch(err => {
+        // TODO -- need better logic for this
         job.status = STATUS_ERROR
-        throw new Error(`ExecutionError: ${status.message}`)
-      }
-
-      else if (attempt >= maxAttempts) {
-        job.status = STATUS_TIMED_OUT
-        throw new Error(`TooManyAttempts: (max=${maxAttempts})`)
-      }
-
-    }).catch(err => {
-      console.error('(jobs.dispatchWorker) <%s> Polling failed:', job.id, err)
-      terminate()
+        console.error(err)
+      }).then(() => job.id)
     })
+
+    Promise.all(promises)
+      .then(ids => {
+        if (!ids.length) {
+          console.debug('(jobs.cacheWorker) no changes')
+          return
+        }
+        console.debug('(jobs.cacheWorker) saving %d updates', ids.length)
+        serializeCache()
+      })
+      .catch(err => console.error(err))
   }
+
+  return {terminate}
+}
+
+function deserializeCache() {
+  cache = (JSON.parse(sessionStorage.getItem('jobs')) || []).map(raw => new Job(raw))
 }
 
 function extractFileId(outputFiles) {
@@ -111,12 +148,12 @@ function generateOutputFilename() {
   return `Beachfront_${timestamp}.geojson`
 }
 
-function resolutionWorker(client, job, status) {
+function resolveResultId(client, job, status) {
   const metadataId = status.result.dataId
 
-  console.debug('(jobs.resolutionWorker) <%s> Fetching metadata', metadataId)
+  console.debug('(jobs.resolveResultId) <%s> Fetching metadata', metadataId)
 
-  client.getFile(metadataId).then(metadataString => {
+  return client.getFile(metadataId).then(metadataString => {
     let outputFiles
     try {
       outputFiles = JSON.parse(metadataString).OutFiles
@@ -132,8 +169,12 @@ function resolutionWorker(client, job, status) {
     job.resultId = geojsonId
   })
   .catch(err => {
-    console.error('(jobs.resolutionWorker) <%s> Failed:', metadataId, err)
+    console.error('(jobs.resolveResultId) <%s> Failed:', metadataId, err)
   })
+}
+
+function serializeCache() {
+  sessionStorage.setItem('jobs', JSON.stringify(cache))
 }
 
 //

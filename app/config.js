@@ -1,8 +1,10 @@
 export const GATEWAY = process.env.GATEWAY
 
+const time = {millisecond: 1, second: 1000, minute: 60000}
+
 export const JOBS_WORKER = {
-  POLL_INTERVAL:     15 * 1000,
-  POLL_MAX_ATTEMPTS: 60
+  INTERVAL: 15 * time.second,
+  JOB_TTL:  5 * time.minute
 }
 
 export const TILE_PROVIDERS = [

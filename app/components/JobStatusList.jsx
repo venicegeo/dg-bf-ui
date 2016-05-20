@@ -4,7 +4,7 @@ import JobStatus from './JobStatus'
 import {fetchJobs} from '../api'
 
 const SECOND = 1000
-const POLL_INTERVAL = 10 * SECOND
+const POLL_INTERVAL = 1 * SECOND  // FIXME -- it might make more sense to have this be pub/sub
 
 export default class JobStatusList extends Component {
   static propTypes = {
