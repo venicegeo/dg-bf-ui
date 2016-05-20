@@ -26,7 +26,7 @@ export default class AlgorithmOptions extends Component {
         <h2>Algorithm Options</h2>
         <label className={fieldStyles.normal}><span>Job Name</span><input ref="name" type="text" placeholder="Enter a name"/></label>
 
-        <label className={styles.normal}>
+        <label className={fieldStyles.normal}>
           <span>Image</span>
           <select ref="image">
             {this.props.images.map(image => <option key={image.name} value={image.ids.join(',')}>{image.name}</option>)}
