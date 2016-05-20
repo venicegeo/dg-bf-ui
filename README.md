@@ -1,22 +1,25 @@
-# beachfront-client
+# bf-ui
 
-# Installing and Developing
+User interface for the Beachfront project.
+
+## Installing and Developing
 
 ```
 $ npm install
 $ npm run watch
 ```
 
-Open browser to http://localhost:8080 .  Changes will automatically reload the browser.
+Open browser to `http://localhost:8080`.  Changes will automatically reload the browser.
 
-# Building
+## Building
 
 ```
 npm run build
 ```
 
-# Testing
+## Testing
 
 ```
-$ npm run lint && npm run test
+$ npm run lint
+$ npm run test
 ```

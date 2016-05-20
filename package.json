@@ -1,7 +1,7 @@
 {
-  "name": "beachfront-client",
+  "name": "bf-ui",
   "version": "0.0.0",
-  "description": "Client-facing component of bf-ui",
+  "description": "User interface for the Beachfront project",
   "scripts": {
     "build": "webpack --colors --progress",
     "clean": "rimraf dist",
