@@ -2,11 +2,29 @@ const webpack = require('webpack')
 
 module.exports = (config) => {
   config.set({
+    //
+    // Base Config
+    //
+
     browsers: ['Chrome'],
+
+    customLaunchers: {
+      gs_firefox_38: {
+        base: 'Firefox',
+        prefs: {'dom.fetch.enabled': true}
+      },
+    },
+
     frameworks: ['mocha'],
+
     reporters: ['mocha'],
 
+    //
+    // Source Wrangling
+    //
+
     files: ['app/**/*test.js'],
+
     preprocessors: {
       'app/**/*.js': ['webpack', 'sourcemap']
     },
@@ -26,6 +44,7 @@ module.exports = (config) => {
         })
       ]
     },
+
     webpackMiddleware: {
       noInfo: true
     }
