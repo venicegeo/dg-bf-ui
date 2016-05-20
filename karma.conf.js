@@ -3,16 +3,16 @@ const webpack = require('webpack')
 module.exports = (config) => {
   config.set({
     browsers: ['Chrome'],
-    frameworks: ['jasmine'],
+    frameworks: ['mocha'],
     reporters: ['mocha'],
 
     files: ['app/**/*test.js'],
     preprocessors: {
-      'app/**/*.js': ['webpack']
+      'app/**/*.js': ['webpack', 'sourcemap']
     },
 
     webpack: {
-      devtool: 'cheap-module-source-map',
+      devtool: 'inline-source-map',
       module: {
         loaders: [
           {pattern: /\.jsx?$/, loader: 'babel', exclude: /node_modules/},
@@ -25,6 +25,9 @@ module.exports = (config) => {
           'process.env.GATEWAY': JSON.stringify('/test-gateway')
         })
       ]
+    },
+    webpackMiddleware: {
+      noInfo: true
     }
   })
 }

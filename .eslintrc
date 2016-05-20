@@ -12,7 +12,7 @@
     "browser": true,
     "es6": true,
     "node": true,
-    "jasmine": true
+    "mocha": true
   },
   "extends": ["plugin:react/recommended"],
   "rules": {

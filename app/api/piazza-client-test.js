@@ -1,104 +1,24 @@
+import expect from 'expect'
 import {Client, STATUS_ERROR, STATUS_RUNNING, STATUS_SUCCESS} from './piazza-client'
+import {
+  ERROR_GENERIC,
+  RESPONSE_FILE,
+  RESPONSE_JOB_CREATED,
+  RESPONSE_JOB_RUNNING,
+  RESPONSE_JOB_SUCCESS,
+  RESPONSE_JOB_ERROR,
+  RESPONSE_JOB_NOT_FOUND,
+  RESPONSE_SERVICE_LIST
+} from '../../test/fixtures/piazza-responses'
 
-const ERROR_UNAUTHORIZED = 'HTTP Status 401 - pz-gateway is unable to authenticate the provided user'
+describe('Piazza Client', function() {
+  this.timeout(500)
 
-const ERROR_GENERIC = `{
-  "timestamp": 1461978715800,
-  "status": 500,
-  "error": "Internal Server Error",
-  "exception": "java.lang.NullPointerException",
-  "message": "No message available",
-  "path": "/any/where"
-}`
-
-const RESPONSE_FILE = `{
-  "foo": "bar"
-}`
-
-const RESPONSE_JOB_CREATED = `{
-  "type": "job",
-  "jobId": "test-id"
-}`
-
-const RESPONSE_JOB_RUNNING = `{
-  "type": "status",
-  "jobId": "test-id",
-  "status": "Running",
-  "jobType": "execute-service",
-  "submittedBy": "test-user",
-  "progress": {}
-}`
-
-const RESPONSE_JOB_SUCCESS = `{
-  "type": "status",
-  "jobId": "test-id",
-  "result": {
-    "type": "data",
-    "dataId": "test-data-id"
-  },
-  "status": "Success",
-  "jobType": "execute-service",
-  "submittedBy": "test-user",
-  "progress": {}
-}`
-
-const RESPONSE_JOB_ERROR = `{
-  "type": "status",
-  "jobId": "test-id",
-  "result": {
-    "type": "error",
-    "message": "Service not found."
-  },
-  "status": "Error",
-  "jobType": "execute-service",
-  "submittedBy": "test-user",
-  "progress": {}
-}`
-
-const RESPONSE_JOB_NOT_FOUND = `{
-  "type": "error",
-  "jobId": "test-id",
-  "message": "Job Not Found.",
-  "origin": "Job Manager"
-}`
-
-const RESPONSE_SERVICE_LIST = `{
-  "type": "service-list",
-  "data": [
-    {
-      "serviceId": "test-id-1",
-      "url": "test-url",
-      "resourceMetadata": {
-        "name": "test-name",
-        "description": "test-description",
-        "method": "POST",
-        "availability": "test-availability"
-      }
-    },
-    {
-      "serviceId": "test-id-2",
-      "url": "test-url",
-      "resourceMetadata": {
-        "name": "test-name",
-        "description": "test-description",
-        "method": "POST",
-        "availability": "test-availability"
-      }
-    }
-  ],
-  "pagination": {
-    "count": 2,
-    "page": 0,
-    "per_page": 100
-  }
-}`
-
-describe('Piazza Client', () => {
-  jasmine.DEFAULT_TIMEOUT_INTERVAL = 500
+  afterEach(() => expect.restoreSpies())
 
   describe('constructor()', () => {
     it('can instantiate', () => {
-      expect(() => new Client('http://test-gateway')).not.toThrow()
+      expect(() => new Client('http://test-gateway')).toNotThrow()
     })
 
     it('normalizes gateway', () => {
@@ -114,43 +34,43 @@ describe('Piazza Client', () => {
 
   describe('getFile()', () => {
     it ('calls correct URL', (done) => {
-      const stub = spyOn(window, 'fetch').and.returnValue(resolve(RESPONSE_FILE))
+      const stub = expect.spyOn(window, 'fetch').andReturn(resolve(RESPONSE_FILE))
       const client = new Client('http://m', 'test-auth-token')
       client.getFile('test-id')
         .then(() => {
-          expect(stub.calls.first().args[0]).toEqual('http://m/file/test-id')
+          expect(stub.calls[0].arguments[0]).toEqual('http://m/file/test-id')
           done()
         })
-        .catch(done.fail)
+        .catch(done)
     })
 
     it('can retrieve file', (done) => {
-      spyOn(window, 'fetch').and.returnValue(resolve(RESPONSE_FILE))
+      expect.spyOn(window, 'fetch').andReturn(resolve(RESPONSE_FILE))
       const client = new Client('http://m', 'test-auth-token')
       client.getFile('test-id')
         .then(content => {
           expect(content).toBeTruthy()
           done()
         })
-        .catch(done.fail)
+        .catch(done)
     })
 
     it('does not modify payload', (done) => {
-      spyOn(window, 'fetch').and.returnValue(resolve(RESPONSE_FILE))
+      expect.spyOn(window, 'fetch').andReturn(resolve(RESPONSE_FILE))
       const client = new Client('http://m', 'test-auth-token')
       client.getFile('test-id')
         .then(actual => {
           expect(actual).toEqual(RESPONSE_FILE)
           done()
         })
-        .catch(done.fail)
+        .catch(done)
     })
 
     it('handles HTTP errors gracefully', (done) => {
-      spyOn(window, 'fetch').and.returnValue(resolveJson(ERROR_GENERIC, 500))
+      expect.spyOn(window, 'fetch').andReturn(resolveJson(ERROR_GENERIC, 500))
       const client = new Client('http://m', 'test-auth-token')
       client.getFile('test-id')
-        .then(() => done.fail('Should have thrown'))
+        .then(() => done('Should have thrown'))
         .catch(error => {
           expect(error.status).toEqual(500)
           done()
@@ -160,18 +80,18 @@ describe('Piazza Client', () => {
   
   describe('getServices()', () => {
     it ('calls correct URL', (done) => {
-      const stub = spyOn(window, 'fetch').and.returnValue(resolve(RESPONSE_SERVICE_LIST))
+      const stub = expect.spyOn(window, 'fetch').andReturn(resolve(RESPONSE_SERVICE_LIST))
       const client = new Client('http://m', 'test-auth-token')
       client.getServices({pattern: 'test-pattern'})
         .then(() => {
-          expect(stub.calls.first().args[0]).toEqual('http://m/service?keyword=test-pattern&per_page=100')
+          expect(stub.calls[0].arguments[0]).toEqual('http://m/service?keyword=test-pattern&per_page=100')
           done()
         })
-        .catch(done.fail)
+        .catch(done)
     })
 
     it('can list services', (done) => {
-      spyOn(window, 'fetch').and.returnValue(resolveJson(RESPONSE_SERVICE_LIST))
+      expect.spyOn(window, 'fetch').andReturn(resolveJson(RESPONSE_SERVICE_LIST))
       const client = new Client('http://m', 'test-auth-token')
       client.getServices({pattern: 'test-pattern'})
         .then(services => {
@@ -179,11 +99,11 @@ describe('Piazza Client', () => {
           expect(services.length).toEqual(2)
           done()
         })
-        .catch(done.fail)
+        .catch(done)
     })
 
     it('deserializes metadata', (done) => {
-      spyOn(window, 'fetch').and.returnValue(resolveJson(RESPONSE_SERVICE_LIST))
+      expect.spyOn(window, 'fetch').andReturn(resolveJson(RESPONSE_SERVICE_LIST))
       const client = new Client('http://m', 'test-auth-token')
       client.getServices({pattern: 'test-pattern'})
         .then(([firstService]) => {
@@ -193,14 +113,14 @@ describe('Piazza Client', () => {
           expect(firstService.resourceMetadata.name).toEqual('test-name')
           done()
         })
-        .catch(done.fail)
+        .catch(done)
     })
 
     it('handles HTTP errors gracefully', (done) => {
-      spyOn(window, 'fetch').and.returnValue(resolve(ERROR_GENERIC, 500))
+      expect.spyOn(window, 'fetch').andReturn(resolve(ERROR_GENERIC, 500))
       const client = new Client('http://m', 'test-auth-token')
       client.getServices({pattern: 'test-pattern'})
-        .then(() => done.fail('Should have thrown'))
+        .then(() => done('Should have thrown'))
         .catch(error => {
           expect(error.status).toEqual(500)
           done()
@@ -210,31 +130,31 @@ describe('Piazza Client', () => {
 
   describe('getStatus()', () => {
     it('calls correct URL', (done) => {
-      const stub = spyOn(window, 'fetch').and.returnValue(resolve(RESPONSE_JOB_RUNNING))
+      const stub = expect.spyOn(window, 'fetch').andReturn(resolve(RESPONSE_JOB_RUNNING))
       const client = new Client('http://m', 'test-auth-token')
       client.getStatus('test-id')
         .then(() => {
-          expect(stub.calls.first().args[0]).toEqual('http://m/job/test-id')
+          expect(stub.calls[0].arguments[0]).toEqual('http://m/job/test-id')
           done()
         })
-        .catch(done.fail)
+        .catch(done)
     })
 
     it('properly deserializes running job', (done) => {
-      spyOn(window, 'fetch').and.returnValue(resolve(RESPONSE_JOB_RUNNING))
+      expect.spyOn(window, 'fetch').andReturn(resolve(RESPONSE_JOB_RUNNING))
       const client = new Client('http://m', 'test-auth-token')
       client.getStatus('test-id')
         .then(status => {
           expect(status.jobId).toEqual('test-id')
           expect(status.status).toEqual(STATUS_RUNNING)
-          expect(status.result).toBeNull()
+          expect(status.result).toEqual(null)
           done()
         })
-        .catch(done.fail)
+        .catch(done)
     })
 
     it('properly deserializes successful job', (done) => {
-      spyOn(window, 'fetch').and.returnValue(resolve(RESPONSE_JOB_SUCCESS))
+      expect.spyOn(window, 'fetch').andReturn(resolve(RESPONSE_JOB_SUCCESS))
       const client = new Client('http://m', 'test-auth-token')
       client.getStatus('test-id')
         .then(status => {
@@ -243,27 +163,27 @@ describe('Piazza Client', () => {
           expect(status.result.dataId).toEqual('test-data-id')
           done()
         })
-        .catch(done.fail)
+        .catch(done)
     })
 
     it('properly deserializes failed job', (done) => {
-      spyOn(window, 'fetch').and.returnValue(resolve(RESPONSE_JOB_ERROR))
+      expect.spyOn(window, 'fetch').andReturn(resolve(RESPONSE_JOB_ERROR))
       const client = new Client('http://m', 'test-auth-token')
       client.getStatus('test-id')
         .then(status => {
           expect(status.jobId).toEqual('test-id')
           expect(status.status).toEqual(STATUS_ERROR)
-          expect(status.result.dataId).toBeUndefined()
+          expect(status.result.dataId).toNotExist()
           done()
         })
-        .catch(done.fail)
+        .catch(done)
     })
 
     it('properly handles non-existent job', (done) => {
-      spyOn(window, 'fetch').and.returnValue(resolve(RESPONSE_JOB_NOT_FOUND))
+      expect.spyOn(window, 'fetch').andReturn(resolve(RESPONSE_JOB_NOT_FOUND))
       const client = new Client('http://m', 'test-auth-token')
       client.getStatus('test-id')
-        .then(() => done.fail('Should have thrown'))
+        .then(() => done('Should have thrown'))
         .catch(error => {
           expect(error instanceof Error).toEqual(true)
           expect(error.message).toMatch(/^InvalidResponse: Job Not Found/i)
@@ -272,10 +192,10 @@ describe('Piazza Client', () => {
     })
 
     it('handles HTTP errors gracefully', (done) => {
-      spyOn(window, 'fetch').and.returnValue(resolve(ERROR_GENERIC, 500))
+      expect.spyOn(window, 'fetch').andReturn(resolve(ERROR_GENERIC, 500))
       const client = new Client('http://m', 'test-auth-token')
       client.getStatus('test-id')
-        .then(() => done.fail('Should have thrown'))
+        .then(() => done('Should have thrown'))
         .catch(error => {
           expect(error.status).toEqual(500)
           done()
@@ -285,46 +205,46 @@ describe('Piazza Client', () => {
 
   describe('post()', () => {
     it('calls correct URL', (done) => {
-      const stub = spyOn(window, 'fetch').and.returnValue(resolve(RESPONSE_JOB_CREATED))
+      const stub = expect.spyOn(window, 'fetch').andReturn(resolve(RESPONSE_JOB_CREATED))
       const client = new Client('http://m', 'test-auth-token')
       client.post('test-type', 'test-data')
         .then(() => {
-          expect(stub.calls.first().args[0]).toEqual('http://m/v2/job')
+          expect(stub.calls[0].arguments[0]).toEqual('http://m/v2/job')
           done()
         })
-        .catch(done.fail)
+        .catch(done)
     })
 
     it('returns new job ID', (done) => {
-      spyOn(window, 'fetch').and.returnValue(resolve(RESPONSE_JOB_CREATED))
+      expect.spyOn(window, 'fetch').andReturn(resolve(RESPONSE_JOB_CREATED))
       const client = new Client('http://m', 'test-auth-token')
       client.post('test-type', 'test-data')
         .then(id => {
           expect(id).toEqual('test-id')
           done()
         })
-        .catch(done.fail)
+        .catch(done)
     })
 
     it('properly serializes message', (done) => {
-      const stub = spyOn(window, 'fetch').and.returnValue(resolve(RESPONSE_JOB_CREATED))
+      const stub = expect.spyOn(window, 'fetch').andReturn(resolve(RESPONSE_JOB_CREATED))
       const client = new Client('http://m', 'test-auth-token')
       client.post('test-type', 'test-data')
         .then(() => {
-          const [, options] = stub.calls.first().args
+          const [, options] = stub.calls[0].arguments
           expect(options.method).toEqual('POST')
           expect(options.headers['content-type']).toEqual('application/json')
           expect(options.body).toEqual('{"type":"test-type","data":"test-data"}')
           done()
         })
-        .catch(done.fail)
+        .catch(done)
     })
 
     it('handles HTTP errors gracefully', (done) => {
-      spyOn(window, 'fetch').and.returnValue(resolve(ERROR_GENERIC, 500))
+      expect.spyOn(window, 'fetch').andReturn(resolve(ERROR_GENERIC, 500))
       const client = new Client('http://m', 'test-auth-token')
       client.post('test-type', 'test-data')
-        .then(() => done.fail('Should have thrown'))
+        .then(() => done('Should have thrown'))
         .catch(error => {
           expect(error.status).toEqual(500)
           done()
