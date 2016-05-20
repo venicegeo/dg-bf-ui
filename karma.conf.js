@@ -3,7 +3,7 @@ const webpack = require('webpack')
 module.exports = (config) => {
   config.set({
     browsers: ['Chrome'],
-    frameworks: ['jasmine'],
+    frameworks: ['mocha'],
     reporters: ['mocha'],
 
     files: ['app/**/*test.js'],
