@@ -1,97 +1,15 @@
 import {Client, STATUS_ERROR, STATUS_RUNNING, STATUS_SUCCESS} from './piazza-client'
+import {
+  ERROR_GENERIC,
+  RESPONSE_FILE,
+  RESPONSE_JOB_CREATED,
+  RESPONSE_JOB_RUNNING,
+  RESPONSE_JOB_SUCCESS,
+  RESPONSE_JOB_ERROR,
+  RESPONSE_JOB_NOT_FOUND,
+  RESPONSE_SERVICE_LIST
+} from '../../test/fixtures/piazza-responses'
 
-const ERROR_UNAUTHORIZED = 'HTTP Status 401 - pz-gateway is unable to authenticate the provided user'
-
-const ERROR_GENERIC = `{
-  "timestamp": 1461978715800,
-  "status": 500,
-  "error": "Internal Server Error",
-  "exception": "java.lang.NullPointerException",
-  "message": "No message available",
-  "path": "/any/where"
-}`
-
-const RESPONSE_FILE = `{
-  "foo": "bar"
-}`
-
-const RESPONSE_JOB_CREATED = `{
-  "type": "job",
-  "jobId": "test-id"
-}`
-
-const RESPONSE_JOB_RUNNING = `{
-  "type": "status",
-  "jobId": "test-id",
-  "status": "Running",
-  "jobType": "execute-service",
-  "submittedBy": "test-user",
-  "progress": {}
-}`
-
-const RESPONSE_JOB_SUCCESS = `{
-  "type": "status",
-  "jobId": "test-id",
-  "result": {
-    "type": "data",
-    "dataId": "test-data-id"
-  },
-  "status": "Success",
-  "jobType": "execute-service",
-  "submittedBy": "test-user",
-  "progress": {}
-}`
-
-const RESPONSE_JOB_ERROR = `{
-  "type": "status",
-  "jobId": "test-id",
-  "result": {
-    "type": "error",
-    "message": "Service not found."
-  },
-  "status": "Error",
-  "jobType": "execute-service",
-  "submittedBy": "test-user",
-  "progress": {}
-}`
-
-const RESPONSE_JOB_NOT_FOUND = `{
-  "type": "error",
-  "jobId": "test-id",
-  "message": "Job Not Found.",
-  "origin": "Job Manager"
-}`
-
-const RESPONSE_SERVICE_LIST = `{
-  "type": "service-list",
-  "data": [
-    {
-      "serviceId": "test-id-1",
-      "url": "test-url",
-      "resourceMetadata": {
-        "name": "test-name",
-        "description": "test-description",
-        "method": "POST",
-        "availability": "test-availability"
-      }
-    },
-    {
-      "serviceId": "test-id-2",
-      "url": "test-url",
-      "resourceMetadata": {
-        "name": "test-name",
-        "description": "test-description",
-        "method": "POST",
-        "availability": "test-availability"
-      }
-    }
-  ],
-  "pagination": {
-    "count": 2,
-    "page": 0,
-    "per_page": 100
-  }
-}`
 
 describe('Piazza Client', () => {
   jasmine.DEFAULT_TIMEOUT_INTERVAL = 500
