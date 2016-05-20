@@ -8,11 +8,11 @@ module.exports = (config) => {
 
     files: ['app/**/*test.js'],
     preprocessors: {
-      'app/**/*.js': ['webpack']
+      'app/**/*.js': ['webpack', 'sourcemap']
     },
 
     webpack: {
-      devtool: 'cheap-module-source-map',
+      devtool: 'inline-source-map',
       module: {
         loaders: [
           {pattern: /\.jsx?$/, loader: 'babel', exclude: /node_modules/},
