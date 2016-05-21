@@ -51,12 +51,12 @@ export function execute(client, {name, algorithmId, algorithmName, imageIds}) {
     })
 }
 
-export function list() {
-  return Promise.resolve(cache.sort((a, b) => b.createdOn - a.createdOn))
-}
-
 export function getResult(client, resultId) {
   return client.getFile(resultId).then(str => new Result(str, resultId, resultId))
+}
+
+export function list() {
+  return Promise.resolve(cache.sort((a, b) => b.createdOn - a.createdOn))
 }
 
 //
@@ -74,103 +74,91 @@ function cacheWorker(client) {
   work()
 
   function work() {
-
-    const outstanding = cache.filter(j => j.status === STATUS_RUNNING)
+    const outstanding = cache.filter(job => job.status === STATUS_RUNNING)
     if (!outstanding.length) {
-      console.debug('(jobs.cacheWorker) nothing to do')
+      console.debug('(jobs:cacheWorker) nothing to do')
       return
     }
-
-    console.debug('(jobs.cacheWorker) updating %d records', outstanding.length)
-
-    // todo -- don't interlace the status and resolve calls
-
-    // get updates
-
-    // for all success, resolve result id
-
-    const promises = outstanding.map((job, index) => {
-
-      return client.getStatus(job.id).then(status => {
-        console.debug('(jobs.cacheWorker) [%d/%d] <%s> poll (%s)', index + 1, outstanding.length, job.id, status.status)
-
-        if (status.status === STATUS_SUCCESS) {
-          job.status = STATUS_SUCCESS
-          return resolveResultId(client, job, status)
-        }
-
-        else if (status.status === STATUS_ERROR) {
-          job.status = STATUS_ERROR
-          return
-        }
-
-        // if still not resolved, stop tracking
-        const age = Date.now() - new Date(job.createdOn).getTime()
-        if (age > JOBS_WORKER.JOB_TTL) {
-          console.warn('(jobs.cacheWorker) <%s> disregarding stalled job', job.id)
-          job.status = STATUS_TIMED_OUT
-        }
-
-      }).catch(err => {
-        // TODO -- need better logic for this
-        job.status = STATUS_ERROR
-        console.error(err)
-      }).then(() => job.id)
-    })
-
-    Promise.all(promises)
-      .then(ids => {
-        if (!ids.length) {
-          console.debug('(jobs.cacheWorker) no changes')
-          return
-        }
-        console.debug('(jobs.cacheWorker) saving %d updates', ids.length)
+    Promise.all(outstanding.map(__update__))
+      .then(() => {
+        console.debug('(jobs:cacheWorker) committing changes')
         serializeCache()
       })
       .catch(err => console.error(err))
   }
 
+  function __update__(job) {
+    return client.getStatus(job.id)
+      .then(status => {
+        console.debug('(jobs:cacheWorker) <%s> poll (%s)', job.id, status.status)
+
+        if (status.status === STATUS_SUCCESS) {
+          job.status = STATUS_SUCCESS
+          return __resolve__(job, status)
+        }
+
+        else if (status.status === STATUS_ERROR) {
+          job.status = STATUS_ERROR
+        }
+
+        else if (calculateDuration(job) > JOBS_WORKER.JOB_TTL) {
+          console.warn('(jobs:cacheWorker) <%s> has timed out', job.id)
+          job.status = STATUS_TIMED_OUT
+        }
+      })
+      .catch(err => {
+        job.status = STATUS_ERROR
+        console.error('(jobs:cacheWorker) <%s> update failed:', job.id, err)
+      })
+  }
+
+  function __resolve__(job, status) {
+    const metadataId = status.result.dataId
+    console.debug('(jobs:cacheWorker) <%s> resolving file ID (via <%s>)', job.id, metadataId)
+    return client.getFile(metadataId)
+      .then(executionOutput => {
+        const files = extractOutputFiles(executionOutput)
+        if (!files) {
+          throw new Error(`Invalid execution output:\n\`${executionOutput}\``)
+        }
+
+        const geojsonId = extractGeojsonId(files)
+        if (!geojsonId) {
+          throw new Error('Could not find GeoJSON file in execution output')
+        }
+
+        job.resultId = geojsonId
+      })
+  }
+
   return {terminate}
+}
+
+function calculateDuration(job) {
+  return Date.now() - new Date(job.createdOn).getTime()
 }
 
 function deserializeCache() {
   cache = (JSON.parse(sessionStorage.getItem('jobs')) || []).map(raw => new Job(raw))
 }
 
-function extractFileId(outputFiles) {
+function extractGeojsonId(outputFiles) {
   const pattern  = /^Beachfront_(.*)\.geojson$/
   const filename = Object.keys(outputFiles).find(key => pattern.test(key))
   return outputFiles[filename]
 }
 
+function extractOutputFiles(executionOutput) {
+  try {
+    return JSON.parse(executionOutput).OutFiles
+  } catch (_) {
+    // do nothing
+  }
+}
+
 function generateOutputFilename() {
   const timestamp = new Date().toISOString().replace(/[-:Z]/g, '').replace(/T/, '.')
   return `Beachfront_${timestamp}.geojson`
-}
-
-function resolveResultId(client, job, status) {
-  const metadataId = status.result.dataId
-
-  console.debug('(jobs.resolveResultId) <%s> Fetching metadata', metadataId)
-
-  return client.getFile(metadataId).then(metadataString => {
-    let outputFiles
-    try {
-      outputFiles = JSON.parse(metadataString).OutFiles
-    } catch (err) {
-      throw new Error(`MetadataParsingError: \`${metadataString}\``)
-    }
-
-    const geojsonId = extractFileId(outputFiles)
-    if (!geojsonId) {
-      throw new Error('Could not find GeoJSON file in metadata')
-    }
-
-    job.resultId = geojsonId
-  })
-  .catch(err => {
-    console.error('(jobs.resolveResultId) <%s> Failed:', metadataId, err)
-  })
 }
 
 function serializeCache() {
