@@ -38,7 +38,7 @@ export default class CreateJob extends Component {
             <li key={a.id} className={`${styles.algorithm} ${((algorithmId === a.id) && styles.selected) || ''}`}>
               {/*<Link to={`/create-job/${a.id}`}>*/}
                 <h3>{a.name}</h3>
-                <p dangerouslySetInnerHTML={{__html: a.description}}/>
+                <p>{a.description}</p>
 
                 <h4>Requirements</h4>
                 <table>
