@@ -7,8 +7,8 @@ describe('config', () => {
   })
 
   it('defines jobs worker timing properties', () => {
-    expect(config.JOBS_WORKER.POLL_INTERVAL).toBeA('number')
-    expect(config.JOBS_WORKER.POLL_MAX_ATTEMPTS).toBeA('number')
+    expect(config.JOBS_WORKER.INTERVAL).toBeA('number')
+    expect(config.JOBS_WORKER.JOB_TTL).toBeA('number')
   })
 
   it('defines at least one tile provider', () => {
