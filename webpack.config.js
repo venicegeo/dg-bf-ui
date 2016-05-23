@@ -3,9 +3,7 @@
 const path = require('path')
 const webpack = require('webpack')
 const HtmlWebpackPlugin = require('html-webpack-plugin')
-const postcssAutoprefixer = require('autoprefixer')
-const postcssColorFunction = require('postcss-color-function')
-const postcssCustomProperties = require('postcss-custom-properties')
+const cssnext = require('postcss-cssnext')
 
 module.exports = {
   context: path.join(__dirname, 'app'),
@@ -35,11 +33,7 @@ module.exports = {
     ]
   },
 
-  postcss: () => [
-    postcssColorFunction,
-    postcssCustomProperties,
-    postcssAutoprefixer
-  ],
+  postcss: () => [cssnext({browsers: 'Firefox >= 38, Chrome >= 40'})],
 
   plugins: [
     new webpack.DefinePlugin({
