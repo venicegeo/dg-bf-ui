@@ -2,11 +2,7 @@
   composes: submenu from '../styles/menus.css';
 }
 
-.header {
-  composes: submenu-header from '../styles/menus.css';
-}
-
-.communicationDown {
+.communicationError {
   background-color: #f04;
   color: white;
   padding: 1.5em .5em;
