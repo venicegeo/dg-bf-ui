@@ -12,3 +12,10 @@
   padding: 1.5em .5em;
   text-align: center;
 }
+
+.placeholder {
+  font-size: 1.4em;
+  text-align: center;
+  opacity: .3;
+  margin-top: 3em;
+}

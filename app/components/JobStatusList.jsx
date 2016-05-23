@@ -26,6 +26,7 @@ export default class JobStatusList extends Component {
   }
 
   render() {
+    const {jobs, communicationError} = this.state
     return (
       <ul className={styles.root}>
         <li className={styles.header}>
@@ -33,7 +34,7 @@ export default class JobStatusList extends Component {
         </li>
 
         {/* TODO -- this need to get passed in somehow */}
-        {this.state.communicationError && (
+        {communicationError && (
           <li className={styles.communicationDown}>
             <div className={styles.message}>
               <i className="fa fa-warning"/> Cannot communicate with the server
@@ -42,7 +43,10 @@ export default class JobStatusList extends Component {
           </li>
         )}
 
-        {this.state.jobs.map(job => <JobStatus key={job.id} job={job}/>)}
+        {jobs.length ?
+          jobs.map(job => <JobStatus key={job.id} job={job}/>) :
+          <li className={styles.placeholder}>You haven't started any jobs yet</li>
+        }
       </ul>
     )
   }
