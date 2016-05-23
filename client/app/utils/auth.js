@@ -1,19 +1,20 @@
 module.exports = {
-    login(email, pass, cb) {
+    login(username, pass, cb) {
         cb = arguments[arguments.length - 1]
         if (sessionStorage.token) {
             if (cb) cb(true)
-            this.onChange(true)
+
             return
         }
-        pretendRequest(email, pass, (res) => {
+
+        request(username, pass, (res) => {
             if (res.authenticated) {
                 sessionStorage.token = res.token
-                if (cb) cb(true)
-                this.onChange(true)
+                cb(true)
+
             } else {
                 if (cb) cb(false)
-                this.onChange(false)
+
             }
         })
     },
@@ -37,16 +38,29 @@ module.exports = {
     onChange: function () {}
 }
 
-function pretendRequest(email, pass, cb) {
+function request(username, pass, cb) {
+
     setTimeout(() => {
-        if (email === 'joe@example.com' && pass === 'password1') {
+        var data = {
+            username: username,
+            credential: pass
+            }
+        fetch('https://pz-security.int.geointservices.io/verification', {
+            body: JSON.stringify({data}),
+            headers: {'content-type': 'application/json'},
+            method: 'POST'
+            }
+        ).then(function(response) {
+            console.log(response);
             cb({
+
                 authenticated: true,
                 token: Math.random().toString(36).substring(7)
             })
-        } else {
+        }).catch(function(err) {
+            console.log(err);
             cb({ authenticated: false })
-        }
+        });
     }, 0)
 }
 
