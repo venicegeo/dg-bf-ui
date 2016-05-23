@@ -56,7 +56,7 @@ export function getResult(client, resultId) {
 }
 
 export function list() {
-  return Promise.resolve(cache.sort((a, b) => b.createdOn - a.createdOn))
+  return Promise.resolve(cache)
 }
 
 //
@@ -64,7 +64,7 @@ export function list() {
 //
 
 function appendToCache(job) {
-  cache.push(job)
+  cache = cache.concat(job).sort((a, b) => b.createdOn - a.createdOn)
   serializeCache()
 }
 
