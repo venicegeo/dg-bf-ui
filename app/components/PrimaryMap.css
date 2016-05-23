@@ -1,5 +1,5 @@
 .root {
-  composes: map from '../styles/common/layout.css';
+  composes: map from '../styles/layout.css';
 }
 
 .basemapSelect {

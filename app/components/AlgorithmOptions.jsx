@@ -1,6 +1,5 @@
 import React, {Component} from 'react'
 import styles from './AlgorithmOptions.css'
-import fieldStyles from '../styles/common/forms.css'
 
 export default class AlgorithmOptions extends Component {
   static propTypes = {
@@ -24,9 +23,9 @@ export default class AlgorithmOptions extends Component {
     return (
       <form className={styles.root} onSubmit={this._onSubmit}>
         <h2>Algorithm Options</h2>
-        <label className={fieldStyles.normal}><span>Job Name</span><input ref="name" type="text" placeholder="Enter a name"/></label>
+        <label className={styles.field}><span>Job Name</span><input ref="name" type="text" placeholder="Enter a name"/></label>
 
-        <label className={fieldStyles.normal}>
+        <label className={styles.field}>
           <span>Image</span>
           <select ref="image">
             {this.props.images.map(image => <option key={image.name} value={image.ids.join(',')}>{image.name}</option>)}

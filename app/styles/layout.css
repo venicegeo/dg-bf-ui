@@ -1,3 +1,14 @@
+/* =========================================================================
+   Layout (Base Styles)
+   ========================================================================= */
+
+@viewport { width: device-width; }
+
+html,
+body {
+  margin: 0;
+}
+
 .navigation {
   z-index: 10;
   position: absolute;

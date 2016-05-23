@@ -1,3 +1,7 @@
+/* =========================================================================
+   Forms (Base Styles)
+   ========================================================================= */
+
 a,
 button {
   outline: none;
@@ -31,4 +35,20 @@ input[type='number']:hover {
 input[type='text']:focus,
 input[type='number']:focus {
   background-color: #fff;
+}
+
+/* Composites
+   ========================================================================= */
+
+.field-normal {
+  display: flex;
+  align-items: center;
+  margin: .5em 0;
+}
+
+.field-normal span {
+  width: 10em;
+  padding-right: .5em;
+  line-height: 1em;
+  text-align: right;
 }

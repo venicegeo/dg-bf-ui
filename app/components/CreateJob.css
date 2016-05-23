@@ -1,5 +1,5 @@
 .root {
-  composes: submenu from '../styles/common/menus.css';
+  composes: submenu from '../styles/menus.css';
 }
 
 .root h1 {

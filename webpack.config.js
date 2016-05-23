@@ -3,6 +3,9 @@
 const path = require('path')
 const webpack = require('webpack')
 const HtmlWebpackPlugin = require('html-webpack-plugin')
+const postcssAutoprefixer = require('autoprefixer')
+const postcssColorFunction = require('postcss-color-function')
+const postcssCustomProperties = require('postcss-custom-properties')
 
 module.exports = {
   context: path.join(__dirname, 'app'),
@@ -26,11 +29,17 @@ module.exports = {
     loaders: [
       {test: /\.jsx?$/, loader: 'babel', exclude: /node_modules/},
       {test: /\.css$/, loader: 'style!css', include: /node_modules/},
-      {test: /\.css$/, loader: 'style!css?module&localIdentName=[name]__[local]', exclude: /node_modules/},
+      {test: /\.css$/, loader: 'style!css?module&localIdentName=[name]__[local]&importLoaders=1!postcss', exclude: /node_modules/},
       {test: /\.(png|jpg|gif)$/, loader: 'file'},
       {test: /\.(otf|eot|svg|ttf|woff)[^/]*$/, loader: 'file'}
     ]
   },
+
+  postcss: () => [
+    postcssColorFunction,
+    postcssCustomProperties,
+    postcssAutoprefixer
+  ],
 
   plugins: [
     new webpack.DefinePlugin({

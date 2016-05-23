@@ -16,6 +16,7 @@
     "node": "^5.0.0"
   },
   "devDependencies": {
+    "autoprefixer": "6.3.6",
     "babel-core": "6.8.0",
     "babel-eslint": "6.0.4",
     "babel-loader": "6.2.4",
@@ -37,6 +38,9 @@
     "karma-sourcemap-loader": "0.3.7",
     "karma-webpack": "1.7.0",
     "mocha": "2.4.5",
+    "postcss-color-function": "2.0.1",
+    "postcss-custom-properties": "5.0.1",
+    "postcss-loader": "0.9.1",
     "rimraf": "2.5.2",
     "style-loader": "0.13.1",
     "webpack": "1.13.0",
