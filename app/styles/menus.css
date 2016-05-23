@@ -1,9 +1,39 @@
+:root {
+  --header-height: 60px;
+}
+
 .submenu {
   composes: sidebar from './layout.css';
-  list-style: none;
-  margin: 0;
-  padding: 0;
   background-color: white;
   box-shadow: 1px 0 rgba(0,0,0,.1), 5px 0 rgba(0,0,0,.1);
   font-size: 16px;
+}
+
+.submenu > header {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  padding: 0 calc(var(--header-height) / 2);
+  line-height: var(--header-height);
+  font-weight: 100;
+  background-color: hsl(202, 70%, 30%);
+}
+
+.submenu h1 {
+  font-size: 24px;
+  font-weight: normal;
+  color: white;
+}
+
+.submenu > ul {
+  position: absolute;
+  top: var(--header-height);
+  left: 0;
+  right: 0;
+  bottom: 0;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  overflow-y: auto;
 }
