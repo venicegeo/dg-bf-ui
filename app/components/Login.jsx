@@ -45,8 +45,7 @@ export default class Login extends Component {
             <Modal className={styles.root} dismiss={this.props.dismiss}>
                 <h1>Login</h1><br />
                 <form onSubmit={this.handleSubmit}>
-                    <label><input ref="username" placeholder="username" /></label>
-                    <label><input ref="pass" placeholder="password" type="password" /></label> <br /><br />
+                    <label><input ref="username" placeholder="username" /></label>&nbsp;&nbsp;
                     <label><input ref="pass" placeholder="password" type="password" /></label> <br /><br />
                     <button type="submit">login</button>
                     {this.state.error && (
