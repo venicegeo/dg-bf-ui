@@ -3,18 +3,18 @@ module.exports = {
         cb = arguments[arguments.length - 1]
         if (sessionStorage.token) {
             if (cb) cb(true)
-
+            this.onChange(true)
             return
         }
 
         request(username, pass, (res) => {
             if (res.authenticated) {
                 sessionStorage.token = res.token
-                cb(true)
-
+                if (cb) cb(true)
+                this.onChange(true)
             } else {
                 if (cb) cb(false)
-
+                this.onChange(false)
             }
         })
     },
@@ -25,10 +25,8 @@ module.exports = {
 
     logout: function (cb) {
         delete sessionStorage.token
-        if (cb)
-        {
-            this.onChange(false)
-        }
+        if (cb) cb()
+        this.onChange(false)
     },
 
     loggedIn: function () {
@@ -62,11 +60,11 @@ function request(username, pass, cb) {
                     token: Math.random().toString(36).substring(7)
 
                 })}
+            else {
+                cb({ authenticated: false })
+            }
 
-        }).catch(function(err) {
-                console.log(err);
-               cb({ authenticated: false })
-        });
+        })
     }, 0)
 }
 

@@ -2,7 +2,7 @@ import React, {Component} from 'react'
 import Modal from './Modal'
 import styles from './Login.css'
 import { withRouter } from 'react-router'
-import auth from '../utils/auth.js'
+import auth from '../../app/utils/auth.js'
 import {authenticate} from '../api'
 
 export default class Login extends Component {
@@ -16,8 +16,6 @@ export default class Login extends Component {
         super();
         this.state = {error: null}
         this.handleSubmit = this.handleSubmit.bind(this);
-
-
     }
 
     handleSubmit(event) {
@@ -29,12 +27,8 @@ export default class Login extends Component {
         auth.login(username, pass, (loggedIn) => {
             if (!loggedIn) {
                 return this.setState({error: true});
-                this.refs.passwordError.value = 'Bad Login Information';
             }
-            else {
-                this.refs.passwordError.value = '';
-            }
-
+            
             const { location } = this.props;
 
             if (location.state && location.state.nextPathname) {
@@ -49,13 +43,14 @@ export default class Login extends Component {
     render() {
         return (
             <Modal className={styles.root} dismiss={this.props.dismiss}>
-                <h1>Login</h1>
+                <h1>Login</h1><br />
                 <form onSubmit={this.handleSubmit}>
                     <label><input ref="username" placeholder="username" /></label>
-                    <label><input ref="pass" placeholder="password" type="password" /></label> <br />
+                    <label><input ref="pass" placeholder="password" type="password" /></label> <br /><br />
+                    <label><input ref="pass" placeholder="password" type="password" /></label> <br /><br />
                     <button type="submit">login</button>
-                    {(
-                        <p id='passwordError' ref="passwordError"></p>
+                    {this.state.error && (
+                        <p>Bad login information</p>
                     )}
                 </form>
             </Modal>
