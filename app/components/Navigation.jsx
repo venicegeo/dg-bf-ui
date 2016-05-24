@@ -1,4 +1,3 @@
-
 import React, {Component} from 'react'
 import Link from 'react-router/lib/Link'
 import auth from '../utils/auth'

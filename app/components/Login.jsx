@@ -12,7 +12,7 @@ export default class Login extends Component {
     location: React.PropTypes.object
   }
 
-  constructor(props) {
+  constructor() {
     super()
     this.state = {error: null}
     this.handleSubmit = this.handleSubmit.bind(this)
