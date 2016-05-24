@@ -132,7 +132,8 @@ function generateControls() {
     }),
     new openlayers.control.ZoomSlider(),
     new openlayers.control.MousePosition({
-      coordinateFormat: openlayers.coordinate.toStringHDMS
+      coordinateFormat: openlayers.coordinate.toStringHDMS,
+      projection: 'EPSG:4326'
     }),
     new openlayers.control.FullScreen(),
     new ExportControl(styles.export),
