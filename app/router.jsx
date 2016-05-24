@@ -1,14 +1,14 @@
 import React from 'react'
 import {createHistory} from 'history'
-import {Router, Route, useRouterHistory, IndexRoute} from 'react-router'
+import {Router, Route, IndexRoute, useRouterHistory} from 'react-router'
 import {render} from 'react-dom'
 import Application from './components/Application'
 import Login from './components/Login'
 import CreateJob from './components/CreateJob'
 import JobStatusList from './components/JobStatusList'
-import auth from './utils/auth.js'
 import Help from './components/Help'
 import About from './components/About'
+import {isLoggedIn} from './api'
 
 export function bootstrap(element) {
   const history = useRouterHistory(createHistory)({
@@ -28,11 +28,17 @@ export function bootstrap(element) {
     </Router>, element)
 }
 
+//
+// Internals
+//
+
 function redirectToLogin(nextState, replace) {
-  if (!auth.loggedIn()) {
+  if (!isLoggedIn()) {
     replace({
       pathname: '/login',
-      state: { nextPathname: nextState.location.pathname || '/' }
+      state: {
+        nextPathname: nextState.location.pathname || '/'
+      }
     })
   }
 }

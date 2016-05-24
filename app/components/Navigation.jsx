@@ -1,6 +1,5 @@
 import React, {Component} from 'react'
 import Link from 'react-router/lib/Link'
-import auth from '../utils/auth'
 import styles from './Navigation.css'
 import brand from '../images/brand-experimental.svg'
 import brandSmall from '../images/brand-experimental-small.svg'
@@ -12,23 +11,6 @@ export default class Navigation extends Component {
 
   constructor() {
     super()
-    this.state = {
-      loggedIn: null,
-    }
-    this._updateAuth = this._updateAuth.bind(this)
-  }
-
-
-
-  _updateAuth(loggedIn) {
-
-    this.setState({
-      loggedIn: !!loggedIn
-    })
-  }
-
-  componentWillMount() {
-    auth.onChange = this._updateAuth
   }
 
   render() {
