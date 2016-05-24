@@ -34,15 +34,15 @@ function normalizeRequirement(key, value) {
   let name = key.replace(IMAGE_REQUIREMENT_PREFIX, '')
   let description = value.trim()
   switch (name) {
-    case 'Bands':
-      description = description.split(',').join(' and ')
-      break
-    case 'CloudCover':
-      name = 'Cloud Cover'
-      description = `Less than ${description}`
-      break
-    default:
-      break
+  case 'Bands':
+    description = description.split(',').join(' and ')
+    break
+  case 'CloudCover':
+    name = 'Cloud Cover'
+    description = `Less than ${description}`
+    break
+  default:
+    break
   }
   return {name, description}
 }

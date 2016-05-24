@@ -11,7 +11,7 @@ import {
   RESPONSE_SERVICE_LIST
 } from '../../test/fixtures/piazza-responses'
 
-describe('Piazza Client', function() {
+describe('Piazza Client', function () {
   this.timeout(500)
 
   afterEach(() => expect.restoreSpies())
@@ -33,7 +33,7 @@ describe('Piazza Client', function() {
   })
 
   describe('getFile()', () => {
-    it ('calls correct URL', (done) => {
+    it('calls correct URL', (done) => {
       const stub = expect.spyOn(window, 'fetch').andReturn(resolve(RESPONSE_FILE))
       const client = new Client('http://m', 'test-auth-token')
       client.getFile('test-id')
@@ -77,9 +77,9 @@ describe('Piazza Client', function() {
         })
     })
   })
-  
+
   describe('getServices()', () => {
-    it ('calls correct URL', (done) => {
+    it('calls correct URL', (done) => {
       const stub = expect.spyOn(window, 'fetch').andReturn(resolve(RESPONSE_SERVICE_LIST))
       const client = new Client('http://m', 'test-auth-token')
       client.getServices({pattern: 'test-pattern'})
