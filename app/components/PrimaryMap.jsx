@@ -16,7 +16,7 @@ const NEW_DETECTION = 'New Detection'
 
 export default class PrimaryMap extends Component {
   static propTypes = {
-    featureCollections: React.PropTypes.array
+    datasets: React.PropTypes.array
   }
 
   constructor() {
@@ -33,7 +33,7 @@ export default class PrimaryMap extends Component {
   }
 
   componentDidUpdate(previousProps) {
-    if (this.props.featureCollections !== previousProps.featureCollections) {
+    if (this.props.datasets !== previousProps.datasets) {
       this._clearLayers()
       this._renderLayers()
     }
@@ -41,10 +41,11 @@ export default class PrimaryMap extends Component {
   }
 
   render() {
+    const providerNames = TILE_PROVIDERS.map(b => b.name)
     return (
       <main className={styles.root} ref="container">
         <BasemapSelect className={styles.basemapSelect}
-                       basemaps={this._basemaps.map(b => b.get('name'))}
+                       basemaps={providerNames}
                        changed={basemapIndex => this.setState({basemapIndex})}/>
       </main>
     )
@@ -68,6 +69,18 @@ export default class PrimaryMap extends Component {
         zoom: MIN_ZOOM
       })
     })
+
+
+    // HACK HACK HACK HACK HACK HACK HACK
+    this._map.on('click', event => {
+      // const layers = []
+      this._map.forEachLayerAtPixel(event.pixel, layer => {
+        const job = layer.get('job')
+        if (job) {
+          console.debug('clicked bbox for:', job)
+        }
+      })
+    })
   }
 
   _clearLayers() {
@@ -75,26 +88,28 @@ export default class PrimaryMap extends Component {
   }
 
   _renderLayers() {
-    const featureCollections = this.props.featureCollections
-    if (!featureCollections || !featureCollections.length) { return }
-    const viewport = openlayers.extent.createEmpty()
-    const reader = new openlayers.format.GeoJSON()
-    featureCollections.forEach(featureCollection => {
-      const bounds = openlayers.extent.createEmpty()
-      const features = reader.readFeatures(featureCollection.geojson, {featureProjection:'EPSG:3857'})
-      features.forEach(feature => {
-        const source = new openlayers.source.Vector({features: [feature]})
-        const layer = new openlayers.layer.Vector({source, style: generateStyles})
-        openlayers.extent.extend(bounds, source.getExtent())
-        openlayers.extent.extend(viewport, source.getExtent())
-        this._layers.push(layer)
-        this._map.addLayer(layer)
-      })
-      const frame = generateFrame(bounds, featureCollection.name)
-      this._layers.push(frame)
-      this._map.addLayer(frame)
+    window.ol = openlayers
+    window.map = this._map
+    window.primarymap = this
+
+    this.props.datasets.forEach(dataset => {
+      const [bbox, label] = generateBBoxLayer(dataset)
+      this._layers.push(bbox)
+      this._layers.push(label)
+      this._map.addLayer(bbox)
+      this._map.addLayer(label)
+      if (dataset.result) {
+        const reader = new openlayers.format.GeoJSON()
+        reader
+          .readFeatures(dataset.result, {featureProjection: 'EPSG:3857'})
+          .forEach(feature => {
+            const source = new openlayers.source.Vector({features: [feature]})
+            const layer  = new openlayers.layer.Vector({source, style: generateStyles(feature)})
+            this._layers.push(layer)
+            this._map.addLayer(layer)
+          })
+      }
     })
-    this._map.getView().fit(viewport, this._map.getSize())
   }
 
   _export() {
@@ -122,6 +137,76 @@ function generateBasemapLayers(providers) {
   })
 }
 
+function generateBBoxLayer(dataset) {
+  const LABEL_CENTER_THRESHOLD = 1000
+  const extent = openlayers.proj.transformExtent(dataset.job.bbox, 'EPSG:4326', 'EPSG:3857')
+  const geometry = openlayers.geom.Polygon.fromExtent(extent)
+  let bboxColor
+  switch (dataset.job.status) {
+    case 'Running':
+      bboxColor = 'rgba(255,255,0, .5)'
+      break;
+    case 'Success':
+      bboxColor = 'rgba(0,255,0, .5)'
+      break;
+    case 'Timed Out':
+    case 'Error':
+      bboxColor = 'rgba(255,0,0, .5)'
+      break;
+    default:
+      bboxColor = 'red'
+  }
+
+  const rectangle = new openlayers.layer.Vector({
+    source: new openlayers.source.Vector({
+      features: [new openlayers.Feature({geometry})]
+    }),
+    style(feature, resolution) {
+      return new openlayers.style.Style({
+        fill: new openlayers.style.Fill({color: bboxColor}),
+        stroke: new openlayers.style.Stroke({
+          color: 'rgba(0, 0, 0, .2)',
+          width: 2
+        }),
+        text: (resolution < LABEL_CENTER_THRESHOLD) ? new openlayers.style.Text({
+          text: dataset.job.name.toUpperCase(),
+          font: 'bold 13px Catamaran, Arial, sans-serif'
+        }) : undefined
+      })
+    }
+  })
+
+  rectangle.set('job', dataset.job)
+  
+  const topRight = openlayers.extent.getTopRight(geometry.getExtent())
+  const label = new openlayers.layer.Vector({
+    source: new openlayers.source.Vector({
+      features: [new openlayers.Feature({
+        geometry: new openlayers.geom.Point(topRight)
+      })]
+    }),
+    style(feature, resolution) {
+      if (resolution < LABEL_CENTER_THRESHOLD) {
+        return
+      }
+      return new openlayers.style.Style({
+        text: new openlayers.style.Text({
+          text: dataset.job.name.toUpperCase(),
+          font: 'bold 13px Catamaran, Arial, sans-serif',
+          stroke: new openlayers.style.Stroke({
+            width: 4,
+            color: 'rgba(255,255,255,.5)'
+          }),
+          textAlign: 'start',
+          textBaseline: 'bottom'
+        })
+      })
+    }
+  })
+
+  return [rectangle, label]
+}
+
 function generateControls() {
   return openlayers.control.defaults({
     attributionOptions: {collapsible: false}
@@ -139,30 +224,6 @@ function generateControls() {
     new ExportControl(styles.export),
     new SearchControl(styles.search)
   ])
-}
-
-function generateFrame(bounds, title) {
-  return new openlayers.layer.Vector({
-    source: new openlayers.source.Vector({
-      features: [new openlayers.Feature({
-        geometry: openlayers.geom.Polygon.fromExtent(bounds)
-      })]
-    }),
-    style: new openlayers.style.Style({
-      stroke: new openlayers.style.Stroke({
-        color: 'rgba(0, 0, 0, .2)',
-        lineDash: [20, 20],
-        weight: 5
-      }),
-      text: new openlayers.style.Text({
-        text: title,
-        font: 'bold 15px Menlo, monospace',
-        fill: new openlayers.style.Fill({
-          color: 'rgba(0, 0, 0, .2)'
-        })
-      })
-    })
-  })
 }
 
 function generateInteractions() {
