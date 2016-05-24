@@ -57,7 +57,7 @@ export default class Application extends Component {
       this.setState({currentResult: null})
     }
   }
-  
+
   _dismissModal() {
     this.context.router.push({
       pathname: this.props.location.pathname,

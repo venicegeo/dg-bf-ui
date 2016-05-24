@@ -13,7 +13,7 @@ export default class BasemapSelect extends Component {
     this.state = {index: 0, isOpen: false}
     this._toggleOpen = this._toggleOpen.bind(this)
   }
-  
+
   render() {
     const {index, isOpen} = this.state
     const {basemaps, className} = this.props

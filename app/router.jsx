@@ -29,20 +29,20 @@ export function bootstrap(element) {
 }
 
 function redirectToLogin(nextState, replace) {
-    if (!auth.loggedIn()) {
-        replace({
-            pathname: '/login',
-            state: { nextPathname: nextState.location.pathname || "/" }
-        })
-    }
+  if (!auth.loggedIn()) {
+    replace({
+      pathname: '/login',
+      state: { nextPathname: nextState.location.pathname || '/' }
+    })
+  }
 }
 
 function FakeIndex() {
-    return <div/>
+  return <div/>
 }
 
 function redirectToDashboard(nextState, replace) {
-    if (auth.loggedIn()) {
-        replace('/')
-    }
+  if (auth.loggedIn()) {
+    replace('/')
+  }
 }

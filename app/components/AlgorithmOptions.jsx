@@ -18,7 +18,7 @@ export default class AlgorithmOptions extends Component {
   componentDidMount() {
     this.refs.name.value = 'Beachfront_Job_' + Date.now()
   }
-  
+
   render() {
     return (
       <form className={styles.root} onSubmit={this._onSubmit}>

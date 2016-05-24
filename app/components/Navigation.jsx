@@ -11,12 +11,12 @@ export default class Navigation extends Component {
     currentLocation: React.PropTypes.object
   }
 
-  constructor () {
-    super();
+  constructor() {
+    super()
     this.state = {
       loggedIn: null,
-    };
-    this._updateAuth = this._updateAuth.bind(this);
+    }
+    this._updateAuth = this._updateAuth.bind(this)
   }
 
 
@@ -31,7 +31,7 @@ export default class Navigation extends Component {
   componentWillMount() {
     auth.onChange = this._updateAuth
   }
-  
+
   render() {
     return (
       <nav className={`${styles.root} ${this.props.currentLocation.pathname === '/' ? styles.atHome : ''}`}>

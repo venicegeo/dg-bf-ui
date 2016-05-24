@@ -6,7 +6,7 @@ export default class About extends Component {
   static propTypes = {
     dismiss: React.PropTypes.func
   }
-  
+
   render() {
     return (
       <Modal className={styles.root} dismiss={this.props.dismiss}>
