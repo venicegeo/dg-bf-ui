@@ -10,25 +10,6 @@ import auth from './utils/auth.js'
 import Help from './components/Help'
 import About from './components/About'
 
-function redirectToLogin(nextState, replace) {
-  if (!auth.loggedIn()) {
-    replace({
-      pathname: '/login',
-      state: { nextPathname: nextState.location.pathname || "/" }
-    })
-  }
-}
-
-function FakeIndex() {
-    return <div/>
-}
-
-function redirectToDashboard(nextState, replace) {
-  if (auth.loggedIn()) {
-    replace('/')
-  }
-}
-
 export function bootstrap(element) {
   const history = useRouterHistory(createHistory)({
     basename: '/'
@@ -45,4 +26,23 @@ export function bootstrap(element) {
             <Route path="about" component={About} onEnter={redirectToLogin}/>
       </Route>
     </Router>, element)
+}
+
+function redirectToLogin(nextState, replace) {
+    if (!auth.loggedIn()) {
+        replace({
+            pathname: '/login',
+            state: { nextPathname: nextState.location.pathname || "/" }
+        })
+    }
+}
+
+function FakeIndex() {
+    return <div/>
+}
+
+function redirectToDashboard(nextState, replace) {
+    if (auth.loggedIn()) {
+        replace('/')
+    }
 }

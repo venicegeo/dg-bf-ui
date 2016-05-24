@@ -16,12 +16,12 @@ export default class Navigation extends Component {
     this.state = {
       loggedIn: null,
     };
-    this.updateAuth = this.updateAuth.bind(this);
+    this._updateAuth = this._updateAuth.bind(this);
   }
 
 
 
-  updateAuth(loggedIn) {
+  _updateAuth(loggedIn) {
 
     this.setState({
       loggedIn: !!loggedIn
@@ -29,9 +29,9 @@ export default class Navigation extends Component {
   }
 
   componentWillMount() {
-    auth.onChange = this.updateAuth
-    //auth.login()
+    auth.onChange = this._updateAuth
   }
+  
   render() {
     return (
       <nav className={`${styles.root} ${this.props.currentLocation.pathname === '/' ? styles.atHome : ''}`}>

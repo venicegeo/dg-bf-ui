@@ -38,7 +38,6 @@ module.exports = {
 
 function request(username, pass, cb) {
 
-    setTimeout(() => {
         var data = {
             username: username,
             credential: pass
@@ -63,8 +62,6 @@ function request(username, pass, cb) {
             else {
                 cb({ authenticated: false })
             }
-
         })
-    }, 0)
 }
 
