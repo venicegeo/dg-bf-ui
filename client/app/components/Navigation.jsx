@@ -30,7 +30,7 @@ export default class Navigation extends Component {
 
   componentWillMount() {
     auth.onChange = this.updateAuth
-    auth.login()
+    //auth.login()
   }
   render() {
     return (

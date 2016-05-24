@@ -46,20 +46,26 @@ function request(username, pass, cb) {
             credential: pass
             }
         fetch('https://pz-security.int.geointservices.io/verification', {
-            body: JSON.stringify({data}),
+            body: JSON.stringify(data),
             headers: {'content-type': 'application/json'},
             method: 'POST'
             }
         ).then(function(response) {
-            console.log(response);
-            cb({
+            // Convert to JSON
+            return response.json();
+        }).then(function(authResp) {
+            console.log(authResp);
+            if (authResp){
+            cb
+                ({
+                    authenticated: true,
+                    token: Math.random().toString(36).substring(7)
 
-                authenticated: true,
-                token: Math.random().toString(36).substring(7)
-            })
+                })}
+
         }).catch(function(err) {
-            console.log(err);
-            cb({ authenticated: false })
+                console.log(err);
+               cb({ authenticated: false })
         });
     }, 0)
 }

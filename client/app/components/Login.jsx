@@ -17,26 +17,30 @@ export default class Login extends Component {
         this.state = {error: null}
         this.handleSubmit = this.handleSubmit.bind(this);
 
+
     }
 
     handleSubmit(event) {
         event.preventDefault()
 
-        const username = this.refs.username.value
-        const pass = this.refs.pass.value
+        const username = this.refs.username.value;
+        const pass = this.refs.pass.value;
 
         auth.login(username, pass, (loggedIn) => {
             if (!loggedIn) {
-                return this.setState({error: true})
+                return this.setState({error: true});
+                this.refs.passwordError.value = 'Bad Login Information';
+            }
+            else {
+                this.refs.passwordError.value = '';
             }
 
-            const { location } = this.props
+            const { location } = this.props;
 
-            
             if (location.state && location.state.nextPathname) {
-                this.props.router.replace(location.state.nextPathname)
+                this.props.router.replace(location.state.nextPathname);
             } else {
-                this.props.router.replace('/')
+                this.props.router.replace('/');
             }
         })
     }
@@ -51,7 +55,7 @@ export default class Login extends Component {
                     <label><input ref="pass" placeholder="password" type="password" /></label> <br />
                     <button type="submit">login</button>
                     {(
-                        <p ref="passwordError" style={{visible: false}}>Bad login information</p>
+                        <p id='passwordError' ref="passwordError"></p>
                     )}
                 </form>
             </Modal>
