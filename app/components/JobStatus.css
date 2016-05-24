@@ -1,0 +1,60 @@
+.root {
+  padding: 15px 30px;
+  transition: background-color .5s linear;
+}
+
+.root + .root {
+  box-shadow: inset 0 1px color(black alpha(7%));
+  padding-top: 30px;
+}
+
+/* =========================================================================
+   Heading
+   ========================================================================= */
+
+.root h2 {
+  margin-bottom: .2em;
+  font-size: 18px;
+}
+
+/* =========================================================================
+   Controls
+   ========================================================================= */
+
+.controls a {
+  display: inline-block;
+  padding: .5em 1em;
+  border: none;
+  border-radius: 6px;
+  text-align: center;
+  text-decoration: none;
+  font-weight: normal;
+  font-size: 13px;
+  background-color: #175B82;
+  color: white;
+}
+
+.controls a:hover {
+  background-color: #1b709d;
+}
+
+.controls a + a {
+  margin-left: .5em;
+}
+
+/* =========================================================================
+   Details
+   ========================================================================= */
+
+.details {
+  display: flex;
+  justify-content: space-between;
+}
+
+:global(.Error) {
+  background-color: color(red alpha(10%));
+}
+
+.timer {
+  opacity: .4;
+}

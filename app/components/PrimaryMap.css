@@ -1,0 +1,217 @@
+.root {
+  composes: map from '../styles/layout.css';
+}
+
+.basemapSelect {
+  z-index: 2;
+  position: absolute;
+  top: 10px;
+  right: 70px;
+}
+
+/* =========================================================================
+   OpenLayers Controls
+   ========================================================================= */
+
+:global(.ol-control) {
+  padding: 0;
+  background-color: transparent;
+  box-shadow: 0 0 0 1px rgba(0,0,0, .3), 0 5px 0 1px rgba(0,0,0, .1);
+  border-radius: 1px;
+  overflow: hidden;
+}
+
+:global(.ol-control) button,
+.export a {
+  display: block;
+  margin: 0;
+  width: 20px;
+  height: 20px;
+  line-height: 20px;
+  box-sizing: border-box;
+  border-radius: 0;
+  border-bottom: 1px solid rgba(0,0,0, .13);
+  text-align: center;
+  vertical-align: text-bottom;
+  background-color: white;
+  color: #555;
+}
+
+:global(.ol-control) button:focus,
+.export a:focus {
+  background-color: white;
+}
+
+:global(.ol-control) button:hover,
+.export a:hover {
+  background-color: #d9f1ff;
+  color: #175b82;
+}
+
+/* OpenLayers Controls: Export Screenshot
+   ========================================================================= */
+
+.export {
+  top: 10px;
+  right: 40px;
+}
+
+/* OpenLayers Controls: Full Screen
+   ========================================================================= */
+
+:global(.ol-full-screen) {
+  top: 10px;
+  right: 10px;
+}
+
+/* OpenLayers Controls: Search
+   ========================================================================= */
+
+.search {
+  top: 40px;
+  right: 10px;
+}
+
+/* OpenLayers Controls: Zoom
+   ========================================================================= */
+
+:global(.ol-zoom) {
+  left: initial;
+  top: 70px;
+  right: 10px;
+}
+
+:global(.ol-zoom .ol-zoom-in) {
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
+}
+
+:global(.ol-zoom  .ol-zoom-out) {
+  border-top-left-radius: 0;
+  border-top-right-radius: 0;
+}
+
+/* OpenLayers Controls: Zoom Slider
+   ========================================================================= */
+
+:global(.ol-zoomslider) {
+  left: initial;
+  top: 120px;
+  right: 10px;
+  width: 20px;
+  box-shadow: none;
+  opacity: .5;
+  color: #555;
+  overflow: visible;
+  height: 100px;
+}
+
+:global(.ol-zoomslider):hover {
+  background-color: transparent;
+  opacity: 1;
+  color: #175b82;
+}
+
+:global(.ol-zoomslider):before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 49%;
+  bottom: 0;
+  width: 1px;
+  background-color: currentColor;
+}
+
+:global(.ol-zoomslider) button,
+:global(.ol-zoomslider) button:hover,
+:global(.ol-zoomslider) button:focus {
+  margin: auto;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  color: inherit;
+  background-color: currentColor;
+  box-shadow: 0 0 0 1px rgba(0,0,0,.1), 0 0 0 3px rgba(255,255,255,.4);
+}
+
+/* OpenLayers Controls: Rotation Reset
+   ========================================================================= */
+
+:global(.ol-rotate) {
+  top: 230px;
+  right: 10px;
+}
+
+/* OpenLayers Controls: Scale Line
+   ========================================================================= */
+
+:global(.ol-scale-line) {
+  left: 0;
+  right: 0;
+  bottom: 10px;
+  margin: 0 auto;
+  width: 600px;
+  background-color: transparent;
+}
+
+:global(.ol-scale-line-inner) {
+  position: relative;
+  margin: 0 auto;
+  border: none;
+  font-family: Inconsolata, monospace;
+  font-size: 9px;
+  opacity: .4;
+  color: black;
+}
+
+:global(.ol-scale-line-inner):before {
+  content: '';
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  right: 0;
+  height: 4px;
+  border: 1px solid;
+  border-top: none;
+}
+
+/* OpenLayers Controls: Mouse Position
+   ========================================================================= */
+
+:global(.ol-mouse-position) {
+  top: auto;
+  right: auto;
+  bottom: 10px;
+  left: 10px;
+  line-height: 11px;
+  color: black;
+  opacity: .4;
+  font-family: inherit;
+  font-size: 11px;
+  font-weight: bold;
+}
+
+/* OpenLayers Controls: Attributions
+   ========================================================================= */
+
+:global(.ol-attribution.ol-uncollapsible) {
+  height: 20px;
+  border-radius: 3px 0 0;
+  line-height: 20px;
+  font-size: 12px;
+  font-family: inherit;
+  box-shadow: none;
+  background-color: rgba(255, 255, 255, .4);
+  color: #555;
+}
+
+:global(.ol-attribution.ol-uncollapsible) ul {
+  font-size: inherit;
+  line-height: inherit;
+  color: inherit;
+  text-shadow: none;
+}
+
+:global(.ol-attribution) a {
+  color: inherit;
+}

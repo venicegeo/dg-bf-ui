@@ -2,8 +2,7 @@ applications:
 - name: beachfront
   host: beachfront
   path: beachfront.zip
-  buildpack: binary_buildpack
-  command: chmod 755 ./beachfront/server && ./beachfront/server
+  buildpack: https://github.com/venicegeo/staticfile-buildpack
   memory: 512M
   instances: 1
   timeout: 15

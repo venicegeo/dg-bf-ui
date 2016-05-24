@@ -1,12 +1,6 @@
-# WebStorm
 .idea
-
-# MacOS
 .DS_Store
-
-# Temporary GOPATH used for compiling
-gopath
-
-# Build Artifacts
-beachfront/
+dist
+node_modules
+npm-debug.log
 beachfront.zip
