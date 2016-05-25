@@ -251,10 +251,6 @@ function generateProgressOverlay(dataset) {
   }
 }
 
-function transformExtent(extent) {
-  return openlayers.proj.transformExtent(extent, 'EPSG:4326', 'EPSG:3857')
-}
-
 function generateResultLayers(dataset) {
   if (dataset.result) {
     const reader = new openlayers.format.GeoJSON()
@@ -342,4 +338,8 @@ function generateStyleUnknownDetectionType() {
       width: 2
     })
   })
+}
+
+function transformExtent(extent) {
+  return openlayers.proj.transformExtent(extent, 'EPSG:4326', 'EPSG:3857')
 }
