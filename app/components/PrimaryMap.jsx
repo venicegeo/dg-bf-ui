@@ -96,11 +96,13 @@ export default class PrimaryMap extends Component {
   }
 
   _renderLayers() {
-
     this.props.datasets.forEach(dataset => {
       this._addLayer(generateJobFrameLayer(dataset))
       this._addLayer(generateLabelLayer(dataset))
       generateResultLayers(dataset).forEach(layer => this._addLayer(layer))
+      const progress = generateProgressOverlay(dataset)
+      if (progress) {
+        this._map.addOverlay(progress)
       }
     })
   }
@@ -233,6 +235,20 @@ function generateLabelLayer(dataset) {
   })
 }
 
+function generateProgressOverlay(dataset) {
+  if (dataset.progress) {
+    const element = document.createElement('div')
+    const percentage = ((dataset.progress.loaded / dataset.progress.total) || 0) * 100
+    const bar = document.createElement('div')
+    element.setAttribute('style', 'border: 1px solid white; width: 100px; transform: translateY(200%); border-radius: 2px; overflow: hidden;')
+    bar.setAttribute('style', `width: ${percentage}%; height: 6px; background-color: white;`)
+    element.appendChild(bar)
+    return new openlayers.Overlay({
+      element,
+      position: openlayers.extent.getBottomLeft(transformExtent(dataset.job.bbox)),
+      positioning: 'bottom-left'
+    })
+  }
 }
 
 function transformExtent(extent) {
