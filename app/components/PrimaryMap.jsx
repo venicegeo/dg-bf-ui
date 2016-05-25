@@ -13,6 +13,7 @@ const MAX_ZOOM = 22
 const DETECTED = 'Detected'
 const UNDETECTED = 'Undetected'
 const NEW_DETECTION = 'New Detection'
+const FOCUS_RESOLUTION = 1000
 
 export default class PrimaryMap extends Component {
   static propTypes = {
@@ -97,9 +98,8 @@ export default class PrimaryMap extends Component {
   _renderLayers() {
 
     this.props.datasets.forEach(dataset => {
-      const [frame, label] = generateFrameLayers(dataset)
-      this._addLayer(frame)
-      this._addLayer(label)
+      this._addLayer(generateJobFrameLayer(dataset))
+      this._addLayer(generateLabelLayer(dataset))
       generateResultLayers(dataset).forEach(layer => this._addLayer(layer))
       }
     })
@@ -130,77 +130,6 @@ function generateBasemapLayers(providers) {
   })
 }
 
-function generateFrameLayers(dataset) {
-  const LABEL_CENTER_THRESHOLD = 1000
-  const extent = openlayers.proj.transformExtent(dataset.job.bbox, 'EPSG:4326', 'EPSG:3857')
-  const geometry = openlayers.geom.Polygon.fromExtent(extent)
-  let bboxColor
-  switch (dataset.job.status) {
-    case 'Running':
-      bboxColor = 'rgba(255,255,0, .5)'
-      break;
-    case 'Success':
-      bboxColor = 'rgba(0,255,0, .5)'
-      break;
-    case 'Timed Out':
-    case 'Error':
-      bboxColor = 'rgba(255,0,0, .5)'
-      break;
-    default:
-      bboxColor = 'red'
-  }
-
-  const rectangle = new openlayers.layer.Vector({
-    source: new openlayers.source.Vector({
-      features: [new openlayers.Feature({geometry})]
-    }),
-    style(feature, resolution) {
-      return new openlayers.style.Style({
-        fill: new openlayers.style.Fill({color: bboxColor}),
-        stroke: new openlayers.style.Stroke({
-          color: 'rgba(0, 0, 0, .5)'
-        }),
-        text: (resolution < LABEL_CENTER_THRESHOLD) ? new openlayers.style.Text({
-          text: dataset.job.name.toUpperCase(),
-          font: 'bold 13px Catamaran, Arial, sans-serif'
-        }) : undefined
-      })
-    }
-  })
-
-  // HACK HACK HACK HACK HACK
-  rectangle.set('job', dataset.job)
-  // HACK HACK HACK HACK HACK
-
-  const topRight = openlayers.extent.getTopRight(geometry.getExtent())
-  const label = new openlayers.layer.Vector({
-    source: new openlayers.source.Vector({
-      features: [new openlayers.Feature({
-        geometry: new openlayers.geom.Point(topRight)
-      })]
-    }),
-    style(feature, resolution) {
-      if (resolution < LABEL_CENTER_THRESHOLD) {
-        return
-      }
-      return new openlayers.style.Style({
-        text: new openlayers.style.Text({
-          text: dataset.job.name.toUpperCase(),
-          font: 'bold 13px Catamaran, Arial, sans-serif',
-          stroke: new openlayers.style.Stroke({
-            width: 3,
-            color: 'rgba(255,255,255,.7)'
-          }),
-          textAlign: 'start',
-          textBaseline: 'bottom'
-        })
-      })
-    }
-  })
-
-  return [rectangle, label]
-}
-
 function generateControls() {
   return openlayers.control.defaults({
     attributionOptions: {collapsible: false}
@@ -226,6 +155,88 @@ function generateInteractions() {
       condition: openlayers.events.condition.altKeyOnly
     })
   ])
+}
+
+function generateJobFrameLayer(dataset) {
+  const labelText = dataset.job.name.toUpperCase()
+  let fillColor = 'red'
+  switch (dataset.job.status) {
+  case 'Running':
+    fillColor = 'rgba(255,255,0, .5)'
+    break;
+  case 'Success':
+    fillColor = 'rgba(0,255,0, .5)'
+    break;
+  case 'Timed Out':
+  case 'Error':
+    fillColor = 'rgba(255,0,0, .5)'
+    break;
+  }
+
+  const rectangle = new openlayers.layer.Vector({
+    source: new openlayers.source.Vector({
+      features: [
+        new openlayers.Feature({
+          geometry: openlayers.geom.Polygon.fromExtent(transformExtent(dataset.job.bbox))
+        })
+      ]
+    }),
+    style(_, resolution) {
+      return new openlayers.style.Style({
+        fill: new openlayers.style.Fill({
+          color: fillColor
+        }),
+        stroke: new openlayers.style.Stroke({
+          color: 'rgba(0, 0, 0, .5)'
+        }),
+        text: (resolution < FOCUS_RESOLUTION) ?
+          new openlayers.style.Text({
+            font: 'bold 16px Catamaran, Arial, sans-serif',
+            text: labelText
+          }) :
+          undefined
+      })
+    }
+  })
+
+  // HACK HACK HACK HACK HACK
+  rectangle.set('job', dataset.job)
+  // HACK HACK HACK HACK HACK
+
+  return rectangle
+}
+
+function generateLabelLayer(dataset) {
+  const topRight = openlayers.extent.getTopRight(transformExtent(dataset.job.bbox))
+  const text = dataset.job.name.toUpperCase()
+  return new openlayers.layer.Vector({
+    minResolution: FOCUS_RESOLUTION,
+    source: new openlayers.source.Vector({
+      features: [
+        new openlayers.Feature({
+          geometry: new openlayers.geom.Point(topRight)
+        })
+      ]
+    }),
+    style: new openlayers.style.Style({
+      text: new openlayers.style.Text({
+        text,
+        font: 'bold 13px Catamaran, Arial, sans-serif',
+        stroke: new openlayers.style.Stroke({
+          width: 2,
+          color: 'rgba(255,255,255,.5)'
+        }),
+        textAlign: 'start',
+        textBaseline: 'bottom'
+      })
+    })
+  })
+}
+
+}
+
+function transformExtent(extent) {
+  return openlayers.proj.transformExtent(extent, 'EPSG:4326', 'EPSG:3857')
 }
 
 function generateResultLayers(dataset) {
