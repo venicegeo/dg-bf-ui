@@ -36,7 +36,9 @@ export default class PrimaryMap extends Component {
   componentDidUpdate(previousProps) {
     if (this.props.datasets !== previousProps.datasets) {
       this._clearLayers()
+      this._clearOverlays()
       this._renderLayers()
+      this._renderOverlays()
     }
     this._updateBasemap()
   }
@@ -95,16 +97,8 @@ export default class PrimaryMap extends Component {
     this._layers.forEach(layer => this._map.removeLayer(layer))
   }
 
-  _renderLayers() {
-    this.props.datasets.forEach(dataset => {
-      this._addLayer(generateJobFrameLayer(dataset))
-      this._addLayer(generateLabelLayer(dataset))
-      generateResultLayers(dataset).forEach(layer => this._addLayer(layer))
-      const progress = generateProgressOverlay(dataset)
-      if (progress) {
-        this._map.addOverlay(progress)
-      }
-    })
+  _clearOverlays() {
+    this._map.getOverlays().clear()
   }
 
   _export() {
@@ -116,6 +110,25 @@ export default class PrimaryMap extends Component {
       element.href = canvas.toDataURL()
     })
     this._map.renderSync()
+  }
+
+  _renderLayers() {
+    this.props.datasets.forEach(dataset => {
+      this._addLayer(generateJobFrameLayer(dataset))
+      this._addLayer(generateLabelLayer(dataset))
+      generateResultLayers(dataset).forEach(layer => this._addLayer(layer))
+    })
+  }
+
+  _renderOverlays() {
+    this.props.datasets.forEach(dataset => {
+      if (dataset.progress) {
+        const progressBar = generateProgressBarOverlay(dataset)
+        if (progressBar) {
+          this._map.addOverlay(progressBar)
+        }
+      }
+    })
   }
 
   _updateBasemap() {
@@ -235,8 +248,8 @@ function generateLabelLayer(dataset) {
   })
 }
 
-function generateProgressOverlay(dataset) {
-  if (dataset.progress) {
+function generateProgressBarOverlay(dataset) {
+  if (dataset.progress && dataset.progress.loaded < dataset.progress.total) {
     const element = document.createElement('div')
     const percentage = ((dataset.progress.loaded / dataset.progress.total) || 0) * 100
     const bar = document.createElement('div')
