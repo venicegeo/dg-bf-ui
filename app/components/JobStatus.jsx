@@ -31,9 +31,9 @@ export default class JobStatus extends Component {
 
           {job.status === STATUS_SUCCESS && (
             <div className={styles.controls}>
-              <a className={styles.button} download={`${job.name}.geojson`} href={job.geojsonUrl}>
+              <button className={styles.button} download={`${job.name}.geojson`} href={job.geojsonUrl}>
                 <i className="fa fa-cloud-download"/> Download
-              </a>
+              </button>
             </div>
           )}
         </Link>

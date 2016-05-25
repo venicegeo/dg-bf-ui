@@ -73,7 +73,6 @@ export default class PrimaryMap extends Component {
 
     // HACK HACK HACK HACK HACK HACK HACK
     this._map.on('click', event => {
-      // const layers = []
       this._map.forEachLayerAtPixel(event.pixel, layer => {
         const job = layer.get('job')
         if (job) {
@@ -81,6 +80,14 @@ export default class PrimaryMap extends Component {
         }
       })
     })
+    // HACK HACK HACK HACK HACK HACK HACK
+
+
+  }
+
+  _addLayer(layer) {
+    this._layers.push(layer)
+    this._map.addLayer(layer)
   }
 
   _clearLayers() {
@@ -88,26 +95,12 @@ export default class PrimaryMap extends Component {
   }
 
   _renderLayers() {
-    window.ol = openlayers
-    window.map = this._map
-    window.primarymap = this
 
     this.props.datasets.forEach(dataset => {
-      const [bbox, label] = generateBBoxLayer(dataset)
-      this._layers.push(bbox)
-      this._layers.push(label)
-      this._map.addLayer(bbox)
-      this._map.addLayer(label)
-      if (dataset.result) {
-        const reader = new openlayers.format.GeoJSON()
-        reader
-          .readFeatures(dataset.result, {featureProjection: 'EPSG:3857'})
-          .forEach(feature => {
-            const source = new openlayers.source.Vector({features: [feature]})
-            const layer  = new openlayers.layer.Vector({source, style: generateStyles(feature)})
-            this._layers.push(layer)
-            this._map.addLayer(layer)
-          })
+      const [frame, label] = generateFrameLayers(dataset)
+      this._addLayer(frame)
+      this._addLayer(label)
+      generateResultLayers(dataset).forEach(layer => this._addLayer(layer))
       }
     })
   }
@@ -137,7 +130,7 @@ function generateBasemapLayers(providers) {
   })
 }
 
-function generateBBoxLayer(dataset) {
+function generateFrameLayers(dataset) {
   const LABEL_CENTER_THRESHOLD = 1000
   const extent = openlayers.proj.transformExtent(dataset.job.bbox, 'EPSG:4326', 'EPSG:3857')
   const geometry = openlayers.geom.Polygon.fromExtent(extent)
@@ -165,8 +158,7 @@ function generateBBoxLayer(dataset) {
       return new openlayers.style.Style({
         fill: new openlayers.style.Fill({color: bboxColor}),
         stroke: new openlayers.style.Stroke({
-          color: 'rgba(0, 0, 0, .2)',
-          width: 2
+          color: 'rgba(0, 0, 0, .5)'
         }),
         text: (resolution < LABEL_CENTER_THRESHOLD) ? new openlayers.style.Text({
           text: dataset.job.name.toUpperCase(),
@@ -176,8 +168,10 @@ function generateBBoxLayer(dataset) {
     }
   })
 
+  // HACK HACK HACK HACK HACK
   rectangle.set('job', dataset.job)
-  
+  // HACK HACK HACK HACK HACK
+
   const topRight = openlayers.extent.getTopRight(geometry.getExtent())
   const label = new openlayers.layer.Vector({
     source: new openlayers.source.Vector({
@@ -194,8 +188,8 @@ function generateBBoxLayer(dataset) {
           text: dataset.job.name.toUpperCase(),
           font: 'bold 13px Catamaran, Arial, sans-serif',
           stroke: new openlayers.style.Stroke({
-            width: 4,
-            color: 'rgba(255,255,255,.5)'
+            width: 3,
+            color: 'rgba(255,255,255,.7)'
           }),
           textAlign: 'start',
           textBaseline: 'bottom'
@@ -232,6 +226,21 @@ function generateInteractions() {
       condition: openlayers.events.condition.altKeyOnly
     })
   ])
+}
+
+function generateResultLayers(dataset) {
+  if (dataset.result) {
+    const reader = new openlayers.format.GeoJSON()
+    reader
+      .readFeatures(dataset.result, {featureProjection: 'EPSG:3857'})
+      .map(feature => new openlayers.layer.Vector({
+        source: new openlayers.source.Vector({
+          features: [feature]
+        }),
+        style: generateStyles(feature)
+      }))
+  }
+  return []
 }
 
 function generateStyles(feature) {
