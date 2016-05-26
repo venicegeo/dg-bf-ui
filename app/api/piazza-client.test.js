@@ -70,11 +70,12 @@ describe('Piazza Client', function() {
       expect.spyOn(window, 'fetch').andReturn(resolveJson(ERROR_GENERIC, 500))
       const client = new Client('http://m', 'test-auth-token')
       client.getFile('test-id')
-        .then(() => done('Should have thrown'))
+        .then(() => done(new Error('Should have thrown')))
         .catch(error => {
           expect(error.status).toEqual(500)
           done()
         })
+        .catch(done)
     })
   })
   
@@ -120,11 +121,12 @@ describe('Piazza Client', function() {
       expect.spyOn(window, 'fetch').andReturn(resolve(ERROR_GENERIC, 500))
       const client = new Client('http://m', 'test-auth-token')
       client.getServices({pattern: 'test-pattern'})
-        .then(() => done('Should have thrown'))
+        .then(() => done(new Error('Should have thrown')))
         .catch(error => {
           expect(error.status).toEqual(500)
           done()
         })
+        .catch(done)
     })
   })
 
@@ -183,7 +185,7 @@ describe('Piazza Client', function() {
       expect.spyOn(window, 'fetch').andReturn(resolve(RESPONSE_JOB_NOT_FOUND))
       const client = new Client('http://m', 'test-auth-token')
       client.getStatus('test-id')
-        .then(() => done('Should have thrown'))
+        .then(() => done(new Error('Should have thrown')))
         .catch(error => {
           expect(error instanceof Error).toEqual(true)
           expect(error.message).toMatch(/^InvalidResponse: Job Not Found/i)
@@ -195,11 +197,12 @@ describe('Piazza Client', function() {
       expect.spyOn(window, 'fetch').andReturn(resolve(ERROR_GENERIC, 500))
       const client = new Client('http://m', 'test-auth-token')
       client.getStatus('test-id')
-        .then(() => done('Should have thrown'))
+        .then(() => done(new Error('Should have thrown')))
         .catch(error => {
           expect(error.status).toEqual(500)
           done()
         })
+        .catch(done)
     })
   })
 
@@ -244,11 +247,12 @@ describe('Piazza Client', function() {
       expect.spyOn(window, 'fetch').andReturn(resolve(ERROR_GENERIC, 500))
       const client = new Client('http://m', 'test-auth-token')
       client.post('test-type', 'test-data')
-        .then(() => done('Should have thrown'))
+        .then(() => done(new Error('Should have thrown')))
         .catch(error => {
           expect(error.status).toEqual(500)
           done()
         })
+        .catch(done)
     })
   })
 })
