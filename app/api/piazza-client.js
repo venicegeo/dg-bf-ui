@@ -8,9 +8,26 @@ export class Client {
     this.authToken = authToken
   }
 
-  getFile(id) {
-    return this._fetch(`/file/${id}`)
-      .then(asText)
+  getFile(id, progress) {
+    return new Promise((resolve, reject) => {
+      const xhr = new XMLHttpRequest()
+      xhr.open('GET', encodeURI(`${this.gateway}/file/${id}`))
+      xhr.setRequestHeader('authorization', this.authToken)
+      xhr.addEventListener('error', () => reject(new Error('Network error')))
+      if (progress) {
+        xhr.addEventListener('progress', event => progress(event.loaded, event.total))
+      }
+      xhr.addEventListener('readystatechange', () => {
+        if (xhr.readyState === 4) {
+          if (xhr.status === 200) {
+            resolve(xhr.responseText)
+            return
+          }
+          reject(new HttpError({status: xhr.status}))
+        }
+      })
+      xhr.send(null)
+    })
   }
 
   getServices({pattern}) {
@@ -54,13 +71,6 @@ function asJson(response) {
     throw new HttpError(response)
   }
   return response.json()
-}
-
-function asText(response) {
-  if (!response.ok) {
-    throw new HttpError(response)
-  }
-  return response.text()
 }
 
 function normalizePostMetadata(metadata) {

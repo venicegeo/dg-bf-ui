@@ -51,8 +51,8 @@ export function execute(client, {name, algorithmId, algorithmName, imageIds}) {
     })
 }
 
-export function getResult(client, resultId) {
-  return client.getFile(resultId).then(str => new Result(str, resultId, resultId))
+export function getResult(client, resultId, progress) {
+  return client.getFile(resultId, progress).then(str => new Result(str, resultId, resultId))
 }
 
 export function list() {

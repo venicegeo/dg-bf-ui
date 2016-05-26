@@ -22,8 +22,8 @@ export function fetchJobs() {
   return jobs.list()
 }
 
-export function fetchResult(id) {
-  return jobs.getResult(client, id)
+export function fetchResult(id, progress) {
+  return jobs.getResult(client, id, progress)
 }
 
 export function fetchImageList() {
