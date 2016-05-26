@@ -24,5 +24,6 @@ export function login(gateway, username, password) {
       // HACK HACK HACK HACK
       
       sessionStorage.setItem('authToken', token)
+      return token
     })
 }
