@@ -40,8 +40,12 @@ export default class PrimaryMap extends Component {
   }
 
   componentDidUpdate(previousProps, previousState) {
-    this._redrawLayersAndOverlays()
-    this._updateBasemap(previousState)
+    if (this.props.datasets !== previousProps.datasets) {
+      this._redrawLayersAndOverlays()
+    }
+    if (this.state.basemapIndex !== previousState.basemapIndex) {
+      this._updateBasemap()
+    }
   }
 
   render() {
@@ -136,10 +140,8 @@ export default class PrimaryMap extends Component {
     })
   }
 
-  _updateBasemap(previousState) {
-    if (this.state.basemapIndex !== previousState.basemapIndex) {
-      this._basemaps.slice(1).forEach((layer, i) => layer.setVisible(i + 1 === this.state.basemapIndex))
-    }
+  _updateBasemap() {
+    this._basemaps.slice(1).forEach((layer, i) => layer.setVisible(i + 1 === this.state.basemapIndex))
   }
 }
 
