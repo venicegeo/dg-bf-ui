@@ -13,7 +13,7 @@ const MAX_ZOOM = 22
 const DETECTED = 'Detected'
 const UNDETECTED = 'Undetected'
 const NEW_DETECTION = 'New Detection'
-const FOCUS_RESOLUTION = 1000
+const RESOLUTION_CLOSE = 1000
 
 const JOB_ID = 'jobId'
 const TYPE = 'type'
@@ -182,7 +182,7 @@ function generateInteractions() {
 }
 
 function generateJobFrameLayer(dataset) {
-  const labelText = dataset.job.name.toUpperCase()
+  const labelText = `${dataset.job.name.toUpperCase()} (${dataset.job.status})`
   let fillColor = 'red'
   switch (dataset.job.status) {
   case 'Running':
@@ -213,9 +213,9 @@ function generateJobFrameLayer(dataset) {
         stroke: new ol.style.Stroke({
           color: 'rgba(0, 0, 0, .5)'
         }),
-        text: (resolution < FOCUS_RESOLUTION) ?
+        text: (resolution < RESOLUTION_CLOSE) ?
           new ol.style.Text({
-            font: 'bold 16px Catamaran, Arial, sans-serif',
+            font: 'bold 18px Catamaran, Arial, sans-serif',
             text: labelText
           }) :
           undefined
@@ -231,9 +231,9 @@ function generateJobFrameLayer(dataset) {
 
 function generateLabelLayer(dataset) {
   const topRight = ol.extent.getTopRight(transformExtent(dataset.job.bbox))
-  const text = dataset.job.name.toUpperCase()
+  const text = dataset.job.name.toUpperCase() + ` (${dataset.job.status})`
   const layer = new ol.layer.Vector({
-    minResolution: FOCUS_RESOLUTION,
+    minResolution: RESOLUTION_CLOSE,
     source: new ol.source.Vector({
       features: [
         new ol.Feature({
@@ -264,11 +264,14 @@ function generateLabelLayer(dataset) {
 function generateProgressBarOverlay(dataset) {
   if (dataset.progress && dataset.progress.loaded < dataset.progress.total) {
     const element = document.createElement('div')
-    const percentage = ((dataset.progress.loaded / dataset.progress.total) || 0) * 100
-    const bar = document.createElement('div')
-    element.setAttribute('style', 'border: 1px solid white; width: 100px; transform: translateY(200%); border-radius: 2px; overflow: hidden;')
-    bar.setAttribute('style', `width: ${percentage}%; height: 6px; background-color: white;`)
-    element.appendChild(bar)
+    element.classList.add(styles.progress)
+
+    const percentage = Math.floor(((dataset.progress.loaded / dataset.progress.total) || 0) * 100)
+    const puck = document.createElement('div')
+    puck.classList.add(styles.progressPuck)
+    puck.setAttribute('style', `width: ${percentage}%;`)
+    element.appendChild(puck)
+
     const progress = new ol.Overlay({
       element,
       position: ol.extent.getBottomLeft(transformExtent(dataset.job.bbox)),
