@@ -39,9 +39,9 @@ export default class PrimaryMap extends Component {
     this._redrawLayersAndOverlays()
   }
 
-  componentDidUpdate(previousProps) {
-    this._updateBasemap()
+  componentDidUpdate(previousProps, previousState) {
     this._redrawLayersAndOverlays()
+    this._updateBasemap(previousState)
   }
 
   render() {
@@ -136,8 +136,10 @@ export default class PrimaryMap extends Component {
     })
   }
 
-  _updateBasemap() {
-    this._basemaps.forEach((layer, i) => layer.setVisible(i === this.state.basemapIndex))
+  _updateBasemap(previousState) {
+    if (this.state.basemapIndex !== previousState.basemapIndex) {
+      this._basemaps.slice(1).forEach((layer, i) => layer.setVisible(i + 1 === this.state.basemapIndex))
+    }
   }
 }
 
