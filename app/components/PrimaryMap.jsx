@@ -206,19 +206,29 @@ function generateJobFrameLayer(dataset) {
       ]
     }),
     style(_, resolution) {
+      const zoomedOut = resolution > RESOLUTION_CLOSE
+      if (zoomedOut) {
+        return new ol.style.Style({
+          fill: new ol.style.Fill({
+            color: fillColor
+          }),
+          stroke: new ol.style.Stroke({
+            color: 'rgba(0, 0, 0, .5)'
+          })
+        })
+      }
       return new ol.style.Style({
-        fill: new ol.style.Fill({
-          color: fillColor
-        }),
         stroke: new ol.style.Stroke({
-          color: 'rgba(0, 0, 0, .5)'
+          color: 'rgba(0, 0, 0, .2)',
+          lineDash: [10, 10]
         }),
-        text: (resolution < RESOLUTION_CLOSE) ?
-          new ol.style.Text({
-            font: 'bold 18px Catamaran, Arial, sans-serif',
-            text: labelText
-          }) :
-          undefined
+        text: new ol.style.Text({
+          fill: new ol.style.Fill({
+            color: 'rgba(0, 0, 0, .2)'
+          }),
+          font: 'bold 18px Catamaran, Arial, sans-serif',
+          text: labelText
+        })
       })
     }
   })
