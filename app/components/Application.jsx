@@ -18,7 +18,6 @@ export default class Application extends Component {
   constructor() {
     super()
     this.state = {currentResult: null}
-    this._dismissModal = this._dismissModal.bind(this)
   }
 
   componentDidMount() {
@@ -56,12 +55,5 @@ export default class Application extends Component {
     } else {
       this.setState({currentResult: null})
     }
-  }
-  
-  _dismissModal() {
-    this.context.router.push({
-      pathname: this.props.location.pathname,
-      hash: ''
-    })
   }
 }
