@@ -15,6 +15,13 @@ const UNDETECTED = 'Undetected'
 const NEW_DETECTION = 'New Detection'
 const FOCUS_RESOLUTION = 1000
 
+const JOB_ID = 'jobId'
+const TYPE = 'type'
+const TYPE_FRAME = 'frame'
+const TYPE_LABEL = 'label'
+const TYPE_PROGRESS = 'progress_bar'
+const TYPE_FEATURE = 'feature'
+
 export default class PrimaryMap extends Component {
   static propTypes = {
     datasets: React.PropTypes.array
@@ -23,24 +30,18 @@ export default class PrimaryMap extends Component {
   constructor() {
     super()
     this._basemaps = []
-    this._layers = []
     this.state = {basemapIndex: 0}
     this._export = this._export.bind(this)
   }
 
   componentDidMount() {
     this._initializeOpenLayers()
-    this._renderLayers()
+    this._redrawLayersAndOverlays()
   }
 
   componentDidUpdate(previousProps) {
-    if (this.props.datasets !== previousProps.datasets) {
-      this._clearLayers()
-      this._clearOverlays()
-      this._renderLayers()
-      this._renderOverlays()
-    }
     this._updateBasemap()
+    this._redrawLayersAndOverlays()
   }
 
   render() {
@@ -88,19 +89,6 @@ export default class PrimaryMap extends Component {
 
   }
 
-  _addLayer(layer) {
-    this._layers.push(layer)
-    this._map.addLayer(layer)
-  }
-
-  _clearLayers() {
-    this._layers.forEach(layer => this._map.removeLayer(layer))
-  }
-
-  _clearOverlays() {
-    this._map.getOverlays().clear()
-  }
-
   _export() {
     const timestamp = new Date().toISOString().replace(/(\D+|\.\d+)/g, '')
     const element = this.refs.downloadButton
@@ -112,21 +100,38 @@ export default class PrimaryMap extends Component {
     this._map.renderSync()
   }
 
-  _renderLayers() {
-    this.props.datasets.forEach(dataset => {
-      this._addLayer(generateJobFrameLayer(dataset))
-      this._addLayer(generateLabelLayer(dataset))
-      generateResultLayers(dataset).forEach(layer => this._addLayer(layer))
-    })
-  }
+  _redrawLayersAndOverlays() {
+    const {datasets} = this.props
+    const exists = {}
+    datasets.forEach(dataset => exists[dataset.job.id] = true)
 
-  _renderOverlays() {
-    this.props.datasets.forEach(dataset => {
-      if (dataset.progress) {
-        const progressBar = generateProgressBarOverlay(dataset)
-        if (progressBar) {
-          this._map.addOverlay(progressBar)
-        }
+    const skipResults = {}
+
+    // Clear
+    this._map.getLayers().getArray().slice().forEach(layer => {
+      if (layer instanceof ol.layer.Tile) {
+        return
+      }
+      const id = layer.get(JOB_ID)
+      const type = layer.get(TYPE)
+      if (exists[id] && type === TYPE_FEATURE) {
+        skipResults[id] = true
+        return
+      }
+      this._map.removeLayer(layer)
+    })
+    this._map.getOverlays().clear()
+
+    // Draw
+    datasets.forEach(dataset => {
+      this._map.addLayer(generateJobFrameLayer(dataset))
+      this._map.addLayer(generateLabelLayer(dataset))
+      if (!skipResults[dataset.job.id]) {
+        generateResultLayers(dataset).forEach(l => this._map.addLayer(l))
+      }
+      const progress = generateProgressBarOverlay(dataset)
+      if (progress) {
+        this._map.addOverlay(progress)
       }
     })
   }
@@ -214,11 +219,10 @@ function generateJobFrameLayer(dataset) {
     }
   })
 
-  // HACK HACK HACK HACK HACK
-  rectangle.set('job', dataset.job)
-  // HACK HACK HACK HACK HACK
+  layer.set(JOB_ID, dataset.job.id)
+  layer.set(TYPE, TYPE_FRAME)
 
-  return rectangle
+  return layer
 }
 
 function generateLabelLayer(dataset) {
@@ -246,6 +250,11 @@ function generateLabelLayer(dataset) {
       })
     })
   })
+
+  layer.set(JOB_ID, dataset.job.id)
+  layer.set(TYPE, TYPE_LABEL)
+
+  return layer
 }
 
 function generateProgressBarOverlay(dataset) {
@@ -261,6 +270,10 @@ function generateProgressBarOverlay(dataset) {
       position: ol.extent.getBottomLeft(transformExtent(dataset.job.bbox)),
       positioning: 'bottom-left'
     })
+
+    progress.set(JOB_ID, dataset.job.id)
+    progress.set(TYPE, TYPE_PROGRESS)
+
     return progress
   }
 }
@@ -277,6 +290,10 @@ function generateResultLayers(dataset) {
           }),
           style: generateStyles(feature)
         })
+
+        layer.set(JOB_ID, dataset.job.id)
+        layer.set(TYPE, TYPE_FEATURE)
+
         return layer
       })
   }
