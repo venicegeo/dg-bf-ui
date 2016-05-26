@@ -1,6 +1,6 @@
 import 'openlayers/dist/ol.css'
 import React, {Component} from 'react'
-import openlayers from 'openlayers'
+import ol from 'openlayers'
 import ExportControl from '../utils/openlayers.ExportControl.js'
 import SearchControl from '../utils/openlayers.SearchControl.js'
 import BasemapSelect from './BasemapSelect.jsx'
@@ -60,13 +60,13 @@ export default class PrimaryMap extends Component {
 
   _initializeOpenLayers() {
     this._basemaps = generateBasemapLayers(TILE_PROVIDERS)
-    this._map = new openlayers.Map({
+    this._map = new ol.Map({
       controls: generateControls(),
       interactions: generateInteractions(),
       layers: this._basemaps,
       target: this.refs.container,
-      view: new openlayers.View({
-        center: openlayers.proj.fromLonLat(INITIAL_CENTER),
+      view: new ol.View({
+        center: ol.proj.fromLonLat(INITIAL_CENTER),
         minZoom: MIN_ZOOM,
         maxZoom: MAX_ZOOM,
         zoom: MIN_ZOOM
@@ -138,36 +138,36 @@ export default class PrimaryMap extends Component {
 
 function generateBasemapLayers(providers) {
   return providers.map((provider, index) => {
-    const source = new openlayers.source.XYZ(Object.assign({crossOrigin: 'anonymous'}, provider))
-    const layer = new openlayers.layer.Tile({source})
+    const source = new ol.source.XYZ(Object.assign({crossOrigin: 'anonymous'}, provider))
+    const layer = new ol.layer.Tile({source})
     layer.setProperties({name: provider.name, visible: index === 0})
     return layer
   })
 }
 
 function generateControls() {
-  return openlayers.control.defaults({
+  return ol.control.defaults({
     attributionOptions: {collapsible: false}
   }).extend([
-    new openlayers.control.ScaleLine({
+    new ol.control.ScaleLine({
       minWidth: 250,
       units: 'nautical'
     }),
-    new openlayers.control.ZoomSlider(),
-    new openlayers.control.MousePosition({
-      coordinateFormat: openlayers.coordinate.toStringHDMS,
+    new ol.control.ZoomSlider(),
+    new ol.control.MousePosition({
+      coordinateFormat: ol.coordinate.toStringHDMS,
       projection: 'EPSG:4326'
     }),
-    new openlayers.control.FullScreen(),
+    new ol.control.FullScreen(),
     new ExportControl(styles.export),
     new SearchControl(styles.search)
   ])
 }
 
 function generateInteractions() {
-  return openlayers.interaction.defaults().extend([
-    new openlayers.interaction.DragRotate({
-      condition: openlayers.events.condition.altKeyOnly
+  return ol.interaction.defaults().extend([
+    new ol.interaction.DragRotate({
+      condition: ol.events.condition.altKeyOnly
     })
   ])
 }
@@ -188,24 +188,24 @@ function generateJobFrameLayer(dataset) {
     break;
   }
 
-  const rectangle = new openlayers.layer.Vector({
-    source: new openlayers.source.Vector({
+  const layer = new ol.layer.Vector({
+    source: new ol.source.Vector({
       features: [
-        new openlayers.Feature({
-          geometry: openlayers.geom.Polygon.fromExtent(transformExtent(dataset.job.bbox))
+        new ol.Feature({
+          geometry: ol.geom.Polygon.fromExtent(transformExtent(dataset.job.bbox))
         })
       ]
     }),
     style(_, resolution) {
-      return new openlayers.style.Style({
-        fill: new openlayers.style.Fill({
+      return new ol.style.Style({
+        fill: new ol.style.Fill({
           color: fillColor
         }),
-        stroke: new openlayers.style.Stroke({
+        stroke: new ol.style.Stroke({
           color: 'rgba(0, 0, 0, .5)'
         }),
         text: (resolution < FOCUS_RESOLUTION) ?
-          new openlayers.style.Text({
+          new ol.style.Text({
             font: 'bold 16px Catamaran, Arial, sans-serif',
             text: labelText
           }) :
@@ -222,22 +222,22 @@ function generateJobFrameLayer(dataset) {
 }
 
 function generateLabelLayer(dataset) {
-  const topRight = openlayers.extent.getTopRight(transformExtent(dataset.job.bbox))
+  const topRight = ol.extent.getTopRight(transformExtent(dataset.job.bbox))
   const text = dataset.job.name.toUpperCase()
-  return new openlayers.layer.Vector({
+  const layer = new ol.layer.Vector({
     minResolution: FOCUS_RESOLUTION,
-    source: new openlayers.source.Vector({
+    source: new ol.source.Vector({
       features: [
-        new openlayers.Feature({
-          geometry: new openlayers.geom.Point(topRight)
+        new ol.Feature({
+          geometry: new ol.geom.Point(topRight)
         })
       ]
     }),
-    style: new openlayers.style.Style({
-      text: new openlayers.style.Text({
+    style: new ol.style.Style({
+      text: new ol.style.Text({
         text,
         font: 'bold 13px Catamaran, Arial, sans-serif',
-        stroke: new openlayers.style.Stroke({
+        stroke: new ol.style.Stroke({
           width: 2,
           color: 'rgba(255,255,255,.5)'
         }),
@@ -256,25 +256,29 @@ function generateProgressBarOverlay(dataset) {
     element.setAttribute('style', 'border: 1px solid white; width: 100px; transform: translateY(200%); border-radius: 2px; overflow: hidden;')
     bar.setAttribute('style', `width: ${percentage}%; height: 6px; background-color: white;`)
     element.appendChild(bar)
-    return new openlayers.Overlay({
+    const progress = new ol.Overlay({
       element,
-      position: openlayers.extent.getBottomLeft(transformExtent(dataset.job.bbox)),
+      position: ol.extent.getBottomLeft(transformExtent(dataset.job.bbox)),
       positioning: 'bottom-left'
     })
+    return progress
   }
 }
 
 function generateResultLayers(dataset) {
   if (dataset.result) {
-    const reader = new openlayers.format.GeoJSON()
-    reader
+    const reader = new ol.format.GeoJSON()
+    return reader
       .readFeatures(dataset.result, {featureProjection: 'EPSG:3857'})
-      .map(feature => new openlayers.layer.Vector({
-        source: new openlayers.source.Vector({
-          features: [feature]
-        }),
-        style: generateStyles(feature)
-      }))
+      .map(feature => {
+        const layer = new ol.layer.Vector({
+          source: new ol.source.Vector({
+            features: [feature]
+          }),
+          style: generateStyles(feature)
+        })
+        return layer
+      })
   }
   return []
 }
@@ -295,9 +299,9 @@ function generateStyles(feature) {
 }
 
 function generateStyleDetectionBaseline(baseline) {
-  return new openlayers.style.Style({
+  return new ol.style.Style({
     geometry: baseline,
-    stroke: new openlayers.style.Stroke({
+    stroke: new ol.style.Stroke({
       color: 'hsla(160, 100%, 30%, .5)',
       width: 2,
       lineDash: [5, 5],
@@ -308,12 +312,12 @@ function generateStyleDetectionBaseline(baseline) {
 }
 
 function generateStyleDetection(detection) {
-  return new openlayers.style.Style({
+  return new ol.style.Style({
     geometry: detection,
-    fill: new openlayers.style.Fill({
+    fill: new ol.style.Fill({
       color: 'hsla(160, 100%, 30%, .2)'
     }),
-    stroke: new openlayers.style.Stroke({
+    stroke: new ol.style.Stroke({
       color: 'hsla(160, 100%, 30%, .75)',
       width: 2
     })
@@ -321,8 +325,8 @@ function generateStyleDetection(detection) {
 }
 
 function generateStyleNewDetection() {
-  return new openlayers.style.Style({
-    stroke: new openlayers.style.Stroke({
+  return new ol.style.Style({
+    stroke: new ol.style.Stroke({
       width: 2,
       color: 'hsl(205, 100%, 50%)'
     })
@@ -330,11 +334,11 @@ function generateStyleNewDetection() {
 }
 
 function generateStyleUndetected() {
-  return new openlayers.style.Style({
-    fill: new openlayers.style.Fill({
+  return new ol.style.Style({
+    fill: new ol.style.Fill({
       color: 'hsla(0, 100%, 75%, .2)'
     }),
-    stroke: new openlayers.style.Stroke({
+    stroke: new ol.style.Stroke({
       color: 'red',
       width: 2,
       lineDash: [5, 5],
@@ -345,8 +349,8 @@ function generateStyleUndetected() {
 }
 
 function generateStyleUnknownDetectionType() {
-  return new openlayers.style.Style({
-    stroke: new openlayers.style.Stroke({
+  return new ol.style.Style({
+    stroke: new ol.style.Stroke({
       color: 'magenta',
       width: 2
     })
@@ -354,5 +358,5 @@ function generateStyleUnknownDetectionType() {
 }
 
 function transformExtent(extent) {
-  return openlayers.proj.transformExtent(extent, 'EPSG:4326', 'EPSG:3857')
+  return ol.proj.transformExtent(extent, 'EPSG:4326', 'EPSG:3857')
 }
