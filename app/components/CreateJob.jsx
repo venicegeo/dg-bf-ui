@@ -17,7 +17,7 @@ export default class CreateJob extends Component {
     this.state = {algorithms: [], images: []}
     this._submit = this._submit.bind(this)
   }
-  
+
   componentDidMount() {
     Promise.all([
       fetchAlgorithms(),

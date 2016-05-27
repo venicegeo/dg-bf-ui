@@ -5,7 +5,7 @@
   "scripts": {
     "build": "webpack --colors --progress",
     "clean": "rimraf dist",
-    "lint": "eslint app karma.conf.js webpack.config.js",
+    "lint": "eslint 'app/**/*.{js,jsx}' karma.conf.js webpack.config.js",
     "test": "karma start",
     "test:ci": "karma start --single-run --browsers gs_firefox_38",
     "watch": "webpack-dev-server --hot --inline --colors --history-api-fallback"

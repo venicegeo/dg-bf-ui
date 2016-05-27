@@ -320,15 +320,15 @@ function generateResultLayers(dataset) {
 function generateStyles(feature) {
   const geometry = feature.getGeometry()
   switch (feature.get('detection')) {
-    case DETECTED:
-      const [baseline, detection] = geometry.getGeometries()
-      return [generateStyleDetectionBaseline(baseline), generateStyleDetection(detection)]
-    case UNDETECTED:
-      return [generateStyleUndetected()]
-    case NEW_DETECTION:
-      return [generateStyleNewDetection()]
-    default:
-      return [generateStyleUnknownDetectionType()]
+  case DETECTED:
+    const [baseline, detection] = geometry.getGeometries()
+    return [generateStyleDetectionBaseline(baseline), generateStyleDetection(detection)]
+  case UNDETECTED:
+    return [generateStyleUndetected()]
+  case NEW_DETECTION:
+    return [generateStyleNewDetection()]
+  default:
+    return [generateStyleUnknownDetectionType()]
   }
 }
 

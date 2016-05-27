@@ -9,8 +9,8 @@ export default class SearchControl extends openlayers.control.Control {
     element.innerHTML = '<button><i class="fa fa-search"/></button>'
     element.addEventListener('click', () => this._clicked())
   }
-  
+
   _clicked() {
-    console.debug('things');
+    console.debug('things')
   }
 }

@@ -8,7 +8,11 @@ export default class Navigation extends Component {
   static propTypes = {
     currentLocation: React.PropTypes.object
   }
-  
+
+  constructor() {
+    super()
+  }
+
   render() {
     return (
       <nav className={`${styles.root} ${this.props.currentLocation.pathname === '/' ? styles.atHome : ''}`}>
