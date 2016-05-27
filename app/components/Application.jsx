@@ -17,7 +17,7 @@ export default class Application extends Component {
 
   constructor() {
     super()
-    this.state = {currentResult: null}
+    this.state = {datasets: []}
   }
 
   componentDidMount() {
@@ -36,7 +36,7 @@ export default class Application extends Component {
     return (
       <div className={styles.root}>
         <Navigation currentLocation={this.props.location}/>
-        <PrimaryMap featureCollections={results}/>
+        <PrimaryMap datasets={this.state.datasets}/>
         {this.props.children}
       </div>
     )
