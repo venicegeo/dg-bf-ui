@@ -1,6 +1,6 @@
 import 'openlayers/dist/ol.css'
 import React, {Component} from 'react'
-import openlayers from 'openlayers'
+import ol from 'openlayers'
 import ExportControl from '../utils/openlayers.ExportControl.js'
 import SearchControl from '../utils/openlayers.SearchControl.js'
 import BasemapSelect from './BasemapSelect.jsx'
@@ -13,38 +13,47 @@ const MAX_ZOOM = 22
 const DETECTED = 'Detected'
 const UNDETECTED = 'Undetected'
 const NEW_DETECTION = 'New Detection'
+const RESOLUTION_CLOSE = 1000
+
+const JOB_ID = 'jobId'
+const TYPE = 'type'
+const TYPE_FRAME = 'frame'
+const TYPE_LABEL = 'label'
+const TYPE_PROGRESS = 'progress_bar'
+const TYPE_FEATURE = 'feature'
 
 export default class PrimaryMap extends Component {
   static propTypes = {
-    featureCollections: React.PropTypes.array
+    datasets: React.PropTypes.array
   }
 
   constructor() {
     super()
     this._basemaps = []
-    this._layers = []
     this.state = {basemapIndex: 0}
     this._export = this._export.bind(this)
   }
 
   componentDidMount() {
     this._initializeOpenLayers()
-    this._renderLayers()
+    this._redrawLayersAndOverlays()
   }
 
-  componentDidUpdate(previousProps) {
-    if (this.props.featureCollections !== previousProps.featureCollections) {
-      this._clearLayers()
-      this._renderLayers()
+  componentDidUpdate(previousProps, previousState) {
+    if (this.props.datasets !== previousProps.datasets) {
+      this._redrawLayersAndOverlays()
     }
-    this._updateBasemap()
+    if (this.state.basemapIndex !== previousState.basemapIndex) {
+      this._updateBasemap()
+    }
   }
 
   render() {
+    const providerNames = TILE_PROVIDERS.map(b => b.name)
     return (
       <main className={styles.root} ref="container">
         <BasemapSelect className={styles.basemapSelect}
-                       basemaps={this._basemaps.map(b => b.get('name'))}
+                       basemaps={providerNames}
                        changed={basemapIndex => this.setState({basemapIndex})}/>
       </main>
     )
@@ -56,45 +65,32 @@ export default class PrimaryMap extends Component {
 
   _initializeOpenLayers() {
     this._basemaps = generateBasemapLayers(TILE_PROVIDERS)
-    this._map = new openlayers.Map({
+    this._map = new ol.Map({
       controls: generateControls(),
       interactions: generateInteractions(),
       layers: this._basemaps,
       target: this.refs.container,
-      view: new openlayers.View({
-        center: openlayers.proj.fromLonLat(INITIAL_CENTER),
+      view: new ol.View({
+        center: ol.proj.fromLonLat(INITIAL_CENTER),
         minZoom: MIN_ZOOM,
         maxZoom: MAX_ZOOM,
         zoom: MIN_ZOOM
       })
     })
-  }
 
-  _clearLayers() {
-    this._layers.forEach(layer => this._map.removeLayer(layer))
-  }
 
-  _renderLayers() {
-    const featureCollections = this.props.featureCollections
-    if (!featureCollections || !featureCollections.length) { return }
-    const viewport = openlayers.extent.createEmpty()
-    const reader = new openlayers.format.GeoJSON()
-    featureCollections.forEach(featureCollection => {
-      const bounds = openlayers.extent.createEmpty()
-      const features = reader.readFeatures(featureCollection.geojson, {featureProjection:'EPSG:3857'})
-      features.forEach(feature => {
-        const source = new openlayers.source.Vector({features: [feature]})
-        const layer = new openlayers.layer.Vector({source, style: generateStyles})
-        openlayers.extent.extend(bounds, source.getExtent())
-        openlayers.extent.extend(viewport, source.getExtent())
-        this._layers.push(layer)
-        this._map.addLayer(layer)
+    // HACK HACK HACK HACK HACK HACK HACK
+    this._map.on('click', event => {
+      this._map.forEachLayerAtPixel(event.pixel, layer => {
+        const job = layer.get('job')
+        if (job) {
+          console.debug('clicked bbox for:', job)
+        }
       })
-      const frame = generateFrame(bounds, featureCollection.name)
-      this._layers.push(frame)
-      this._map.addLayer(frame)
     })
-    this._map.getView().fit(viewport, this._map.getSize())
+    // HACK HACK HACK HACK HACK HACK HACK
+
+
   }
 
   _export() {
@@ -108,68 +104,217 @@ export default class PrimaryMap extends Component {
     this._map.renderSync()
   }
 
+  _redrawLayersAndOverlays() {
+    const {datasets} = this.props
+    const exists = {}
+    datasets.forEach(dataset => exists[dataset.job.id] = true)
+
+    const skipResults = {}
+
+    // Clear
+    this._map.getLayers().getArray().slice().forEach(layer => {
+      if (layer instanceof ol.layer.Tile) {
+        return
+      }
+      const id = layer.get(JOB_ID)
+      const type = layer.get(TYPE)
+      if (exists[id] && type === TYPE_FEATURE) {
+        skipResults[id] = true
+        return
+      }
+      this._map.removeLayer(layer)
+    })
+    this._map.getOverlays().clear()
+
+    // Draw
+    datasets.forEach(dataset => {
+      this._map.addLayer(generateJobFrameLayer(dataset))
+      this._map.addLayer(generateLabelLayer(dataset))
+      if (!skipResults[dataset.job.id]) {
+        generateResultLayers(dataset).forEach(l => this._map.addLayer(l))
+      }
+      const progress = generateProgressBarOverlay(dataset)
+      if (progress) {
+        this._map.addOverlay(progress)
+      }
+    })
+  }
+
   _updateBasemap() {
-    this._basemaps.forEach((layer, i) => layer.setVisible(i === this.state.basemapIndex))
+    this._basemaps.slice(1).forEach((layer, i) => layer.setVisible(i + 1 === this.state.basemapIndex))
   }
 }
 
 function generateBasemapLayers(providers) {
   return providers.map((provider, index) => {
-    const source = new openlayers.source.XYZ(Object.assign({crossOrigin: 'anonymous'}, provider))
-    const layer = new openlayers.layer.Tile({source})
+    const source = new ol.source.XYZ(Object.assign({crossOrigin: 'anonymous'}, provider))
+    const layer = new ol.layer.Tile({source})
     layer.setProperties({name: provider.name, visible: index === 0})
     return layer
   })
 }
 
 function generateControls() {
-  return openlayers.control.defaults({
+  return ol.control.defaults({
     attributionOptions: {collapsible: false}
   }).extend([
-    new openlayers.control.ScaleLine({
+    new ol.control.ScaleLine({
       minWidth: 250,
       units: 'nautical'
     }),
-    new openlayers.control.ZoomSlider(),
-    new openlayers.control.MousePosition({
-      coordinateFormat: openlayers.coordinate.toStringHDMS
+    new ol.control.ZoomSlider(),
+    new ol.control.MousePosition({
+      coordinateFormat: ol.coordinate.toStringHDMS,
+      projection: 'EPSG:4326'
     }),
-    new openlayers.control.FullScreen(),
+    new ol.control.FullScreen(),
     new ExportControl(styles.export),
     new SearchControl(styles.search)
   ])
 }
 
-function generateFrame(bounds, title) {
-  return new openlayers.layer.Vector({
-    source: new openlayers.source.Vector({
-      features: [new openlayers.Feature({
-        geometry: openlayers.geom.Polygon.fromExtent(bounds)
-      })]
-    }),
-    style: new openlayers.style.Style({
-      stroke: new openlayers.style.Stroke({
-        color: 'rgba(0, 0, 0, .2)',
-        lineDash: [20, 20],
-        weight: 5
-      }),
-      text: new openlayers.style.Text({
-        text: title,
-        font: 'bold 15px Menlo, monospace',
-        fill: new openlayers.style.Fill({
-          color: 'rgba(0, 0, 0, .2)'
+function generateInteractions() {
+  return ol.interaction.defaults().extend([
+    new ol.interaction.DragRotate({
+      condition: ol.events.condition.altKeyOnly
+    })
+  ])
+}
+
+function generateJobFrameLayer(dataset) {
+  const labelText = `${dataset.job.name.toUpperCase()} (${dataset.job.status})`
+  let fillColor = 'red'
+  switch (dataset.job.status) {
+  case 'Running':
+    fillColor = 'rgba(255,255,0, .5)'
+    break
+  case 'Success':
+    fillColor = 'rgba(0,255,0, .5)'
+    break
+  case 'Timed Out':
+  case 'Error':
+    fillColor = 'rgba(255,0,0, .5)'
+    break
+  }
+
+  const layer = new ol.layer.Vector({
+    source: new ol.source.Vector({
+      features: [
+        new ol.Feature({
+          geometry: ol.geom.Polygon.fromExtent(transformExtent(dataset.job.bbox))
         })
+      ]
+    }),
+    style(_, resolution) {
+      const zoomedOut = resolution > RESOLUTION_CLOSE
+      if (zoomedOut) {
+        return new ol.style.Style({
+          fill: new ol.style.Fill({
+            color: fillColor
+          }),
+          stroke: new ol.style.Stroke({
+            color: 'rgba(0, 0, 0, .5)'
+          })
+        })
+      }
+      return new ol.style.Style({
+        stroke: new ol.style.Stroke({
+          color: 'rgba(0, 0, 0, .2)',
+          lineDash: [10, 10]
+        }),
+        text: new ol.style.Text({
+          fill: new ol.style.Fill({
+            color: 'rgba(0, 0, 0, .2)'
+          }),
+          font: 'bold 18px Catamaran, Arial, sans-serif',
+          text: labelText
+        })
+      })
+    }
+  })
+
+  layer.set(JOB_ID, dataset.job.id)
+  layer.set(TYPE, TYPE_FRAME)
+
+  return layer
+}
+
+function generateLabelLayer(dataset) {
+  const topRight = ol.extent.getTopRight(transformExtent(dataset.job.bbox))
+  const text = dataset.job.name.toUpperCase() + ` (${dataset.job.status})`
+  const layer = new ol.layer.Vector({
+    minResolution: RESOLUTION_CLOSE,
+    source: new ol.source.Vector({
+      features: [
+        new ol.Feature({
+          geometry: new ol.geom.Point(topRight)
+        })
+      ]
+    }),
+    style: new ol.style.Style({
+      text: new ol.style.Text({
+        text,
+        font: 'bold 13px Catamaran, Arial, sans-serif',
+        stroke: new ol.style.Stroke({
+          width: 2,
+          color: 'rgba(255,255,255,.5)'
+        }),
+        textAlign: 'start',
+        textBaseline: 'bottom'
       })
     })
   })
+
+  layer.set(JOB_ID, dataset.job.id)
+  layer.set(TYPE, TYPE_LABEL)
+
+  return layer
 }
 
-function generateInteractions() {
-  return openlayers.interaction.defaults().extend([
-    new openlayers.interaction.DragRotate({
-      condition: openlayers.events.condition.altKeyOnly
+function generateProgressBarOverlay(dataset) {
+  if (dataset.progress && dataset.progress.loaded < dataset.progress.total) {
+    const element = document.createElement('div')
+    element.classList.add(styles.progress)
+
+    const percentage = Math.floor(((dataset.progress.loaded / dataset.progress.total) || 0) * 100)
+    const puck = document.createElement('div')
+    puck.classList.add(styles.progressPuck)
+    puck.setAttribute('style', `width: ${percentage}%;`)
+    element.appendChild(puck)
+
+    const progress = new ol.Overlay({
+      element,
+      position: ol.extent.getBottomLeft(transformExtent(dataset.job.bbox)),
+      positioning: 'bottom-left'
     })
-  ])
+
+    progress.set(JOB_ID, dataset.job.id)
+    progress.set(TYPE, TYPE_PROGRESS)
+
+    return progress
+  }
+}
+
+function generateResultLayers(dataset) {
+  if (dataset.result) {
+    const reader = new ol.format.GeoJSON()
+    return reader
+      .readFeatures(dataset.result, {featureProjection: 'EPSG:3857'})
+      .map(feature => {
+        const layer = new ol.layer.Vector({
+          source: new ol.source.Vector({
+            features: [feature]
+          }),
+          style: generateStyles(feature)
+        })
+
+        layer.set(JOB_ID, dataset.job.id)
+        layer.set(TYPE, TYPE_FEATURE)
+
+        return layer
+      })
+  }
+  return []
 }
 
 function generateStyles(feature) {
@@ -188,9 +333,9 @@ function generateStyles(feature) {
 }
 
 function generateStyleDetectionBaseline(baseline) {
-  return new openlayers.style.Style({
+  return new ol.style.Style({
     geometry: baseline,
-    stroke: new openlayers.style.Stroke({
+    stroke: new ol.style.Stroke({
       color: 'hsla(160, 100%, 30%, .5)',
       width: 2,
       lineDash: [5, 5],
@@ -201,12 +346,12 @@ function generateStyleDetectionBaseline(baseline) {
 }
 
 function generateStyleDetection(detection) {
-  return new openlayers.style.Style({
+  return new ol.style.Style({
     geometry: detection,
-    fill: new openlayers.style.Fill({
+    fill: new ol.style.Fill({
       color: 'hsla(160, 100%, 30%, .2)'
     }),
-    stroke: new openlayers.style.Stroke({
+    stroke: new ol.style.Stroke({
       color: 'hsla(160, 100%, 30%, .75)',
       width: 2
     })
@@ -214,8 +359,8 @@ function generateStyleDetection(detection) {
 }
 
 function generateStyleNewDetection() {
-  return new openlayers.style.Style({
-    stroke: new openlayers.style.Stroke({
+  return new ol.style.Style({
+    stroke: new ol.style.Stroke({
       width: 2,
       color: 'hsl(205, 100%, 50%)'
     })
@@ -223,11 +368,11 @@ function generateStyleNewDetection() {
 }
 
 function generateStyleUndetected() {
-  return new openlayers.style.Style({
-    fill: new openlayers.style.Fill({
+  return new ol.style.Style({
+    fill: new ol.style.Fill({
       color: 'hsla(0, 100%, 75%, .2)'
     }),
-    stroke: new openlayers.style.Stroke({
+    stroke: new ol.style.Stroke({
       color: 'red',
       width: 2,
       lineDash: [5, 5],
@@ -238,10 +383,14 @@ function generateStyleUndetected() {
 }
 
 function generateStyleUnknownDetectionType() {
-  return new openlayers.style.Style({
-    stroke: new openlayers.style.Stroke({
+  return new ol.style.Style({
+    stroke: new ol.style.Stroke({
       color: 'magenta',
       width: 2
     })
   })
+}
+
+function transformExtent(extent) {
+  return ol.proj.transformExtent(extent, 'EPSG:4326', 'EPSG:3857')
 }

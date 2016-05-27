@@ -15,14 +15,14 @@ export function login(gateway, username, password) {
       return response.text()
     })
     .then(token => {
-      
+
       // HACK HACK HACK HACK
       if (token === 'false') {
         throw new Error('Invalid user credentials')
       }
       token = `Basic ${btoa(username + ':' + password)}`
       // HACK HACK HACK HACK
-      
+
       sessionStorage.setItem('authToken', token)
       return token
     })

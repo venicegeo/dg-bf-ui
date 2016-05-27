@@ -13,6 +13,7 @@ export default class Timestamp extends Component {
   constructor() {
     super()
     this.state = {relative: true}
+    this._clicked = this._clicked.bind(this)
   }
 
   componentDidMount() {
@@ -30,9 +31,15 @@ export default class Timestamp extends Component {
     return (
       <span className={`${styles.root} ${this.props.className}`}
             title={this.state.relative ? staticTimestamp : relativeTimestamp}
-            onClick={() => this.setState({relative: !this.state.relative})}>
+            onClick={this._clicked}>
         {this.state.relative ? relativeTimestamp : staticTimestamp}
       </span>
     )
+  }
+
+  _clicked(event) {
+    event.stopPropagation()
+    event.preventDefault()
+    this.setState({relative: !this.state.relative})
   }
 }

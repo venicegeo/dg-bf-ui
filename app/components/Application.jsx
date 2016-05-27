@@ -17,8 +17,7 @@ export default class Application extends Component {
 
   constructor() {
     super()
-    this.state = {currentResult: null}
-    this._dismissModal = this._dismissModal.bind(this)
+    this.state = {datasets: []}
   }
 
   componentDidMount() {
@@ -37,7 +36,7 @@ export default class Application extends Component {
     return (
       <div className={styles.root}>
         <Navigation currentLocation={this.props.location}/>
-        <PrimaryMap featureCollections={results}/>
+        <PrimaryMap datasets={this.state.datasets}/>
         {this.props.children}
       </div>
     )
@@ -56,12 +55,5 @@ export default class Application extends Component {
     } else {
       this.setState({currentResult: null})
     }
-  }
-
-  _dismissModal() {
-    this.context.router.push({
-      pathname: this.props.location.pathname,
-      hash: ''
-    })
   }
 }

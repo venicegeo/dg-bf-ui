@@ -9,6 +9,25 @@
   right: 70px;
 }
 
+.progress {
+  width: 150px;
+  transform: translateY(200%);
+  color: white;
+  border: 1px solid;
+  border-radius: 2px;
+  overflow: hidden;
+  background-color: color(black a(.2));
+  box-shadow:
+    0 0 0 1px color(black a(.2)),
+    0 0 0 5px color(black a(.1));
+  pointer-events: none;
+}
+
+.progressPuck {
+  height: 7px;
+  background-color: currentColor;
+}
+
 /* =========================================================================
    OpenLayers Controls
    ========================================================================= */

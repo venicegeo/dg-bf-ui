@@ -1,11 +1,26 @@
-.root {
-  padding: 15px 30px;
-  transition: background-color .5s linear;
+:root {
+  --base-color: #175B82;
 }
 
-.root + .root {
+.root > a {
+  display: block;
+  padding: 15px 30px;
+  text-decoration: none;
+  color: inherit;
+  transition: background-color .25s linear, border .1s ease-in-out;
+}
+
+.root + .root > a {
   box-shadow: inset 0 1px color(black alpha(7%));
-  padding-top: 30px;
+}
+
+:global(.Error) {
+  background-color: color(red alpha(10%));
+}
+
+.active {
+  background-color: color(#00a3ff alpha(10%));
+  border-left: 5px solid var(--base-color);
 }
 
 /* =========================================================================
@@ -14,14 +29,14 @@
 
 .root h2 {
   margin-bottom: .2em;
-  font-size: 18px;
+  font-size: 16px;
 }
 
 /* =========================================================================
    Controls
    ========================================================================= */
 
-.controls a {
+.button {
   display: inline-block;
   padding: .5em 1em;
   border: none;
@@ -30,12 +45,12 @@
   text-decoration: none;
   font-weight: normal;
   font-size: 13px;
-  background-color: #175B82;
+  background-color: var(--base-color);
   color: white;
 }
 
 .controls a:hover {
-  background-color: #1b709d;
+  background-color: color(var(--base-color) lightness(23%));
 }
 
 .controls a + a {
@@ -49,10 +64,7 @@
 .details {
   display: flex;
   justify-content: space-between;
-}
-
-:global(.Error) {
-  background-color: color(red alpha(10%));
+  font-size: 14px;
 }
 
 .timer {
