@@ -90,9 +90,9 @@ export default class PrimaryMap extends Component {
     // HACK HACK HACK HACK HACK HACK HACK
     this._map.on('click', event => {
       this._map.forEachLayerAtPixel(event.pixel, layer => {
-        const job = layer.get('job')
-        if (job) {
-          console.debug('clicked bbox for:', job)
+        const jobId = layer.get('jobId')
+        if (jobId) {
+          console.debug('clicked bbox for:', jobId)
         }
       })
     })
