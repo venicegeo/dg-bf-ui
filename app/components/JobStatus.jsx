@@ -1,7 +1,8 @@
 import React, {Component} from 'react'
 import {Link} from 'react-router'
-import styles from './JobStatus.css'
 import Timer from './Timestamp.jsx'
+import {serialize} from '../utils/map-anchor'
+import styles from './JobStatus.css'
 
 const STATUS_SUCCESS = 'Success'
 const STATUS_RUNNING = 'Running'
@@ -21,7 +22,7 @@ export default class JobStatus extends Component {
     // TODO -- need to rethink download re: auth
     return (
       <li className={styles.root}>
-        <Link to={`/jobs/${job.id}`} activeClassName={styles.active} className={job.status}>
+        <Link to={`/?jobId=${job.id}#${serialize(job.bbox)}`} activeClassName={styles.active} className={job.status}>
           <h2>{job.name}</h2>
 
           <div className={styles.details}>

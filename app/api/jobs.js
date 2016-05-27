@@ -195,6 +195,7 @@ class Job {
     this.resultId = raw.resultId
     this.status = raw.status
     this.imageIds = raw.imageIds
+    this.bbox = raw.bbox
   }
 }
 
