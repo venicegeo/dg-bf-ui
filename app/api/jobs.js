@@ -6,6 +6,7 @@ const STATUS_SUCCESS = 'Success'
 const STATUS_TIMED_OUT = 'Timed Out'
 
 let cache
+let subscribers = []
 
 export function initialize(client) {
   deserializeCache()
@@ -56,7 +57,14 @@ export function getResult(client, resultId, progress) {
 }
 
 export function list() {
-  return Promise.resolve(cache)
+  return cache.slice()
+}
+
+export function subscribe(notifier) {
+  subscribers.push(notifier)
+  return () => {
+    subscribers = subscribers.filter(fn => fn !== notifier)
+  }
 }
 
 //
@@ -84,7 +92,10 @@ function cacheWorker(client) {
         console.debug('(jobs:cacheWorker) committing changes')
         serializeCache()
       })
-      .catch(err => console.error(err))
+      .catch(err => {
+        console.error(err)
+        notifySubscribers(err)
+      })
   }
 
   function __update__(job) {
@@ -161,8 +172,14 @@ function generateOutputFilename() {
   return `Beachfront_${timestamp}.geojson`
 }
 
+function notifySubscribers(cacheError) {
+  console.debug('(jobs.notifySubscribers)', cacheError)
+  subscribers.forEach(notify => notify(cacheError))
+}
+
 function serializeCache() {
   sessionStorage.setItem('jobs', JSON.stringify(cache))
+  notifySubscribers()
 }
 
 //

@@ -20,7 +20,11 @@ export function fetchAlgorithms() {
   return algorithms.list(client)
 }
 
-export function fetchJobs() {
+export function subscribeJobs(fn) {
+  return jobs.subscribe(fn)
+}
+
+export function listJobs() {
   return jobs.list()
 }
 
