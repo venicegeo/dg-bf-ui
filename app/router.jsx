@@ -20,7 +20,6 @@ export function bootstrap(element) {
         <IndexRoute component={FakeIndex} onEnter={redirectToLogin}/>
         <Route path="login" component={Login}/>
         <Route path="jobs" component={JobStatusList} onEnter={redirectToLogin}/>
-        <Route path="jobs/:resultId" component={JobStatusList} onEnter={redirectToLogin}/>
         <Route path="create-job" component={CreateJob} onEnter={redirectToLogin}/>
         <Route path="help" component={Help} onEnter={redirectToLogin}/>
         <Route path="about" component={About} onEnter={redirectToLogin}/>
