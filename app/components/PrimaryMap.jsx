@@ -187,14 +187,14 @@ function generateJobFrameLayer(dataset) {
   switch (dataset.job.status) {
   case 'Running':
     fillColor = 'rgba(255,255,0, .5)'
-    break;
+    break
   case 'Success':
     fillColor = 'rgba(0,255,0, .5)'
-    break;
+    break
   case 'Timed Out':
   case 'Error':
     fillColor = 'rgba(255,0,0, .5)'
-    break;
+    break
   }
 
   const layer = new ol.layer.Vector({
