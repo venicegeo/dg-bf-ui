@@ -4,8 +4,10 @@ import ol from 'openlayers'
 import ExportControl from '../utils/openlayers.ExportControl.js'
 import SearchControl from '../utils/openlayers.SearchControl.js'
 import BasemapSelect from './BasemapSelect.jsx'
-import styles from './PrimaryMap.css'
+import {debounce} from '../utils/debounce'
+import {deserialize} from '../utils/map-anchor'
 import {TILE_PROVIDERS} from '../config'
+import styles from './PrimaryMap.css'
 
 const INITIAL_CENTER = [-20, 0]
 const MIN_ZOOM = 2.5
@@ -24,6 +26,7 @@ const TYPE_FEATURE = 'feature'
 
 export default class PrimaryMap extends Component {
   static propTypes = {
+    anchor: React.PropTypes.string,
     datasets: React.PropTypes.array
   }
 
@@ -32,11 +35,13 @@ export default class PrimaryMap extends Component {
     this._basemaps = []
     this.state = {basemapIndex: 0}
     this._export = this._export.bind(this)
+    this._recenter = debounce(this._recenter.bind(this))
   }
 
   componentDidMount() {
     this._initializeOpenLayers()
     this._redrawLayersAndOverlays()
+    this._recenter(this.props.anchor)
   }
 
   componentDidUpdate(previousProps, previousState) {
@@ -45,6 +50,9 @@ export default class PrimaryMap extends Component {
     }
     if (this.state.basemapIndex !== previousState.basemapIndex) {
       this._updateBasemap()
+    }
+    if (this.props.anchor && this.props.anchor !== previousProps.anchor) {
+      this._recenter(this.props.anchor)
     }
   }
 
@@ -102,6 +110,17 @@ export default class PrimaryMap extends Component {
       element.href = canvas.toDataURL()
     })
     this._map.renderSync()
+  }
+
+  _recenter(anchor) {
+    const deserialized = deserialize(anchor)
+    if (deserialized) {
+      const {basemapIndex, zoom, center} = deserialize(anchor)
+      this.setState({basemapIndex})
+      const view = this._map.getView()
+      view.setCenter(center)
+      view.setZoom(zoom)
+    }
   }
 
   _redrawLayersAndOverlays() {

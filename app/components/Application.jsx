@@ -37,7 +37,7 @@ export default class Application extends Component {
     return (
       <div className={styles.root}>
         <Navigation currentLocation={this.props.location}/>
-        <PrimaryMap datasets={datasets}/>
+        <PrimaryMap datasets={datasets} anchor={this.props.location.hash}/>
         {this.props.children}
       </div>
     )
