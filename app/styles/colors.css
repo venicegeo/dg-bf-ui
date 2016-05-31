@@ -3,8 +3,19 @@
    ========================================================================= */
 
 html {
-  background-color: hsl(202, 40%, 35%);
+  background-color: hsl(202, 71%, 24%);
   color: #555;
+}
+
+body:before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
+  background-image: url(../images/matte-grid.svg);
+  opacity: .04;
 }
 
 h1,
