@@ -1,0 +1,30 @@
+.root {
+
+}
+
+.minimap {
+  position: relative;
+  height: 200px;
+}
+
+.root h2,
+.root h3 {
+  margin: .5em 0;
+}
+
+.root h2 {
+  font-size: 1.5em;
+}
+
+.root h3 {
+  font-size: inherit;
+  color: inherit;
+}
+
+.controls {
+  text-align: center;
+}
+
+.field {
+  composes: field-normal from '../styles/forms.css';
+}
