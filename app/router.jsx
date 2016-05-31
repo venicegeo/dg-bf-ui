@@ -17,13 +17,12 @@ export function bootstrap(element) {
   render(
     <Router history={history}>
       <Route path="/" component={Application}>
-        <IndexRoute component={FakeIndex} onEnter={redirectToLogin}/>
+        <IndexRoute component={FakeIndex} onEnter={enforceLogin}/>
         <Route path="login" component={Login}/>
-        <Route path="jobs" component={JobStatusList} onEnter={redirectToLogin}/>
-        <Route path="jobs/:resultId" component={JobStatusList} onEnter={redirectToLogin}/>
-        <Route path="create-job" component={CreateJob} onEnter={redirectToLogin}/>
-        <Route path="help" component={Help} onEnter={redirectToLogin}/>
-        <Route path="about" component={About} onEnter={redirectToLogin}/>
+        <Route path="jobs" component={JobStatusList} onEnter={enforceLogin}/>
+        <Route path="create-job" component={CreateJob} onEnter={enforceLogin}/>
+        <Route path="help" component={Help} onEnter={enforceLogin}/>
+        <Route path="about" component={About} onEnter={enforceLogin}/>
       </Route>
     </Router>, element)
 }
@@ -32,7 +31,7 @@ export function bootstrap(element) {
 // Internals
 //
 
-function redirectToLogin(nextState, replace) {
+function enforceLogin(nextState, replace) {
   if (!isLoggedIn()) {
     replace({
       pathname: '/login',

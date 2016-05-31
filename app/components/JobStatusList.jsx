@@ -1,10 +1,7 @@
 import React, {Component} from 'react'
 import styles from './JobStatusList.css'
 import JobStatus from './JobStatus'
-import {fetchJobs} from '../api'
-
-const SECOND = 1000
-const POLL_INTERVAL = 1 * SECOND  // FIXME -- it might make more sense to have this be pub/sub
+import {listJobs, subscribeJobs} from '../api'
 
 export default class JobStatusList extends Component {
   static propTypes = {
@@ -13,20 +10,22 @@ export default class JobStatusList extends Component {
 
   constructor() {
     super()
-    this.state = {jobs: [], communicationError: null}
-    this._checkStatus = this._checkStatus.bind(this)
+    this.state = {jobs: [], err: null}
+    this._dismissError = this._dismissError.bind(this)
+    this._update = this._update.bind(this)
   }
 
   componentDidMount() {
-    this._activatePolling(POLL_INTERVAL)
+    this._update()
+    this._unsubscribe = subscribeJobs(this._update)
   }
 
   componentWillUnmount() {
-    this._deactivatePolling()
+    this._unsubscribe()
   }
 
   render() {
-    const {jobs, communicationError} = this.state
+    const {jobs, err} = this.state
     return (
       <div className={styles.root}>
         <header>
@@ -35,13 +34,12 @@ export default class JobStatusList extends Component {
 
         <ul>
 
-          {/* TODO -- this need to get passed in somehow */}
-          {communicationError && (
+          {err && (
             <li className={styles.communicationError}>
               <div className={styles.message}>
                 <i className="fa fa-warning"/> Cannot communicate with the server
               </div>
-              <button>Retry</button>
+              <button onClick={this._dismissError}>Retry</button>
             </li>
           )}
 
@@ -54,25 +52,14 @@ export default class JobStatusList extends Component {
     )
   }
 
-  _activatePolling(interval) {
-    console.debug('@job-status-list#_activatePolling', interval)
-    this._checkStatus()
-      .then(() => {
-        this._intervalId = setInterval(this._checkStatus, interval)
-      })
-      .catch(error => {
-        this._deactivatePolling()
-        // TODO - disable polling until error is dismissed
-        console.error(error)
-      })
+  _dismissError() {
+    console.warn('_dismissError: Not yet implemented')
   }
 
-  _deactivatePolling() {
-    console.debug('@job-status-list#_deactivatePolling')
-    clearInterval(this._intervalId)
-  }
-
-  _checkStatus() {
-    return fetchJobs().then(jobs => this.setState({jobs}))
+  _update(err) {
+    this.setState({
+      err,
+      jobs: listJobs()
+    })
   }
 }

@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg width="100px" height="100px" viewBox="0 0 100 100" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: Sketch 3.8.2 (29753) - http://www.bohemiancoding.com/sketch -->
+    <title>matte-grid</title>
+    <desc>Created with Sketch.</desc>
+    <defs></defs>
+    <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd" stroke-linecap="square">
+        <g id="matte-grid">
+            <g id="Inner" stroke="#FFFFFF">
+                <path d="M24.5,0 L24.5,100" id="Line"></path>
+                <path d="M74.5,0 L74.5,100" id="Line-Copy"></path>
+                <path d="M0,25.5 L100,25.5" id="Line"></path>
+                <path d="M0,75.5 L100,75.5" id="Line-Copy-2"></path>
+            </g>
+            <g id="Outer" transform="translate(0.000000, -1.000000)" stroke="#000000">
+                <path d="M0,1.5 L100,1.5" id="Line"></path>
+                <path d="M0,51.5 L100,51.5" id="Line-Copy-3"></path>
+                <path d="M49.5,1 L49.5,101" id="Line-Copy-4"></path>
+                <path d="M99.5,1 L99.5,101" id="Line-Copy-5"></path>
+            </g>
+        </g>
+    </g>
+</svg>

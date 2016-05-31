@@ -2,53 +2,20 @@
   composes: submenu from '../styles/menus.css';
 }
 
-.root h1 {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 60px;
-  background-color: #eee;
-  padding: 0 30px;
-  line-height: 60px;
-  font-size: 3em;
-  font-weight: 100;
+.placeholder {
+  padding: 1em;
+  text-align: center;
+}
+
+.placeholder h2 {
+  margin: 5em 0 8em;
+  font-size: 18px;
+}
+
+.imagery {
+
 }
 
 .algorithms {
-  list-style: none;
-  margin: 1em 0 0;
-  padding: 0;
-}
 
-.algorithms {
-  margin-bottom: 45px;
-}
-
-.algorithm {
-  padding: 15px;
-  border-left: 3px solid #175b82;
-  border-radius: 4px;
-}
-
-.algorithm + .algorithm {
-  margin: 15px 0 0;
-}
-
-.algorithm a {
-  color: inherit;
-  text-decoration: none;
-}
-
-.algorithm .description {
-  color: rgba(0,0,0,.5);
-}
-
-.selected {
-  background-color: #175b82;
-  color: white;
-}
-
-.selected h3, .selected h4 {
-  color: inherit;
 }
