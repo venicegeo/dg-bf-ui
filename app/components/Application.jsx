@@ -1,8 +1,9 @@
 import styles from './Application.css'
 import React, {Component} from 'react'
 import Navigation from './Navigation'
-import PrimaryMap from './PrimaryMap'
+import PrimaryMap, {MODE_DRAW_BBOX, MODE_NORMAL} from './PrimaryMap'
 import {fetchResult, listJobs, subscribeJobs} from '../api'
+import {serialize} from '../utils/bbox'
 
 export default class Application extends Component {
   static contextTypes = {
@@ -18,6 +19,7 @@ export default class Application extends Component {
   constructor() {
     super()
     this.state = {jobs: [], progress: {}, results: {}}
+    this._bboxChanged = this._bboxChanged.bind(this)
   }
 
   componentDidMount() {
@@ -37,7 +39,10 @@ export default class Application extends Component {
     return (
       <div className={styles.root}>
         <Navigation currentLocation={this.props.location}/>
-        <PrimaryMap datasets={datasets} anchor={this.props.location.hash}/>
+        <PrimaryMap datasets={datasets}
+                    anchor={this.props.location.hash}
+                    mode={this.props.location.pathname === 'create-job' ? MODE_DRAW_BBOX : MODE_NORMAL}
+                    bboxChanged={this._bboxChanged}/>
         {this.props.children}
       </div>
     )
@@ -46,6 +51,15 @@ export default class Application extends Component {
   //
   // Internal API
   //
+
+  _bboxChanged(bbox) {
+    this.context.router.push({
+      ...this.props.location,
+      query: {
+        bbox: bbox ? serialize(bbox) : undefined
+      }
+    })
+  }
 
   _clearResult(job) {
     this.setState({

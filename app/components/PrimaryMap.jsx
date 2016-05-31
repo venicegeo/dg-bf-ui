@@ -19,29 +19,39 @@ const RESOLUTION_CLOSE = 1000
 
 const JOB_ID = 'jobId'
 const TYPE = 'type'
+const TYPE_DRAW = 'draw'
+const TYPE_FEATURE = 'feature'
 const TYPE_FRAME = 'frame'
 const TYPE_LABEL = 'label'
 const TYPE_PROGRESS = 'progress_bar'
-const TYPE_FEATURE = 'feature'
+
+export const MODE_DRAW_BBOX = 'MODE_DRAW_BBOX'
+export const MODE_NORMAL = 'MODE_NORMAL'
 
 export default class PrimaryMap extends Component {
   static propTypes = {
     anchor: React.PropTypes.string,
-    datasets: React.PropTypes.array
+    bboxChanged: React.PropTypes.func,
+    datasets: React.PropTypes.array,
+    mode: React.PropTypes.string
   }
 
   constructor() {
     super()
-    this._basemaps = []
     this.state = {basemapIndex: 0}
-    this._export = this._export.bind(this)
     this._recenter = debounce(this._recenter.bind(this))
+    this._handleDrawStart = this._handleDrawStart.bind(this)
+    this._handleDrawEnd = this._handleDrawEnd.bind(this)
+    this._handleMapClick = this._handleMapClick.bind(this)
   }
 
   componentDidMount() {
     this._initializeOpenLayers()
     this._redrawLayersAndOverlays()
     this._recenter(this.props.anchor)
+    if (this.props.mode === MODE_DRAW_BBOX) {
+      this._activateDrawInteraction()
+    }
   }
 
   componentDidUpdate(previousProps, previousState) {
@@ -54,14 +64,19 @@ export default class PrimaryMap extends Component {
     if (this.props.anchor && this.props.anchor !== previousProps.anchor) {
       this._recenter(this.props.anchor)
     }
+    if (this.props.mode === MODE_DRAW_BBOX) {
+      this._activateDrawInteraction()
+    } else {
+      this._deactivateDrawInteraction()
+    }
   }
 
   render() {
-    const providerNames = TILE_PROVIDERS.map(b => b.name)
+    const basemapNames = TILE_PROVIDERS.map(b => b.name)
     return (
       <main className={styles.root} ref="container">
         <BasemapSelect className={styles.basemapSelect}
-                       basemaps={providerNames}
+                       basemaps={basemapNames}
                        changed={basemapIndex => this.setState({basemapIndex})}/>
       </main>
     )
@@ -71,12 +86,45 @@ export default class PrimaryMap extends Component {
   // Internals
   //
 
+  _activateDrawInteraction() {
+    this._getDrawInteraction().setActive(true)
+  }
+
+  _clearDraw() {
+    this._getDrawLayer().getSource().clear()
+  }
+
+  _deactivateDrawInteraction() {
+    this._clearDraw()
+    this._getDrawInteraction().setActive(false)
+  }
+
+  _getBasemapLayers() {
+    return this._map.getLayers().getArray().slice(0, TILE_PROVIDERS.length)
+  }
+
+  _getDrawInteraction() {
+    return this._map.getInteractions().getArray().find(i => i.get(TYPE) === TYPE_DRAW)
+  }
+
+  _getLayers() {
+    const offset = TILE_PROVIDERS.length + 1  // Basemaps + draw layer
+    return this._map.getLayers().getArray().slice(offset)
+  }
+
+  _getDrawLayer() {
+    return this._map.getLayers().item(TILE_PROVIDERS.length)
+  }
+
   _initializeOpenLayers() {
-    this._basemaps = generateBasemapLayers(TILE_PROVIDERS)
+    const basemapLayers = generateBasemapLayers(TILE_PROVIDERS)
+    const drawLayer = generateDrawLayer()
+    const drawInteraction = generateDrawInteraction(drawLayer)
+
     this._map = new ol.Map({
       controls: generateControls(),
-      interactions: generateInteractions(),
-      layers: this._basemaps,
+      interactions: generateInteractions().extend([drawInteraction]),
+      layers: [...basemapLayers, drawLayer],
       target: this.refs.container,
       view: new ol.View({
         center: ol.proj.fromLonLat(INITIAL_CENTER),
@@ -86,36 +134,16 @@ export default class PrimaryMap extends Component {
       })
     })
 
-
-    // HACK HACK HACK HACK HACK HACK HACK
-    this._map.on('click', event => {
-      this._map.forEachLayerAtPixel(event.pixel, layer => {
-        const jobId = layer.get('jobId')
-        if (jobId) {
-          console.debug('clicked bbox for:', jobId)
-        }
-      })
-    })
-    // HACK HACK HACK HACK HACK HACK HACK
-
-
-  }
-
-  _export() {
-    const timestamp = new Date().toISOString().replace(/(\D+|\.\d+)/g, '')
-    const element = this.refs.downloadButton
-    element.download = `BEACHFRONT_EXPORT_${timestamp}.png`
-    this._map.once('postcompose', event => {
-      const canvas = event.context.canvas
-      element.href = canvas.toDataURL()
-    })
-    this._map.renderSync()
+    // Event handlers
+    this._map.on('click', this._handleMapClick)
+    drawInteraction.on('drawstart', this._handleDrawStart)
+    drawInteraction.on('drawend', this._handleDrawEnd)
   }
 
   _recenter(anchor) {
     const deserialized = deserialize(anchor)
     if (deserialized) {
-      const {basemapIndex, zoom, center} = deserialize(anchor)
+      const {basemapIndex, zoom, center} = deserialized
       this.setState({basemapIndex})
       const view = this._map.getView()
       view.setCenter(center)
@@ -131,7 +159,7 @@ export default class PrimaryMap extends Component {
     const skipResults = {}
 
     // Clear
-    this._map.getLayers().getArray().slice().forEach(layer => {
+    this._getLayers().forEach(layer => {
       if (layer instanceof ol.layer.Tile) {
         return
       }
@@ -139,6 +167,9 @@ export default class PrimaryMap extends Component {
       const type = layer.get(TYPE)
       if (exists[id] && type === TYPE_FEATURE) {
         skipResults[id] = true
+        return
+      }
+      if (type === TYPE_DRAW) {
         return
       }
       this._map.removeLayer(layer)
@@ -160,7 +191,31 @@ export default class PrimaryMap extends Component {
   }
 
   _updateBasemap() {
-    this._basemaps.slice(1).forEach((layer, i) => layer.setVisible(i + 1 === this.state.basemapIndex))
+    this._getBasemapLayers().forEach((layer, i) => layer.setVisible(i === this.state.basemapIndex))
+  }
+
+  //
+  // Events
+  //
+
+  _handleMapClick(event) {
+    this._map.forEachLayerAtPixel(event.pixel, layer => {
+      const jobId = layer.get('jobId')
+      if (jobId) {
+        console.debug('clicked bbox for:', jobId)
+      }
+    })
+  }
+
+  _handleDrawEnd(event) {
+    const extent = event.feature.getGeometry().getExtent()
+    const bbox = ol.proj.transformExtent(extent, 'EPSG:3857', 'EPSG:4326')
+    this.props.bboxChanged(bbox)
+  }
+
+  _handleDrawStart() {
+    this._clearDraw()
+    this.props.bboxChanged(null)
   }
 }
 
@@ -334,6 +389,61 @@ function generateResultLayers(dataset) {
       })
   }
   return []
+}
+
+function generateDrawInteraction(drawLayer) {
+  const draw = new ol.interaction.Draw({
+    source: drawLayer.getSource(),
+    maxPoints: 2,
+    type: 'LineString',
+    geometryFunction(coordinates, geometry) {
+      geometry = geometry || new ol.geom.Polygon(null)
+      const [[x1, y1], [x2, y2]] = coordinates
+      geometry.setCoordinates([[[x1, y1], [x1, y2], [x2, y2], [x2, y1], [x1, y1]]])
+      return geometry
+    },
+    style: new ol.style.Style({
+      image: new ol.style.RegularShape({
+        stroke: new ol.style.Stroke({
+          color: 'black',
+          width: 1
+        }),
+        points: 4,
+        radius: 15,
+        radius2: 0,
+        angle: 0
+      }),
+      fill: new ol.style.Fill({
+        color: 'hsla(202, 70%, 50%, .6)'
+      }),
+      stroke: new ol.style.Stroke({
+        color: 'hsl(202, 70%, 50%)',
+        width: 1,
+        lineDash: [5, 5]
+      })
+    })
+  })
+  draw.set(TYPE, TYPE_DRAW)
+  draw.setActive(false)
+  return draw
+}
+
+function generateDrawLayer() {
+  const layer = new ol.layer.Vector({
+    source: new ol.source.Vector({wrapX: false}),
+    style: new ol.style.Style({
+      fill: new ol.style.Fill({
+        color: 'hsla(202, 70%, 50%, .35)'
+      }),
+      stroke: new ol.style.Stroke({
+        color: 'hsla(202, 70%, 50%, .7)',
+        width: 1,
+        lineDash: [5, 5]
+      })
+    })
+  })
+  layer.set(TYPE, TYPE_DRAW)
+  return layer
 }
 
 function generateStyles(feature) {
