@@ -1,8 +1,33 @@
 const IMAGE_REQUIREMENT_PREFIX = 'imgReq - '
 
-export function list(client) {
-  return client.getServices({pattern: '^BF_Algo'})
-    .then(services => services.map(a => new Algorithm(a)))
+let cache
+
+export function initialize(client) {
+  return cacheWorker(client)
+}
+
+export function list() {
+  // TODO -- filter by capability * image props
+  return cache.slice()
+}
+
+//
+// Internals
+//
+
+function cacheWorker(client) {
+  const handle = setInterval(work, 60000)
+  const terminate = () => clearInterval(handle)
+  work()
+
+  function work() {
+    client.getServices({pattern: '^BF_Algo'})
+      .then(services => {
+        cache = services.map(a => new Algorithm(a))
+      })
+  }
+  
+  return {terminate}
 }
 
 //

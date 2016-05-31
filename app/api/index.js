@@ -16,8 +16,8 @@ export function isLoggedIn() {
   return !!authentication.getAuthToken()
 }
 
-export function fetchAlgorithms() {
-  return algorithms.list(client)
+export function listAlgorithms() {
+  return algorithms.list()
 }
 
 export function subscribeJobs(fn) {
@@ -54,6 +54,7 @@ function initialize() {
 function initializeSubmodules(authToken) {
   client = new Client(GATEWAY, authToken)
   jobs.initialize(client)
+  algorithms.initialize(client)
 }
 
 //

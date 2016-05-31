@@ -1,6 +1,6 @@
 import React, {Component} from 'react'
-import {createJob, fetchAlgorithms, fetchImageList} from '../api'
 import AlgorithmOptions from './AlgorithmOptions'
+import {createJob, listAlgorithms, fetchImageList} from '../api'
 import styles from './CreateJob.css'
 
 export default class CreateJob extends Component {
@@ -19,10 +19,6 @@ export default class CreateJob extends Component {
   }
 
   componentDidMount() {
-    Promise.all([
-      fetchAlgorithms(),
-      fetchImageList()
-    ]).then(([algorithms, images]) => this.setState({algorithms, images}))
   }
 
   render() {
