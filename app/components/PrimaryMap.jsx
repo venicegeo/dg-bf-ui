@@ -247,6 +247,61 @@ function generateControls() {
   ])
 }
 
+function generateDrawLayer() {
+  const layer = new ol.layer.Vector({
+    source: new ol.source.Vector({wrapX: false}),
+    style: new ol.style.Style({
+      fill: new ol.style.Fill({
+        color: 'hsla(202, 70%, 50%, .35)'
+      }),
+      stroke: new ol.style.Stroke({
+        color: 'hsla(202, 70%, 50%, .7)',
+        width: 1,
+        lineDash: [5, 5]
+      })
+    })
+  })
+  layer.set(TYPE, TYPE_DRAW)
+  return layer
+}
+
+function generateDrawInteraction(drawLayer) {
+  const draw = new ol.interaction.Draw({
+    source: drawLayer.getSource(),
+    maxPoints: 2,
+    type: 'LineString',
+    geometryFunction(coordinates, geometry) {
+      geometry = geometry || new ol.geom.Polygon(null)
+      const [[x1, y1], [x2, y2]] = coordinates
+      geometry.setCoordinates([[[x1, y1], [x1, y2], [x2, y2], [x2, y1], [x1, y1]]])
+      return geometry
+    },
+    style: new ol.style.Style({
+      image: new ol.style.RegularShape({
+        stroke: new ol.style.Stroke({
+          color: 'black',
+          width: 1
+        }),
+        points: 4,
+        radius: 15,
+        radius2: 0,
+        angle: 0
+      }),
+      fill: new ol.style.Fill({
+        color: 'hsla(202, 70%, 50%, .6)'
+      }),
+      stroke: new ol.style.Stroke({
+        color: 'hsl(202, 70%, 50%)',
+        width: 1,
+        lineDash: [5, 5]
+      })
+    })
+  })
+  draw.set(TYPE, TYPE_DRAW)
+  draw.setActive(false)
+  return draw
+}
+
 function generateInteractions() {
   return ol.interaction.defaults().extend([
     new ol.interaction.DragRotate({
@@ -389,61 +444,6 @@ function generateResultLayers(dataset) {
       })
   }
   return []
-}
-
-function generateDrawInteraction(drawLayer) {
-  const draw = new ol.interaction.Draw({
-    source: drawLayer.getSource(),
-    maxPoints: 2,
-    type: 'LineString',
-    geometryFunction(coordinates, geometry) {
-      geometry = geometry || new ol.geom.Polygon(null)
-      const [[x1, y1], [x2, y2]] = coordinates
-      geometry.setCoordinates([[[x1, y1], [x1, y2], [x2, y2], [x2, y1], [x1, y1]]])
-      return geometry
-    },
-    style: new ol.style.Style({
-      image: new ol.style.RegularShape({
-        stroke: new ol.style.Stroke({
-          color: 'black',
-          width: 1
-        }),
-        points: 4,
-        radius: 15,
-        radius2: 0,
-        angle: 0
-      }),
-      fill: new ol.style.Fill({
-        color: 'hsla(202, 70%, 50%, .6)'
-      }),
-      stroke: new ol.style.Stroke({
-        color: 'hsl(202, 70%, 50%)',
-        width: 1,
-        lineDash: [5, 5]
-      })
-    })
-  })
-  draw.set(TYPE, TYPE_DRAW)
-  draw.setActive(false)
-  return draw
-}
-
-function generateDrawLayer() {
-  const layer = new ol.layer.Vector({
-    source: new ol.source.Vector({wrapX: false}),
-    style: new ol.style.Style({
-      fill: new ol.style.Fill({
-        color: 'hsla(202, 70%, 50%, .35)'
-      }),
-      stroke: new ol.style.Stroke({
-        color: 'hsla(202, 70%, 50%, .7)',
-        width: 1,
-        lineDash: [5, 5]
-      })
-    })
-  })
-  layer.set(TYPE, TYPE_DRAW)
-  return layer
 }
 
 function generateStyles(feature) {
