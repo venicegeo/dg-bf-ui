@@ -1,5 +1,4 @@
 import React, {Component} from 'react'
-import AlgorithmOptions from './AlgorithmOptions'
 import {createJob, listAlgorithms, fetchImageList} from '../api'
 import styles from './CreateJob.css'
 
@@ -22,37 +21,20 @@ export default class CreateJob extends Component {
   }
 
   render() {
-    const {algorithmId} = this.props.params
-    const {algorithms, images} = this.state
-    const [selectedAlgorithm] = algorithms
     return (
       <div className={styles.root}>
-        <h1>Create Job</h1>
-        <h2>Select Algorithm</h2>
-        <ul className={styles.algorithms}>
-          {algorithms.map(a =>
-            <li key={a.id} className={`${styles.algorithm} ${((algorithmId === a.id) && styles.selected) || ''}`}>
-              {/*<Link to={`/create-job/${a.id}`}>*/}
-                <h3>{a.name}</h3>
-                <p>{a.description}</p>
-
-                <h4>Requirements</h4>
-                <table>
-                  <tbody>
-                    {a.requirements.map(r => <tr key={r.name}><th>{r.name}</th><td>{r.description}</td></tr>)}
-                  </tbody>
-                </table>
-              {/*</Link>*/}
-            </li>
-          )}
+        <header>
+          <h1>Create Job</h1>
+        </header>
+        <ul>
+          <li className={styles.placeholder}>
+            <h2>Draw bounding box to search for imagery</h2>
+            <p>or</p>
+            <button className={styles.uploadButton}>
+              <i className="fa fa-upload"/> Upload my own image
+            </button>
+          </li>
         </ul>
-        {selectedAlgorithm && images && (
-          <div>
-            <AlgorithmOptions algorithm={selectedAlgorithm}
-                              images={images}
-                              onSubmit={this._submit}/>
-          </div>
-        )}
       </div>
     )
   }
