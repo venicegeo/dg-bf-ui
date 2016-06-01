@@ -1,0 +1,13 @@
+.root {
+    z-index: 9999;
+    position: absolute;
+    width: 350px;
+    height: 35px;
+    border: solid;
+    top: 30%;
+    left: 40%;
+    font-size: 1.5em;
+    line-height: 1.5em;
+    background-color: rgba(255, 255, 255, 0.9);
+
+}

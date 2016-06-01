@@ -7,6 +7,7 @@ import Login from './components/Login'
 import CreateJob from './components/CreateJob'
 import JobStatusList from './components/JobStatusList'
 import Help from './components/Help'
+import SearchMap from './components/SearchMap'
 import About from './components/About'
 import {isLoggedIn} from './api'
 
@@ -24,6 +25,7 @@ export function bootstrap(element) {
         <Route path="create-job" component={CreateJob} onEnter={redirectToLogin}/>
         <Route path="help" component={Help} onEnter={redirectToLogin}/>
         <Route path="about" component={About} onEnter={redirectToLogin}/>
+        <Route path="searchMap" component={SearchMap} onEnter={redirectToLogin}/>
       </Route>
     </Router>, element)
 }
