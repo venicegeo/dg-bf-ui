@@ -36,7 +36,7 @@ export default class CreateJob extends Component {
             <h2>Job Details</h2>
             <label><span>Name</span><input/></label>
           </li>}
-          
+
           {bbox && imageId && <li className={styles.algorithms}>
             <AlgorithmList/>
           </li>}

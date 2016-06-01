@@ -105,7 +105,7 @@ export default class Application extends Component {
     const progress = this.state.progress[job.id]
     return {job, progress, result}
   }
-  
+
   _updateJobs(idsToLoadResultsFor) {
     const jobs = listJobs()
     this.setState({jobs: jobs})
