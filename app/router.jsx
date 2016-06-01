@@ -21,6 +21,7 @@ export function bootstrap(element) {
         <Route path="login" component={Login}/>
         <Route path="jobs" component={JobStatusList} onEnter={enforceLogin}/>
         <Route path="create-job" component={CreateJob} onEnter={enforceLogin}/>
+        <Route path="create-job/:bbox" component={CreateJob} onEnter={enforceLogin}/>
         <Route path="help" component={Help} onEnter={enforceLogin}/>
         <Route path="about" component={About} onEnter={enforceLogin}/>
       </Route>

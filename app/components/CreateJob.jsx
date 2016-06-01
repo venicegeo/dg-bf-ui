@@ -11,7 +11,7 @@ export default class CreateJob extends Component {
   }
 
   static propTypes = {
-    location: React.PropTypes.object
+    params: React.PropTypes.object
   }
 
   constructor() {
@@ -58,7 +58,7 @@ export default class CreateJob extends Component {
   //
 
   _getBoundingBox() {
-    const {bbox} = this.props.location.query
+    const {bbox} = this.props.params
     return bbox ? deserialize(bbox) : null
   }
 

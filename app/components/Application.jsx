@@ -55,9 +55,7 @@ export default class Application extends Component {
   _bboxChanged(bbox) {
     this.context.router.push({
       ...this.props.location,
-      query: {
-        bbox: bbox ? serialize(bbox) : undefined
-      }
+      pathname: '/create-job' + (bbox ? '/' + serialize(bbox) : '')
     })
   }
 
