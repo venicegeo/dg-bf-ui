@@ -26,7 +26,7 @@ function cacheWorker(client) {
         cache = services.map(a => new Algorithm(a))
       })
   }
-  
+
   return {terminate}
 }
 
