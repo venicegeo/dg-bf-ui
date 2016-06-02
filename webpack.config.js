@@ -23,6 +23,7 @@ module.exports = {
   },
 
   resolve: {
+    alias: {openlayers$: 'openlayers/dist/ol-debug.js'},
     extensions: ['', '.js', '.jsx']
   },
 
@@ -32,7 +33,7 @@ module.exports = {
   },
 
   module: {
-    noParse: /\/openlayers\/.*\.js$/,
+    noParse: /\bol(-debug)?\.js$/,
     preLoaders: [
       {test: /\.jsx?$/, loader: 'eslint', exclude: /node_modules/}
     ],
