@@ -1,13 +1,13 @@
-import styles from './Application.css'
 import React, {Component} from 'react'
 import {connect} from 'react-redux'
 import Navigation from './Navigation'
 import PrimaryMap, {MODE_DRAW_BBOX, MODE_NORMAL, MODE_SELECT_IMAGERY} from './PrimaryMap'
 import {serialize} from '../utils/bbox'
+import styles from './Application.css'
 
 import store from '../store'
 
-const selector = state => {
+function selector(state) {
   return {
     jobs: state.jobs.records
   }

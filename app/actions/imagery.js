@@ -1,7 +1,7 @@
 import moment from 'moment'
 import {CATALOG} from '../config'
 
-export function search(client, apiKey, bbox, dateFrom /*, dateTo*/) {
+export function searchForImagery(client, apiKey, bbox, dateFrom /*, dateTo*/) {
   const date = moment(dateFrom).toISOString()
   return fetch(`${CATALOG}/discover?acquiredDate=${date}&bbox=${bbox}&cloudCover=1`)
     .then(response => {

@@ -1,4 +1,4 @@
-import {JOBS_WORKER} from '../config'
+import {JOBS_WORKER} from '../../config'
 
 const STATUS_ERROR = 'Error'
 const STATUS_RUNNING = 'Running'

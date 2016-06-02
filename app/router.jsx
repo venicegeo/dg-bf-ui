@@ -9,7 +9,6 @@ import CreateJob from './components/CreateJob'
 import JobStatusList from './components/JobStatusList'
 import Help from './components/Help'
 import About from './components/About'
-import {isLoggedIn} from './api'
 import store from './store'
 
 export function bootstrap(element) {
@@ -38,7 +37,7 @@ export function bootstrap(element) {
 //
 
 function enforceLogin(nextState, replace) {
-  if (!isLoggedIn()) {
+  if (!store.getState().login.authToken) {
     replace({
       pathname: '/login',
       state: {

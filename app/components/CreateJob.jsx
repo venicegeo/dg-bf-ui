@@ -1,5 +1,4 @@
 import React, {Component} from 'react'
-import {createJob, searchImagery, listAlgorithms} from '../api'
 import AlgorithmList from './AlgorithmList'
 import ImagerySearch from './ImagerySearch'
 import NewJobDetails from './NewJobDetails'
