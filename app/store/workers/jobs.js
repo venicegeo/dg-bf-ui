@@ -1,77 +1,12 @@
 import {JOBS_WORKER} from '../../config'
 
-const STATUS_ERROR = 'Error'
-const STATUS_RUNNING = 'Running'
-const STATUS_SUCCESS = 'Success'
-const STATUS_TIMED_OUT = 'Timed Out'
-
-let cache
-let subscribers = []
-
-export function initialize(client) {
-  deserializeCache()
-  return cacheWorker(client)
-}
-
-export function execute(client, {catalogApiKey, name, algorithm, feature}) {
-  // HACK
-  const body = {
-    algoType: algorithm.name,
-    svcURL: algorithm.url,
-    pzAuthToken: client.authToken,
-    pzAddr: client.gateway,
-    dbAuthToken: catalogApiKey,
-    bands: ['green', 'swir1'],  // FIXME
-    metaDataJSON: feature
-  }
-  return fetch('https://bf-handle.int.geointservices.io/execute', {
-    body: JSON.stringify(body),
-    headers: {
-      'content-type': 'application/json'
-    },
-    method: 'POST'
-  })
-    .then(response => {
-      if (response.ok) {
-        return response.text()
-      }
-      throw new Error('ACK!')
-    })
-    .then(id => {
-      appendToCache(new Job({
-        id,
-        name,
-        algorithmName: algorithm.name,
-        createdOn: Date.now(),
-        status: STATUS_RUNNING
-      }))
-    })
-  // HACK
-}
-
 export function getResult(client, resultId, progress) {
   return client.getFile(resultId, progress).then(str => new Result(str, resultId, resultId))
-}
-
-export function list() {
-  return cache ? cache.slice() : []  // HACK
-}
-
-export function subscribe(notifier) {
-  subscribers.push(notifier)
-  return () => {
-    subscribers = subscribers.filter(fn => fn !== notifier)
-  }
 }
 
 //
 // Internals
 //
-
-function appendToCache(job) {
-  cache = cache.concat(job).sort((a, b) => b.createdOn - a.createdOn)
-  serializeCache()
-}
 
 function cacheWorker(client) {
   const handle = setInterval(work, JOBS_WORKER.INTERVAL)
@@ -144,39 +79,6 @@ function cacheWorker(client) {
 
 function calculateDuration(job) {
   return Date.now() - new Date(job.createdOn).getTime()
-}
-
-function deserializeCache() {
-  cache = (JSON.parse(sessionStorage.getItem('jobs')) || []).map(raw => new Job(raw))
-}
-
-function extractGeojsonId(outputFiles) {
-  const pattern  = /^Beachfront_(.*)\.geojson$/
-  const filename = Object.keys(outputFiles).find(key => pattern.test(key))
-  return outputFiles[filename]
-}
-
-function extractOutputFiles(executionOutput) {
-  try {
-    return JSON.parse(executionOutput).OutFiles
-  } catch (_) {
-    // do nothing
-  }
-}
-
-function generateOutputFilename() {
-  const timestamp = new Date().toISOString().replace(/[-:Z]/g, '').replace(/T/, '.')
-  return `Beachfront_${timestamp}.geojson`
-}
-
-function notifySubscribers(cacheError) {
-  console.debug('(jobs.notifySubscribers)', cacheError)
-  subscribers.forEach(notify => notify(cacheError))
-}
-
-function serializeCache() {
-  sessionStorage.setItem('jobs', JSON.stringify(cache))
-  notifySubscribers()
 }
 
 //

@@ -6,7 +6,9 @@ import {
   AUTH_TOKEN_RECEIVED,
   AUTHENTICATION_FAILED,
   FETCH_JOBS,
-  RECEIVE_JOBS
+  RECEIVE_JOBS,
+  JOB_CREATED,
+  JOB_CREATION_FAILED
 } from '../actions'
 
 function login(state = {
