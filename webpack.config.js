@@ -51,6 +51,7 @@ module.exports = {
   plugins: [
     new webpack.DefinePlugin({
       'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV || 'development'),
+      'process.env.CATALOG': JSON.stringify(process.env.CATALOG || 'http://localhost:3001'),
       'process.env.GATEWAY': JSON.stringify(process.env.GATEWAY || 'http://localhost:3000')
     }),
     new HtmlWebpackPlugin({

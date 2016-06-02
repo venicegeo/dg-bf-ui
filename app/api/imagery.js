@@ -1,12 +1,9 @@
 import moment from 'moment'
+import {CATALOG} from '../config'
 
 export function search(client, apiKey, bbox, dateFrom /*, dateTo*/) {
-  const url = client.gateway.replace('pz-gateway', 'pzsvc-image-catalog')
-    + '/discover'
-    + '?bbox=' + bbox.join(',')
-    + '&cloudCover=1'
-    + '&acquiredDate=' + moment(dateFrom).toISOString()
-  return fetch(url)
+  const date = moment(dateFrom).toISOString()
+  return fetch(`${CATALOG}/discover?acquiredDate=${date}&bbox=${bbox}&cloudCover=1`)
     .then(response => {
       if (response.ok) {
         return response.json()

@@ -1,3 +1,4 @@
+export const CATALOG = process.env.CATALOG
 export const GATEWAY = process.env.GATEWAY
 
 const time = {millisecond: 1, second: 1000, minute: 60000}
