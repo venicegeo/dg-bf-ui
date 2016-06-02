@@ -32,8 +32,8 @@ export function fetchResult(id, progress) {
   return jobs.getResult(client, id, progress)
 }
 
-export function fetchImageList() {
-  return imagery.list(client)
+export function searchImagery(apiKey, bbox, dateFrom, dateTo) {
+  return imagery.search(client, apiKey, bbox, dateFrom, dateTo)
 }
 
 export function createJob({name, algorithmId, algorithmName, imageIds}) {

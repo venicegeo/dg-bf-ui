@@ -1,5 +1,5 @@
 import React, {Component} from 'react'
-// import {createJob, listAlgorithms, fetchImageList} from '../api'
+import {createJob, searchImagery, listAlgorithms} from '../api'
 import AlgorithmList from './AlgorithmList'
 import ImagerySearch from './ImagerySearch'
 import NewJobDetails from './NewJobDetails'
@@ -17,12 +17,16 @@ export default class CreateJob extends Component {
 
   constructor() {
     super()
+    this.state = {catalogApiKey: '', name: ''}
+    this._handleApiKeyChange = this._handleApiKeyChange.bind(this)
+    this._handleJobSubmit = this._handleJobSubmit.bind(this)
+    this._handleNameChange = this._handleNameChange.bind(this)
     this._handleSearchSubmit = this._handleSearchSubmit.bind(this)
   }
 
   render() {
     const bbox = this._getBoundingBox()
-    const imageId = 'DEBUG DEBUG DEBUG'
+    const imageId = this.props.params.imageId
     return (
       <div className={styles.root}>
         <header>
@@ -30,15 +34,18 @@ export default class CreateJob extends Component {
         </header>
         <ul>
           {bbox && <li className={styles.imagery}>
-            <ImagerySearch bbox={bbox} onSubmit={this._handleSearchSubmit}/>
+            <ImagerySearch bbox={bbox}
+                           onApiKeyChange={this._handleApiKeyChange}
+                           onSubmit={this._handleSearchSubmit}/>
           </li>}
 
           {bbox && imageId && <li className={styles.details}>
-            <NewJobDetails/>
+            <NewJobDetails onNameChange={this._handleNameChange}/>
           </li>}
 
           {bbox && imageId && <li className={styles.algorithms}>
-            <AlgorithmList/>
+            <AlgorithmList algorithms={listAlgorithms()}
+                           onSubmit={this._handleJobSubmit}/>
           </li>}
 
           {!bbox && <li className={styles.placeholder}>
@@ -62,8 +69,26 @@ export default class CreateJob extends Component {
     return bbox ? deserialize(bbox) : null
   }
 
-  _handleSearchSubmit(data) {
-    this.setState({})
-    console.warn('search form not yet implemented', data)
+  _handleApiKeyChange(catalogApiKey) {
+    this.setState({catalogApiKey})
+  }
+
+  _handleJobSubmit(algorithm) {
+    createJob({
+      algorithm,
+      catalogApiKey: this.state.catalogApiKey,
+      name: this.state.name,
+    })
+  }
+
+  _handleNameChange(name) {
+    this.setState({name})
+  }
+
+  _handleSearchSubmit({bbox, dateFrom, dateTo}) {
+    searchImagery(this.state.catalogApiKey, bbox, dateFrom, dateTo)
+      .then(imagery => {
+        console.debug(imagery)
+      })
   }
 }
