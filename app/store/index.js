@@ -2,7 +2,7 @@ import {applyMiddleware, createStore, combineReducers} from 'redux'
 import thunkMiddleware from 'redux-thunk'
 
 import {
-  REQUEST_AUTH_TOKEN,
+  LOG_IN,
   AUTH_TOKEN_RECEIVED,
   AUTHENTICATION_FAILED,
   FETCH_JOBS,
@@ -11,17 +11,17 @@ import {
 
 function login(state = {
   authToken: sessionStorage.getItem('authToken'),
-  authenticating: false,
-  error: false
+  verifying: false,
+  error: null
 }, action) {
   switch (action.type) {
+  case LOG_IN:
+    return {...state, verifying: true, error: null}
   case AUTH_TOKEN_RECEIVED:
     sessionStorage.setItem('authToken', action.token)
-    return {...state, authenticating: false, authToken: action.token}
-  case REQUEST_AUTH_TOKEN:
-    return {...state, authenticating: true}
+    return {...state, verifying: false, error: null, authToken: action.token}
   case AUTHENTICATION_FAILED:
-    return {...state, authenticating: false, error: true}
+    return {...state, verifying: false, error: action.message}
   default:
     return state
   }
