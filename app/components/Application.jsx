@@ -102,7 +102,7 @@ export default class Application extends Component {
 
   _getMapMode() {
     const {pathname} = this.props.location
-    if (pathname.match(/^create-job\/?$/)) {
+    if (pathname.match(/^create-job$/)) {
       return MODE_DRAW_BBOX
     }
     if (pathname.match(/^create-job\//) && this.props.params.bbox) {
@@ -114,7 +114,7 @@ export default class Application extends Component {
   _handleBoundingBoxChange(bbox) {
     this.context.router.push({
       ...this.props.location,
-      pathname: `/create-job/${bbox || ''}`
+      pathname: `/create-job${bbox ? '/' + serialize(bbox) : ''}`
     })
   }
 
