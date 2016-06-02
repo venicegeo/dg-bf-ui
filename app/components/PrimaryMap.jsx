@@ -1,9 +1,11 @@
 import 'openlayers/dist/ol.css'
 import React, {Component} from 'react'
+import {findDOMNode} from 'react-dom'
 import ol from 'openlayers'
 import ExportControl from '../utils/openlayers.ExportControl.js'
 import SearchControl from '../utils/openlayers.SearchControl.js'
 import BasemapSelect from './BasemapSelect.jsx'
+import ImageDetails from './ImageDetails.jsx'
 import {debounce} from '../utils/debounce'
 import {deserialize} from '../utils/map-anchor'
 import {TILE_PROVIDERS} from '../config'
@@ -91,6 +93,7 @@ export default class PrimaryMap extends Component {
         <BasemapSelect className={styles.basemapSelect}
                        basemaps={basemapNames}
                        changed={basemapIndex => this.setState({basemapIndex})}/>
+        <ImageDetails ref="imageryDetails" feature={this.state.selectedImageFeature}/>
       </main>
     )
   }
@@ -140,6 +143,7 @@ export default class PrimaryMap extends Component {
     this._selectInteraction.on('select', this._handleSelect)
 
     this._progressBars = {}
+    this._imageDetailsOverlay = generateImageryDetailsOverlay(this.refs.imageryDetails)
 
     this._map = new ol.Map({
       controls: generateControls(),
@@ -151,6 +155,9 @@ export default class PrimaryMap extends Component {
         this._drawLayer,
         this._imageryLayer,
         this._detectionsLayer
+      ],
+      overlays: [
+        this._imageDetailsOverlay
       ],
       target: this.refs.container,
       view: new ol.View({
@@ -302,6 +309,13 @@ export default class PrimaryMap extends Component {
     if (this.props.mode === MODE_SELECT_IMAGERY) {
       const feature = event.target.getFeatures().item(0)
       this.props.onImageSelect(feature ? feature.getId() : null)
+      if (feature) {
+        this.setState({selectedImageFeature: feature})
+        this._imageDetailsOverlay.setPosition(ol.extent.getTopRight(feature.getGeometry().getExtent()))
+      } else {
+        this.setState({selectedImageFeature: null})
+        this._imageDetailsOverlay.setPosition(undefined)
+      }
     }
   }
 }
@@ -480,6 +494,15 @@ function generateImageryLayer() {
         })
       })
     }
+  })
+}
+
+function generateImageryDetailsOverlay(componentRef) {
+  return new ol.Overlay({
+    autoPan: true,
+    element: findDOMNode(componentRef),
+    id: 'imageryDetails',
+    positioning: 'bottom-right'
   })
 }
 
