@@ -2,6 +2,7 @@ import React, {Component} from 'react'
 // import {createJob, listAlgorithms, fetchImageList} from '../api'
 import AlgorithmList from './AlgorithmList'
 import ImagerySearch from './ImagerySearch'
+import NewJobDetails from './NewJobDetails'
 import {deserialize} from '../utils/bbox'
 import styles from './CreateJob.css'
 
