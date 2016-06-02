@@ -36,8 +36,8 @@ export function searchImagery(apiKey, bbox, dateFrom, dateTo) {
   return imagery.search(client, apiKey, bbox, dateFrom, dateTo)
 }
 
-export function createJob({name, algorithmId, algorithmName, imageIds}) {
-  return jobs.execute(client, {name, algorithmId, algorithmName, imageIds})
+export function createJob({name, algorithm, feature, catalogApiKey}) {
+  return jobs.execute(client, {name, algorithm, feature, catalogApiKey})
 }
 
 //

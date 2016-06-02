@@ -44,6 +44,7 @@ class Algorithm {
     this.description = service.resourceMetadata.description
     this.name = service.resourceMetadata.name
     this.requirements = extractRequirements(service.resourceMetadata.metadata)
+    this.url = service.url
   }
 }
 

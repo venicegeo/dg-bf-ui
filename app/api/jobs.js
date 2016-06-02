@@ -13,43 +13,40 @@ export function initialize(client) {
   return cacheWorker(client)
 }
 
-export function execute(client, {name, algorithmId, algorithmName, imageIds}) {
-  const outputFilename = generateOutputFilename()
-  const imageFilenames = imageIds.map(s => s + '.TIF').join(',')
-  return client.post('execute-service', {
-    dataInputs: {
-      cmd: {
-        content: `shoreline --image ${imageFilenames} --projection geo-scaled --threshold 0.5 --tolerance 0 ${outputFilename}`,
-        type: 'urlparameter'
-      },
-      inFiles: {
-        content: imageIds.join(','),
-        type: 'urlparameter'
-      },
-      outGeoJson: {
-        content: outputFilename,
-        type: 'urlparameter'
-      }
+export function execute(client, {catalogApiKey, name, algorithm, feature}) {
+  // HACK
+  const body = {
+    algoType: algorithm.name,
+    svcURL: algorithm.url,
+    pzAuthToken: client.authToken,
+    pzAddr: client.gateway,
+    dbAuthToken: catalogApiKey,
+    bands: ['green', 'swir1'],  // FIXME
+    metaDataJSON: feature
+  }
+  return fetch('https://bf-handle.int.geointservices.io/execute', {
+    body: JSON.stringify(body),
+    headers: {
+      'content-type': 'application/json'
     },
-    dataOutput: [
-      {
-        mimeType: 'application/json',
-        type: 'text'
-      }
-    ],
-    serviceId: algorithmId
+    method: 'POST'
   })
+    .then(response => {
+      if (response.ok) {
+        return response.text()
+      }
+      throw new Error('ACK!')
+    })
     .then(id => {
       appendToCache(new Job({
-        algorithmName,
         id,
-        imageIds,
         name,
+        algorithmName: algorithm.name,
         createdOn: Date.now(),
         status: STATUS_RUNNING
       }))
-      return id
     })
+  // HACK
 }
 
 export function getResult(client, resultId, progress) {
