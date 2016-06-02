@@ -57,7 +57,7 @@ export function getResult(client, resultId, progress) {
 }
 
 export function list() {
-  return cache.slice()
+  return cache ? cache.slice() : []  // HACK
 }
 
 export function subscribe(notifier) {

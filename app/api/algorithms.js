@@ -8,7 +8,7 @@ export function initialize(client) {
 
 export function list() {
   // TODO -- filter by capability * image props
-  return cache.slice()
+  return cache ? cache.slice() : []  // HACK
 }
 
 //
@@ -21,9 +21,13 @@ function cacheWorker(client) {
   work()
 
   function work() {
+    console.debug('(algorithms:cacheWorker) updating')
     client.getServices({pattern: '^BF_Algo'})
       .then(services => {
         cache = services.map(a => new Algorithm(a))
+      })
+      .catch(err => {
+        console.error('(algorithms:cacheWorker) update failed:', err)
       })
   }
 
