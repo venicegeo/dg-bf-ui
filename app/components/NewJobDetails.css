@@ -1,0 +1,3 @@
+.field {
+  composes: field-normal from '../styles/forms.css';
+}

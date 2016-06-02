@@ -7,15 +7,11 @@
   text-align: center;
 }
 
-.placeholder h2 {
+.placeholder h3 {
   margin: 5em 0 8em;
   font-size: 18px;
 }
 
-.imagery {
-
-}
-
-.algorithms {
-
+.root li + li {
+  margin-top: 30px;
 }

@@ -1,22 +1,11 @@
-.root {
-
-}
-
 .minimap {
   position: relative;
   height: 200px;
 }
 
-.root h2,
 .root h3 {
-  margin: .5em 0;
-}
-
-.root h2 {
-  font-size: 1.5em;
-}
-
-.root h3 {
+  margin-top: 15px;
+  padding: 5px 15px;
   font-size: inherit;
   color: inherit;
 }

@@ -33,8 +33,7 @@ export default class CreateJob extends Component {
           </li>}
 
           {bbox && imageId && <li className={styles.details}>
-            <h2>Job Details</h2>
-            <label><span>Name</span><input/></label>
+            <NewJobDetails/>
           </li>}
 
           {bbox && imageId && <li className={styles.algorithms}>
@@ -42,7 +41,7 @@ export default class CreateJob extends Component {
           </li>}
 
           {!bbox && <li className={styles.placeholder}>
-            <h2>Draw bounding box to search for imagery</h2>
+            <h3>Draw bounding box to search for imagery</h3>
             <p>or</p>
             <button className={styles.uploadButton}>
               <i className="fa fa-upload"/> Upload my own image

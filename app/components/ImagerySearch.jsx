@@ -16,7 +16,7 @@ export default class ImagerySearch extends Component {
   render() {
     return (
       <form className={styles.root} onSubmit={this._handleSubmit}>
-        <h2>Source Imagery</h2>
+        <h2>Search for Imagery</h2>
         <div className={styles.minimap}>
           <StaticMinimap bbox={this.props.bbox}/>
         </div>
