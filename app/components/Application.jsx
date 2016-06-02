@@ -1,7 +1,7 @@
 import styles from './Application.css'
 import React, {Component} from 'react'
 import Navigation from './Navigation'
-import PrimaryMap, {MODE_DRAW_BBOX, MODE_NORMAL} from './PrimaryMap'
+import PrimaryMap, {MODE_DRAW_BBOX, MODE_NORMAL, MODE_SELECT_IMAGERY} from './PrimaryMap'
 import {fetchResult, listJobs, subscribeJobs} from '../api'
 import {serialize} from '../utils/bbox'
 
@@ -19,7 +19,8 @@ export default class Application extends Component {
   constructor() {
     super()
     this.state = {jobs: [], progress: {}, results: {}}
-    this._bboxChanged = this._bboxChanged.bind(this)
+    this._handleBoundingBoxChange = this._handleBoundingBoxChange.bind(this)
+    this._handleImageSelect = this._handleImageSelect.bind(this)
   }
 
   componentDidMount() {
@@ -40,9 +41,11 @@ export default class Application extends Component {
       <div className={styles.root}>
         <Navigation currentLocation={this.props.location}/>
         <PrimaryMap datasets={datasets}
+                    imagery={this.state.imagery}
                     anchor={this.props.location.hash}
-                    mode={this.props.location.pathname === 'create-job' ? MODE_DRAW_BBOX : MODE_NORMAL}
-                    bboxChanged={this._bboxChanged}/>
+                    mode={this._getMapMode()}
+                    onBoundingBoxChange={this._handleBoundingBoxChange}
+                    onImageSelect={this._handleImageSelect}/>
         {this.props.children}
       </div>
     )
@@ -51,13 +54,6 @@ export default class Application extends Component {
   //
   // Internal API
   //
-
-  _bboxChanged(bbox) {
-    this.context.router.push({
-      ...this.props.location,
-      pathname: '/create-job' + (bbox ? '/' + serialize(bbox) : '')
-    })
-  }
 
   _clearResult(job) {
     this.setState({
@@ -102,6 +98,31 @@ export default class Application extends Component {
     const result = this.state.results[job.id]
     const progress = this.state.progress[job.id]
     return {job, progress, result}
+  }
+
+  _getMapMode() {
+    const {pathname} = this.props.location
+    if (pathname.match(/^create-job\/?$/)) {
+      return MODE_DRAW_BBOX
+    }
+    if (pathname.match(/^create-job\//) && this.props.params.bbox) {
+      return MODE_SELECT_IMAGERY
+    }
+    return MODE_NORMAL
+  }
+
+  _handleBoundingBoxChange(bbox) {
+    this.context.router.push({
+      ...this.props.location,
+      pathname: `/create-job/${bbox || ''}`
+    })
+  }
+
+  _handleImageSelect(imageId) {
+    this.context.router.push({
+      ...this.props.location,
+      pathname: `/create-job/${this.props.params.bbox}${imageId ? '/' + imageId : ''}`
+    })
   }
 
   _updateJobs(idsToLoadResultsFor) {
