@@ -32,13 +32,13 @@ export function createJob({catalogApiKey, name, algorithm, feature}) {
       },
       method: 'POST'
     })
-    // HACK
       .then(response => {
         if (!response.ok) {
           throw new Error(`HttpError (code=${response.status})`)
         }
         return response.text()
       })
+    // HACK
       .then(id => {
         dispatch({
           type: JOB_CREATED,

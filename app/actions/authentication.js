@@ -22,16 +22,25 @@ export function logIn(username, password) {
 
         // HACK HACK HACK HACK
         if (token === 'false') {
-          dispatch({type: AUTHENTICATION_FAILED, message: 'Credentials rejected'})
+          dispatch({
+            type: AUTHENTICATION_FAILED,
+            message: 'Credentials rejected'
+          })
           return
         }
         token = `Basic ${btoa(username + ':' + password)}`
         // HACK HACK HACK HACK
 
-        dispatch({type: AUTH_TOKEN_RECEIVED, token})
+        dispatch({
+          type: AUTH_TOKEN_RECEIVED,
+          token
+        })
       })
       .catch(err => {
-        dispatch({type: AUTHENTICATION_FAILED, message: err.toString()})
+        dispatch({
+          type: AUTHENTICATION_FAILED,
+          message: err.toString()
+        })
       })
   }
 }
