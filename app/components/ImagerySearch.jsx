@@ -3,24 +3,28 @@ import moment from 'moment'
 import StaticMinimap from './StaticMinimap'
 import styles from './ImagerySearch.css'
 
+const KEY_CATALOG_API_KEY = 'catalogApiKey'
+
 export default class ImagerySearch extends Component {
   static propTypes = {
     bbox: React.PropTypes.array,
     error: React.PropTypes.object,
     isSearching: React.PropTypes.bool,
-    onApiKeyChange: React.PropTypes.func,
+    onChange: React.PropTypes.func,
     onSubmit: React.PropTypes.func
   }
 
   constructor() {
     super()
+    this._emitOnChange = this._emitOnChange.bind(this)
     this._handleSubmit = this._handleSubmit.bind(this)
-    this._handleApiKeyChange = this._handleApiKeyChange.bind(this)
   }
 
   componentDidMount() {
     this.refs.dateFrom.value = moment().subtract(5, 'days').format('YYYY-MM-DD')
     this.refs.dateTo.value = moment().format('YYYY-MM-DD')
+    this.refs.apiKey.value = localStorage.getItem(KEY_CATALOG_API_KEY) || ''
+    this._emitOnChange()
   }
 
   render() {
@@ -48,13 +52,13 @@ export default class ImagerySearch extends Component {
         </label>
         <label className={styles.field}>
           <span>API Key</span>
-          <input ref="apiKey" type="password" disabled={isSearching} />
+          <input ref="apiKey" type="password" disabled={isSearching} onChange={this._emitOnChange} />
         </label>
 
         <h3>Date/Time</h3>
         <label className={styles.field}>
           <span>From</span>
-          <input ref="dateFrom" type="date" disabled={isSearching} />
+          <input ref="dateFrom" type="date" disabled={isSearching} onChange={this._emitOnChange} />
         </label>
         <label className={styles.field}>
           <span>To</span>
@@ -67,18 +71,21 @@ export default class ImagerySearch extends Component {
       </form>
     )
   }
+  
+  //
+  // Internals
+  //
 
-  _handleApiKeyChange() {
-    this.props.onApiKeyChange(this.refs.apiKey.value)
+  _emitOnChange() {
+    const {apiKey, dateFrom, dateTo} = this.refs
+    localStorage.setItem(KEY_CATALOG_API_KEY, apiKey.value)
+    console.debug('_emitOnChange', apiKey.value, dateFrom.value, dateTo.value)
+    this.props.onChange(apiKey.value, dateFrom.value, dateTo.value)
   }
 
   _handleSubmit(event) {
     event.preventDefault()
     event.stopPropagation()
-    this.props.onSubmit({
-      bbox: this.props.bbox,
-      dateFrom: this.refs.dateFrom.value || null,
-      dateTo: this.refs.dateTo.value || null
-    })
+    this.props.onSubmit()
   }
 }

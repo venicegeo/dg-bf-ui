@@ -28,11 +28,11 @@ class CreateJob extends Component {
 
   constructor() {
     super()
-    this.state = {catalogApiKey: '', name: ''}
-    this._handleApiKeyChange = this._handleApiKeyChange.bind(this)
+    this.state = {name: null, catalogApiKey: null, dateFrom: null, dateTo: null}
     this._handleJobSubmit = this._handleJobSubmit.bind(this)
     this._handleNameChange = this._handleNameChange.bind(this)
     this._handleSearchSubmit = this._handleSearchSubmit.bind(this)
+    this._handleSearchFormChange = this._handleSearchFormChange.bind(this)
   }
 
   render() {
@@ -48,7 +48,7 @@ class CreateJob extends Component {
             <ImagerySearch bbox={bbox}
                            error={this.props.imagery.error}
                            isSearching={this.props.imagery.searching}
-                           onApiKeyChange={this._handleApiKeyChange}
+                           onChange={this._handleSearchFormChange}
                            onSubmit={this._handleSearchSubmit}/>
           </li>}
 
@@ -77,24 +77,23 @@ class CreateJob extends Component {
   // Internals
   //
 
-  _handleApiKeyChange(catalogApiKey) {
-    this.setState({catalogApiKey})
-  }
-
   _handleJobSubmit(algorithm) {
-    createJob({
-      algorithm,
-      catalogApiKey: this.state.catalogApiKey,
-      name: this.state.name,
-    })
   }
 
   _handleNameChange(name) {
     this.setState({name})
   }
 
-  _handleSearchSubmit({bbox, dateFrom, dateTo}) {
-    this.props.dispatch(searchImageCatalog(this.state.catalogApiKey, bbox, dateFrom, dateTo))
+  _handleSearchFormChange(catalogApiKey, dateFrom, dateTo) {
+    this.setState({catalogApiKey, dateFrom, dateTo})
+  }
+
+  _handleSearchSubmit() {
+    const {catalogApiKey, dateFrom, dateTo} = this.state
+    const {bbox} = this.props.params
+    if (catalogApiKey && dateFrom) {
+      this.props.dispatch(searchImageCatalog(catalogApiKey, bbox, dateFrom, dateTo))
+    }
   }
 }
 
