@@ -8,13 +8,13 @@ const {STATUS_RUNNING} = worker
 // Actions
 //
 
+export const CREATE_JOB = 'CREATE_JOB'
+export const CREATE_JOB_ERROR = 'CREATE_JOB_ERROR'
 export const FETCH_JOBS = 'FETCH_JOBS'
-export const JOB_CREATED = 'JOB_CREATED'
-export const JOB_CREATION_FAILED = 'JOB_CREATION_FAILED'
+export const FETCH_JOBS_SUCCESS = 'FETCH_JOBS_SUCCESS'
 export const JOBS_WORKER_ERROR = 'JOBS_WORKER_ERROR'
-export const JOBS_WORKER_STARTED = 'JOBS_WORKER_STARTED'
-export const JOBS_WORKER_STOPPED = 'JOBS_WORKER_STOPPED'
-export const RECEIVE_JOBS = 'RECEIVE_JOBS'
+export const START_JOBS_WORKER = 'START_JOBS_WORKER'
+export const STOP_JOBS_WORKER = 'STOP_JOBS_WORKER'
 export const UPDATE_JOB = 'UPDATE_JOB'
 
 //
@@ -51,7 +51,7 @@ export function createJob({catalogApiKey, name, algorithm, feature}) {
     // HACK
       .then(id => {
         dispatch({
-          type: JOB_CREATED,
+          type: CREATE_JOB,
           record: {
             id,
             name,
@@ -63,7 +63,7 @@ export function createJob({catalogApiKey, name, algorithm, feature}) {
       })
       .catch(err => {
         dispatch({
-          type: JOB_CREATION_FAILED,
+          type: CREATE_JOB_ERROR,
           message: err.toString()
         })
       })
@@ -90,7 +90,7 @@ export function startJobsWorker() {
       },
       onTerminate() {
         dispatch({
-          type: JOBS_WORKER_STOPPED
+          type: STOP_JOBS_WORKER
         })
       },
       onUpdate(jobId, status, resultId) {
@@ -102,6 +102,6 @@ export function startJobsWorker() {
         })
       }
     })
-    dispatch({type: JOBS_WORKER_STARTED})
+    dispatch({type: START_JOBS_WORKER})
   }
 }

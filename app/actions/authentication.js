@@ -1,8 +1,8 @@
 import {GATEWAY} from '../config'
 
 export const LOG_IN = 'LOG_IN'
-export const AUTH_TOKEN_RECEIVED = 'AUTH_TOKEN_RECEIVED'
-export const AUTHENTICATION_FAILED = 'AUTHENTICATION_FAILED'
+export const LOG_IN_SUCCESS = 'LOG_IN_SUCCESS'
+export const LOG_IN_ERROR = 'LOG_IN_ERROR'
 
 export function logIn(username, password) {
   return dispatch => {
@@ -23,7 +23,7 @@ export function logIn(username, password) {
         // HACK HACK HACK HACK
         if (token === 'false') {
           dispatch({
-            type: AUTHENTICATION_FAILED,
+            type: LOG_IN_ERROR,
             message: 'Credentials rejected'
           })
           return
@@ -32,13 +32,13 @@ export function logIn(username, password) {
         // HACK HACK HACK HACK
 
         dispatch({
-          type: AUTH_TOKEN_RECEIVED,
+          type: LOG_IN_SUCCESS,
           token
         })
       })
       .catch(err => {
         dispatch({
-          type: AUTHENTICATION_FAILED,
+          type: LOG_IN_ERROR,
           message: err.toString()
         })
       })

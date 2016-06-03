@@ -3,16 +3,16 @@ import thunkMiddleware from 'redux-thunk'
 
 import {
   LOG_IN,
-  AUTH_TOKEN_RECEIVED,
-  AUTHENTICATION_FAILED,
+  LOG_IN_SUCCESS,
+  LOG_IN_ERROR,
 
+  CREATE_JOB,
+  CREATE_JOB_ERROR,
   FETCH_JOBS,
-  JOB_CREATED,
-  JOB_CREATION_FAILED,
+  FETCH_JOBS_SUCCESS,
   JOBS_WORKER_ERROR,
-  JOBS_WORKER_STARTED,
-  JOBS_WORKER_STOPPED,
-  RECEIVE_JOBS,
+  START_JOBS_WORKER,
+  STOP_JOBS_WORKER,
   UPDATE_JOB
 } from '../actions'
 
@@ -24,10 +24,10 @@ function login(state = {
   switch (action.type) {
   case LOG_IN:
     return {...state, verifying: true, error: null}
-  case AUTH_TOKEN_RECEIVED:
+  case LOG_IN_SUCCESS:
     sessionStorage.setItem('authToken', action.token)
     return {...state, verifying: false, error: null, authToken: action.token}
-  case AUTHENTICATION_FAILED:
+  case LOG_IN_ERROR:
     return {...state, verifying: false, error: action.message}
   default:
     return state
@@ -47,9 +47,9 @@ function workers(state = {
   switch (action.type) {
   case JOBS_WORKER_ERROR:
     return {...state, jobs: {...state.jobs, error: action.message}}
-  case JOBS_WORKER_STARTED:
+  case START_JOBS_WORKER:
     return {...state, jobs: {running: true, error: null}}
-  case JOBS_WORKER_STOPPED:
+  case STOP_JOBS_WORKER:
     return {...state, jobs: {...state.jobs, running: false}}
   default:
     return state
@@ -63,7 +63,7 @@ function jobs(state = {
   switch (action.type) {
   case FETCH_JOBS:
     return {...state, fetching: true}
-  case RECEIVE_JOBS:
+  case FETCH_JOBS_SUCCESS:
     return {...state, fetching: false, records: action.records}
   case UPDATE_JOB:
     return {...state, records: state.records.map(job => {
