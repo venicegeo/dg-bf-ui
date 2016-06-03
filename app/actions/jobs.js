@@ -2,7 +2,7 @@ import {Client} from '../utils/piazza-client'
 import * as worker from './workers/jobs'
 import {GATEWAY, JOBS_WORKER} from '../config'
 
-const {STATUS_RUNNING} = worker
+import {STATUS_RUNNING} from '../constants'
 
 //
 // Action Types

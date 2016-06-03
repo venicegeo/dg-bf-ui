@@ -4,8 +4,10 @@ import Timer from './Timestamp.jsx'
 import {serialize} from '../utils/map-anchor'
 import styles from './JobStatus.css'
 
-const STATUS_SUCCESS = 'Success'
-const STATUS_RUNNING = 'Running'
+import {
+  STATUS_SUCCESS,
+  STATUS_RUNNING
+} from '../constants'
 
 export default class JobStatus extends Component {
   static propTypes = {

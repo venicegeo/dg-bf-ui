@@ -1,7 +1,9 @@
-export const STATUS_ERROR = 'Error'
-export const STATUS_RUNNING = 'Running'
-export const STATUS_SUCCESS = 'Success'
-export const STATUS_TIMED_OUT = 'Timed Out'
+import {
+  STATUS_ERROR,
+  STATUS_RUNNING,
+  STATUS_SUCCESS,
+  STATUS_TIMED_OUT
+} from '../../constants'
 
 let _client, _handlers, _instance, _ttl
 

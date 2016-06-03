@@ -17,16 +17,18 @@ const MIN_ZOOM = 2.5
 const MAX_ZOOM = 22
 const RESOLUTION_CLOSE = 1000
 
+import {
+  STATUS_ERROR,
+  STATUS_RUNNING,
+  STATUS_SUCCESS,
+  STATUS_TIMED_OUT
+} from '../constants'
 const DISPOSITION_DETECTED = 'Detected'
 const DISPOSITION_UNDETECTED = 'Undetected'
 const DISPOSITION_NEW_DETECTION = 'New Detection'
 const JOB_ID = 'JOB_ID'
 const JOB_NAME = 'JOB_NAME'
 const JOB_STATUS = 'JOB_STATUS'
-const STATUS_RUNNING = 'Running'
-const STATUS_SUCCESS = 'Success'
-const STATUS_TIMED_OUT = 'Timed Out'
-const STATUS_ERROR = 'Error'
 export const MODE_DRAW_BBOX = 'MODE_DRAW_BBOX'
 export const MODE_NORMAL = 'MODE_NORMAL'
 export const MODE_SELECT_IMAGERY = 'MODE_SELECT_IMAGERY'
