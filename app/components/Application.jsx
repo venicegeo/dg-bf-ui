@@ -2,7 +2,6 @@ import React, {Component} from 'react'
 import {connect} from 'react-redux'
 import Navigation from './Navigation'
 import PrimaryMap, {MODE_DRAW_BBOX, MODE_NORMAL, MODE_SELECT_IMAGERY} from './PrimaryMap'
-import {serialize} from '../utils/bbox'
 import {changeLoadedResults, startJobsWorkerIfNeeded} from '../actions'
 import styles from './Application.css'
 
@@ -30,6 +29,7 @@ class Application extends Component {
     children: React.PropTypes.element,
     datasets: React.PropTypes.array,
     dispatch: React.PropTypes.func,
+    imagery: React.PropTypes.array,
     location: React.PropTypes.object,
     loggedIn: React.PropTypes.bool,
     params: React.PropTypes.object,
@@ -65,8 +65,9 @@ class Application extends Component {
       <div className={styles.root}>
         <Navigation currentLocation={this.props.location}/>
         <PrimaryMap datasets={this.props.datasets}
-                    imagery={null}
+                    imagery={this.props.imagery}
                     anchor={this.props.location.hash}
+                    bbox={this.props.params.bbox}
                     mode={this._getMapMode()}
                     onBoundingBoxChange={this._handleBoundingBoxChange}
                     onImageSelect={this._handleImageSelect}/>
@@ -80,12 +81,8 @@ class Application extends Component {
   //
 
   _getMapMode() {
-    const {pathname} = this.props.location
-    if (pathname.match(/^create-job$/)) {
-      return MODE_DRAW_BBOX
-    }
-    if (pathname.match(/^create-job\//) && this.props.params.bbox) {
-      return MODE_SELECT_IMAGERY
+    if (this.props.location.pathname.indexOf('create-job') === 0) {
+      return (this.props.params.bbox && this.props.imagery) ? MODE_SELECT_IMAGERY : MODE_DRAW_BBOX
     }
     return MODE_NORMAL
   }
@@ -93,7 +90,7 @@ class Application extends Component {
   _handleBoundingBoxChange(bbox) {
     this.context.router.push({
       ...this.props.location,
-      pathname: `/create-job${bbox ? '/' + serialize(bbox) : ''}`
+      pathname: `/create-job${bbox ? '/' + bbox : ''}`
     })
   }
 
