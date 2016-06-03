@@ -7,7 +7,8 @@ import SearchControl from '../utils/openlayers.SearchControl.js'
 import BasemapSelect from './BasemapSelect.jsx'
 import ImageDetails from './ImageDetails.jsx'
 import {debounce} from '../utils/debounce'
-import {deserialize} from '../utils/map-anchor'
+import * as anchorUtil from '../utils/map-anchor'
+import * as bboxUtil from '../utils/bbox'
 import {TILE_PROVIDERS} from '../config'
 import styles from './PrimaryMap.css'
 
@@ -33,6 +34,7 @@ export const MODE_SELECT_IMAGERY = 'MODE_SELECT_IMAGERY'
 export default class PrimaryMap extends Component {
   static propTypes = {
     anchor: React.PropTypes.string,
+    bbox: React.PropTypes.string,
     datasets: React.PropTypes.array,
     imagery: React.PropTypes.object,
     mode: React.PropTypes.string,
@@ -44,6 +46,7 @@ export default class PrimaryMap extends Component {
     super()
     this.state = {basemapIndex: 0}
     this._recenter = debounce(this._recenter.bind(this))
+    this._renderSearchBbox = debounce(this._renderSearchBbox.bind(this))
     this._handleDrawStart = this._handleDrawStart.bind(this)
     this._handleDrawEnd = this._handleDrawEnd.bind(this)
     this._handleSelect = this._handleSelect.bind(this)
@@ -55,6 +58,9 @@ export default class PrimaryMap extends Component {
     this._renderFrames()
     this._renderImagery()
     this._recenter(this.props.anchor)
+    if (this.props.bbox) {
+      this._renderSearchBbox()
+    }
     if (this.props.mode === MODE_DRAW_BBOX) {
       this._activateDrawInteraction()
     }
@@ -74,6 +80,9 @@ export default class PrimaryMap extends Component {
       this._renderFrames()
       this._renderImagery()
       this._renderProgressBars()
+    }
+    if (this.props.bbox !== previousProps.bbox) {
+      this._renderSearchBbox()
     }
     if (this.state.basemapIndex !== previousState.basemapIndex) {
       this._updateBasemap()
@@ -170,7 +179,7 @@ export default class PrimaryMap extends Component {
   }
 
   _recenter(anchor) {
-    const deserialized = deserialize(anchor)
+    const deserialized = anchorUtil.deserialize(anchor)
     if (deserialized) {
       const {basemapIndex, zoom, center} = deserialized
       this.setState({basemapIndex})
@@ -266,6 +275,18 @@ export default class PrimaryMap extends Component {
     })
   }
 
+  _renderSearchBbox() {
+    this._clearDraw()
+    const deserialized = bboxUtil.deserialize(this.props.bbox)
+    if (!deserialized) {
+      return
+    }
+    const feature = new ol.Feature({
+      geometry: ol.geom.Polygon.fromExtent(deserialized)
+    })
+    this._drawLayer.getSource().addFeature(feature)
+  }
+
   _updateBasemap() {
     this._basemapLayers.forEach((layer, i) => layer.setVisible(i === this.state.basemapIndex))
   }
@@ -297,7 +318,7 @@ export default class PrimaryMap extends Component {
   _handleDrawEnd(event) {
     const extent = event.feature.getGeometry().getExtent()
     const bbox = ol.proj.transformExtent(extent, 'EPSG:3857', 'EPSG:4326')
-    this.props.onBoundingBoxChange(bbox)
+    this.props.onBoundingBoxChange(bboxUtil.serialize(bbox))
   }
 
   _handleDrawStart() {

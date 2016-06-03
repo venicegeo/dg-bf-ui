@@ -6,5 +6,8 @@ export function serialize(bbox) {
 
 export function deserialize(serialized) {
   const coordinates = decodeURIComponent(serialized).split(',').map(parseFloat)
-  return ol.proj.transformExtent(coordinates, 'EPSG:4326', 'EPSG:3857')
+  if (coordinates.length === 4) {
+    return ol.proj.transformExtent(coordinates, 'EPSG:4326', 'EPSG:3857')
+  }
+  return null
 }
