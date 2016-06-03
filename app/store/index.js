@@ -6,6 +6,12 @@ import {
   LOG_IN_SUCCESS,
   LOG_IN_ERROR,
 
+  ALGORITHMS_WORKER_ERROR,
+  FETCH_ALGORITHMS,
+  FETCH_ALGORITHMS_SUCCESS,
+  START_ALGORITHMS_WORKER,
+  STOP_ALGORITHMS_WORKER,
+
   SEARCH_IMAGE_CATALOG,
   SEARCH_IMAGE_CATALOG_ERROR,
   SEARCH_IMAGE_CATALOG_SUCCESS,
@@ -26,6 +32,20 @@ import {
   LOAD_RESULT_PROGRESSED,
   UNLOAD_RESULT
 } from '../actions'
+
+function algorithms(state = {
+  fetching: false,
+  records: []
+}, action) {
+  switch (action.type) {
+  case FETCH_ALGORITHMS:
+    return {...state, fetching: true}
+  case FETCH_ALGORITHMS_SUCCESS:
+    return {...state, fetching: false, records: action.records}
+  default:
+    return state
+  }
+}
 
 function imagery(state = {
   searching: false,
@@ -116,6 +136,12 @@ function workers(state = {
   }
 }, action) {
   switch (action.type) {
+  case ALGORITHMS_WORKER_ERROR:
+    return {...state, algorithms: {...state.algorithms, error: action.err}}
+  case START_ALGORITHMS_WORKER:
+    return {...state, algorithms: {running: true, error: null}}
+  case STOP_ALGORITHMS_WORKER:
+    return {...state, algorithms: {...state.algorithms, running: false}}
   case JOBS_WORKER_ERROR:
     return {...state, jobs: {...state.jobs, error: action.err}}
   case START_JOBS_WORKER:
@@ -128,6 +154,7 @@ function workers(state = {
 }
 
 const beachfrontApp = combineReducers({
+  algorithms,
   imagery,
   jobs,
   login,

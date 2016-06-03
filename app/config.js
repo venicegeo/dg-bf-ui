@@ -8,6 +8,10 @@ export const JOBS_WORKER = {
   JOB_TTL:  5 * time.minute
 }
 
+export const ALGORITHMS_WORKER = {
+  INTERVAL: 60 * time.second
+}
+
 export const TILE_PROVIDERS = [
   {
     name: 'Grey (Default)',

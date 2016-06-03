@@ -2,7 +2,11 @@ import React, {Component} from 'react'
 import {connect} from 'react-redux'
 import Navigation from './Navigation'
 import PrimaryMap, {MODE_DRAW_BBOX, MODE_NORMAL, MODE_SELECT_IMAGERY} from './PrimaryMap'
-import {changeLoadedResults, startJobsWorkerIfNeeded} from '../actions'
+import {
+  changeLoadedResults,
+  startAlgorithmsWorkerIfNeeded,
+  startJobsWorkerIfNeeded
+} from '../actions'
 import styles from './Application.css'
 
 function selector(state) {
@@ -46,6 +50,7 @@ class Application extends Component {
   componentDidMount() {
     const {dispatch, location, loggedIn} = this.props
     if (loggedIn) {
+      dispatch(startAlgorithmsWorkerIfNeeded())
       dispatch(startJobsWorkerIfNeeded())
     }
     dispatch(changeLoadedResults(asArray(location.query.jobId)))
@@ -54,6 +59,7 @@ class Application extends Component {
   componentWillReceiveProps(nextProps) {
     const {dispatch} = this.props
     if (nextProps.loggedIn) {
+      dispatch(startAlgorithmsWorkerIfNeeded())
       dispatch(startJobsWorkerIfNeeded())
     }
     if (nextProps.location.query.jobId !== this.props.location.query.jobId) {
