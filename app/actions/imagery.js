@@ -8,10 +8,18 @@ import {CATALOG} from '../config'
 export const SEARCH_IMAGE_CATALOG = 'SEARCH_IMAGE_CATALOG'
 export const SEARCH_IMAGE_CATALOG_SUCCESS = 'SEARCH_IMAGE_CATALOG_SUCCESS'
 export const SEARCH_IMAGE_CATALOG_ERROR = 'SEARCH_IMAGE_CATALOG_ERROR'
+export const SELECT_IMAGE = 'SELECT_IMAGE'
 
 //
 // Action Creators
 //
+
+export function selectImage(feature) {
+  return {
+    type: SELECT_IMAGE,
+    feature
+  }
+}
 
 export function searchImageCatalog(apiKey, bbox, dateFrom /*, dateTo*/) {
   return (dispatch) => {

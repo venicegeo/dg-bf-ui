@@ -4,6 +4,7 @@ import Navigation from './Navigation'
 import PrimaryMap, {MODE_DRAW_BBOX, MODE_NORMAL, MODE_SELECT_IMAGERY} from './PrimaryMap'
 import {
   changeLoadedResults,
+  selectImage,
   startAlgorithmsWorkerIfNeeded,
   startJobsWorkerIfNeeded
 } from '../actions'
@@ -19,7 +20,7 @@ function selector(state) {
         geojson: result ? result.geojson : null
       }
     }),
-    imagery: state.imagery.searchResults,
+    imagery: state.imagery,
     loggedIn: !!state.login.authToken,
     workers: state.workers
   }
@@ -72,7 +73,7 @@ class Application extends Component {
       <div className={styles.root}>
         <Navigation currentLocation={this.props.location}/>
         <PrimaryMap datasets={this.props.datasets}
-                    imagery={this.props.imagery}
+                    imagery={this.props.imagery.searchResults}
                     anchor={this.props.location.hash}
                     bbox={this.props.params.bbox}
                     mode={this._getMapMode()}
@@ -89,7 +90,7 @@ class Application extends Component {
 
   _getMapMode() {
     if (this.props.location.pathname.indexOf('create-job') === 0) {
-      return (this.props.params.bbox && this.props.imagery) ? MODE_SELECT_IMAGERY : MODE_DRAW_BBOX
+      return (this.props.params.bbox && this.props.imagery.searchResults) ? MODE_SELECT_IMAGERY : MODE_DRAW_BBOX
     }
     return MODE_NORMAL
   }
@@ -101,11 +102,8 @@ class Application extends Component {
     })
   }
 
-  _handleImageSelect(imageId) {
-    this.context.router.push({
-      ...this.props.location,
-      pathname: `/create-job/${this.props.params.bbox}${imageId ? '/' + imageId : ''}`
-    })
+  _handleImageSelect(geojson) {
+    this.props.dispatch(selectImage(geojson))
   }
 }
 

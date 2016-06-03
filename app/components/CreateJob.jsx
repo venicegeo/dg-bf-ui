@@ -37,7 +37,7 @@ class CreateJob extends Component {
 
   render() {
     const bbox = deserialize(this.props.params.bbox)
-    const imageId = this.props.params.imageId
+    const selectedImage = this.props.imagery.selection
     return (
       <div className={styles.root}>
         <header>
@@ -52,11 +52,11 @@ class CreateJob extends Component {
                            onSubmit={this._handleSearchSubmit}/>
           </li>}
 
-          {bbox && imageId && <li className={styles.details}>
+          {bbox && selectedImage && <li className={styles.details}>
             <NewJobDetails onNameChange={this._handleNameChange}/>
           </li>}
 
-          {bbox && imageId && <li className={styles.algorithms}>
+          {bbox && selectedImage && <li className={styles.algorithms}>
             <AlgorithmList algorithms={this.props.algorithms}
                            onSubmit={this._handleJobSubmit}/>
           </li>}

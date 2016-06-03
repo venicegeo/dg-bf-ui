@@ -15,6 +15,7 @@ import {
   SEARCH_IMAGE_CATALOG,
   SEARCH_IMAGE_CATALOG_ERROR,
   SEARCH_IMAGE_CATALOG_SUCCESS,
+  SELECT_IMAGE,
 
   CREATE_JOB,
   CREATE_JOB_SUCCESS,
@@ -50,6 +51,7 @@ function algorithms(state = {
 function imagery(state = {
   searching: false,
   searchResults: null,
+  selection: null,
   error: null
 }, action) {
   switch (action.type) {
@@ -59,6 +61,8 @@ function imagery(state = {
     return {...state, searching: false, searchResults: action.results}
   case SEARCH_IMAGE_CATALOG_ERROR:
     return {...state, searching: false, error: action.err}
+  case SELECT_IMAGE:
+    return {...state, selection: action.feature}
   default:
     return state
   }

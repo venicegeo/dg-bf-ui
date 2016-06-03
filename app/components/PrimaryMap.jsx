@@ -331,11 +331,12 @@ export default class PrimaryMap extends Component {
   _handleSelect(event) {
     if (this.props.mode === MODE_SELECT_IMAGERY) {
       const feature = event.target.getFeatures().item(0)
-      this.props.onImageSelect(feature ? feature.getId() : null)
       if (feature) {
+        this.props.onImageSelect(new ol.format.GeoJSON().writeFeature(feature))
         this.setState({selectedImageFeature: feature})
         this._imageDetailsOverlay.setPosition(ol.extent.getTopRight(feature.getGeometry().getExtent()))
       } else {
+        this.props.onImageSelect(null)
         this.setState({selectedImageFeature: null})
         this._imageDetailsOverlay.setPosition(undefined)
       }
