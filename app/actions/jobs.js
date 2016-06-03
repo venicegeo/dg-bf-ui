@@ -5,10 +5,11 @@ import {GATEWAY, JOBS_WORKER} from '../config'
 const {STATUS_RUNNING} = worker
 
 //
-// Actions
+// Action Types
 //
 
 export const CREATE_JOB = 'CREATE_JOB'
+export const CREATE_JOB_SUCCESS = 'CREATE_JOB_SUCCESS'
 export const CREATE_JOB_ERROR = 'CREATE_JOB_ERROR'
 export const FETCH_JOBS = 'FETCH_JOBS'
 export const FETCH_JOBS_SUCCESS = 'FETCH_JOBS_SUCCESS'
@@ -33,6 +34,9 @@ export function createJob({catalogApiKey, name, algorithm, feature}) {
       bands: ['green', 'swir1'],  // FIXME
       metaDataJSON: feature
     }
+    dispatch({
+      type: CREATE_JOB
+    })
     // return client.post('execute-service', body)
     // HACK
     return fetch('https://bf-handle.int.geointservices.io/execute', {
@@ -50,58 +54,84 @@ export function createJob({catalogApiKey, name, algorithm, feature}) {
       })
     // HACK
       .then(id => {
-        dispatch({
-          type: CREATE_JOB,
-          record: {
-            id,
-            name,
-            algorithmName: algorithm.name,
-            createdOn: Date.now(),
-            status: STATUS_RUNNING
-          }
-        })
+        dispatch(createJobSuccess(id, name, algorithm))
       })
       .catch(err => {
-        dispatch({
-          type: CREATE_JOB_ERROR,
-          message: err.toString()
-        })
+        dispatch(createJobError(err))
       })
   }
 }
 
-export function startJobsWorker() {
+export function startJobsWorkerIfNeeded() {
   return (dispatch, getState) => {
-    if (getState().workers.jobs.running) {
+    const state = getState()
+    if (state.workers.jobs.running) {
       return
     }
-    const client = new Client(GATEWAY, getState().login.authToken)
-    const interval = JOBS_WORKER.INTERVAL
-    const ttl = JOBS_WORKER.JOB_TTL
-    worker.start(client, interval, ttl, {
+    if (state.workers.jobs.error) {
+      return
+    }
+    const client = new Client(GATEWAY, state.login.authToken)
+    worker.start(client, JOBS_WORKER.INTERVAL, JOBS_WORKER.JOB_TTL, {
       select() {
         return getState().jobs
       },
       onFailure(err) {
-        dispatch({
-          type: JOBS_WORKER_ERROR,
-          message: err.toString()
-        })
+        dispatch(jobsWorkerError(err))
       },
       onTerminate() {
-        dispatch({
-          type: STOP_JOBS_WORKER
-        })
+        dispatch(stopJobsWorker())
       },
       onUpdate(jobId, status, resultId) {
-        dispatch({
-          type: UPDATE_JOB,
-          jobId,
-          status,
-          resultId
-        })
+        dispatch(updateJob(jobId, status, resultId))
       }
     })
     dispatch({type: START_JOBS_WORKER})
+  }
+}
+
+//
+// Internals
+//
+
+function createJobError(err) {
+  return {
+    type: CREATE_JOB_ERROR,
+    message: err.toString()
+  }
+}
+
+function createJobSuccess(id, name, algorithm) {
+  return {
+    type: CREATE_JOB_SUCCESS,
+    record: {
+      id,
+      name,
+      algorithmName: algorithm.name,
+      createdOn: Date.now(),
+      status: STATUS_RUNNING
+    }
+  }
+}
+
+function jobsWorkerError(err) {
+  return {
+    type: JOBS_WORKER_ERROR,
+    message: err.toString()
+  }
+}
+
+function stopJobsWorker() {
+  return {
+    type: STOP_JOBS_WORKER
+  }
+}
+
+function updateJob(jobId, status, resultId) {
+  return {
+    type: UPDATE_JOB,
+    jobId,
+    status,
+    resultId
   }
 }
