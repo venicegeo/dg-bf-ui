@@ -3,6 +3,7 @@ import {connect} from 'react-redux'
 import Navigation from './Navigation'
 import PrimaryMap, {MODE_DRAW_BBOX, MODE_NORMAL, MODE_SELECT_IMAGERY} from './PrimaryMap'
 import {
+  clearImageSearchResults,
   changeLoadedResults,
   selectImage,
   startAlgorithmsWorkerIfNeeded,
@@ -65,6 +66,9 @@ class Application extends Component {
     }
     if (nextProps.location.query.jobId !== this.props.location.query.jobId) {
       dispatch(changeLoadedResults(asArray(nextProps.location.query.jobId)))
+    }
+    if (nextProps.params.bbox !== this.props.params.bbox) {
+      dispatch(clearImageSearchResults())
     }
   }
 

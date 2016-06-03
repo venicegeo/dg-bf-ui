@@ -12,6 +12,7 @@ import {
   START_ALGORITHMS_WORKER,
   STOP_ALGORITHMS_WORKER,
 
+  CLEAR_IMAGE_SEARCH_RESULTS,
   SEARCH_IMAGE_CATALOG,
   SEARCH_IMAGE_CATALOG_ERROR,
   SEARCH_IMAGE_CATALOG_SUCCESS,
@@ -55,6 +56,8 @@ function imagery(state = {
   error: null
 }, action) {
   switch (action.type) {
+  case CLEAR_IMAGE_SEARCH_RESULTS:
+    return {...state, searchResults: null}
   case SEARCH_IMAGE_CATALOG:
     return {...state, searching: true, error: null}
   case SEARCH_IMAGE_CATALOG_SUCCESS:

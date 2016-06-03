@@ -5,6 +5,7 @@ import {CATALOG} from '../config'
 // Action Types
 //
 
+export const CLEAR_IMAGE_SEARCH_RESULTS = 'CLEAR_IMAGE_SEARCH_RESULTS'
 export const SEARCH_IMAGE_CATALOG = 'SEARCH_IMAGE_CATALOG'
 export const SEARCH_IMAGE_CATALOG_SUCCESS = 'SEARCH_IMAGE_CATALOG_SUCCESS'
 export const SEARCH_IMAGE_CATALOG_ERROR = 'SEARCH_IMAGE_CATALOG_ERROR'
@@ -13,6 +14,12 @@ export const SELECT_IMAGE = 'SELECT_IMAGE'
 //
 // Action Creators
 //
+
+export function clearImageSearchResults() {
+  return {
+    type: CLEAR_IMAGE_SEARCH_RESULTS
+  }
+}
 
 export function selectImage(feature) {
   return {
