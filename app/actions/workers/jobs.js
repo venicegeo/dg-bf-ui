@@ -73,13 +73,14 @@ function fetchGeoJsonId(status) {
 function fetchUpdates({id: jobId, createdOn}) {
   return _client.getStatus(jobId)
     .then(status => {
-      console.debug('(jobs:worker) <%s> poll (%s)', status.jobId, status.status)
+      console.debug('(jobs:worker) <%s> polled (%s)', status.jobId, status.status)
 
       if (status.status === STATUS_SUCCESS) {
         return fetchGeoJsonId(status)
       }
 
       else if (exceededTTL(createdOn)) {
+        console.warn('(jobs:worker) <%s> appears to have stalled and will no longer be tracked', status.jobId)
         return {...status, status: STATUS_TIMED_OUT}
       }
 
