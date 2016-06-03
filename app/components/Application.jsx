@@ -3,14 +3,21 @@ import {connect} from 'react-redux'
 import Navigation from './Navigation'
 import PrimaryMap, {MODE_DRAW_BBOX, MODE_NORMAL, MODE_SELECT_IMAGERY} from './PrimaryMap'
 import {serialize} from '../utils/bbox'
-import {startJobsWorker} from '../actions'
+import {changeLoadedResults, startJobsWorkerIfNeeded} from '../actions'
 import styles from './Application.css'
 
 import store from '../store'
 
 function selector(state) {
   return {
-    jobs: state.jobs.records,
+    datasets: state.jobs.records.map(job => {
+      const result = state.results[job.id]
+      return {
+        job,
+        progress: result ? result.progress : null,
+        geojson: result ? result.geojson : null
+      }
+    }),
     loggedIn: !!state.login.authToken,
     workers: state.workers
   }
@@ -23,8 +30,8 @@ class Application extends Component {
 
   static propTypes = {
     children: React.PropTypes.element,
+    datasets: React.PropTypes.array,
     dispatch: React.PropTypes.func,
-    jobs: React.PropTypes.array,
     location: React.PropTypes.object,
     loggedIn: React.PropTypes.bool,
     params: React.PropTypes.object,
@@ -38,19 +45,28 @@ class Application extends Component {
   }
 
   componentDidMount() {
-    this._startWorkersIfNeeded()
+    const {dispatch, location, loggedIn} = this.props
+    if (loggedIn) {
+      dispatch(startJobsWorkerIfNeeded())
+    }
+    dispatch(changeLoadedResults(asArray(location.query.jobId)))
   }
 
-  componentDidUpdate() {
-    this._startWorkersIfNeeded()
+  componentWillReceiveProps(nextProps) {
+    const {dispatch} = this.props
+    if (nextProps.loggedIn && nextProps.workers !== this.props.workers) {
+      dispatch(startJobsWorkerIfNeeded())
+    }
+    if (nextProps.location.query.jobId !== this.props.location.query.jobId) {
+      dispatch(changeLoadedResults(asArray(nextProps.location.query.jobId)))
+    }
   }
 
   render() {
-    const datasets = this.props.jobs.map(job => this._generateDataset(job))
     return (
       <div className={styles.root}>
         <Navigation currentLocation={this.props.location}/>
-        <PrimaryMap datasets={datasets}
+        <PrimaryMap datasets={this.props.datasets}
                     imagery={null}
                     anchor={this.props.location.hash}
                     mode={this._getMapMode()}
@@ -64,13 +80,6 @@ class Application extends Component {
   //
   // Internal API
   //
-
-
-  _generateDataset(job) {
-    // const result = this.state.results[job.id]
-    // const progress = this.state.progress[job.id]
-    return {job/*, progress, result*/}
-  }
 
   _getMapMode() {
     const {pathname} = this.props.location
@@ -96,16 +105,17 @@ class Application extends Component {
       pathname: `/create-job/${this.props.params.bbox}${imageId ? '/' + imageId : ''}`
     })
   }
-
-  _startWorkersIfNeeded() {
-    const {dispatch, loggedIn, workers} = this.props
-    if (!loggedIn) {
-      return
-    }
-    if (!workers.jobs.running) {
-      dispatch(startJobsWorker())
-    }
-  }
 }
 
 export default connect(selector)(Application)
+
+//
+// Internals
+//
+
+function asArray(value) {
+  if (value) {
+    return [].concat(value)
+  }
+}
+

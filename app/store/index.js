@@ -13,7 +13,13 @@ import {
   JOBS_WORKER_ERROR,
   START_JOBS_WORKER,
   STOP_JOBS_WORKER,
-  UPDATE_JOB
+  UPDATE_JOB,
+
+  LOAD_RESULT,
+  LOAD_RESULT_SUCCESS,
+  LOAD_RESULT_ERROR,
+  LOAD_RESULT_PROGRESSED,
+  UNLOAD_RESULT
 } from '../actions'
 
 function login(state = {
@@ -29,6 +35,24 @@ function login(state = {
     return {...state, verifying: false, error: null, authToken: action.token}
   case LOG_IN_ERROR:
     return {...state, verifying: false, error: action.message}
+  default:
+    return state
+  }
+}
+
+function results(state = {}, action) {
+  const {jobId} = action
+  switch (action.type) {
+  case LOAD_RESULT:
+    return {...state, [jobId]: {...state[jobId], loading: true}}
+  case LOAD_RESULT_SUCCESS:
+    return {...state, [jobId]: {...state[jobId], loading: false, geojson: action.geojson}}
+  case LOAD_RESULT_ERROR:
+    return {...state, [jobId]: {...state[jobId], loading: false, error: action.message}}
+  case LOAD_RESULT_PROGRESSED:
+    return {...state, [jobId]: {...state[jobId], progress: {loaded: action.loaded, total: action.total}}}
+  case UNLOAD_RESULT:
+    return {...state, [jobId]: undefined}
   default:
     return state
   }
@@ -80,6 +104,7 @@ function jobs(state = {
 const beachfrontApp = combineReducers({
   login,
   jobs,
+  results,
   workers
 })
 

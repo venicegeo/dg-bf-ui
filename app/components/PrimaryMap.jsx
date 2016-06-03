@@ -198,8 +198,8 @@ export default class PrimaryMap extends Component {
 
     // Additions
     const reader = new ol.format.GeoJSON()
-    datasets.filter(d => d.result && !previous[d.job.id]).forEach(dataset => {
-      const features = reader.readFeatures(dataset.result, {featureProjection: 'EPSG:3857'})
+    datasets.filter(d => d.geojson && !previous[d.job.id]).forEach(dataset => {
+      const features = reader.readFeatures(dataset.geojson, {featureProjection: 'EPSG:3857'})
       features.forEach(f => f.setProperties({
         [JOB_ID]: dataset.job.id,
         [JOB_NAME]: dataset.job.name,
