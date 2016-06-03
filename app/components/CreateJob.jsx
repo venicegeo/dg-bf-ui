@@ -9,6 +9,7 @@ import styles from './CreateJob.css'
 
 function selector(state) {
   return {
+    algorithms: state.algorithms.records,
     imagery: state.imagery
   }
 }
@@ -19,6 +20,7 @@ class CreateJob extends Component {
   }
 
   static propTypes = {
+    algorithms: React.PropTypes.array,
     dispatch: React.PropTypes.func,
     imagery: React.PropTypes.object,
     params: React.PropTypes.object
@@ -55,7 +57,7 @@ class CreateJob extends Component {
           </li>}
 
           {bbox && imageId && <li className={styles.algorithms}>
-            <AlgorithmList algorithms={listAlgorithms()}
+            <AlgorithmList algorithms={this.props.algorithms}
                            onSubmit={this._handleJobSubmit}/>
           </li>}
 

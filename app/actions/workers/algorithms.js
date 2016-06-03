@@ -69,7 +69,7 @@ function normalizeRequirement(key, value) {
   default:
     break
   }
-  return {name, description}
+  return {name, description, literal: value}
 }
 
 function normalizeAlgorithm(serviceDescriptor) {
