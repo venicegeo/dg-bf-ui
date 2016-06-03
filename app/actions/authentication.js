@@ -41,15 +41,15 @@ export function logIn(username, password) {
         dispatch(logInSuccess(token))
       })
       .catch(err => {
-        dispatch(logInError(err.toString()))
+        dispatch(logInError(err))
       })
   }
 }
 
-function logInError(message) {
+function logInError(err) {
   return {
     type: LOG_IN_ERROR,
-    message
+    err
   }
 }
 

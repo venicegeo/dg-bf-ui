@@ -86,7 +86,9 @@ export function startJobsWorkerIfNeeded() {
         dispatch(updateJob(jobId, status, resultId))
       }
     })
-    dispatch({type: START_JOBS_WORKER})
+    dispatch({
+      type: START_JOBS_WORKER
+    })
   }
 }
 
@@ -97,7 +99,7 @@ export function startJobsWorkerIfNeeded() {
 function createJobError(err) {
   return {
     type: CREATE_JOB_ERROR,
-    message: err.toString()
+    err
   }
 }
 
@@ -117,7 +119,7 @@ function createJobSuccess(id, name, algorithm) {
 function jobsWorkerError(err) {
   return {
     type: JOBS_WORKER_ERROR,
-    message: err.toString()
+    err
   }
 }
 

@@ -60,7 +60,7 @@ function login(state = {
     sessionStorage.setItem('authToken', action.token)
     return {...state, verifying: false, error: null, authToken: action.token}
   case LOG_IN_ERROR:
-    return {...state, verifying: false, error: action.message}
+    return {...state, verifying: false, error: action.err}
   default:
     return state
   }
@@ -74,7 +74,7 @@ function results(state = {}, action) {
   case LOAD_RESULT_SUCCESS:
     return {...state, [jobId]: {...state[jobId], loading: false, geojson: action.geojson}}
   case LOAD_RESULT_ERROR:
-    return {...state, [jobId]: {...state[jobId], loading: false, error: action.message}}
+    return {...state, [jobId]: {...state[jobId], loading: false, error: action.err}}
   case LOAD_RESULT_PROGRESSED:
     return {...state, [jobId]: {...state[jobId], progress: {loaded: action.loaded, total: action.total}}}
   case UNLOAD_RESULT:
@@ -96,7 +96,7 @@ function workers(state = {
 }, action) {
   switch (action.type) {
   case JOBS_WORKER_ERROR:
-    return {...state, jobs: {...state.jobs, error: action.message}}
+    return {...state, jobs: {...state.jobs, error: action.err}}
   case START_JOBS_WORKER:
     return {...state, jobs: {running: true, error: null}}
   case STOP_JOBS_WORKER:
