@@ -86,9 +86,7 @@ export function startJobsWorkerIfNeeded() {
         dispatch(updateJob(jobId, status, resultId))
       }
     })
-    dispatch({
-      type: START_JOBS_WORKER
-    })
+    dispatch(startJobsWorker())
   }
 }
 
@@ -120,6 +118,12 @@ function jobsWorkerError(err) {
   return {
     type: JOBS_WORKER_ERROR,
     err
+  }
+}
+
+function startJobsWorker() {
+  return {
+    type: START_JOBS_WORKER
   }
 }
 

@@ -20,7 +20,7 @@ export function start(client, interval, ttl, {select, onFailure, onTerminate, on
 
 export function terminate() {
   clearInterval(_instance)
-  _instance.onTerminate()
+  _handlers.onTerminate()
   _instance = null
   _client = null
   _handlers = null
@@ -49,6 +49,7 @@ function work() {
       })
     })
     .catch(err => {
+      console.error('(jobs:worker) cycle failed; terminating.', err)
       _handlers.onFailure(err)
       terminate()
     })
