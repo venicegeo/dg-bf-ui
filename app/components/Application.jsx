@@ -54,7 +54,7 @@ class Application extends Component {
 
   componentWillReceiveProps(nextProps) {
     const {dispatch} = this.props
-    if (nextProps.loggedIn && nextProps.workers !== this.props.workers) {
+    if (nextProps.loggedIn) {
       dispatch(startJobsWorkerIfNeeded())
     }
     if (nextProps.location.query.jobId !== this.props.location.query.jobId) {
