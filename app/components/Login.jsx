@@ -31,6 +31,10 @@ class Login extends Component {
     this._handleSubmit = this._handleSubmit.bind(this)
   }
 
+  componentDidMount() {
+    this.refs.username.focus()
+  }
+
   render() {
     return (
       <Modal className={styles.root} dismiss={this.props.dismiss}>
