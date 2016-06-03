@@ -6,6 +6,8 @@ import styles from './ImagerySearch.css'
 export default class ImagerySearch extends Component {
   static propTypes = {
     bbox: React.PropTypes.array,
+    error: React.PropTypes.object,
+    isSearching: React.PropTypes.bool,
     onApiKeyChange: React.PropTypes.func,
     onSubmit: React.PropTypes.func
   }
@@ -22,13 +24,21 @@ export default class ImagerySearch extends Component {
   }
 
   render() {
+    const {error, bbox, isSearching} = this.props
     return (
-      <form className={styles.root} onSubmit={this._handleSubmit}>
+      <form className={`${styles.root} ${isSearching ? styles.isSearching : ''}`} onSubmit={this._handleSubmit}>
         <h2>Search for Imagery</h2>
         <div className={styles.minimap}>
-          <StaticMinimap bbox={this.props.bbox}/>
+          <StaticMinimap bbox={bbox}/>
         </div>
 
+        {error && (
+          <div className={styles.errorMessage}>
+            <h4><i className="fa fa-warning"/> Search failed</h4>
+            <p>Could not search the image catalog because of an error.</p>
+            <pre>{error.stack}</pre>
+          </div>
+        )}
         <h3>Catalog</h3>
         <label className={styles.field}>
           <span>Provider</span>
@@ -38,13 +48,13 @@ export default class ImagerySearch extends Component {
         </label>
         <label className={styles.field}>
           <span>API Key</span>
-          <input ref="apiKey" type="password" />
+          <input ref="apiKey" type="password" disabled={isSearching} />
         </label>
 
         <h3>Date/Time</h3>
         <label className={styles.field}>
           <span>From</span>
-          <input ref="dateFrom" type="date" />
+          <input ref="dateFrom" type="date" disabled={isSearching} />
         </label>
         <label className={styles.field}>
           <span>To</span>
@@ -52,7 +62,7 @@ export default class ImagerySearch extends Component {
         </label>
 
         <div className={styles.controls}>
-          <button>Search for imagery</button>
+          <button disabled={isSearching}>Search for imagery</button>
         </div>
       </form>
     )

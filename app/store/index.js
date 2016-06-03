@@ -6,6 +6,10 @@ import {
   LOG_IN_SUCCESS,
   LOG_IN_ERROR,
 
+  SEARCH_IMAGE_CATALOG,
+  SEARCH_IMAGE_CATALOG_ERROR,
+  SEARCH_IMAGE_CATALOG_SUCCESS,
+
   CREATE_JOB,
   CREATE_JOB_SUCCESS,
   CREATE_JOB_ERROR,
@@ -22,6 +26,23 @@ import {
   LOAD_RESULT_PROGRESSED,
   UNLOAD_RESULT
 } from '../actions'
+
+function imagery(state = {
+  searching: false,
+  searchResults: null,
+  error: null
+}, action) {
+  switch (action.type) {
+  case SEARCH_IMAGE_CATALOG:
+    return {...state, searching: true, error: null}
+  case SEARCH_IMAGE_CATALOG_SUCCESS:
+    return {...state, searching: false, searchResults: action.results}
+  case SEARCH_IMAGE_CATALOG_ERROR:
+    return {...state, searching: false, error: action.err}
+  default:
+    return state
+  }
+}
 
 function jobs(state = {
   creating: false,
@@ -107,6 +128,7 @@ function workers(state = {
 }
 
 const beachfrontApp = combineReducers({
+  imagery,
   jobs,
   login,
   results,

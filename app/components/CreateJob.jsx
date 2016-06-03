@@ -1,16 +1,26 @@
 import React, {Component} from 'react'
+import {connect} from 'react-redux'
 import AlgorithmList from './AlgorithmList'
 import ImagerySearch from './ImagerySearch'
 import NewJobDetails from './NewJobDetails'
 import {deserialize} from '../utils/bbox'
+import {searchImageCatalog} from '../actions'
 import styles from './CreateJob.css'
 
-export default class CreateJob extends Component {
+function selector(state) {
+  return {
+    imagery: state.imagery
+  }
+}
+
+class CreateJob extends Component {
   static contextTypes = {
     router: React.PropTypes.object
   }
 
   static propTypes = {
+    dispatch: React.PropTypes.func,
+    imagery: React.PropTypes.object,
     params: React.PropTypes.object
   }
 
@@ -24,7 +34,7 @@ export default class CreateJob extends Component {
   }
 
   render() {
-    const bbox = this._getBoundingBox()
+    const bbox = deserialize(this.props.params.bbox)
     const imageId = this.props.params.imageId
     return (
       <div className={styles.root}>
@@ -34,6 +44,8 @@ export default class CreateJob extends Component {
         <ul>
           {bbox && <li className={styles.imagery}>
             <ImagerySearch bbox={bbox}
+                           error={this.props.imagery.error}
+                           isSearching={this.props.imagery.searching}
                            onApiKeyChange={this._handleApiKeyChange}
                            onSubmit={this._handleSearchSubmit}/>
           </li>}
@@ -63,11 +75,6 @@ export default class CreateJob extends Component {
   // Internals
   //
 
-  _getBoundingBox() {
-    const {bbox} = this.props.params
-    return bbox ? deserialize(bbox) : null
-  }
-
   _handleApiKeyChange(catalogApiKey) {
     this.setState({catalogApiKey})
   }
@@ -85,9 +92,8 @@ export default class CreateJob extends Component {
   }
 
   _handleSearchSubmit({bbox, dateFrom, dateTo}) {
-    searchImagery(this.state.catalogApiKey, bbox, dateFrom, dateTo)
-      .then(imagery => {
-        console.debug(imagery)
-      })
+    this.props.dispatch(searchImageCatalog(this.state.catalogApiKey, bbox, dateFrom, dateTo))
   }
 }
+
+export default connect(selector)(CreateJob)

@@ -15,6 +15,7 @@ function selector(state) {
         geojson: result ? result.geojson : null
       }
     }),
+    imagery: state.imagery.searchResults,
     loggedIn: !!state.login.authToken,
     workers: state.workers
   }
@@ -29,7 +30,7 @@ class Application extends Component {
     children: React.PropTypes.element,
     datasets: React.PropTypes.array,
     dispatch: React.PropTypes.func,
-    imagery: React.PropTypes.array,
+    imagery: React.PropTypes.object,
     location: React.PropTypes.object,
     loggedIn: React.PropTypes.bool,
     params: React.PropTypes.object,
