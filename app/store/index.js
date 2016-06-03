@@ -23,6 +23,31 @@ import {
   UNLOAD_RESULT
 } from '../actions'
 
+function jobs(state = {
+  creating: false,
+  fetching: false,
+  records: JSON.parse(sessionStorage.getItem('jobs')) || [],
+  error: null
+}, action) {
+  switch (action.type) {
+  case FETCH_JOBS:
+    return {...state, fetching: true}
+  case FETCH_JOBS_SUCCESS:
+    return {...state, fetching: false, records: action.records}
+  case CREATE_JOB_SUCCESS:
+    return {...state, creating: false, records: state.records.concat(action.record)}
+  case UPDATE_JOB:
+    return {...state, records: state.records.map(job => {
+      if (job.id === action.jobId) {
+        return {...job, status: action.status, resultId: action.resultId}
+      }
+      return job
+    })}
+  default:
+    return state
+  }
+}
+
 function login(state = {
   authToken: sessionStorage.getItem('authToken'),
   verifying: false,
@@ -81,30 +106,9 @@ function workers(state = {
   }
 }
 
-function jobs(state = {
-  fetching: false,
-  records: JSON.parse(sessionStorage.getItem('jobs')) || []
-}, action) {
-  switch (action.type) {
-  case FETCH_JOBS:
-    return {...state, fetching: true}
-  case FETCH_JOBS_SUCCESS:
-    return {...state, fetching: false, records: action.records}
-  case UPDATE_JOB:
-    return {...state, records: state.records.map(job => {
-      if (job.id === action.jobId) {
-        return {...job, status: action.status, resultId: action.resultId}
-      }
-      return job
-    })}
-  default:
-    return state
-  }
-}
-
 const beachfrontApp = combineReducers({
-  login,
   jobs,
+  login,
   results,
   workers
 })

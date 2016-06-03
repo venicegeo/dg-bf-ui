@@ -6,8 +6,6 @@ import {serialize} from '../utils/bbox'
 import {changeLoadedResults, startJobsWorkerIfNeeded} from '../actions'
 import styles from './Application.css'
 
-import store from '../store'
-
 function selector(state) {
   return {
     datasets: state.jobs.records.map(job => {
@@ -118,4 +116,3 @@ function asArray(value) {
     return [].concat(value)
   }
 }
-
