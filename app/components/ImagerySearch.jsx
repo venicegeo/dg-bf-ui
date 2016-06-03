@@ -71,7 +71,7 @@ export default class ImagerySearch extends Component {
       </form>
     )
   }
-  
+
   //
   // Internals
   //
