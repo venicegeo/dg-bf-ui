@@ -3,13 +3,16 @@ import {connect} from 'react-redux'
 import Navigation from './Navigation'
 import PrimaryMap, {MODE_DRAW_BBOX, MODE_NORMAL, MODE_SELECT_IMAGERY} from './PrimaryMap'
 import {serialize} from '../utils/bbox'
+import {startJobsWorker} from '../actions'
 import styles from './Application.css'
 
 import store from '../store'
 
 function selector(state) {
   return {
-    jobs: state.jobs.records
+    jobs: state.jobs.records,
+    loggedIn: !!state.login.authToken,
+    workers: state.workers
   }
 }
 
@@ -19,10 +22,13 @@ class Application extends Component {
   }
 
   static propTypes = {
-    jobs: React.PropTypes.array,
-    params: React.PropTypes.object,
     children: React.PropTypes.element,
-    location: React.PropTypes.object
+    dispatch: React.PropTypes.func,
+    jobs: React.PropTypes.array,
+    location: React.PropTypes.object,
+    loggedIn: React.PropTypes.bool,
+    params: React.PropTypes.object,
+    workers: React.PropTypes.object
   }
 
   constructor() {
@@ -31,7 +37,13 @@ class Application extends Component {
     this._handleImageSelect = this._handleImageSelect.bind(this)
   }
 
+  componentDidMount() {
+    this._startWorkersIfNeeded()
+  }
 
+  componentDidUpdate() {
+    this._startWorkersIfNeeded()
+  }
 
   render() {
     const datasets = this.props.jobs.map(job => this._generateDataset(job))
@@ -85,6 +97,15 @@ class Application extends Component {
     })
   }
 
+  _startWorkersIfNeeded() {
+    const {dispatch, loggedIn, workers} = this.props
+    if (!loggedIn) {
+      return
+    }
+    if (!workers.jobs.running) {
+      dispatch(startJobsWorker())
+    }
+  }
 }
 
 export default connect(selector)(Application)
