@@ -130,7 +130,6 @@ export default class PrimaryMap extends Component {
   }
 
   _deactivateDrawInteraction() {
-    this._clearDraw()
     this._drawInteraction.setActive(false)
   }
 
@@ -304,6 +303,7 @@ export default class PrimaryMap extends Component {
       this._activateDrawInteraction()
       break
     case MODE_NORMAL:
+      this._clearDraw()
       this._deactivateDrawInteraction()
       this._deactivateSelectInteraction()
       break
