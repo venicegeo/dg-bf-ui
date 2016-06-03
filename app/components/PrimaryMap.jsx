@@ -76,7 +76,7 @@ export default class PrimaryMap extends Component {
     // DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG
   }
 
-  componentDidUpdate(previousProps, previousState) {
+  componentDidUpdate(previousProps, previousState) {  // eslint-disable-line complexity
     if (this.props.datasets !== previousProps.datasets) {
       this._renderDetections()
       this._renderFrames()

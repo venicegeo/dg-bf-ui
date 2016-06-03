@@ -9,14 +9,12 @@ export default class NewJobDetails extends Component {
 
   constructor() {
     super()
-    this._handleNameChange = this._handleNameChange.bind(this)
+    this._emitNameChange = this._emitNameChange.bind(this)
   }
 
   componentDidMount() {
     this.refs.name.value = 'Beachfront_Job_' + Date.now()
-    // HACK
-    this._handleNameChange()
-    // HACK
+    this._emitNameChange()
   }
 
   render() {
@@ -25,13 +23,13 @@ export default class NewJobDetails extends Component {
         <h2>Job Details</h2>
         <label className={styles.field}>
           <span>Name</span>
-          <input ref="name" onChange={this._handleNameChange}/>
+          <input ref="name" onChange={this._emitNameChange}/>
         </label>
       </div>
     )
   }
 
-  _handleNameChange() {
+  _emitNameChange() {
     this.props.onNameChange(this.refs.name.value)
   }
 }
