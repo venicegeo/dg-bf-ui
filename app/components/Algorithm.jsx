@@ -4,6 +4,7 @@ import styles from './Algorithm.css'
 export default class Algorithm extends Component {
   static propTypes = {
     algorithm: React.PropTypes.object,
+    imageProperties: React.PropTypes.object,
     onSubmit: React.PropTypes.func
   }
 
@@ -19,13 +20,19 @@ export default class Algorithm extends Component {
         <p>{this.props.algorithm.description}</p>
 
         <div className={styles.controls}>
-          <button>Start</button>
+          <button className={styles.startButton}>Start</button>
         </div>
 
         <h4>Image Requirements</h4>
-        <table>
+        <table className={styles.requirements}>
           <tbody>
-          {this.props.algorithm.requirements.map(r => <tr key={r.name}><th>{r.name}</th><td>{r.description}</td></tr>)}
+          {this.props.algorithm.requirements.map(r => (
+            <tr key={r.name}
+                className={isCompatible(r, this.props.imageProperties) ? styles.unmet : styles.met}>
+              <th>{r.name}</th>
+              <td>{r.description}</td>
+            </tr>
+          ))}
           </tbody>
         </table>
       </form>
@@ -35,5 +42,16 @@ export default class Algorithm extends Component {
   _handleSubmit(event) {
     event.preventDefault()
     this.props.onSubmit(this.props.algorithm)
+  }
+}
+
+function isCompatible(requirement, imageProperties) {
+  switch (requirement.name) {
+  case 'Bands':
+    return requirement.literal.split(',').every(s => imageProperties.bands[s])
+  case 'Cloud Cover':
+    return imageProperties.cloudCover < requirement.literal
+  default:
+    return false
   }
 }

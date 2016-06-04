@@ -58,6 +58,7 @@ class CreateJob extends Component {
 
           {bbox && selectedImage && <li className={styles.algorithms}>
             <AlgorithmList algorithms={this.props.algorithms}
+                           imageProperties={selectedImage.properties}
                            onSubmit={this._handleJobSubmit}/>
           </li>}
 
