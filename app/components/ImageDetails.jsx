@@ -27,7 +27,7 @@ export default class ImageDetails extends Component {
 
     return (
       <div className={styles.root}>
-        <h1>{feature.getId() || 'nil'}</h1>
+        <h1>{feature.id || 'nil'}</h1>
 
         <dl>
           {/*
@@ -35,16 +35,16 @@ export default class ImageDetails extends Component {
           <dd><img ref="thumbnail" crossOrigin={true} src={feature.get(KEY_THUMBNAIL)}/></dd>
           */}
           <dt>Date Captured</dt>
-          <dd>{moment(feature.get(KEY_DATE)).format('llll')}</dd>
+          <dd>{moment(feature.properties[KEY_DATE]).format('llll')}</dd>
 
           <dt>Bands</dt>
-          <dd>{Object.keys(feature.get(KEY_BANDS)).join(', ')}</dd>
+          <dd>{Object.keys(feature.properties[KEY_BANDS]).join(', ')}</dd>
 
           <dt>Cloud Cover</dt>
-          <dd>{feature.get(KEY_CLOUD_COVER)}</dd>
+          <dd>{feature.properties[KEY_CLOUD_COVER]}</dd>
 
           <dt>Sensor Name</dt>
-          <dd>{feature.get(KEY_SENSOR_NAME)}</dd>
+          <dd>{feature.properties[KEY_SENSOR_NAME]}</dd>
         </dl>
       </div>
     )

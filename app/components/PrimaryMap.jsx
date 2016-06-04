@@ -46,7 +46,7 @@ export default class PrimaryMap extends Component {
 
   constructor() {
     super()
-    this.state = {basemapIndex: 0}
+    this.state = {basemapIndex: 0, selectedImageFeature: null}
     this._recenter = debounce(this._recenter.bind(this))
     this._renderSearchBbox = debounce(this._renderSearchBbox.bind(this))
     this._handleDrawStart = this._handleDrawStart.bind(this)
@@ -127,6 +127,7 @@ export default class PrimaryMap extends Component {
 
   _clearSelection() {
     this._selectInteraction.getFeatures().clear()
+    this.setState({selectedImageFeature: null})
   }
 
   _deactivateDrawInteraction() {
@@ -332,8 +333,9 @@ export default class PrimaryMap extends Component {
     if (this.props.mode === MODE_SELECT_IMAGERY) {
       const feature = event.target.getFeatures().item(0)
       if (feature) {
-        this.props.onImageSelect(new ol.format.GeoJSON().writeFeatureObject(feature))
-        this.setState({selectedImageFeature: feature})
+        const selectedImageFeature = new ol.format.GeoJSON().writeFeatureObject(feature)
+        this.props.onImageSelect(selectedImageFeature)
+        this.setState({selectedImageFeature})
         this._imageDetailsOverlay.setPosition(ol.extent.getTopRight(feature.getGeometry().getExtent()))
       } else {
         this.props.onImageSelect(null)
