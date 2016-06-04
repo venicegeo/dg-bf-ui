@@ -41,7 +41,7 @@ export function createJob(catalogApiKey, name, algorithm, feature) {
     })
     // return client.post('execute-service', body)
     // HACK
-    return fetch(GATEWAY.indexOf('localhost') ? 'http://localhost:3002/execute' : 'https://bf-handle.int.geointservices.io/execute', {
+    return fetch('https://bf-handle.int.geointservices.io/execute', {
       body: JSON.stringify(body),
       headers: {
         'content-type': 'application/json'
