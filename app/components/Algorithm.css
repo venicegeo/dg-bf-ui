@@ -1,3 +1,43 @@
 .field {
   composes: field-normal from '../styles/forms.css';
 }
+
+.startButton {
+  display: block;
+  width: 100%;
+  padding: 1em;
+  border: none;
+  border-radius: 4px;
+  background-color: #16aa3e;
+  color: white;
+  font-family: inherit;
+  font-size: inherit;
+  max-width: 90%;
+  margin: 1em 0;
+}
+
+.requirements {
+  width: 100%;
+  font-size: 14px;
+}
+
+.requirements th {
+  width: 50%;
+  text-align: right;
+}
+
+.requirements th,
+.requirements td {
+  background-color: #ddd;
+  padding: .3em;
+}
+
+.requirements .unmet td {
+  background-color: red;
+  color: white;
+}
+
+.requirements .met td {
+  background-color: green;
+  color: white;
+}

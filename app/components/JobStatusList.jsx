@@ -1,31 +1,28 @@
 import React, {Component} from 'react'
-import styles from './JobStatusList.css'
+import {connect} from 'react-redux'
 import JobStatus from './JobStatus'
-import {listJobs, subscribeJobs} from '../api'
+import styles from './JobStatusList.css'
 
-export default class JobStatusList extends Component {
+function selector(state) {
+  return {
+    jobs: state.jobs.records
+  }
+}
+
+class JobStatusList extends Component {
   static propTypes = {
+    jobs: React.PropTypes.array,
     params: React.PropTypes.object
   }
 
   constructor() {
     super()
-    this.state = {jobs: [], err: null}
     this._dismissError = this._dismissError.bind(this)
-    this._update = this._update.bind(this)
-  }
-
-  componentDidMount() {
-    this._update()
-    this._unsubscribe = subscribeJobs(this._update)
-  }
-
-  componentWillUnmount() {
-    this._unsubscribe()
   }
 
   render() {
-    const {jobs, err} = this.state
+    const {jobs} = this.props
+    const err = null  // FIXME
     return (
       <div className={styles.root}>
         <header>
@@ -55,11 +52,6 @@ export default class JobStatusList extends Component {
   _dismissError() {
     console.warn('_dismissError: Not yet implemented')
   }
-
-  _update(err) {
-    this.setState({
-      err,
-      jobs: listJobs()
-    })
-  }
 }
+
+export default connect(selector)(JobStatusList)

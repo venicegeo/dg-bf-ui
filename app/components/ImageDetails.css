@@ -1,0 +1,29 @@
+.root {
+  position: absolute;
+  padding: 15px;
+  width: 200px;
+  border-radius: 5px;
+  color: white;
+  background-color: #1675aa;
+  box-shadow: 0 0 0 5px white, 0 0 0 20px rgba(255,255,255,.7);
+  font-size: 14px;
+}
+
+.root h1 {
+  color: white;
+  font-size: 1.5em;
+  word-break: break-all;
+  border-bottom: 1px solid;
+  margin: 0 -15px;
+  padding: 0 15px 15px;
+}
+
+.root dt {
+  font-weight: bold;
+  text-transform: uppercase;
+  font-size: .8em;
+}
+
+.root dd + dt {
+  margin-top: 1em;
+}

@@ -14,11 +14,6 @@ export default class StaticMinimap extends Component {
     this._initializeMap()
   }
 
-  componentDidUpdate() {
-    this._map().getLayers().
-    this._initializeMap()
-  }
-
   componentWillUnmount() {
     this._destroyMap()
   }

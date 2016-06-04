@@ -26,6 +26,7 @@
 .progressPuck {
   height: 7px;
   background-color: currentColor;
+  transition: width .3s linear;
 }
 
 /* =========================================================================

@@ -1,48 +1,88 @@
-import styles from './Application.css'
 import React, {Component} from 'react'
+import {connect} from 'react-redux'
 import Navigation from './Navigation'
-import PrimaryMap, {MODE_DRAW_BBOX, MODE_NORMAL} from './PrimaryMap'
-import {fetchResult, listJobs, subscribeJobs} from '../api'
-import {serialize} from '../utils/bbox'
+import PrimaryMap, {MODE_DRAW_BBOX, MODE_NORMAL, MODE_SELECT_IMAGERY} from './PrimaryMap'
+import {
+  clearImageSearchResults,
+  changeLoadedResults,
+  selectImage,
+  startAlgorithmsWorkerIfNeeded,
+  startJobsWorkerIfNeeded
+} from '../actions'
+import styles from './Application.css'
 
-export default class Application extends Component {
+function selector(state) {
+  return {
+    datasets: state.jobs.records.map(job => {
+      const result = state.results[job.id]
+      return {
+        job,
+        progress: result ? result.progress : null,
+        geojson: result ? result.geojson : null
+      }
+    }),
+    imagery: state.imagery,
+    loggedIn: !!state.login.authToken,
+    workers: state.workers
+  }
+}
+
+class Application extends Component {
   static contextTypes = {
     router: React.PropTypes.object
   }
 
   static propTypes = {
-    params: React.PropTypes.object,
     children: React.PropTypes.element,
-    location: React.PropTypes.object
+    datasets: React.PropTypes.array,
+    dispatch: React.PropTypes.func,
+    imagery: React.PropTypes.object,
+    location: React.PropTypes.object,
+    loggedIn: React.PropTypes.bool,
+    params: React.PropTypes.object,
+    workers: React.PropTypes.object
   }
 
   constructor() {
     super()
-    this.state = {jobs: [], progress: {}, results: {}}
-    this._bboxChanged = this._bboxChanged.bind(this)
+    this._handleBoundingBoxChange = this._handleBoundingBoxChange.bind(this)
+    this._handleImageSelect = this._handleImageSelect.bind(this)
   }
 
   componentDidMount() {
-    this._updateJobs(this.props.location.query.jobId)
-    subscribeJobs(() => {
-      console.debug('application was notified')
-      this._updateJobs(this.props.location.query.jobId)
-    })
+    const {dispatch, location, loggedIn} = this.props
+    if (loggedIn) {
+      dispatch(startAlgorithmsWorkerIfNeeded())
+      dispatch(startJobsWorkerIfNeeded())
+    }
+    dispatch(changeLoadedResults(asArray(location.query.jobId)))
   }
 
-  componentWillReceiveProps(incomingProps) {
-    this._updateJobs(incomingProps.location.query.jobId)
+  componentWillReceiveProps(nextProps) {
+    const {dispatch} = this.props
+    if (nextProps.loggedIn) {
+      dispatch(startAlgorithmsWorkerIfNeeded())
+      dispatch(startJobsWorkerIfNeeded())
+    }
+    if (nextProps.location.query.jobId !== this.props.location.query.jobId) {
+      dispatch(changeLoadedResults(asArray(nextProps.location.query.jobId)))
+    }
+    if (nextProps.params.bbox !== this.props.params.bbox) {
+      dispatch(clearImageSearchResults())
+    }
   }
 
   render() {
-    const datasets = this.state.jobs.map(job => this._generateDataset(job))
     return (
       <div className={styles.root}>
         <Navigation currentLocation={this.props.location}/>
-        <PrimaryMap datasets={datasets}
+        <PrimaryMap datasets={this.props.datasets}
+                    imagery={this.props.imagery.searchResults}
                     anchor={this.props.location.hash}
-                    mode={this.props.location.pathname === 'create-job' ? MODE_DRAW_BBOX : MODE_NORMAL}
-                    bboxChanged={this._bboxChanged}/>
+                    bbox={this.props.params.bbox}
+                    mode={this._getMapMode()}
+                    onBoundingBoxChange={this._handleBoundingBoxChange}
+                    onImageSelect={this._handleImageSelect}/>
         {this.props.children}
       </div>
     )
@@ -52,72 +92,33 @@ export default class Application extends Component {
   // Internal API
   //
 
-  _bboxChanged(bbox) {
+  _getMapMode() {
+    if (this.props.location.pathname.indexOf('create-job') === 0) {
+      return (this.props.params.bbox && this.props.imagery.searchResults) ? MODE_SELECT_IMAGERY : MODE_DRAW_BBOX
+    }
+    return MODE_NORMAL
+  }
+
+  _handleBoundingBoxChange(bbox) {
     this.context.router.push({
       ...this.props.location,
-      query: {
-        bbox: bbox ? serialize(bbox) : undefined
-      }
+      pathname: `/create-job${bbox ? '/' + bbox : ''}`
     })
   }
 
-  _clearResult(job) {
-    this.setState({
-      progress: Object.assign({}, this.state.progress, {
-        [job.id]: undefined
-      }),
-      results: Object.assign({}, this.state.results, {
-        [job.id]: undefined
-      })
-    })
+  _handleImageSelect(geojson) {
+    this.props.dispatch(selectImage(geojson))
   }
+}
 
-  _fetchResult(job) {
-    console.debug('(app._fetchResult) -> `%s`', job.id)
-    if (this.state.results[job.id]) {
-      return  // Nothing to do
-    }
-    if (this.state.progress[job.id]) {
-      return  // Currently loading
-    }
-    if (!job.resultId) {
-      return // No result to load
-    }
-    // TODO -- it may be time to investigate feasibility of introducing Redux...
-    fetchResult(job.resultId, (loaded, total) => {
-      this.setState({
-        progress: Object.assign({}, this.state.progress, {
-          [job.id]: {loaded, total}
-        })
-      })
-    })
-      .then(result => {
-        this.setState({
-          results: Object.assign({}, this.state.results, {
-            [job.id]: result.geojson
-          })
-        })
-      })
-  }
+export default connect(selector)(Application)
 
-  _generateDataset(job) {
-    const result = this.state.results[job.id]
-    const progress = this.state.progress[job.id]
-    return {job, progress, result}
-  }
+//
+// Internals
+//
 
-  _updateJobs(idsToLoadResultsFor) {
-    const jobs = listJobs()
-    this.setState({jobs: jobs})
-
-    if (idsToLoadResultsFor) {
-      jobs.forEach(job => {
-        if (idsToLoadResultsFor.indexOf(job.id) !== -1) {
-          this._fetchResult(job)
-        } else {
-          this._clearResult(job)
-        }
-      })
-    }
+function asArray(value) {
+  if (value) {
+    return [].concat(value)
   }
 }

@@ -4,8 +4,10 @@ import Timer from './Timestamp.jsx'
 import {serialize} from '../utils/map-anchor'
 import styles from './JobStatus.css'
 
-const STATUS_SUCCESS = 'Success'
-const STATUS_RUNNING = 'Running'
+import {
+  STATUS_SUCCESS,
+  STATUS_RUNNING
+} from '../constants'
 
 export default class JobStatus extends Component {
   static propTypes = {
@@ -23,7 +25,7 @@ export default class JobStatus extends Component {
     return (
       <li className={styles.root}>
         <Link to={`/?jobId=${job.id}#${serialize(job.bbox)}`} activeClassName={styles.active} className={job.status}>
-          <h2>{job.name}</h2>
+          <h3>{job.name}</h3>
 
           <div className={styles.details}>
             <span className={styles.status}>{job.status}</span>
