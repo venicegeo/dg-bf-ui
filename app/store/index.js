@@ -66,6 +66,8 @@ function imagery(state = {
     return {...state, searching: false, error: action.err}
   case SELECT_IMAGE:
     return {...state, selection: action.feature}
+  case CREATE_JOB_SUCCESS:
+    return {...state, selection: null}
   default:
     return state
   }
