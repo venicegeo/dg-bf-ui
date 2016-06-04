@@ -78,6 +78,7 @@ function normalizeAlgorithm(serviceDescriptor) {
     id:           serviceDescriptor.serviceId,
     name:         serviceDescriptor.resourceMetadata.name,
     requirements: extractRequirements(serviceDescriptor.resourceMetadata.metadata),
+    type:         serviceDescriptor.resourceMetadata.metadata.Interface,
     url:          serviceDescriptor.url
   }
 }

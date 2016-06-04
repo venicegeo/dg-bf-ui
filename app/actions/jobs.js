@@ -28,7 +28,7 @@ export function createJob(catalogApiKey, name, algorithm, feature) {
     const bbox = fromFeature(feature)
     const client = new Client(GATEWAY, getState().login.authToken)
     const body = {
-      algoType: algorithm.name,
+      algoType: algorithm.type,
       svcURL: algorithm.url,
       pzAuthToken: client.authToken,
       pzAddr: client.gateway,
