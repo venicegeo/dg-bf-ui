@@ -82,8 +82,12 @@ function jobs(state = {
     return {...state, fetching: true}
   case FETCH_JOBS_SUCCESS:
     return {...state, fetching: false, records: action.records}
+  case CREATE_JOB:
+    return {...state, creating: true}
   case CREATE_JOB_SUCCESS:
     return {...state, creating: false, records: state.records.concat(action.record)}
+  case CREATE_JOB_ERROR:
+    return {...state, creating: false, error: action.err}
   case UPDATE_JOB:
     return {...state, records: state.records.map(job => {
       if (job.id === action.jobId) {

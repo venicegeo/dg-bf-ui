@@ -87,7 +87,6 @@ class CreateJob extends Component {
             jobId
           }
         })
-        console.debug('WHEEE!', jobId)
       })
   }
 
