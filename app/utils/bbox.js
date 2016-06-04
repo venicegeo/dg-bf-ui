@@ -20,5 +20,5 @@ export function fromFeature(geojsonFeature) {
     throw new Error('Input must be a GeoJSON Feature')
   }
   const geometry = new ol.format.GeoJSON().readGeometry(geojsonFeature.geometry)
-  return ol.proj.transformExtent(geometry, WEB_MERCATOR, WGS84)
+  return ol.proj.transformExtent(geometry.getExtent(), WEB_MERCATOR, WGS84)
 }
