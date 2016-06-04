@@ -4,7 +4,7 @@ import AlgorithmList from './AlgorithmList'
 import ImagerySearch from './ImagerySearch'
 import NewJobDetails from './NewJobDetails'
 import {deserialize} from '../utils/bbox'
-import {searchImageCatalog} from '../actions'
+import {createJob, searchImageCatalog} from '../actions'
 import styles from './CreateJob.css'
 
 function selector(state) {
@@ -78,6 +78,17 @@ class CreateJob extends Component {
   //
 
   _handleJobSubmit(algorithm) {
+    const {catalogApiKey, name} = this.state
+    this.props.dispatch(createJob(catalogApiKey, name, algorithm, this.props.imagery.selection))
+      .then(jobId => {
+        this.context.router.push({
+          pathname: '/jobs',
+          query: {
+            jobId
+          }
+        })
+        console.debug('WHEEE!', jobId)
+      })
   }
 
   _handleNameChange(name) {

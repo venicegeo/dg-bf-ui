@@ -1,5 +1,6 @@
 import {Client} from '../utils/piazza-client'
 import * as worker from './workers/jobs'
+import {fromFeature} from '../utils/bbox'
 import {GATEWAY, JOBS_WORKER} from '../config'
 
 import {STATUS_RUNNING} from '../constants'
@@ -22,8 +23,9 @@ export const UPDATE_JOB = 'UPDATE_JOB'
 // Action Creators
 //
 
-export function createJob({catalogApiKey, name, algorithm, feature}) {
+export function createJob(catalogApiKey, name, algorithm, feature) {
   return (dispatch, getState) => {
+    const bbox = fromFeature(feature)
     const client = new Client(GATEWAY, getState().login.authToken)
     const body = {
       algoType: algorithm.name,
@@ -39,7 +41,7 @@ export function createJob({catalogApiKey, name, algorithm, feature}) {
     })
     // return client.post('execute-service', body)
     // HACK
-    return fetch('https://bf-handle.int.geointservices.io/execute', {
+    return fetch(GATEWAY.indexOf('localhost') ? 'http://localhost:3002/execute' : 'https://bf-handle.int.geointservices.io/execute', {
       body: JSON.stringify(body),
       headers: {
         'content-type': 'application/json'
@@ -54,7 +56,8 @@ export function createJob({catalogApiKey, name, algorithm, feature}) {
       })
     // HACK
       .then(id => {
-        dispatch(createJobSuccess(id, name, algorithm))
+        dispatch(createJobSuccess(id, name, algorithm, bbox))
+        return id
       })
       .catch(err => {
         dispatch(createJobError(err))
@@ -101,10 +104,11 @@ function createJobError(err) {
   }
 }
 
-function createJobSuccess(id, name, algorithm) {
+function createJobSuccess(id, name, algorithm, bbox) {
   return {
     type: CREATE_JOB_SUCCESS,
     record: {
+      bbox,
       id,
       name,
       algorithmName: algorithm.name,
