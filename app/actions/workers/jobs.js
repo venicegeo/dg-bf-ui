@@ -65,11 +65,11 @@ function fetchGeoJsonId(status) {
   console.debug('(jobs:worker) <%s> resolving file ID (via <%s>)', status.jobId, metadataId)
   return _client.getFile(metadataId)
     .then(metadata => {
-      const [geojsonId] = metadata.match(/^[0-9a-f-]+$/i)
-      if (!geojsonId) {
+      const guids = metadata.match(/^[0-9a-f-]+$/i)
+      if (!guids) {
         throw new Error('Could not find GeoJSON file in execution output')
       }
-      return {...status, resultId: geojsonId}
+      return {...status, resultId: guids[0]}
     })
 }
 
