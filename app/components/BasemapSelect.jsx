@@ -20,7 +20,7 @@ export default class BasemapSelect extends Component {
     const current = basemaps[index]
     return (
       <div className={`${styles.root} ${className} ${isOpen ? styles.isOpen : ''}`}>
-        <button className={styles.button} onClick={this._toggleOpen}>
+        <div className={styles.button} onClick={this._toggleOpen}>
           <label>
             <svg viewBox="0 0 40 33">
               <polygon points="36.4644661 17.3228873 40 19.5276993 20 32 0 19.5276993 3.53553391 17.3228873 20 27.5903758 36.4644661 17.3228873"/>
@@ -29,7 +29,7 @@ export default class BasemapSelect extends Component {
             {current}
           </label>
           <span><i className="fa fa-caret-down"/></span>
-        </button>
+        </div>
         <ul className={styles.options}>
           {basemaps.map((basemap, i) => (
             <li key={i}

@@ -25,6 +25,7 @@
   color: inherit;
   font-family: inherit;
   background-color: transparent;
+  cursor: pointer;
 }
 
 .button label,
