@@ -56,6 +56,16 @@ export function createJob(catalogApiKey, name, algorithm, feature) {
       })
     // HACK
       .then(id => {
+        // HACK HACK HACK HACK HACK
+        // Handles the direct calls to bf-handle until we get it pz-servicified
+        if (id.trim().match(/^[0-9a-f-]+$/i)) {
+          const resultId = id.trim()
+          const adhocJobId = 'ADHOC-' + resultId
+          dispatch(createJobSuccess(adhocJobId, name, algorithm, bbox))
+          dispatch(updateJob(adhocJobId, 'Success', resultId))
+          return
+        }
+        // HACK HACK HACK HACK HACK
         dispatch(createJobSuccess(id, name, algorithm, bbox))
         return id
       })
