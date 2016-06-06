@@ -12,7 +12,7 @@ import * as bboxUtil from '../utils/bbox'
 import {TILE_PROVIDERS} from '../config'
 import styles from './PrimaryMap.css'
 
-const INITIAL_CENTER = [-20, 0]
+const INITIAL_CENTER = [110, 0]
 const MIN_ZOOM = 2.5
 const MAX_ZOOM = 22
 const RESOLUTION_CLOSE = 1000
@@ -100,7 +100,7 @@ export default class PrimaryMap extends Component {
   render() {
     const basemapNames = TILE_PROVIDERS.map(b => b.name)
     return (
-      <main className={styles.root} ref="container">
+      <main className={styles.root} ref="container" tabIndex="1">
         <BasemapSelect className={styles.basemapSelect}
                        basemaps={basemapNames}
                        changed={basemapIndex => this.setState({basemapIndex})}/>
