@@ -87,16 +87,16 @@ function jobs(state = {
   case CREATE_JOB:
     return {...state, creating: true}
   case CREATE_JOB_SUCCESS:
-    return {...state, creating: false, records: state.records.concat(action.record)}
+    return {...state, creating: false, records: serializeJobRecords(state.records.concat(action.record))}
   case CREATE_JOB_ERROR:
     return {...state, creating: false, error: action.err}
   case UPDATE_JOB:
-    return {...state, records: state.records.map(job => {
+    return {...state, records: serializeJobRecords(state.records.map(job => {
       if (job.id === action.jobId) {
         return {...job, status: action.status, resultId: action.resultId}
       }
       return job
-    })}
+    }))}
   default:
     return state
   }
@@ -176,3 +176,12 @@ const beachfrontApp = combineReducers({
 })
 
 export default applyMiddleware(thunkMiddleware)(createStore)(beachfrontApp)
+
+//
+// Internals
+//
+
+function serializeJobRecords(records) {
+  sessionStorage.setItem('jobs', JSON.stringify(records))
+  return records
+}
