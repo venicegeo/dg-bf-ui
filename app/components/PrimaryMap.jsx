@@ -553,6 +553,7 @@ function generateProgressBarOverlay(dataset) {
 function generateSelectInteraction(...layers) {
   return new ol.interaction.Select({
     layers,
+    condition: ol.events.condition.click,
     style: new ol.style.Style({
       fill: new ol.style.Fill({
         color: 'red'
