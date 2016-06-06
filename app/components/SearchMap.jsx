@@ -18,21 +18,21 @@ export default class SearchMap extends Component {
     super()
     this.state = {modalIsOpen: null}
     this._handleSubmit = this._handleSubmit.bind(this)
-    console.log("made it to searchmap")
+    console.log('made it to searchmap')
   }
 
   openModal() {
-    this.setState({modalIsOpen: true});
+    this.setState({modalIsOpen: true})
   }
 
   closeModal() {
-    this.setState({modalIsOpen: false});
+    this.setState({modalIsOpen: false})
   }
 
   handleModalCloseRequest() {
     // opportunity to validate something and keep the modal open even if it
     // requested to be closed
-    this.setState({modalIsOpen: false});
+    this.setState({modalIsOpen: false})
   }
 
 
