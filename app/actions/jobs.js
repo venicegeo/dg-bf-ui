@@ -60,7 +60,7 @@ export function createJob(catalogApiKey, name, algorithm, feature) {
         // Handles the direct calls to bf-handle until we get it pz-servicified
         if (id.trim().match(/^[0-9a-f-]+$/i)) {
           const resultId = id.trim()
-          const adhocJobId = 'ADHOC-' + resultId
+          const adhocJobId = 'ADHOC_' + resultId + '_' + Date.now()
           dispatch(createJobSuccess(adhocJobId, name, algorithm, bbox))
           dispatch(updateJob(adhocJobId, 'Success', resultId))
           return
