@@ -35,7 +35,7 @@ export function searchImageCatalog(apiKey, bbox, dateFrom /*, dateTo*/) {
     })
 
     const acquiredDate = moment(dateFrom).toISOString()
-    return fetch(`${CATALOG}/discover?acquiredDate=${acquiredDate}&bbox=${bbox}&cloudCover=1`)
+    return fetch(`${CATALOG}/discover?acquiredDate=${acquiredDate}&bbox=${bbox}&cloudCover=0.1`)
       .then(response => {
         if (response.ok) {
           return response.json()
