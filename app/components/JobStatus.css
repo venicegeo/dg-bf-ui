@@ -1,60 +1,39 @@
 :root {
   --base-color: #175B82;
+  --padding-size: 15px;
 }
 
-.root > a {
-  display: block;
-  padding: 15px 30px;
-  text-decoration: none;
+.root {
+  display: flex;
+  background-color: #fff;
+  border-bottom: 1px solid color(black alpha(7%));
+}
+
+/* Statuses
+   ========================================================================= */
+
+.succeeded {}
+
+.running {}
+
+.failed {
+  background-color: hsl(340, 95%, 95%);
+  border-left: 2px solid;
+  color: #822;
+}
+
+.failed h3 {
   color: inherit;
-  transition: background-color .25s linear, border .1s ease-in-out;
 }
 
-.root + .root > a {
-  box-shadow: inset 0 1px color(black alpha(7%));
+.timedOut {
+  composes: failed;
 }
 
-:global(.Error) {
-  background-color: color(red alpha(10%));
-}
-
+/* TODO actually use this */
 .active {
   background-color: color(#00a3ff alpha(10%));
   border-left: 5px solid var(--base-color);
-}
-
-/* =========================================================================
-   Heading
-   ========================================================================= */
-
-.root h3 {
-  margin-bottom: .2em;
-  font-size: 16px;
-}
-
-/* =========================================================================
-   Controls
-   ========================================================================= */
-
-.button {
-  display: inline-block;
-  padding: .5em 1em;
-  border: none;
-  border-radius: 6px;
-  text-align: center;
-  text-decoration: none;
-  font-weight: normal;
-  font-size: 13px;
-  background-color: var(--base-color);
-  color: white;
-}
-
-.controls a:hover {
-  background-color: color(var(--base-color) lightness(23%));
-}
-
-.controls a + a {
-  margin-left: .5em;
 }
 
 /* =========================================================================
@@ -62,6 +41,23 @@
    ========================================================================= */
 
 .details {
+  flex: 1;
+}
+
+.details h3 {
+  margin: 0 var(--padding-size) .2em;
+  font-size: 16px;
+}
+
+.metadata {
+  /* TODO collapse by default */
+}
+
+/* =========================================================================
+   Summary
+   ========================================================================= */
+
+.summary {
   display: flex;
   justify-content: space-between;
   font-size: 14px;
@@ -69,4 +65,54 @@
 
 .timer {
   opacity: .4;
+}
+
+/* =========================================================================
+   Controls
+   ========================================================================= */
+
+.controls {
+  --control-background-color: #1675aa;
+  display: flex;
+  flex-direction: column;
+  align-content: stretch;
+  font-size: 15px;
+}
+
+.controls a {
+  position: relative;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-end;
+  flex: 1;
+  padding: 0 15px;
+  background-color: var(--control-background-color);
+  color: white;
+  opacity: .6;
+  text-decoration: none;
+}
+
+.controls a:hover {
+  opacity: 1;
+}
+
+.controls a:before {
+  content: attr(title);
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  position: absolute;
+  right: 43px;
+  top: 0;
+  bottom: 0;
+  background: var(--control-background-color);
+  width: 0;
+  overflow: hidden;
+  transition: width .1s ease-in-out;
+  white-space: nowrap;
+}
+
+.controls:hover a:before {
+  width: 120px;
 }

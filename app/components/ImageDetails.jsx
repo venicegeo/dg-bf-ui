@@ -22,12 +22,13 @@ export default class ImageDetails extends Component {
   render() {
     const {feature} = this.props
     if (!feature) {
-      return <div/>
+      return <div role="no-feature-selected"/>
     }
 
+    const id = normalizeId(feature.id)
     return (
       <div className={styles.root}>
-        <h1>{feature.id || 'nil'}</h1>
+        <h1 title={id}>{id}</h1>
 
         <dl>
           {/*
@@ -49,4 +50,11 @@ export default class ImageDetails extends Component {
       </div>
     )
   }
+}
+
+function normalizeId(featureId) {
+  if (!featureId) {
+    return 'nil'
+  }
+  return featureId.replace('pl:landsat:', '')
 }

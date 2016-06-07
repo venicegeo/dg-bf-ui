@@ -1,27 +1,74 @@
+:root {
+  --detail-overlay-heading-color: white;
+  --detail-overlay-table-color: #1675aa;
+  --detail-overlay-shadow-color: rgba(0,0,0,.2);
+}
+
+/* =========================================================================
+   Container
+   ========================================================================= */
+
 .root {
   position: absolute;
-  padding: 15px;
-  width: 200px;
-  border-radius: 5px;
+  top: 0;
+  left: 20px;
   color: white;
-  background-color: #1675aa;
-  box-shadow: 0 0 0 5px white, 0 0 0 20px rgba(255,255,255,.7);
   font-size: 14px;
 }
 
+.root:before {
+  content: '';
+  display: inline-block;
+  position: absolute;
+  top: 0;
+  left: -20px;
+  border-right: 20px solid var(--detail-overlay-heading-color);
+  border-bottom: 20px solid transparent;
+  pointer-events: none;
+  filter: drop-shadow(0px 6px var(--detail-overlay-shadow-color));
+}
+
+/* =========================================================================
+   Heading
+   ========================================================================= */
+
 .root h1 {
+  margin: 0;
+  padding: .5em;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow-x: hidden;
+  max-width: 200px;
+  font-size: 1.1em;
+  border-top-right-radius: 3px;
+  background-color: var(--detail-overlay-heading-color);
+  color: var(--detail-overlay-table-color);
+}
+
+/* =========================================================================
+   Table
+   ========================================================================= */
+
+.root dl {
+  margin: 0;
+  padding: 1em;
+  border-bottom-left-radius: 3px;
+  border-bottom-right-radius: 3px;
+  box-shadow:
+    inset 0 3px var(--detail-overlay-shadow-color),
+    0 6px var(--detail-overlay-shadow-color);
+  background-color: color(var(--detail-overlay-table-color) alpha(92%));
   color: white;
-  font-size: 1.5em;
-  word-break: break-all;
-  border-bottom: 1px solid;
-  margin: 0 -15px;
-  padding: 0 15px 15px;
 }
 
 .root dt {
   font-weight: bold;
   text-transform: uppercase;
   font-size: .8em;
+}
+
+.root dd {
+  margin-left: 1em;
 }
 
 .root dd + dt {

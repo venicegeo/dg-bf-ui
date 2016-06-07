@@ -336,7 +336,7 @@ export default class PrimaryMap extends Component {
         const selectedImageFeature = new ol.format.GeoJSON().writeFeatureObject(feature)
         this.props.onImageSelect(selectedImageFeature)
         this.setState({selectedImageFeature})
-        this._imageDetailsOverlay.setPosition(ol.extent.getTopRight(feature.getGeometry().getExtent()))
+        this._imageDetailsOverlay.setPosition(ol.extent.getCenter(feature.getGeometry().getExtent()))
       } else {
         this.props.onImageSelect(null)
         this.setState({selectedImageFeature: null})
@@ -528,7 +528,7 @@ function generateImageryDetailsOverlay(componentRef) {
     autoPan: true,
     element: findDOMNode(componentRef),
     id: 'imageryDetails',
-    positioning: 'bottom-right'
+    positioning: 'top-left'
   })
 }
 
@@ -556,7 +556,7 @@ function generateSelectInteraction(...layers) {
     condition: ol.events.condition.click,
     style: new ol.style.Style({
       fill: new ol.style.Fill({
-        color: 'red'
+        color: 'rgba(0, 255, 0, 0.5)'
       })
     })
   })
