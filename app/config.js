@@ -9,7 +9,7 @@ export const JOBS_WORKER = {
 }
 
 export const ALGORITHMS_WORKER = {
-  INTERVAL: 60 * time.second
+  INTERVAL: 30 * time.minute
 }
 
 export const TILE_PROVIDERS = [
