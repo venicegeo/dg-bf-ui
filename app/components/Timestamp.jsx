@@ -26,7 +26,7 @@ export default class Timestamp extends Component {
 
   render() {
     const t = moment(this.props.timestamp)
-    const relativeTimestamp = t.fromNow(true)
+    const relativeTimestamp = t.fromNow()
     const staticTimestamp   = t.format('llll')
     return (
       <span className={`${styles.root} ${this.props.className}`}

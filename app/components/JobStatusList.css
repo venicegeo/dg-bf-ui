@@ -9,6 +9,10 @@
   text-align: center;
 }
 
+.root ul {
+  background-color: #c8ced2;
+}
+
 .placeholder {
   font-size: 1.4em;
   text-align: center;

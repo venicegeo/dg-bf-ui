@@ -25,7 +25,6 @@ export const UPDATE_JOB = 'UPDATE_JOB'
 
 export function createJob(catalogApiKey, name, algorithm, feature) {
   return (dispatch, getState) => {
-    const bbox = fromFeature(feature)
     const client = new Client(GATEWAY, getState().login.authToken)
     const body = {
       algoType: algorithm.type,
@@ -56,17 +55,18 @@ export function createJob(catalogApiKey, name, algorithm, feature) {
       })
     // HACK
       .then(id => {
+        const bbox = fromFeature(feature)
         // HACK HACK HACK HACK HACK
         // Handles the direct calls to bf-handle until we get it pz-servicified
         if (id.trim().match(/^[0-9a-f-]+$/i)) {
           const resultId = id.trim()
           const adhocJobId = 'ADHOC_' + resultId + '_' + Date.now()
-          dispatch(createJobSuccess(adhocJobId, name, algorithm, bbox))
+          dispatch(createJobSuccess(adhocJobId, name, algorithm, bbox, feature.id))
           dispatch(updateJob(adhocJobId, 'Success', resultId))
           return
         }
         // HACK HACK HACK HACK HACK
-        dispatch(createJobSuccess(id, name, algorithm, bbox))
+        dispatch(createJobSuccess(id, name, algorithm, bbox, feature.id))
         return id
       })
       .catch(err => {
@@ -114,12 +114,13 @@ function createJobError(err) {
   }
 }
 
-function createJobSuccess(id, name, algorithm, bbox) {
+function createJobSuccess(id, name, algorithm, bbox, imageId) {
   return {
     type: CREATE_JOB_SUCCESS,
     record: {
       bbox,
       id,
+      imageId,
       name,
       algorithmName: algorithm.name,
       createdOn: Date.now(),
