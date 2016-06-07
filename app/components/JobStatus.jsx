@@ -25,7 +25,7 @@ export default class JobStatus extends Component {
   constructor() {
     super()
     this.state = {isExpanded: false}
-    this._toggleExpansion = this._toggleExpansion.bind(this)
+    this._handleExpansionToggle = this._handleExpansionToggle.bind(this)
   }
 
   render() {
@@ -33,7 +33,7 @@ export default class JobStatus extends Component {
     const {job} = this.props
     return (
       <li className={`${styles.root} ${this._classForStatus} ${this._classForExpansion}`}>
-        <div className={styles.details} onClick={this._toggleExpansion}>
+        <div className={styles.details} onClick={this._handleExpansionToggle}>
           <h3 className={styles.title}>
             <i className={`fa fa-chevron-right ${styles.caret}`}/>
             <span>{job.name}</span>
@@ -92,7 +92,7 @@ export default class JobStatus extends Component {
     }
   }
 
-  _toggleExpansion() {
+  _handleExpansionToggle() {
     this.setState({isExpanded: !this.state.isExpanded})
   }
 }
