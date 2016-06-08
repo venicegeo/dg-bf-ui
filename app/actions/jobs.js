@@ -3,7 +3,11 @@ import * as worker from './workers/jobs'
 import {fromFeature} from '../utils/bbox'
 import {GATEWAY, JOBS_WORKER} from '../config'
 
-import {STATUS_RUNNING} from '../constants'
+import {
+  REQUIREMENT_BANDS,
+  REQUIREMENT_CLOUDCOVER,
+  STATUS_RUNNING
+} from '../constants'
 
 //
 // Action Types
@@ -32,7 +36,7 @@ export function createJob(catalogApiKey, name, algorithm, feature) {
       pzAuthToken: client.authToken,
       pzAddr: client.gateway,
       dbAuthToken: catalogApiKey,
-      bands: ['green', 'swir1'],  // FIXME
+      bands: algorithm.requirements.find(a => a.name === REQUIREMENT_BANDS).literal.split(','),
       metaDataJSON: feature
     }
     dispatch({

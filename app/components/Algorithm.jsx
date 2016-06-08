@@ -1,6 +1,11 @@
 import React, {Component} from 'react'
 import styles from './Algorithm.css'
 
+import {
+  REQUIREMENT_BANDS,
+  REQUIREMENT_CLOUDCOVER
+} from '../constants'
+
 export default class Algorithm extends Component {
   static propTypes = {
     algorithm: React.PropTypes.object,
@@ -28,7 +33,7 @@ export default class Algorithm extends Component {
           <tbody>
           {this.props.algorithm.requirements.map(r => (
             <tr key={r.name}
-                className={isCompatible(r, this.props.imageProperties) ? styles.unmet : styles.met}>
+                className={isCompatible(r, this.props.imageProperties) ? styles.met : styles.unmet}>
               <th>{r.name}</th>
               <td>{r.description}</td>
             </tr>
@@ -47,10 +52,10 @@ export default class Algorithm extends Component {
 
 function isCompatible(requirement, imageProperties) {
   switch (requirement.name) {
-  case 'Bands':
+  case REQUIREMENT_BANDS:
     return requirement.literal.split(',').every(s => imageProperties.bands[s])
-  case 'Cloud Cover':
-    return imageProperties.cloudCover < requirement.literal
+  case REQUIREMENT_CLOUDCOVER:
+    return imageProperties.cloudCover < (requirement.literal / 10)
   default:
     return false
   }

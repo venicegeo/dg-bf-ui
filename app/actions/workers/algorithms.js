@@ -1,5 +1,10 @@
 const IMAGE_REQUIREMENT_PREFIX = 'ImgReq - '
 
+import {
+  REQUIREMENT_BANDS,
+  REQUIREMENT_CLOUDCOVER
+} from '../../constants'
+
 let _client, _handlers, _instance
 
 export function start(client, interval, {beforeFetch, onFailure, onTerminate, onUpdate, shouldRun}) {
@@ -59,12 +64,13 @@ function normalizeRequirement(key, value) {
   let description = value.trim()
   switch (name) {
   case 'bands':
-    name = 'Bands'
+    name = REQUIREMENT_BANDS
     description = description.toUpperCase().split(',').join(' and ')
     break
   case 'cloudCover':
-    name = 'Cloud Cover'
+    name = REQUIREMENT_CLOUDCOVER
     description = `Less than ${description}%`
+    value = parseFloat(value)
     break
   default:
     break
