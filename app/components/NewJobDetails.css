@@ -1,3 +1,5 @@
 .field {
   composes: field-normal from '../styles/forms.css';
+  margin-top: 1em;
+  margin-bottom: 1em;
 }
