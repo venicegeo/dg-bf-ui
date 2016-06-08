@@ -27,3 +27,12 @@ h6 {
   font-weight: 400;
   margin: 0;
 }
+
+/* Composites
+   ========================================================================= */
+
+.heading {
+  font-family: Montserrat, sans-serif;
+  font-weight: 400;
+  margin: 0;
+}

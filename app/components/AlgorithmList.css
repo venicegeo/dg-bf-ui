@@ -1,3 +1,7 @@
+.root ul {
+  margin-right: 15px;
+}
+
 .root li {
   margin: 1em 0;
 }
