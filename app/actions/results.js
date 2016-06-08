@@ -23,17 +23,14 @@ export function changeLoadedResults(ids = []) {
       const isLoadedOrLoading = results[job.id]
 
       if (shouldLoad && isLoadedOrLoading) {
-        console.debug('changeLoadedResults - ignoring', job.id)
         return  // Nothing to do
       }
 
       if (!shouldLoad && isLoadedOrLoading) {
-        console.debug('changeLoadedResults - will unload', job.id)
         return dispatch(unloadResult(job.id))  // TODO -- cancel any in-flight promises
       }
 
       if (shouldLoad && !isLoadedOrLoading) {
-        console.debug('changeLoadedResults - will load', job.id)
         return dispatch(loadResult(job.id, job.resultId))
       }
     })
