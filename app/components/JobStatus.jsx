@@ -18,21 +18,32 @@ export default class JobStatus extends Component {
     job: React.PropTypes.shape({
       id: React.PropTypes.string,
       name: React.PropTypes.string,
+      resultId: React.PropTypes.string,
       status: React.PropTypes.string
-    })
+    }),
+    result: React.PropTypes.object,
+    onDownload: React.PropTypes.func
   }
 
   constructor() {
     super()
-    this.state = {isExpanded: false}
+    this.state = {isDownloading: false, isExpanded: false}
+    this._handleDownloadClicked = this._handleDownloadClicked.bind(this)
     this._handleExpansionToggle = this._handleExpansionToggle.bind(this)
   }
 
-  render() {
+  componentWillReceiveProps(nextProps) {
+    if (this.state.isDownloading && nextProps.result && nextProps.result.geojson) {
+      this._triggerDownload(nextProps.result.geojson)
+    }
+  }
+
+  render() {  // eslint-disable-line
     // TODO -- style for "active"
     const {job} = this.props
+    const progress = calculateProgress(this.props.result) || {}
     return (
-      <li className={`${styles.root} ${this._classForStatus} ${this._classForExpansion}`}>
+      <li className={`${styles.root} ${this._classForStatus} ${this._classForExpansion} ${this._classForDownloading} ${this._classForLoading}`}>
         <div className={styles.details} onClick={this._handleExpansionToggle}>
           <h3 className={styles.title}>
             <i className={`fa fa-chevron-right ${styles.caret}`}/>
@@ -42,6 +53,10 @@ export default class JobStatus extends Component {
           <div className={styles.summary}>
             <span className={styles.status}>{job.status}</span>
             <Timer className={styles.timer} timestamp={job.createdOn}/>
+          </div>
+
+          <div className={styles.progressBar} title={progress.verbose}>
+            <div className={styles.puck} style={{width: progress.percentage}}></div>
           </div>
 
           <div className={styles.metadata}>
@@ -64,12 +79,13 @@ export default class JobStatus extends Component {
             <i className="fa fa-globe"/>
           </Link>
           {job.status === STATUS_SUCCESS && (
-            <a download={`${job.name}.geojson`} href={job.geojsonUrl} title="Download">
-              <i className="fa fa-cloud-download"/>
+            <a className={styles.download}
+               title={this.state.isDownloading ? progress.percentage : 'Download'}
+               onClick={this._handleDownloadClicked}>
+              {this.state.isDownloading ? progress.percentage : <i className="fa fa-cloud-download"/>}
             </a>
           )}
         </div>
-
       </li>
     )
   }
@@ -78,8 +94,16 @@ export default class JobStatus extends Component {
   // Internals
   //
 
+  get _classForDownloading() {
+    return this.state.isDownloading ? styles.isDownloading : ''
+  }
+
   get _classForExpansion() {
     return this.state.isExpanded ? styles.isExpanded : ''
+  }
+
+  get _classForLoading() {
+    return (this.props.result && this.props.result.loading) ? styles.isLoading : ''
   }
 
   get _classForStatus() {
@@ -92,7 +116,46 @@ export default class JobStatus extends Component {
     }
   }
 
+  _handleDownloadClicked() {
+    const {result} = this.props
+    if (result && result.geojson) {
+      this._triggerDownload(result.geojson)
+      return
+    }
+    if (!this.state.isDownloading) {
+      this.setState({isDownloading: true})
+      setTimeout(() => this.props.onDownload(this.props.job))
+    }
+  }
+
   _handleExpansionToggle() {
     this.setState({isExpanded: !this.state.isExpanded})
+  }
+
+  _triggerDownload(contents) {
+    this.setState({isDownloading: false})
+    const file = new File([contents], {type: 'application/json'})
+    const virtualHyperlink = document.createElement('a')
+    virtualHyperlink.href = URL.createObjectURL(file)
+    virtualHyperlink.download = this.props.job.name + '.geojson'
+    virtualHyperlink.click()
+  }
+}
+
+//
+// Helper Component
+//
+
+const MB = 1024000
+
+function calculateProgress(result) {
+  if (result && result.progress && result.progress.total) {
+    const {loaded, total} = result.progress
+    const loadedMB = (Math.round((loaded / MB) * 10) / 10)
+    const totalMB = (Math.round((total / MB) * 10) / 10)
+    return {
+      percentage: Math.ceil((loaded / total) * 100) + '%',
+      verbose: `Retrieving GeoJSON (${loadedMB} of ${totalMB}MB)`
+    }
   }
 }

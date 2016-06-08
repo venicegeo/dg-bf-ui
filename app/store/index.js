@@ -123,8 +123,12 @@ function login(state = {
 function results(state = {}, action) {
   const {jobId} = action
   switch (action.type) {
+  /*
+   Caching for results needs to live in the action creator.  Because of the potentially huge
+   size of the GeoJSON, keeping that in the state tree is probably a bad idea.
+   */
   case LOAD_RESULT:
-    return {...state, [jobId]: {...state[jobId], loading: true}}
+    return {...state, [jobId]: {loading: true}}
   case LOAD_RESULT_SUCCESS:
     return {...state, [jobId]: {...state[jobId], loading: false, geojson: action.geojson}}
   case LOAD_RESULT_ERROR:
