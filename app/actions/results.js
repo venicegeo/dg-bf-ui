@@ -23,17 +23,14 @@ export function changeLoadedResults(ids = []) {
       const isLoadedOrLoading = results[job.id]
 
       if (shouldLoad && isLoadedOrLoading) {
-        console.debug('changeLoadedResults - ignoring', job.id)
         return  // Nothing to do
       }
 
       if (!shouldLoad && isLoadedOrLoading) {
-        console.debug('changeLoadedResults - will unload', job.id)
         return dispatch(unloadResult(job.id))  // TODO -- cancel any in-flight promises
       }
 
       if (shouldLoad && !isLoadedOrLoading) {
-        console.debug('changeLoadedResults - will load', job.id)
         return dispatch(loadResult(job.id, job.resultId))
       }
     })
@@ -41,14 +38,44 @@ export function changeLoadedResults(ids = []) {
   }
 }
 
+export function downloadResult(jobId) {
+  return (dispatch, getState) => {
+    const job = getState().jobs.records.find(j => j.id === jobId)
+    if (!job) {
+      console.error('Job <%s> does not exist', jobId)
+      return
+    }
+    return dispatch(loadResult(job.id, job.resultId))
+  }
+}
+
 function loadResult(jobId, resultId) {
   return (dispatch, getState) => {
-    const client = new Client(GATEWAY, getState().login.authToken)
-    // TODO -- force cache on result fetch
+    const state = getState()
+    const client = new Client(GATEWAY, state.login.authToken)
+
+    if (state.results[jobId]) {
+      console.debug('(results:loadResult) cache hit: <%s>', jobId)
+      return  // Already loading or loaded
+    }
+
+    console.debug('(results:loadResult) cache miss: <%s>', jobId)
+    dispatch({
+      type: LOAD_RESULT,
+      jobId
+    })
+
+    const cached = readCached(jobId)
+    if (cached) {
+      dispatch(loadResultSuccess(jobId, cached))
+      return
+    }
+
     return client.getFile(resultId, (loaded, total) => {
       dispatch(loadResultProgressed(jobId, loaded, total))
     })
       .then(str => {
+        writeCache(jobId, str)
         dispatch(loadResultSuccess(jobId, str))
       })
       .catch(err => {
@@ -87,4 +114,16 @@ function unloadResult(jobId) {
     type: UNLOAD_RESULT,
     jobId
   }
+}
+
+//
+// Internals
+//
+
+function writeCache(jobId, geojsonString) {
+  localStorage.setItem(`result:${jobId}`, geojsonString)
+}
+
+function readCached(jobId) {
+  return localStorage.getItem(`result:${jobId}`)
 }
