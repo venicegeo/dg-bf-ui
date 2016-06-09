@@ -206,7 +206,21 @@ const beachfrontApp = combineReducers({
   workers
 })
 
-export default applyMiddleware(thunkMiddleware)(createStore)(beachfrontApp)
+let devtoolsExtension = f => f
+if (process.env.NODE_ENV === 'development') {
+  if (typeof window.devToolsExtension === 'function') {
+    devtoolsExtension = window.devToolsExtension()
+  }
+}
+
+export function configureStore(initialState) {
+  return createStore(beachfrontApp, initialState,
+    compose(
+      applyMiddleware(thunkMiddleware),
+      devtoolsExtension
+    )
+  )
+}
 
 //
 // Internals
