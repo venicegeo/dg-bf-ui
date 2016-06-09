@@ -27,6 +27,7 @@ export default class ImagerySearch extends Component {
     error: React.PropTypes.object,
     isSearching: React.PropTypes.bool,
     onChange: React.PropTypes.func.isRequired,
+    onClearBbox: React.PropTypes.func.isRequired,
     onSubmit: React.PropTypes.func.isRequired
   }
 
@@ -50,6 +51,9 @@ export default class ImagerySearch extends Component {
         <h2>Search for Imagery</h2>
         <div className={styles.minimap}>
           <StaticMinimap bbox={bbox}/>
+          <div className={styles.clearBbox} onClick={this.props.onClearBbox}>
+            <i className="fa fa-times-circle"/> Clear
+          </div>
         </div>
 
         {error && (

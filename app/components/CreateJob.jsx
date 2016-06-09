@@ -39,6 +39,7 @@ class CreateJob extends Component {
     algorithms: React.PropTypes.array.isRequired,
     dispatch: React.PropTypes.func.isRequired,
     imagery: React.PropTypes.object.isRequired,
+    location: React.PropTypes.object.isRequired,
     params: React.PropTypes.object.isRequired
   }
 
@@ -47,6 +48,7 @@ class CreateJob extends Component {
     this.state = {name: null, catalogApiKey: null, dateFrom: null, dateTo: null}
     this._handleJobSubmit = this._handleJobSubmit.bind(this)
     this._handleNameChange = this._handleNameChange.bind(this)
+    this._handleClearBbox = this._handleClearBbox.bind(this)
     this._handleSearchSubmit = this._handleSearchSubmit.bind(this)
     this._handleSearchFormChange = this._handleSearchFormChange.bind(this)
   }
@@ -65,6 +67,7 @@ class CreateJob extends Component {
                            error={this.props.imagery.error}
                            isSearching={this.props.imagery.searching}
                            onChange={this._handleSearchFormChange}
+                           onClearBbox={this._handleClearBbox}
                            onSubmit={this._handleSearchSubmit}/>
           </li>}
 
@@ -109,6 +112,10 @@ class CreateJob extends Component {
 
   _handleNameChange(name) {
     this.setState({name})
+  }
+
+  _handleClearBbox() {
+    this.context.router.push({...this.props.location, pathname: '/create-job'})
   }
 
   _handleSearchFormChange(catalogApiKey, dateFrom, dateTo) {
