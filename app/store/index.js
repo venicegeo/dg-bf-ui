@@ -211,6 +211,38 @@ if (process.env.NODE_ENV === 'development') {
   if (typeof window.devToolsExtension === 'function') {
     devtoolsExtension = window.devToolsExtension()
   }
+  // DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG
+  // DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG
+  // sessionStorage.setItem('jobs', JSON.stringify([
+  //   {
+  //     algorithmName: 'test-algo-id',
+  //     createdOn: new Date().toISOString(),
+  //     id: 'indonesia',
+  //     name: 'Indonesia Fixture',
+  //     resultId: 'indonesia.geojson',
+  //     status: 'Success',
+  //     bbox: [110, 1, 112, -1]
+  //   },
+  //   {
+  //     algorithmName: 'test-algo-id',
+  //     createdOn: new Date(Date.now() - 3 * (24 * 60 * 60 * 1000)).toISOString(),
+  //     id: 'perth',
+  //     name: 'Perth Fixture',
+  //     resultId: 'perth.geojson',
+  //     status: 'Success',
+  //     bbox: [115.4, -32.52, 116.06, -31.88]
+  //   },
+  //   {
+  //     algorithmName: 'test-algo-id',
+  //     createdOn: new Date(0).toISOString(),
+  //     id: '_stalled',
+  //     name: 'Stalled Fixture',
+  //     status: 'Running',
+  //     bbox: [0, 0, 3, 3]
+  //   }
+  // ]))
+  // DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG
+  // DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG
 }
 
 export function configureStore(initialState) {
