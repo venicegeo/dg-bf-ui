@@ -99,7 +99,6 @@ export default class ImagerySearch extends Component {
   _emitOnChange() {
     const {apiKey, dateFrom, dateTo} = this.refs
     localStorage.setItem(KEY_CATALOG_API_KEY, apiKey.value)
-    console.debug('_emitOnChange', apiKey.value, dateFrom.value, dateTo.value)
     this.props.onChange(apiKey.value, dateFrom.value, dateTo.value)
   }
 
