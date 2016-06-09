@@ -51,13 +51,13 @@ class Application extends Component {
 
   static propTypes = {
     children: React.PropTypes.element,
-    datasets: React.PropTypes.array,
-    dispatch: React.PropTypes.func,
-    imagery: React.PropTypes.object,
-    location: React.PropTypes.object,
-    loggedIn: React.PropTypes.bool,
-    params: React.PropTypes.object,
-    workers: React.PropTypes.object
+    datasets: React.PropTypes.array.isRequired,
+    dispatch: React.PropTypes.func.isRequired,
+    imagery: React.PropTypes.object.isRequired,
+    location: React.PropTypes.object.isRequired,
+    loggedIn: React.PropTypes.bool.isRequired,
+    params: React.PropTypes.object.isRequired,
+    workers: React.PropTypes.object.isRequired
   }
 
   constructor() {

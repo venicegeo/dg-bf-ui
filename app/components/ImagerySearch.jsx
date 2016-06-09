@@ -26,8 +26,8 @@ export default class ImagerySearch extends Component {
     bbox: React.PropTypes.array,
     error: React.PropTypes.object,
     isSearching: React.PropTypes.bool,
-    onChange: React.PropTypes.func,
-    onSubmit: React.PropTypes.func
+    onChange: React.PropTypes.func.isRequired,
+    onSubmit: React.PropTypes.func.isRequired
   }
 
   constructor() {

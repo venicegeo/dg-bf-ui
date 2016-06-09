@@ -20,7 +20,7 @@ import styles from './NewJobDetails.css'
 export default class NewJobDetails extends Component {
   static propTypes = {
     className: React.PropTypes.string,
-    onNameChange: React.PropTypes.func
+    onNameChange: React.PropTypes.func.isRequired
   }
 
   constructor() {

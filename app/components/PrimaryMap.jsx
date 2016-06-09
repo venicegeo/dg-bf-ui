@@ -59,7 +59,7 @@ export default class PrimaryMap extends Component {
       startIndex: React.PropTypes.number.isRequired,
       images: React.PropTypes.object.isRequired
     }),
-    mode: React.PropTypes.string,
+    mode: React.PropTypes.string.isRequired,
     onBoundingBoxChange: React.PropTypes.func.isRequired,
     onImageSelect: React.PropTypes.func.isRequired
   }

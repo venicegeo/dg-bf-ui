@@ -36,10 +36,10 @@ class CreateJob extends Component {
   }
 
   static propTypes = {
-    algorithms: React.PropTypes.array,
-    dispatch: React.PropTypes.func,
-    imagery: React.PropTypes.object,
-    params: React.PropTypes.object
+    algorithms: React.PropTypes.array.isRequired,
+    dispatch: React.PropTypes.func.isRequired,
+    imagery: React.PropTypes.object.isRequired,
+    params: React.PropTypes.object.isRequired
   }
 
   constructor() {

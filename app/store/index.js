@@ -14,7 +14,7 @@
  * limitations under the License.
  **/
 
-import {applyMiddleware, createStore, combineReducers} from 'redux'
+import {applyMiddleware, createStore, combineReducers, compose} from 'redux'
 import thunkMiddleware from 'redux-thunk'
 
 import {

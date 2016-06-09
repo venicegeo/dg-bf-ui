@@ -36,9 +36,9 @@ export default class JobStatus extends Component {
       name: React.PropTypes.string,
       resultId: React.PropTypes.string,
       status: React.PropTypes.string
-    }),
-    result: React.PropTypes.object,
-    onDownload: React.PropTypes.func
+    }).isRequired,
+    onDownload: React.PropTypes.func.isRequired,
+    result: React.PropTypes.object
   }
 
   constructor() {
