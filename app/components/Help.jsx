@@ -19,17 +19,25 @@ import Modal from './Modal'
 import styles from './Help.css'
 
 export default class Help extends Component {
+  static contextTypes = {
+    router: React.PropTypes.object
+  }
+
   static propTypes = {
-    dismiss: React.PropTypes.func
+    location: React.PropTypes.object
   }
 
   render() {
     return (
-      <Modal className={styles.root} dismiss={this.props.dismiss}>
+      <Modal className={styles.root} onDismiss={() => this._dismiss()}>
         <h1>Help!</h1>
         <p>Need help?  Let us know we do this stuff for a living... literally!</p>
         <p><a href="mailto:venice@radiantblue.com">venice@radiantblue.com</a></p>
       </Modal>
     )
+  }
+
+  _dismiss() {
+    this.context.router.push({...this.props.location, pathname: '/'})
   }
 }
