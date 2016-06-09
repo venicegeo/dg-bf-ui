@@ -38,7 +38,7 @@ export default class ImagerySearch extends Component {
   }
 
   componentDidMount() {
-    this.refs.dateFrom.value = moment().subtract(5, 'days').format('YYYY-MM-DD')
+    this.refs.dateFrom.value = moment().subtract(14, 'days').format('YYYY-MM-DD')
     this.refs.dateTo.value = moment().format('YYYY-MM-DD')
     this.refs.apiKey.value = localStorage.getItem(KEY_CATALOG_API_KEY) || ''
     this._emitOnChange()
