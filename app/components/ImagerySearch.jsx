@@ -26,8 +26,9 @@ export default class ImagerySearch extends Component {
     bbox: React.PropTypes.array,
     error: React.PropTypes.object,
     isSearching: React.PropTypes.bool,
-    onChange: React.PropTypes.func,
-    onSubmit: React.PropTypes.func
+    onChange: React.PropTypes.func.isRequired,
+    onClearBbox: React.PropTypes.func.isRequired,
+    onSubmit: React.PropTypes.func.isRequired
   }
 
   constructor() {
@@ -37,7 +38,7 @@ export default class ImagerySearch extends Component {
   }
 
   componentDidMount() {
-    this.refs.dateFrom.value = moment().subtract(5, 'days').format('YYYY-MM-DD')
+    this.refs.dateFrom.value = moment().subtract(14, 'days').format('YYYY-MM-DD')
     this.refs.dateTo.value = moment().format('YYYY-MM-DD')
     this.refs.apiKey.value = localStorage.getItem(KEY_CATALOG_API_KEY) || ''
     this._emitOnChange()
@@ -50,6 +51,9 @@ export default class ImagerySearch extends Component {
         <h2>Search for Imagery</h2>
         <div className={styles.minimap}>
           <StaticMinimap bbox={bbox}/>
+          <div className={styles.clearBbox} onClick={this.props.onClearBbox}>
+            <i className="fa fa-times-circle"/> Clear
+          </div>
         </div>
 
         {error && (
@@ -95,7 +99,6 @@ export default class ImagerySearch extends Component {
   _emitOnChange() {
     const {apiKey, dateFrom, dateTo} = this.refs
     localStorage.setItem(KEY_CATALOG_API_KEY, apiKey.value)
-    console.debug('_emitOnChange', apiKey.value, dateFrom.value, dateTo.value)
     this.props.onChange(apiKey.value, dateFrom.value, dateTo.value)
   }
 

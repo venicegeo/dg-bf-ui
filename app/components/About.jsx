@@ -19,16 +19,24 @@ import Modal from './Modal'
 import styles from './About.css'
 
 export default class About extends Component {
+  static contextTypes = {
+    router: React.PropTypes.object
+  }
+
   static propTypes = {
-    dismiss: React.PropTypes.func
+    location: React.PropTypes.object
   }
 
   render() {
     return (
-      <Modal className={styles.root} dismiss={this.props.dismiss}>
+      <Modal className={styles.root} onDismiss={() => this._dismiss()}>
         <h1>Welcome to Beachfront</h1>
         <p>Beachfront is an NGA Services project aimed at providing automated near real time feature extraction of global shoreline captured at the best possible resolution based on available sources. Beachfront leverages computer vision algorithm services, the Piazza Platform, and incoming satellite imagery to provide this capability.</p>
       </Modal>
     )
+  }
+
+  _dismiss() {
+    this.context.router.push({...this.props.location, pathname: '/'})
   }
 }

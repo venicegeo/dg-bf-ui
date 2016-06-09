@@ -25,23 +25,25 @@ import CreateJob from './components/CreateJob'
 import JobStatusList from './components/JobStatusList'
 import Help from './components/Help'
 import About from './components/About'
-import store from './store'
+import {configureStore} from './store'
 
 export function bootstrap(element) {
   const history = useRouterHistory(createHistory)({
     basename: '/'
   })
+  const store = configureStore()
+  const loginFilter = createLoginFilter(store)
   render(
     <Provider store={store}>
       <Router history={history}>
         <Route path="/" component={Application}>
-          <IndexRoute component={FakeIndex} onEnter={enforceLogin}/>
+          <IndexRoute component={FakeIndex} onEnter={loginFilter}/>
           <Route path="login" component={Login}/>
-          <Route path="jobs" component={JobStatusList} onEnter={enforceLogin}/>
-          <Route path="create-job" component={CreateJob} onEnter={enforceLogin}/>
-          <Route path="create-job/:bbox" component={CreateJob} onEnter={enforceLogin}/>
-          <Route path="help" component={Help} onEnter={enforceLogin}/>
-          <Route path="about" component={About} onEnter={enforceLogin}/>
+          <Route path="jobs" component={JobStatusList} onEnter={loginFilter}/>
+          <Route path="create-job" component={CreateJob} onEnter={loginFilter}/>
+          <Route path="create-job/:bbox" component={CreateJob} onEnter={loginFilter}/>
+          <Route path="help" component={Help} onEnter={loginFilter}/>
+          <Route path="about" component={About} onEnter={loginFilter}/>
         </Route>
       </Router>
     </Provider>, element)
@@ -51,14 +53,16 @@ export function bootstrap(element) {
 // Internals
 //
 
-function enforceLogin(nextState, replace) {
-  if (!store.getState().login.authToken) {
-    replace({
-      pathname: '/login',
-      state: {
-        nextPathname: nextState.location.pathname || '/'
-      }
-    })
+function createLoginFilter(store) {
+  return (nextState, replace) => {
+    if (!store.getState().login.authToken) {
+      replace({
+        pathname: '/login',
+        state: {
+          nextPathname: nextState.location.pathname || '/'
+        }
+      })
+    }
   }
 }
 

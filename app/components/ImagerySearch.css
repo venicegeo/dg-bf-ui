@@ -41,6 +41,23 @@
   height: 200px;
 }
 
+.clearBbox {
+  position: absolute;
+  right: 10px;
+  bottom: 10px;
+  padding: .25em .75em;
+  border-radius: 3px;
+  background-color: rgba(0, 0, 0, 0.11);
+  color: #737373;
+  font-size: 14px;
+  cursor: pointer;
+  opacity: .7;
+}
+
+.clearBbox:hover {
+  opacity: 1;
+}
+
 .root h3 {
   margin-top: 15px;
   padding: 5px 15px;

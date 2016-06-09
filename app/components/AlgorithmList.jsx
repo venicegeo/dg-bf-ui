@@ -20,10 +20,10 @@ import styles from './AlgorithmList.css'
 
 export default class AlgorithmList extends Component {
   static propTypes = {
-    algorithms: React.PropTypes.array,
+    algorithms: React.PropTypes.array.isRequired,
     className: React.PropTypes.string,
-    imageProperties: React.PropTypes.object,
-    onSubmit: React.PropTypes.func
+    imageProperties: React.PropTypes.object.isRequired,
+    onSubmit: React.PropTypes.func.isRequired
   }
 
   render() {

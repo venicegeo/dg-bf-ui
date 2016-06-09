@@ -29,10 +29,10 @@ function selector(state) {
 
 class JobStatusList extends Component {
   static propTypes = {
-    dispatch: React.PropTypes.func,
-    jobs: React.PropTypes.array,
-    params: React.PropTypes.object,
-    results: React.PropTypes.object
+    dispatch: React.PropTypes.func.isRequired,
+    jobs: React.PropTypes.array.isRequired,
+    params: React.PropTypes.object.isRequired,
+    results: React.PropTypes.object.isRequired
   }
 
   constructor() {

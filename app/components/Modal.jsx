@@ -18,17 +18,20 @@ import React, {Component} from 'react'
 
 export default class Modal extends Component {
   static propTypes = {
-    children: React.PropTypes.oneOfType([React.PropTypes.element, React.PropTypes.arrayOf(React.PropTypes.element)]),
+    children: React.PropTypes.oneOfType([
+      React.PropTypes.element,
+      React.PropTypes.arrayOf(React.PropTypes.element)
+    ]).isRequired,
     className: React.PropTypes.string,
-    dismiss: React.PropTypes.func
+    onDismiss: React.PropTypes.func.isRequired
   }
 
   componentDidMount() {
-    document.addEventListener('click', this.props.dismiss)
+    document.addEventListener('click', this.props.onDismiss)
   }
 
   componentWillUnmount() {
-    document.removeEventListener('click', this.props.dismiss)
+    document.removeEventListener('click', this.props.onDismiss)
   }
 
   render() {

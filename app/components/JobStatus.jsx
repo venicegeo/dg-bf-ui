@@ -36,9 +36,9 @@ export default class JobStatus extends Component {
       name: React.PropTypes.string,
       resultId: React.PropTypes.string,
       status: React.PropTypes.string
-    }),
-    result: React.PropTypes.object,
-    onDownload: React.PropTypes.func
+    }).isRequired,
+    onDownload: React.PropTypes.func.isRequired,
+    result: React.PropTypes.object
   }
 
   constructor() {
@@ -154,7 +154,9 @@ export default class JobStatus extends Component {
     const virtualHyperlink = document.createElement('a')
     virtualHyperlink.href = URL.createObjectURL(file)
     virtualHyperlink.download = this.props.job.name + '.geojson'
+    document.body.appendChild(virtualHyperlink)
     virtualHyperlink.click()
+    document.body.removeChild(virtualHyperlink)
   }
 }
 

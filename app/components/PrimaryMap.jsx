@@ -54,20 +54,25 @@ export default class PrimaryMap extends Component {
     anchor: React.PropTypes.string,
     bbox: React.PropTypes.string,
     datasets: React.PropTypes.array,
-    imagery: React.PropTypes.object,
-    mode: React.PropTypes.string,
-    onBoundingBoxChange: React.PropTypes.func,
-    onImageSelect: React.PropTypes.func
+    imagery: React.PropTypes.shape({
+      count: React.PropTypes.number.isRequired,
+      startIndex: React.PropTypes.number.isRequired,
+      images: React.PropTypes.object.isRequired
+    }),
+    mode: React.PropTypes.string.isRequired,
+    onBoundingBoxChange: React.PropTypes.func.isRequired,
+    onImageSelect: React.PropTypes.func.isRequired
   }
 
   constructor() {
     super()
     this.state = {basemapIndex: 0, selectedImageFeature: null}
-    this._recenter = debounce(this._recenter.bind(this))
-    this._renderSearchBbox = debounce(this._renderSearchBbox.bind(this))
+    this._handleBasemapChange = this._handleBasemapChange.bind(this)
     this._handleDrawStart = this._handleDrawStart.bind(this)
     this._handleDrawEnd = this._handleDrawEnd.bind(this)
+    this._renderSearchBbox = debounce(this._renderSearchBbox.bind(this))
     this._handleSelect = this._handleSelect.bind(this)
+    this._recenter = debounce(this._recenter.bind(this))
   }
 
   componentDidMount() {
@@ -119,7 +124,7 @@ export default class PrimaryMap extends Component {
       <main className={styles.root} ref="container" tabIndex="1">
         <BasemapSelect className={styles.basemapSelect}
                        basemaps={basemapNames}
-                       changed={basemapIndex => this.setState({basemapIndex})}/>
+                       onChange={this._handleBasemapChange}/>
         <ImageDetails ref="imageryDetails" feature={this.state.selectedImageFeature}/>
       </main>
     )
@@ -153,6 +158,37 @@ export default class PrimaryMap extends Component {
   _deactivateSelectInteraction() {
     this._clearSelection()
     this._selectInteraction.setActive(false)
+  }
+
+  _handleBasemapChange(index) {
+    this.setState({basemapIndex: index})
+  }
+
+  _handleDrawEnd(event) {
+    const extent = event.feature.getGeometry().getExtent()
+    const bbox = ol.proj.transformExtent(extent, 'EPSG:3857', 'EPSG:4326')
+    this.props.onBoundingBoxChange(bboxUtil.serialize(bbox))
+  }
+
+  _handleDrawStart() {
+    this._clearDraw()
+    this.props.onBoundingBoxChange(null)
+  }
+
+  _handleSelect(event) {
+    if (this.props.mode === MODE_SELECT_IMAGERY) {
+      const feature = event.target.getFeatures().item(0)
+      if (feature) {
+        const selectedImageFeature = new ol.format.GeoJSON().writeFeatureObject(feature)
+        this.props.onImageSelect(selectedImageFeature)
+        this.setState({selectedImageFeature})
+        this._imageDetailsOverlay.setPosition(ol.extent.getCenter(feature.getGeometry().getExtent()))
+      } else {
+        this.props.onImageSelect(null)
+        this.setState({selectedImageFeature: null})
+        this._imageDetailsOverlay.setPosition(undefined)
+      }
+    }
   }
 
   _initializeOpenLayers() {
@@ -329,42 +365,11 @@ export default class PrimaryMap extends Component {
       break
     }
   }
-
-  //
-  // Events
-  //
-
-  _handleDrawEnd(event) {
-    const extent = event.feature.getGeometry().getExtent()
-    const bbox = ol.proj.transformExtent(extent, 'EPSG:3857', 'EPSG:4326')
-    this.props.onBoundingBoxChange(bboxUtil.serialize(bbox))
-  }
-
-  _handleDrawStart() {
-    this._clearDraw()
-    this.props.onBoundingBoxChange(null)
-  }
-
-  _handleSelect(event) {
-    if (this.props.mode === MODE_SELECT_IMAGERY) {
-      const feature = event.target.getFeatures().item(0)
-      if (feature) {
-        const selectedImageFeature = new ol.format.GeoJSON().writeFeatureObject(feature)
-        this.props.onImageSelect(selectedImageFeature)
-        this.setState({selectedImageFeature})
-        this._imageDetailsOverlay.setPosition(ol.extent.getCenter(feature.getGeometry().getExtent()))
-      } else {
-        this.props.onImageSelect(null)
-        this.setState({selectedImageFeature: null})
-        this._imageDetailsOverlay.setPosition(undefined)
-      }
-    }
-  }
 }
 
 function generateBasemapLayers(providers) {
   return providers.map((provider, index) => {
-    const source = new ol.source.XYZ(Object.assign({crossOrigin: 'anonymous'}, provider))
+    const source = new ol.source.XYZ({...provider, crossOrigin: 'anonymous'})
     const layer = new ol.layer.Tile({source})
     layer.setProperties({name: provider.name, visible: index === 0})
     return layer

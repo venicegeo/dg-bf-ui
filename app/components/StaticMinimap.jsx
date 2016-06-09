@@ -23,7 +23,7 @@ const [DEFAULT_TILE_PROVIDER] = TILE_PROVIDERS
 
 export default class StaticMinimap extends Component {
   static propTypes = {
-    bbox: React.PropTypes.array
+    bbox: React.PropTypes.arrayOf(React.PropTypes.number)
   }
 
   componentDidMount() {
