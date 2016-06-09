@@ -21,6 +21,9 @@ import {
   CREATE_JOB,
   CREATE_JOB_SUCCESS,
   CREATE_JOB_ERROR,
+  DISCOVER_SERVICE,
+  DISCOVER_SERVICE_ERROR,
+  DISCOVER_SERVICE_SUCCESS,
   FETCH_JOBS,
   FETCH_JOBS_SUCCESS,
   JOBS_WORKER_ERROR,
@@ -74,12 +77,20 @@ function imagery(state = {
 }
 
 function jobs(state = {
+  serviceId: null,
   creating: false,
+  discovering: false,
   fetching: false,
   records: JSON.parse(sessionStorage.getItem('jobs')) || [],
   error: null
 }, action) {
   switch (action.type) {
+  case DISCOVER_SERVICE:
+    return {...state, discovering: true}
+  case DISCOVER_SERVICE_SUCCESS:
+    return {...state, discovering: false, serviceId: action.serviceId}
+  case DISCOVER_SERVICE_ERROR:
+    return {...state, discovering: false, error: action.err}
   case FETCH_JOBS:
     return {...state, fetching: true}
   case FETCH_JOBS_SUCCESS:

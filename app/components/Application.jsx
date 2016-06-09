@@ -5,6 +5,7 @@ import PrimaryMap, {MODE_DRAW_BBOX, MODE_NORMAL, MODE_SELECT_IMAGERY} from './Pr
 import {
   clearImageSearchResults,
   changeLoadedResults,
+  discoverServiceIfNeeded,
   selectImage,
   startAlgorithmsWorkerIfNeeded,
   startJobsWorkerIfNeeded
@@ -52,6 +53,7 @@ class Application extends Component {
   componentDidMount() {
     const {dispatch, location, loggedIn} = this.props
     if (loggedIn) {
+      dispatch(discoverServiceIfNeeded())
       dispatch(startAlgorithmsWorkerIfNeeded())
       dispatch(startJobsWorkerIfNeeded())
     }
@@ -60,7 +62,8 @@ class Application extends Component {
 
   componentWillReceiveProps(nextProps) {
     const {dispatch} = this.props
-    if (nextProps.loggedIn) {
+    if (!this.props.loggedIn && nextProps.loggedIn) {
+      dispatch(discoverServiceIfNeeded())
       dispatch(startAlgorithmsWorkerIfNeeded())
       dispatch(startJobsWorkerIfNeeded())
     }
