@@ -154,7 +154,9 @@ export default class JobStatus extends Component {
     const virtualHyperlink = document.createElement('a')
     virtualHyperlink.href = URL.createObjectURL(file)
     virtualHyperlink.download = this.props.job.name + '.geojson'
+    document.body.appendChild(virtualHyperlink)
     virtualHyperlink.click()
+    document.body.removeChild(virtualHyperlink)
   }
 }
 
