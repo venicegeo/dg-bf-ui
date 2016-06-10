@@ -21,21 +21,21 @@ export default class BasemapSelect extends Component {
   static propTypes = {
     basemaps: React.PropTypes.arrayOf(React.PropTypes.string).isRequired,
     className: React.PropTypes.string,
+    index: React.PropTypes.number.isRequired,
     onChange: React.PropTypes.func.isRequired
   }
 
   constructor() {
     super()
-    this.state = {index: 0, isOpen: false}
+    this.state = {isOpen: false}
     this._handleToggleOpen = this._handleToggleOpen.bind(this)
   }
 
   render() {
-    const {index, isOpen} = this.state
-    const {basemaps, className} = this.props
+    const {basemaps, className, index} = this.props
     const current = basemaps[index]
     return (
-      <div className={`${styles.root} ${className || ''} ${isOpen ? styles.isOpen : ''}`}>
+      <div className={`${styles.root} ${className || ''} ${this.state.isOpen ? styles.isOpen : ''}`}>
         <div className={styles.button} onClick={this._handleToggleOpen}>
           <label>
             <svg viewBox="0 0 40 33">

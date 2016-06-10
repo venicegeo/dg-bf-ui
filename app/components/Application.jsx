@@ -62,6 +62,7 @@ class Application extends Component {
 
   constructor() {
     super()
+    this._handleAnchorChange = this._handleAnchorChange.bind(this)
     this._handleBoundingBoxChange = this._handleBoundingBoxChange.bind(this)
     this._handleImageSelect = this._handleImageSelect.bind(this)
   }
@@ -100,6 +101,7 @@ class Application extends Component {
                     anchor={this.props.location.hash}
                     bbox={this.props.params.bbox}
                     mode={this._getMapMode()}
+                    onAnchorChange={this._handleAnchorChange}
                     onBoundingBoxChange={this._handleBoundingBoxChange}
                     onImageSelect={this._handleImageSelect}/>
         {this.props.children}
@@ -116,6 +118,15 @@ class Application extends Component {
       return (this.props.params.bbox && this.props.imagery.searchResults) ? MODE_SELECT_IMAGERY : MODE_DRAW_BBOX
     }
     return MODE_NORMAL
+  }
+
+  _handleAnchorChange(anchor) {
+    if (this.props.location.hash !== anchor) {
+      this.context.router.replace({
+        ...this.props.location,
+        hash: anchor
+      })
+    }
   }
 
   _handleBoundingBoxChange(bbox) {

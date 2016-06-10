@@ -16,22 +16,24 @@
 
 import ol from 'openlayers'
 
-export function serialize(bbox) {
-  const basemapIndex = 0
-  const zoom = 9
-  const [lat, long] = ol.extent.getCenter(bbox).map(truncate)
-  return `${basemapIndex}:${zoom}:${lat},${long}`
+export function serializeFromBbox(bbox) {
+  return serialize(ol.extent.getCenter(bbox), 1000, 0)
+}
+
+export function serialize(coordinate, resolution = 25000, basemapIndex = 0) {
+  const [lat, long] = coordinate.map(truncate)
+  return `#${basemapIndex}:${Math.ceil(resolution)}:${lat},${long}`
 }
 
 export function deserialize(serialized) {
-  const chunks = serialized.match(/^#(\d+):(\d+):(-?[0-9.]+),(-?[0-9.]+)$/)
+  const chunks = serialized.match(/^#(\d+):(-?[0-9.]+):(-?[0-9.]+),(-?[0-9.]+)$/)
   if (chunks) {
     return {
       basemapIndex: parseInt(chunks[1], 10),
-      zoom: parseInt(chunks[2], 10),
+      resolution: parseInt(chunks[2], 10),
       center: ol.proj.fromLonLat([
-        parseFloat(chunks[3]),
-        parseFloat(chunks[4])
+        truncate(parseFloat(chunks[3])),
+        truncate(parseFloat(chunks[4]))
       ])
     }
   }

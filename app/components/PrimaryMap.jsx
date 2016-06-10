@@ -60,6 +60,7 @@ export default class PrimaryMap extends Component {
       images: React.PropTypes.object.isRequired
     }),
     mode: React.PropTypes.string.isRequired,
+    onAnchorChange: React.PropTypes.func.isRequired,
     onBoundingBoxChange: React.PropTypes.func.isRequired,
     onImageSelect: React.PropTypes.func.isRequired
   }
@@ -67,12 +68,13 @@ export default class PrimaryMap extends Component {
   constructor() {
     super()
     this.state = {basemapIndex: 0, selectedImageFeature: null}
+    this._emitAnchorChange = debounce(this._emitAnchorChange.bind(this), 1000)
     this._handleBasemapChange = this._handleBasemapChange.bind(this)
     this._handleDrawStart = this._handleDrawStart.bind(this)
     this._handleDrawEnd = this._handleDrawEnd.bind(this)
-    this._renderSearchBbox = debounce(this._renderSearchBbox.bind(this))
     this._handleSelect = this._handleSelect.bind(this)
     this._recenter = debounce(this._recenter.bind(this))
+    this._renderSearchBbox = debounce(this._renderSearchBbox.bind(this))
   }
 
   componentDidMount() {
@@ -123,6 +125,7 @@ export default class PrimaryMap extends Component {
     return (
       <main className={styles.root} ref="container" tabIndex="1">
         <BasemapSelect className={styles.basemapSelect}
+                       index={this.state.basemapIndex}
                        basemaps={basemapNames}
                        onChange={this._handleBasemapChange}/>
         <ImageDetails ref="imageryDetails" feature={this.state.selectedImageFeature}/>
@@ -160,8 +163,21 @@ export default class PrimaryMap extends Component {
     this._selectInteraction.setActive(false)
   }
 
+  _emitAnchorChange() {
+    const view = this._map.getView()
+    const resolution = Math.floor(view.getResolution())
+    const center = ol.proj.transform(view.getCenter(), 'EPSG:3857', 'EPSG:4326')
+    const anchor = anchorUtil.serialize(center, resolution, this.state.basemapIndex)
+    // Don't emit false positives
+    if (this.props.anchor !== anchor) {
+      this._skipNextRecenter = true
+      this.props.onAnchorChange(anchor)
+    }
+  }
+
   _handleBasemapChange(index) {
     this.setState({basemapIndex: index})
+    this._emitAnchorChange()
   }
 
   _handleDrawEnd(event) {
@@ -230,16 +246,22 @@ export default class PrimaryMap extends Component {
         zoom: MIN_ZOOM
       })
     })
+
+    this._map.on('moveend', this._emitAnchorChange)
   }
 
   _recenter(anchor) {
+    if (this._skipNextRecenter) {
+      this._skipNextRecenter = false
+      return
+    }
     const deserialized = anchorUtil.deserialize(anchor)
     if (deserialized) {
-      const {basemapIndex, zoom, center} = deserialized
+      const {basemapIndex, resolution, center} = deserialized
       this.setState({basemapIndex})
       const view = this._map.getView()
       view.setCenter(center)
-      view.setZoom(zoom)
+      view.setResolution(view.constrainResolution(resolution))
     }
   }
 
