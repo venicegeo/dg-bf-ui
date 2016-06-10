@@ -103,8 +103,11 @@ export default class PrimaryMap extends Component {
     if (this.props.datasets !== previousProps.datasets) {
       this._renderDetections()
       this._renderFrames()
-      this._renderImagery()
       this._renderProgressBars()
+    }
+    if (this.props.imagery !== previousProps.imagery) {
+      this._renderImagery()
+      this._renderImagerySearchResultsOverlay()
     }
     if (this.props.bbox !== previousProps.bbox) {
       this._renderSearchBbox()
@@ -128,7 +131,7 @@ export default class PrimaryMap extends Component {
                        index={this.state.basemapIndex}
                        basemaps={basemapNames}
                        onChange={this._handleBasemapChange}/>
-        <ImageDetails ref="imageryDetails" feature={this.state.selectedImageFeature}/>
+        <ImageDetails ref="imageDetails" feature={this.state.selectedImageFeature}/>
       </main>
     )
   }
@@ -222,7 +225,7 @@ export default class PrimaryMap extends Component {
     this._selectInteraction.on('select', this._handleSelect)
 
     this._progressBars = {}
-    this._imageDetailsOverlay = generateImageryDetailsOverlay(this.refs.imageryDetails)
+    this._imageDetailsOverlay = generateImageDetailsOverlay(this.refs.imageDetails)
 
     this._map = new ol.Map({
       controls: generateControls(),
@@ -566,11 +569,11 @@ function generateImageryLayer() {
   })
 }
 
-function generateImageryDetailsOverlay(componentRef) {
+function generateImageDetailsOverlay(componentRef) {
   return new ol.Overlay({
     autoPan: true,
     element: findDOMNode(componentRef),
-    id: 'imageryDetails',
+    id: 'imageDetails',
     positioning: 'top-left'
   })
 }
