@@ -1,3 +1,19 @@
+/**
+ * Copyright 2016, RadiantBlue Technologies, Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ **/
+
 import {Client} from '../utils/piazza-client'
 import {GATEWAY} from '../config'
 
@@ -23,17 +39,14 @@ export function changeLoadedResults(ids = []) {
       const isLoadedOrLoading = results[job.id]
 
       if (shouldLoad && isLoadedOrLoading) {
-        console.debug('changeLoadedResults - ignoring', job.id)
         return  // Nothing to do
       }
 
       if (!shouldLoad && isLoadedOrLoading) {
-        console.debug('changeLoadedResults - will unload', job.id)
         return dispatch(unloadResult(job.id))  // TODO -- cancel any in-flight promises
       }
 
       if (shouldLoad && !isLoadedOrLoading) {
-        console.debug('changeLoadedResults - will load', job.id)
         return dispatch(loadResult(job.id, job.resultId))
       }
     })
@@ -41,10 +54,31 @@ export function changeLoadedResults(ids = []) {
   }
 }
 
+export function downloadResult(jobId) {
+  return (dispatch, getState) => {
+    const job = getState().jobs.records.find(j => j.id === jobId)
+    if (!job) {
+      console.error('Job <%s> does not exist', jobId)
+      return
+    }
+    return dispatch(loadResult(job.id, job.resultId))
+  }
+}
+
 function loadResult(jobId, resultId) {
   return (dispatch, getState) => {
-    const client = new Client(GATEWAY, getState().login.authToken)
-    // TODO -- force cache on result fetch
+    const state = getState()
+    const client = new Client(GATEWAY, state.login.authToken)
+
+    if (state.results[jobId]) {
+      return  // Already loading or loaded
+    }
+
+    dispatch({
+      type: LOAD_RESULT,
+      jobId
+    })
+
     return client.getFile(resultId, (loaded, total) => {
       dispatch(loadResultProgressed(jobId, loaded, total))
     })
@@ -52,6 +86,7 @@ function loadResult(jobId, resultId) {
         dispatch(loadResultSuccess(jobId, str))
       })
       .catch(err => {
+        console.error('Could not load result <job:%s> <result:%s>', jobId, resultId, err)
         dispatch(loadResultError(jobId, err))
       })
   }
@@ -61,7 +96,7 @@ function loadResultError(jobId, err) {
   return {
     type: LOAD_RESULT_ERROR,
     jobId,
-    message: err.toString()
+    err
   }
 }
 

@@ -1,3 +1,19 @@
+/**
+ * Copyright 2016, RadiantBlue Technologies, Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ **/
+
 import React, {Component} from 'react'
 import {connect} from 'react-redux'
 import AlgorithmList from './AlgorithmList'
@@ -20,10 +36,11 @@ class CreateJob extends Component {
   }
 
   static propTypes = {
-    algorithms: React.PropTypes.array,
-    dispatch: React.PropTypes.func,
-    imagery: React.PropTypes.object,
-    params: React.PropTypes.object
+    algorithms: React.PropTypes.array.isRequired,
+    dispatch: React.PropTypes.func.isRequired,
+    imagery: React.PropTypes.object.isRequired,
+    location: React.PropTypes.object.isRequired,
+    params: React.PropTypes.object.isRequired
   }
 
   constructor() {
@@ -31,6 +48,7 @@ class CreateJob extends Component {
     this.state = {name: null, catalogApiKey: null, dateFrom: null, dateTo: null}
     this._handleJobSubmit = this._handleJobSubmit.bind(this)
     this._handleNameChange = this._handleNameChange.bind(this)
+    this._handleClearBbox = this._handleClearBbox.bind(this)
     this._handleSearchSubmit = this._handleSearchSubmit.bind(this)
     this._handleSearchFormChange = this._handleSearchFormChange.bind(this)
   }
@@ -49,6 +67,7 @@ class CreateJob extends Component {
                            error={this.props.imagery.error}
                            isSearching={this.props.imagery.searching}
                            onChange={this._handleSearchFormChange}
+                           onClearBbox={this._handleClearBbox}
                            onSubmit={this._handleSearchSubmit}/>
           </li>}
 
@@ -93,6 +112,10 @@ class CreateJob extends Component {
 
   _handleNameChange(name) {
     this.setState({name})
+  }
+
+  _handleClearBbox() {
+    this.context.router.push({...this.props.location, pathname: '/create-job'})
   }
 
   _handleSearchFormChange(catalogApiKey, dateFrom, dateTo) {

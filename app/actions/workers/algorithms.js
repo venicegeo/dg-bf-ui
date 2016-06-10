@@ -1,4 +1,25 @@
+/**
+ * Copyright 2016, RadiantBlue Technologies, Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ **/
+
 const IMAGE_REQUIREMENT_PREFIX = 'ImgReq - '
+
+import {
+  REQUIREMENT_BANDS,
+  REQUIREMENT_CLOUDCOVER
+} from '../../constants'
 
 let _client, _handlers, _instance
 
@@ -59,12 +80,13 @@ function normalizeRequirement(key, value) {
   let description = value.trim()
   switch (name) {
   case 'bands':
-    name = 'Bands'
+    name = REQUIREMENT_BANDS
     description = description.toUpperCase().split(',').join(' and ')
     break
   case 'cloudCover':
-    name = 'Cloud Cover'
+    name = REQUIREMENT_CLOUDCOVER
     description = `Less than ${description}%`
+    value = parseFloat(value)
     break
   default:
     break

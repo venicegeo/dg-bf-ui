@@ -1,17 +1,33 @@
+/**
+ * Copyright 2016, RadiantBlue Technologies, Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ **/
+
 import React, {Component} from 'react'
 import styles from './BasemapSelect.css'
 
 export default class BasemapSelect extends Component {
   static propTypes = {
+    basemaps: React.PropTypes.arrayOf(React.PropTypes.string).isRequired,
     className: React.PropTypes.string,
-    basemaps: React.PropTypes.array,
-    changed: React.PropTypes.func
+    onChange: React.PropTypes.func.isRequired
   }
 
   constructor() {
     super()
     this.state = {index: 0, isOpen: false}
-    this._toggleOpen = this._toggleOpen.bind(this)
+    this._handleToggleOpen = this._handleToggleOpen.bind(this)
   }
 
   render() {
@@ -19,8 +35,8 @@ export default class BasemapSelect extends Component {
     const {basemaps, className} = this.props
     const current = basemaps[index]
     return (
-      <div className={`${styles.root} ${className} ${isOpen ? styles.isOpen : ''}`}>
-        <div className={styles.button} onClick={this._toggleOpen}>
+      <div className={`${styles.root} ${className || ''} ${isOpen ? styles.isOpen : ''}`}>
+        <div className={styles.button} onClick={this._handleToggleOpen}>
           <label>
             <svg viewBox="0 0 40 33">
               <polygon points="36.4644661 17.3228873 40 19.5276993 20 32 0 19.5276993 3.53553391 17.3228873 20 27.5903758 36.4644661 17.3228873"/>
@@ -34,19 +50,19 @@ export default class BasemapSelect extends Component {
           {basemaps.map((basemap, i) => (
             <li key={i}
                 className={index === i ? styles.active : ''}
-                onClick={() => this._select(i)}>{basemap}</li>
+                onClick={() => this._handleChange(i)}>{basemap}</li>
           ))}
         </ul>
       </div>
     )
   }
 
-  _select(index) {
-    this.props.changed(index)
+  _handleChange(index) {
+    this.props.onChange(index)
     this.setState({index, isOpen: false})
   }
 
-  _toggleOpen() {
+  _handleToggleOpen() {
     this.setState({isOpen: !this.state.isOpen})
   }
 }

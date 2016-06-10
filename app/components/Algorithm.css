@@ -1,22 +1,86 @@
-.field {
-  composes: field-normal from '../styles/forms.css';
+/**
+ * Copyright 2016, RadiantBlue Technologies, Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ **/
+
+/* =========================================================================
+   Heading
+   ========================================================================= */
+
+.name {
+  margin: 0 0 .25em;
+}
+
+.description {
+  margin: 0;
+}
+
+/* =========================================================================
+   Controls
+   ========================================================================= */
+
+.controls {
+  margin: .5em 0 1em;
+}
+
+.isNotCompatible .controls {
+  background-color: #ffee00;
+  padding: 2em;
+  border-radius: 3px;
+}
+
+.compatibilityWarning {
+  display: none;
+}
+
+.compatibilityWarning h4 {
+  color: #58530c;
+}
+
+.isNotCompatible .compatibilityWarning {
+  display: block;
 }
 
 .startButton {
+  composes: heading from '../styles/typography.css';
   display: block;
   width: 100%;
+  margin: 0 auto;
   padding: 1em;
   border: none;
   border-radius: 4px;
   background-color: #16aa3e;
+  box-shadow: inset 0 -3px rgba(0,0,0,.1);
   color: white;
-  font-family: inherit;
-  font-size: inherit;
-  max-width: 90%;
-  margin: 1em 0;
+  font-size: 14px;
 }
 
-.requirements {
+.isNotCompatible .startButton {
+  background-color: #3d94c5;
+  color: hsl(0, 0%, 100%);
+  text-shadow: 1px 1px rgba(0,0,0,.1);
+}
+
+/* =========================================================================
+   Requirements
+   ========================================================================= */
+
+.requirements h4 {
+  margin-bottom: .5em;
+}
+
+.requirements table {
   width: 100%;
   font-size: 14px;
 }
@@ -33,11 +97,11 @@
 }
 
 .requirements .unmet td {
-  background-color: red;
+  background-color: #e47b7b;
   color: white;
 }
 
 .requirements .met td {
-  background-color: green;
+  background-color: #4fbb42;
   color: white;
 }

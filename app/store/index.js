@@ -1,4 +1,20 @@
-import {applyMiddleware, createStore, combineReducers} from 'redux'
+/**
+ * Copyright 2016, RadiantBlue Technologies, Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ **/
+
+import {applyMiddleware, createStore, combineReducers, compose} from 'redux'
 import thunkMiddleware from 'redux-thunk'
 
 import {
@@ -21,6 +37,9 @@ import {
   CREATE_JOB,
   CREATE_JOB_SUCCESS,
   CREATE_JOB_ERROR,
+  DISCOVER_SERVICE,
+  DISCOVER_SERVICE_ERROR,
+  DISCOVER_SERVICE_SUCCESS,
   FETCH_JOBS,
   FETCH_JOBS_SUCCESS,
   JOBS_WORKER_ERROR,
@@ -74,12 +93,20 @@ function imagery(state = {
 }
 
 function jobs(state = {
+  serviceId: null,
   creating: false,
+  discovering: false,
   fetching: false,
   records: JSON.parse(sessionStorage.getItem('jobs')) || [],
   error: null
 }, action) {
   switch (action.type) {
+  case DISCOVER_SERVICE:
+    return {...state, discovering: true}
+  case DISCOVER_SERVICE_SUCCESS:
+    return {...state, discovering: false, serviceId: action.serviceId}
+  case DISCOVER_SERVICE_ERROR:
+    return {...state, discovering: false, error: action.err}
   case FETCH_JOBS:
     return {...state, fetching: true}
   case FETCH_JOBS_SUCCESS:
@@ -123,8 +150,12 @@ function login(state = {
 function results(state = {}, action) {
   const {jobId} = action
   switch (action.type) {
+  /*
+   Caching for results needs to live in the action creator.  Because of the potentially huge
+   size of the GeoJSON, keeping that in the state tree is probably a bad idea.
+   */
   case LOAD_RESULT:
-    return {...state, [jobId]: {...state[jobId], loading: true}}
+    return {...state, [jobId]: {loading: true}}
   case LOAD_RESULT_SUCCESS:
     return {...state, [jobId]: {...state[jobId], loading: false, geojson: action.geojson}}
   case LOAD_RESULT_ERROR:
@@ -175,7 +206,53 @@ const beachfrontApp = combineReducers({
   workers
 })
 
-export default applyMiddleware(thunkMiddleware)(createStore)(beachfrontApp)
+let devtoolsExtension = f => f
+if (process.env.NODE_ENV === 'development') {
+  if (typeof window.devToolsExtension === 'function') {
+    devtoolsExtension = window.devToolsExtension()
+  }
+  // DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG
+  // DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG
+  // sessionStorage.setItem('jobs', JSON.stringify([
+  //   {
+  //     algorithmName: 'test-algo-id',
+  //     createdOn: new Date().toISOString(),
+  //     id: 'indonesia',
+  //     name: 'Indonesia Fixture',
+  //     resultId: 'indonesia.geojson',
+  //     status: 'Success',
+  //     bbox: [110, 1, 112, -1]
+  //   },
+  //   {
+  //     algorithmName: 'test-algo-id',
+  //     createdOn: new Date(Date.now() - 3 * (24 * 60 * 60 * 1000)).toISOString(),
+  //     id: 'perth',
+  //     name: 'Perth Fixture',
+  //     resultId: 'perth.geojson',
+  //     status: 'Success',
+  //     bbox: [115.4, -32.52, 116.06, -31.88]
+  //   },
+  //   {
+  //     algorithmName: 'test-algo-id',
+  //     createdOn: new Date(0).toISOString(),
+  //     id: '_stalled',
+  //     name: 'Stalled Fixture',
+  //     status: 'Running',
+  //     bbox: [0, 0, 3, 3]
+  //   }
+  // ]))
+  // DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG
+  // DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG
+}
+
+export function configureStore(initialState) {
+  return createStore(beachfrontApp, initialState,
+    compose(
+      applyMiddleware(thunkMiddleware),
+      devtoolsExtension
+    )
+  )
+}
 
 //
 // Internals

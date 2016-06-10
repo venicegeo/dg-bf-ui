@@ -1,3 +1,19 @@
+/**
+ * Copyright 2016, RadiantBlue Technologies, Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ **/
+
 import React, {Component} from 'react'
 import {connect} from 'react-redux'
 import Navigation from './Navigation'
@@ -5,6 +21,7 @@ import PrimaryMap, {MODE_DRAW_BBOX, MODE_NORMAL, MODE_SELECT_IMAGERY} from './Pr
 import {
   clearImageSearchResults,
   changeLoadedResults,
+  discoverServiceIfNeeded,
   selectImage,
   startAlgorithmsWorkerIfNeeded,
   startJobsWorkerIfNeeded
@@ -34,13 +51,13 @@ class Application extends Component {
 
   static propTypes = {
     children: React.PropTypes.element,
-    datasets: React.PropTypes.array,
-    dispatch: React.PropTypes.func,
-    imagery: React.PropTypes.object,
-    location: React.PropTypes.object,
-    loggedIn: React.PropTypes.bool,
-    params: React.PropTypes.object,
-    workers: React.PropTypes.object
+    datasets: React.PropTypes.array.isRequired,
+    dispatch: React.PropTypes.func.isRequired,
+    imagery: React.PropTypes.object.isRequired,
+    location: React.PropTypes.object.isRequired,
+    loggedIn: React.PropTypes.bool.isRequired,
+    params: React.PropTypes.object.isRequired,
+    workers: React.PropTypes.object.isRequired
   }
 
   constructor() {
@@ -52,6 +69,7 @@ class Application extends Component {
   componentDidMount() {
     const {dispatch, location, loggedIn} = this.props
     if (loggedIn) {
+      dispatch(discoverServiceIfNeeded())
       dispatch(startAlgorithmsWorkerIfNeeded())
       dispatch(startJobsWorkerIfNeeded())
     }
@@ -60,7 +78,8 @@ class Application extends Component {
 
   componentWillReceiveProps(nextProps) {
     const {dispatch} = this.props
-    if (nextProps.loggedIn) {
+    if (!this.props.loggedIn && nextProps.loggedIn) {
+      dispatch(discoverServiceIfNeeded())
       dispatch(startAlgorithmsWorkerIfNeeded())
       dispatch(startJobsWorkerIfNeeded())
     }
