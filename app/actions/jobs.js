@@ -65,15 +65,15 @@ export function createJob(catalogApiKey, name, algorithm, feature) {
             metaDataJSON: feature
           }),
           type: 'body',
-          mimeType: 'application/json',
-          dataOutput: [
-            {
-              mimeType: 'application/json',
-              type: 'text'
-            }
-          ]
+          mimeType: 'application/json'
         }
       },
+      dataOutput: [
+        {
+          mimeType: 'application/json',
+          type: 'text'
+        }
+      ],
       serviceId: state.jobs.serviceId
     })
       .then(id => {
