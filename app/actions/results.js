@@ -71,30 +71,22 @@ function loadResult(jobId, resultId) {
     const client = new Client(GATEWAY, state.login.authToken)
 
     if (state.results[jobId]) {
-      console.debug('(results:loadResult) cache hit: <%s>', jobId)
       return  // Already loading or loaded
     }
 
-    console.debug('(results:loadResult) cache miss: <%s>', jobId)
     dispatch({
       type: LOAD_RESULT,
       jobId
     })
 
-    const cached = readCached(jobId)
-    if (cached) {
-      dispatch(loadResultSuccess(jobId, cached))
-      return
-    }
-
     return client.getFile(resultId, (loaded, total) => {
       dispatch(loadResultProgressed(jobId, loaded, total))
     })
       .then(str => {
-        writeCache(jobId, str)
         dispatch(loadResultSuccess(jobId, str))
       })
       .catch(err => {
+        console.error('Could not load result <job:%s> <result:%s>', jobId, resultId, err)
         dispatch(loadResultError(jobId, err))
       })
   }
@@ -104,7 +96,7 @@ function loadResultError(jobId, err) {
   return {
     type: LOAD_RESULT_ERROR,
     jobId,
-    message: err.toString()
+    err
   }
 }
 
@@ -130,16 +122,4 @@ function unloadResult(jobId) {
     type: UNLOAD_RESULT,
     jobId
   }
-}
-
-//
-// Internals
-//
-
-function writeCache(jobId, geojsonString) {
-  localStorage.setItem(`result:${jobId}`, geojsonString)
-}
-
-function readCached(jobId) {
-  return localStorage.getItem(`result:${jobId}`)
 }
