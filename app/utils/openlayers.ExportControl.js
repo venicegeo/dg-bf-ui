@@ -14,25 +14,6 @@ export default class ExportControl extends openlayers.control.Control {
 
   _clicked() {
     const map = this.getMap()
-    ///var metadata = document.createElement('div')
-    //metadata.className = 'metadata-popup'
-    //metadata.style.display = 'block'
-    //position for now.  once we are getting coordinates from map, position will change of the metadata form
-    //metadata.style.position = 'absolute'
-    //metadata.style.top = '300px'
-    //metadata.style.left = '50%'
-    //metadata.style.transform = 'translateX(-50%)'
-    //metadata.innerHTML = '<table style="width: 400px; height: 400px; background-color: #ffffff;" name="metadataTbl"><tr><td>metadata 1</td></tr><tr><td>metadata 1</td></tr><tr><td>metadata 1</td></tr><tr><td>metadata 1</td></tr></table>'
-
-    //var overlay = new openlayers.Overlay ({
-    //    element: metadata,
-    //    positioning: 'top-center'
-    //});
-
-    //Set position to image is instead of 0,0
-    //overlay.setPosition([0,0])
-    //map.addOverlay(overlay);
-
     const hyperlink = this.element.firstChild
     const timestamp = new Date().toISOString().replace(/(\D+|\.\d+)/g, '')
 
@@ -48,7 +29,6 @@ export default class ExportControl extends openlayers.control.Control {
       newCanvas.width = canvas.width
       newCanvas.height = canvas.height
 
-      //context.drawImage(imageData, 0,0)
       context.putImageData(imageData, 0, 0)
 
       var extent = map.getView().calculateExtent(map.getSize())
