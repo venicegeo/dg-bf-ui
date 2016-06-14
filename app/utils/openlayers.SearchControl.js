@@ -7,7 +7,6 @@ export default class SearchControl extends openlayers.control.Control {
     super({element})
     element.className = `${className || ''} ol-unselectable ol-control`
     element.title = 'Jump to a specific location or coordinate'
-    element.id = 'searchCoordBtn'
     element.innerHTML = '<button><i class="fa fa-search"/></button>'
     element.addEventListener('click', () => this._searchClicked())
 
@@ -23,28 +22,40 @@ export default class SearchControl extends openlayers.control.Control {
       this._dialog.style.top = '300px'
       this._dialog.style.left = '50%'
       this._dialog.style.transform = 'translateX(-50%)'
-      this._dialog.innerHTML = '<input style="width: 400px; height: 26px;" name="coordinate">&nbsp<button style="vertical-align: bottom"; type="submit"><i class="fa fa-search fa-2x"/></button>'
+      this._dialog.innerHTML = '<input id="inputTextbox" style="width: 400px; height: 25px;" name="coordinate">&nbsp<button class="fa fa-search fa-2x" style="vertical-align: bottom" type="submit"></button><button id="closeDialog" type="reset" style="vertical-align: bottom" class="fa fa-close fa-2x"></button>'
       this._dialog.addEventListener('submit', (event) => this._formSubmitted(event))
       this.getMap().getTarget().appendChild(this._dialog)
+
+      var closeDialog = document.getElementById("closeDialog");
+      closeDialog.addEventListener('click', (event) => this._closeDialog())
     }
     return this._dialog
   }
 
   _formSubmitted(event){
 
-    console.log(this._dialog.querySelector("input").value)
     event.preventDefault()
+    var input = document.getElementById('inputTextbox').value;
+    if (input != "") {
 
-    var [x,y] = this._convertGeospatialCoordinateFormat(this._dialog.querySelector("input").value)
-    var lat = parseFloat(y)
-    var long = parseFloat(x)
-    var map = this.getMap()
+      var [x,y] = this._convertGeospatialCoordinateFormat(this._dialog.querySelector("input").value)
+      var lat = parseFloat(y)
+      var long = parseFloat(x)
+      var map = this.getMap()
 
-    var view = map.getView()
-    view.setCenter(openlayers.proj.transform([long, lat], 'EPSG:4326', 'EPSG:3857'))
-    view.setZoom(8)
+      var view = map.getView()
+      view.setCenter(openlayers.proj.transform([long, lat], 'EPSG:4326', 'EPSG:3857'))
+      view.setZoom(8)
+      this._dialog.style.display = 'none'
+      this._dialog.querySelector("input").value = ""
+    }
+    else {
+      alert("You must enter a coordinate value")
+    }
+  }
+
+  _closeDialog() {
     this._dialog.style.display = 'none'
-    this._dialog.querySelector("input").value = ""
   }
 
   _searchClicked() {
