@@ -22,6 +22,7 @@ import ExportControl from '../utils/openlayers.ExportControl.js'
 import SearchControl from '../utils/openlayers.SearchControl.js'
 import BasemapSelect from './BasemapSelect.jsx'
 import ImageDetails from './ImageDetails.jsx'
+import ImagerySearchResults from './ImagerySearchResults.jsx'
 import {debounce} from '../utils/debounce'
 import * as anchorUtil from '../utils/map-anchor'
 import * as bboxUtil from '../utils/bbox'
@@ -59,9 +60,11 @@ export default class PrimaryMap extends Component {
       startIndex: React.PropTypes.number.isRequired,
       images: React.PropTypes.object.isRequired
     }),
+    isSearching: React.PropTypes.bool.isRequired,
     mode: React.PropTypes.string.isRequired,
     onAnchorChange: React.PropTypes.func.isRequired,
     onBoundingBoxChange: React.PropTypes.func.isRequired,
+    onImagerySearchPageChange: React.PropTypes.func.isRequired,
     onImageSelect: React.PropTypes.func.isRequired
   }
 
@@ -82,6 +85,7 @@ export default class PrimaryMap extends Component {
     this._renderDetections()
     this._renderFrames()
     this._renderImagery()
+    this._renderImagerySearchResultsOverlay()
     this._recenter(this.props.anchor)
     if (this.props.bbox) {
       this._renderSearchBbox()
@@ -107,6 +111,8 @@ export default class PrimaryMap extends Component {
     }
     if (this.props.imagery !== previousProps.imagery) {
       this._renderImagery()
+    }
+    if (this.props.isSearching !== previousProps.isSearching) {
       this._renderImagerySearchResultsOverlay()
     }
     if (this.props.bbox !== previousProps.bbox) {
@@ -132,6 +138,10 @@ export default class PrimaryMap extends Component {
                        basemaps={basemapNames}
                        onChange={this._handleBasemapChange}/>
         <ImageDetails ref="imageDetails" feature={this.state.selectedImageFeature}/>
+        <ImagerySearchResults ref="imageSearchResults"
+                              imagery={this.props.imagery}
+                              isSearching={this.props.isSearching}
+                              onPageChange={this.props.onImagerySearchPageChange}/>
       </main>
     )
   }
@@ -226,6 +236,7 @@ export default class PrimaryMap extends Component {
 
     this._progressBars = {}
     this._imageDetailsOverlay = generateImageDetailsOverlay(this.refs.imageDetails)
+    this._imageSearchResultsOverlay = generateImageSearchResultsOverlay(this.refs.imageSearchResults)
 
     this._map = new ol.Map({
       controls: generateControls(),
@@ -239,6 +250,7 @@ export default class PrimaryMap extends Component {
         this._detectionsLayer
       ],
       overlays: [
+        this._imageSearchResultsOverlay,
         this._imageDetailsOverlay
       ],
       target: this.refs.container,
@@ -316,12 +328,36 @@ export default class PrimaryMap extends Component {
   _renderImagery() {
     const {imagery} = this.props
     const reader = new ol.format.GeoJSON()
-    this._imageryLayer.getSource().clear()
+    const source = this._imageryLayer.getSource()
+    source.setAttributions(undefined)
+    source.clear()
     if (imagery) {
       const features = reader.readFeatures(imagery.images, {featureProjection: 'EPSG:3857'})
-      // TODO -- set attributions
-      this._imageryLayer.getSource().addFeatures(features)
+      if (features.length) {
+        source.setAttributions(['<a href="https://www.planet.com">Planet Labs</a>'])  // HACK -- this should be dynamic, not hardcoded
+        source.addFeatures(features)
+      }
     }
+  }
+
+  _renderImagerySearchResultsOverlay() {
+    this._imageSearchResultsOverlay.setPosition(undefined)
+    // HACK HACK HACK HACK HACK HACK HACK HACK
+    const bbox = bboxUtil.deserialize(this.props.bbox)
+    if (!bbox || !this.props.imagery || this.props.isSearching) {
+      return
+    }
+    if (this.props.imagery.count) {
+      console.debug('has results')
+      this._imageSearchResultsOverlay.setPosition(ol.extent.getBottomRight(bbox))
+      this._imageSearchResultsOverlay.setPositioning('top-right')
+    }
+    else {
+      console.debug('no results')
+      this._imageSearchResultsOverlay.setPosition(ol.extent.getCenter(bbox))
+      this._imageSearchResultsOverlay.setPositioning('center-center')
+    }
+    // HACK HACK HACK HACK HACK HACK HACK HACK
   }
 
   _renderProgressBars() {
@@ -575,6 +611,15 @@ function generateImageDetailsOverlay(componentRef) {
     element: findDOMNode(componentRef),
     id: 'imageDetails',
     positioning: 'top-left'
+  })
+}
+
+function generateImageSearchResultsOverlay(componentRef) {
+  return new ol.Overlay({
+    autoPan: true,
+    element: findDOMNode(componentRef),
+    id: 'imageSearchResults',
+    stopEvent: false
   })
 }
 
