@@ -26,6 +26,8 @@ export const SEARCH_IMAGE_CATALOG = 'SEARCH_IMAGE_CATALOG'
 export const SEARCH_IMAGE_CATALOG_SUCCESS = 'SEARCH_IMAGE_CATALOG_SUCCESS'
 export const SEARCH_IMAGE_CATALOG_ERROR = 'SEARCH_IMAGE_CATALOG_ERROR'
 export const SELECT_IMAGE = 'SELECT_IMAGE'
+export const UPDATE_IMAGE_SEARCH_CRITERIA = 'UPDATE_IMAGE_SEARCH_CRITERIA'
+export const UPDATE_IMAGE_CATALOG_API_KEY = 'UPDATE_IMAGE_CATALOG_API_KEY'
 
 //
 // Action Creators
@@ -44,14 +46,15 @@ export function selectImage(feature) {
   }
 }
 
-export function searchImageCatalog(apiKey, bbox, dateFrom /*, dateTo*/) {
-  return (dispatch) => {
+export function searchImageCatalog(startIndex=0, count=100) {
+  return (dispatch, getState) => {
     dispatch({
       type: SEARCH_IMAGE_CATALOG
     })
 
+    const {bbox, dateFrom} = getState().imagery.search.criteria
     const acquiredDate = moment(dateFrom).toISOString()
-    return fetch(`${CATALOG}/discover?acquiredDate=${acquiredDate}&bbox=${bbox}&cloudCover=0.1&count=100`)
+    return fetch(`${CATALOG}/discover?acquiredDate=${acquiredDate}&bbox=${bbox}&cloudCover=0.1&count=${count}&startIndex=${startIndex}`)
       .then(response => {
         if (response.ok) {
           return response.json()
@@ -64,6 +67,24 @@ export function searchImageCatalog(apiKey, bbox, dateFrom /*, dateTo*/) {
       .catch(err => {
         dispatch(searchImageCatalogError(err))
       })
+  }
+}
+
+export function updateImageryCatalogApiKey(value) {
+  return {
+    type: UPDATE_IMAGE_CATALOG_API_KEY,
+    value
+  }
+}
+
+export function updateImageSearchCriteria(bbox, dateFrom, dateTo) {
+  return {
+    type: UPDATE_IMAGE_SEARCH_CRITERIA,
+    criteria: {
+      bbox,
+      dateFrom,
+      dateTo
+    }
   }
 }
 

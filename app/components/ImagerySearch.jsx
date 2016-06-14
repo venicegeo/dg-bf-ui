@@ -19,29 +19,31 @@ import moment from 'moment'
 import StaticMinimap from './StaticMinimap'
 import styles from './ImagerySearch.css'
 
-const KEY_CATALOG_API_KEY = 'catalogApiKey'
-
 export default class ImagerySearch extends Component {
   static propTypes = {
-    bbox: React.PropTypes.array,
+    bbox: React.PropTypes.array.isRequired,
+    catalogApiKey: React.PropTypes.string,
+    dateFrom: React.PropTypes.string.isRequired,
+    dateTo: React.PropTypes.string.isRequired,
     error: React.PropTypes.object,
-    isSearching: React.PropTypes.bool,
-    onChange: React.PropTypes.func.isRequired,
+    isSearching: React.PropTypes.bool.isRequired,
+    onApiKeyChange: React.PropTypes.func.isRequired,
+    onCriteriaChange: React.PropTypes.func.isRequired,
     onClearBbox: React.PropTypes.func.isRequired,
     onSubmit: React.PropTypes.func.isRequired
   }
 
   constructor() {
     super()
-    this._emitOnChange = this._emitOnChange.bind(this)
+    this._emitApiKeyChange = this._emitApiKeyChange.bind(this)
+    this._emitCriteriaChange = this._emitCriteriaChange.bind(this)
     this._handleSubmit = this._handleSubmit.bind(this)
   }
 
   componentDidMount() {
-    this.refs.dateFrom.value = moment().subtract(14, 'days').format('YYYY-MM-DD')
-    this.refs.dateTo.value = moment().format('YYYY-MM-DD')
-    this.refs.apiKey.value = localStorage.getItem(KEY_CATALOG_API_KEY) || ''
-    this._emitOnChange()
+    this.refs.dateFrom.value = moment(this.props.dateFrom).format('YYYY-MM-DD')
+    this.refs.dateTo.value = moment(this.props.dateTo).format('YYYY-MM-DD')
+    this.refs.apiKey.value = this.props.catalogApiKey || ''
   }
 
   render() {
@@ -72,13 +74,13 @@ export default class ImagerySearch extends Component {
         </label>
         <label className={styles.field}>
           <span>API Key</span>
-          <input ref="apiKey" type="password" disabled={isSearching} onChange={this._emitOnChange} />
+          <input ref="apiKey" type="password" disabled={isSearching} onChange={this._emitApiKeyChange} />
         </label>
 
         <h3>Date/Time</h3>
         <label className={styles.field}>
           <span>From</span>
-          <input ref="dateFrom" type="date" disabled={isSearching} onChange={this._emitOnChange} />
+          <input ref="dateFrom" type="date" disabled={isSearching} onChange={this._emitCriteriaChange} />
         </label>
         <label className={styles.field}>
           <span>To</span>
@@ -86,7 +88,7 @@ export default class ImagerySearch extends Component {
         </label>
 
         <div className={styles.controls}>
-          <button disabled={isSearching}>Search for imagery</button>
+          <button disabled={!this._canSubmit}>Search for imagery</button>
         </div>
       </form>
     )
@@ -96,10 +98,20 @@ export default class ImagerySearch extends Component {
   // Internals
   //
 
-  _emitOnChange() {
-    const {apiKey, dateFrom, dateTo} = this.refs
-    localStorage.setItem(KEY_CATALOG_API_KEY, apiKey.value)
-    this.props.onChange(apiKey.value, dateFrom.value, dateTo.value)
+  get _canSubmit() {
+    return this.props.isSearching === false
+        && this.props.catalogApiKey
+        && this.props.dateFrom
+        && this.props.dateTo
+  }
+
+  _emitApiKeyChange() {
+    this.props.onApiKeyChange(this.refs.apiKey.value)
+  }
+
+  _emitCriteriaChange() {
+    const {dateFrom, dateTo} = this.refs
+    this.props.onCriteriaChange(dateFrom.value, dateTo.value)
   }
 
   _handleSubmit(event) {

@@ -20,13 +20,17 @@ import AlgorithmList from './AlgorithmList'
 import ImagerySearch from './ImagerySearch'
 import NewJobDetails from './NewJobDetails'
 import {deserialize} from '../utils/bbox'
-import {createJob, searchImageCatalog} from '../actions'
+import {createJob, searchImageCatalog, updateImageryCatalogApiKey, updateImageSearchCriteria} from '../actions'
 import styles from './CreateJob.css'
 
 function selector(state) {
   return {
     algorithms: state.algorithms.records,
-    imagery: state.imagery
+    catalogApiKey: state.imagery.catalogApiKey,
+    isSearching: state.imagery.search.searching,
+    searchCriteria: state.imagery.search.criteria,
+    error: state.imagery.search.error,
+    selectedImage: state.imagery.selection
   }
 }
 
@@ -37,57 +41,71 @@ class CreateJob extends Component {
 
   static propTypes = {
     algorithms: React.PropTypes.array.isRequired,
+    catalogApiKey: React.PropTypes.string,
     dispatch: React.PropTypes.func.isRequired,
-    imagery: React.PropTypes.object.isRequired,
+    isSearching: React.PropTypes.bool.isRequired,
+    searchCriteria: React.PropTypes.object,
+    error: React.PropTypes.object,
+    selectedImage: React.PropTypes.object,
     location: React.PropTypes.object.isRequired,
     params: React.PropTypes.object.isRequired
   }
 
   constructor() {
     super()
-    this.state = {name: null, catalogApiKey: null, dateFrom: null, dateTo: null}
+    this.state = {name: null}
     this._handleJobSubmit = this._handleJobSubmit.bind(this)
     this._handleNameChange = this._handleNameChange.bind(this)
+    this._handleImageryCatalogApiKeyChange = this._handleImageryCatalogApiKeyChange.bind(this)
     this._handleClearBbox = this._handleClearBbox.bind(this)
     this._handleSearchSubmit = this._handleSearchSubmit.bind(this)
-    this._handleSearchFormChange = this._handleSearchFormChange.bind(this)
+    this._handleSearchCriteriaChange = this._handleSearchCriteriaChange.bind(this)
   }
 
   render() {
     const bbox = deserialize(this.props.params.bbox)
-    const selectedImage = this.props.imagery.selection
     return (
       <div className={styles.root}>
         <header>
           <h1>Create Job</h1>
         </header>
         <ul>
-          {bbox && <li className={styles.imagery}>
-            <ImagerySearch bbox={bbox}
-                           error={this.props.imagery.error}
-                           isSearching={this.props.imagery.searching}
-                           onChange={this._handleSearchFormChange}
-                           onClearBbox={this._handleClearBbox}
-                           onSubmit={this._handleSearchSubmit}/>
-          </li>}
+          {bbox && (
+            <li className={styles.imagery}>
+              <ImagerySearch bbox={bbox}
+                             catalogApiKey={this.props.catalogApiKey}
+                             dateFrom={this.props.searchCriteria.dateFrom}
+                             dateTo={this.props.searchCriteria.dateTo}
+                             error={this.props.error}
+                             isSearching={this.props.isSearching}
+                             onApiKeyChange={this._handleImageryCatalogApiKeyChange}
+                             onCriteriaChange={this._handleSearchCriteriaChange}
+                             onClearBbox={this._handleClearBbox}
+                             onSubmit={this._handleSearchSubmit}/>
+            </li>
+          )}
+          {bbox && this.props.selectedImage && (
+            <li className={styles.details}>
+              <NewJobDetails onNameChange={this._handleNameChange}/>
+            </li>
+          )}
+          {bbox && this.props.selectedImage && (
+            <li className={styles.algorithms}>
+              <AlgorithmList algorithms={this.props.algorithms}
+                             imageProperties={this.props.selectedImage.properties}
+                             onSubmit={this._handleJobSubmit}/>
+            </li>
+          )}
 
-          {bbox && selectedImage && <li className={styles.details}>
-            <NewJobDetails onNameChange={this._handleNameChange}/>
-          </li>}
-
-          {bbox && selectedImage && <li className={styles.algorithms}>
-            <AlgorithmList algorithms={this.props.algorithms}
-                           imageProperties={selectedImage.properties}
-                           onSubmit={this._handleJobSubmit}/>
-          </li>}
-
-          {!bbox && <li className={styles.placeholder}>
-            <h3>Draw bounding box to search for imagery</h3>
-            <p>or</p>
-            <button className={styles.uploadButton}>
-              <i className="fa fa-upload"/> Upload my own image
-            </button>
-          </li>}
+          {!bbox && (
+            <li className={styles.placeholder}>
+              <h3>Draw bounding box to search for imagery</h3>
+              <p>or</p>
+              <button className={styles.uploadButton}>
+                <i className="fa fa-upload"/> Upload my own image
+              </button>
+            </li>
+          )}
         </ul>
       </div>
     )
@@ -97,9 +115,14 @@ class CreateJob extends Component {
   // Internals
   //
 
+  _handleClearBbox() {
+    this.context.router.push({...this.props.location, pathname: '/create-job'})
+  }
+
   _handleJobSubmit(algorithm) {
-    const {catalogApiKey, name} = this.state
-    this.props.dispatch(createJob(catalogApiKey, name, algorithm, this.props.imagery.selection))
+    const {selectedImage, catalogApiKey} = this.props
+    const {name} = this.state
+    this.props.dispatch(createJob(catalogApiKey, name, algorithm, selectedImage))
       .then(jobId => {
         this.context.router.push({
           pathname: '/jobs',
@@ -114,20 +137,16 @@ class CreateJob extends Component {
     this.setState({name})
   }
 
-  _handleClearBbox() {
-    this.context.router.push({...this.props.location, pathname: '/create-job'})
+  _handleImageryCatalogApiKeyChange(apiKey) {
+    this.props.dispatch(updateImageryCatalogApiKey(apiKey))
   }
 
-  _handleSearchFormChange(catalogApiKey, dateFrom, dateTo) {
-    this.setState({catalogApiKey, dateFrom, dateTo})
+  _handleSearchCriteriaChange(dateFrom, dateTo) {
+    this.props.dispatch(updateImageSearchCriteria(this.props.params.bbox, dateFrom, dateTo))
   }
 
   _handleSearchSubmit() {
-    const {catalogApiKey, dateFrom, dateTo} = this.state
-    const {bbox} = this.props.params
-    if (catalogApiKey && dateFrom) {
-      this.props.dispatch(searchImageCatalog(catalogApiKey, bbox, dateFrom, dateTo))
-    }
+    this.props.dispatch(searchImageCatalog())
   }
 }
 

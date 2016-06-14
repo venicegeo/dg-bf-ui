@@ -33,6 +33,8 @@ import {
   SEARCH_IMAGE_CATALOG_ERROR,
   SEARCH_IMAGE_CATALOG_SUCCESS,
   SELECT_IMAGE,
+  UPDATE_IMAGE_SEARCH_CRITERIA,
+  UPDATE_IMAGE_CATALOG_API_KEY,
 
   CREATE_JOB,
   CREATE_JOB_SUCCESS,
@@ -69,20 +71,33 @@ function algorithms(state = {
 }
 
 function imagery(state = {
-  searching: false,
-  searchResults: null,
+  catalogApiKey: localStorage.getItem('catalogApiKey'),
+  search: {
+    criteria: {
+      bbox: null,  // FIXME -- this value is duplicated by the url param but is needed for pagination actions
+      dateFrom: new Date(Date.now() - 86400 * 30 * 1000).toISOString().substr(0, 10),
+      dateTo: new Date(Date.now()).toISOString().substr(0, 10)
+    },
+    results: null,
+    searching: false
+  },
   selection: null,
   error: null
 }, action) {
   switch (action.type) {
+  case UPDATE_IMAGE_CATALOG_API_KEY:
+    localStorage.setItem('catalogApiKey', action.value)
+    return {...state, catalogApiKey: action.value}
+  case UPDATE_IMAGE_SEARCH_CRITERIA:
+    return {...state, search: {...state.search, criteria: action.criteria}}
   case CLEAR_IMAGE_SEARCH_RESULTS:
-    return {...state, searchResults: null}
+    return {...state, search: {...state.search, results: null}}
   case SEARCH_IMAGE_CATALOG:
-    return {...state, searching: true, error: null}
+    return {...state, search: {...state.search, searching: true}, error: null}
   case SEARCH_IMAGE_CATALOG_SUCCESS:
-    return {...state, searching: false, searchResults: action.results}
+    return {...state, search: {...state.search, searching: false, results: action.results}}
   case SEARCH_IMAGE_CATALOG_ERROR:
-    return {...state, searching: false, error: action.err}
+    return {...state, search: {...state.search, searching: false}, error: action.err}
   case SELECT_IMAGE:
     return {...state, selection: action.feature}
   case CREATE_JOB_SUCCESS:
