@@ -39,7 +39,7 @@ module.exports = {
   },
 
   resolve: {
-    alias: {openlayers$: 'openlayers/dist/ol-debug.js'},
+    alias: process.env.NODE_ENV === 'production' ? {} : {openlayers$: 'openlayers/dist/ol-debug.js'},
     extensions: ['', '.js', '.jsx']
   },
 
