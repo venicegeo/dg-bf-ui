@@ -28,9 +28,14 @@ function selector(state) {
 }
 
 class JobStatusList extends Component {
+  static contextTypes = {
+    router: React.PropTypes.object
+  }
+
   static propTypes = {
     dispatch: React.PropTypes.func.isRequired,
     jobs: React.PropTypes.array.isRequired,
+    location: React.PropTypes.object,
     params: React.PropTypes.object.isRequired,
     results: React.PropTypes.object.isRequired
   }
@@ -77,6 +82,12 @@ class JobStatusList extends Component {
   }
 
   _handleDownload(job) {
+    this.context.router.push({...this.props.location,
+      // HACK -- ensure job isn't automatically unloaded because its ID isn't in the URL
+      query: {
+        jobId: job.id
+      }
+    })
     this.props.dispatch(downloadResult(job.id))
   }
 }
