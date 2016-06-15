@@ -268,7 +268,7 @@ export default class PrimaryMap extends Component {
   _renderDetections() {
     const {datasets} = this.props
     const incomingJobs = {}
-    datasets.forEach(dataset => incomingJobs[dataset.job.id] = true)
+    datasets.filter(d => d.geojson).forEach(dataset => incomingJobs[dataset.job.id] = true)
     const source = this._detectionsLayer.getSource()
     const previous = {}
 
