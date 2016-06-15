@@ -84,12 +84,10 @@ class Application extends Component {
       dispatch(startAlgorithmsWorkerIfNeeded())
       dispatch(startJobsWorkerIfNeeded())
     }
-    if (nextProps.location.query.jobId !== this.props.location.query.jobId) {
-      dispatch(changeLoadedResults(asArray(nextProps.location.query.jobId)))
-    }
     if (nextProps.params.bbox !== this.props.params.bbox) {
       dispatch(clearImageSearchResults())
     }
+    dispatch(changeLoadedResults(asArray(nextProps.location.query.jobId)))
   }
 
   render() {
