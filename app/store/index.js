@@ -34,6 +34,7 @@ import {
   SEARCH_IMAGE_CATALOG_SUCCESS,
   SELECT_IMAGE,
   UPDATE_IMAGE_SEARCH_CRITERIA,
+  UPDATE_IMAGE_SEARCH_BBOX,
   UPDATE_IMAGE_CATALOG_API_KEY,
 
   CREATE_JOB,
@@ -70,14 +71,25 @@ function algorithms(state = {
   }
 }
 
+function criteria(state = {
+  bbox: JSON.parse(sessionStorage.getItem('bbox')),
+}, action) {
+  switch (action.type) {
+  case UPDATE_IMAGE_SEARCH_BBOX:
+    sessionStorage.setItem('bbox', JSON.stringify(action.bbox))
+    return {
+      ...state,
+      bbox: action.bbox
+    }
+  default:
+    return state
+  }
+}
+
 function imagery(state = {
   catalogApiKey: localStorage.getItem('catalogApiKey'),
   search: {
-    criteria: {
-      bbox: null,  // FIXME -- this value is duplicated by the url param but is needed for pagination actions
-      dateFrom: new Date(Date.now() - 86400 * 30 * 1000).toISOString().substr(0, 10),
-      dateTo: new Date(Date.now()).toISOString().substr(0, 10)
-    },
+    criteria: criteria(undefined, {}),
     results: null,
     searching: false
   },
@@ -88,8 +100,14 @@ function imagery(state = {
   case UPDATE_IMAGE_CATALOG_API_KEY:
     localStorage.setItem('catalogApiKey', action.value)
     return {...state, catalogApiKey: action.value}
-  case UPDATE_IMAGE_SEARCH_CRITERIA:
-    return {...state, search: {...state.search, criteria: action.criteria}}
+  case UPDATE_IMAGE_SEARCH_BBOX:
+    return {
+      ...state,
+      search: {
+        ...state.search,
+        criteria: criteria(state.search.criteria, action)
+      }
+    }
   case CLEAR_IMAGE_SEARCH_RESULTS:
     return {...state, search: {...state.search, results: null}}
   case SEARCH_IMAGE_CATALOG:

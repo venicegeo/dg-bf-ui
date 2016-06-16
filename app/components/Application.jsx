@@ -25,11 +25,13 @@ import {
   discoverServiceIfNeeded,
   selectImage,
   startAlgorithmsWorkerIfNeeded,
-  startJobsWorkerIfNeeded
+  startJobsWorkerIfNeeded,
+  updateImageSearchBbox
 } from '../actions'
 
 function selector(state) {
   return {
+    bbox: state.imagery.search.criteria.bbox,
     datasets: state.jobs.records.map(job => {
       const result = state.results[job.id]
       return {
@@ -50,13 +52,13 @@ class Application extends Component {
   }
 
   static propTypes = {
+    bbox: React.PropTypes.arrayOf(React.PropTypes.number),
     children: React.PropTypes.element,
     datasets: React.PropTypes.array.isRequired,
     dispatch: React.PropTypes.func.isRequired,
     imagery: React.PropTypes.object.isRequired,
     isLoggedIn: React.PropTypes.bool.isRequired,
     location: React.PropTypes.object.isRequired,
-    params: React.PropTypes.object.isRequired,
     workers: React.PropTypes.object.isRequired
   }
 
@@ -84,7 +86,10 @@ class Application extends Component {
       dispatch(startAlgorithmsWorkerIfNeeded())
       dispatch(startJobsWorkerIfNeeded())
     }
-    if (nextProps.params.bbox !== this.props.params.bbox) {
+    if (nextProps.location.pathname !== this.props.location.pathname) {
+      dispatch(updateImageSearchBbox(null))
+    }
+    if (nextProps.bbox !== this.props.bbox) {
       dispatch(clearImageSearchResults())
     }
     dispatch(changeLoadedResults(asArray(nextProps.location.query.jobId)))
@@ -97,7 +102,7 @@ class Application extends Component {
         <PrimaryMap datasets={this.props.datasets}
                     imagery={this.props.imagery.searchResults}
                     anchor={this.props.location.hash}
-                    bbox={this.props.params.bbox}
+                    bbox={this.props.bbox}
                     mode={this._mapMode}
                     onAnchorChange={this._handleAnchorChange}
                     onBoundingBoxChange={this._handleBoundingBoxChange}
@@ -111,9 +116,9 @@ class Application extends Component {
   // Internal API
   //
 
-    if (this.props.location.pathname.indexOf('create-job') === 0) {
-      return (this.props.params.bbox && this.props.imagery.searchResults) ? MODE_SELECT_IMAGERY : MODE_DRAW_BBOX
   get _mapMode() {
+    if (this.props.location.pathname === 'create-job') {
+      return (this.props.bbox && this.props.imagerySearchResults) ? MODE_SELECT_IMAGERY : MODE_DRAW_BBOX
     }
     return MODE_NORMAL
   }
@@ -128,10 +133,9 @@ class Application extends Component {
   }
 
   _handleBoundingBoxChange(bbox) {
-    this.context.router.push({
-      ...this.props.location,
-      pathname: `/create-job${bbox ? '/' + bbox : ''}`
-    })
+    this.props.dispatch(updateImageSearchBbox(bbox))
+  }
+
   }
 
   _handleImageSelect(geojson) {

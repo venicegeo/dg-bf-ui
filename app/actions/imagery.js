@@ -26,7 +26,8 @@ export const SEARCH_IMAGE_CATALOG = 'SEARCH_IMAGE_CATALOG'
 export const SEARCH_IMAGE_CATALOG_SUCCESS = 'SEARCH_IMAGE_CATALOG_SUCCESS'
 export const SEARCH_IMAGE_CATALOG_ERROR = 'SEARCH_IMAGE_CATALOG_ERROR'
 export const SELECT_IMAGE = 'SELECT_IMAGE'
-export const UPDATE_IMAGE_SEARCH_CRITERIA = 'UPDATE_IMAGE_SEARCH_CRITERIA'
+export const UPDATE_IMAGE_SEARCH_BBOX = 'UPDATE_IMAGE_SEARCH_BBOX'
+export const UPDATE_IMAGE_SEARCH_DATES = 'UPDATE_IMAGE_SEARCH_DATES'
 export const UPDATE_IMAGE_CATALOG_API_KEY = 'UPDATE_IMAGE_CATALOG_API_KEY'
 
 //
@@ -77,14 +78,18 @@ export function updateImageryCatalogApiKey(value) {
   }
 }
 
-export function updateImageSearchCriteria(bbox, dateFrom, dateTo) {
+export function updateImageSearchBbox(bbox) {
   return {
-    type: UPDATE_IMAGE_SEARCH_CRITERIA,
-    criteria: {
-      bbox,
-      dateFrom,
-      dateTo
-    }
+    type: UPDATE_IMAGE_SEARCH_BBOX,
+    bbox: bbox || null
+  }
+}
+
+export function updateImageSearchDates(dateFrom, dateTo) {
+  return {
+    type: UPDATE_IMAGE_SEARCH_DATES,
+    dateFrom,
+    dateTo
   }
 }
 

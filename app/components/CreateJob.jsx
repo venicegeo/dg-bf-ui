@@ -19,13 +19,18 @@ import {connect} from 'react-redux'
 import AlgorithmList from './AlgorithmList'
 import ImagerySearch from './ImagerySearch'
 import NewJobDetails from './NewJobDetails'
-import {deserialize} from '../utils/bbox'
-import {createJob, searchImageCatalog, updateImageryCatalogApiKey, updateImageSearchCriteria} from '../actions'
 import styles from './CreateJob.css'
+import {
+  createJob,
+  searchImageCatalog,
+  updateImageryCatalogApiKey,
+  updateImageSearchBbox,
+} from '../actions'
 
 function selector(state) {
   return {
     algorithms: state.algorithms.records,
+    bbox: state.imagery.search.criteria.bbox,
     catalogApiKey: state.imagery.catalogApiKey,
     isSearching: state.imagery.search.searching,
     searchCriteria: state.imagery.search.criteria,
@@ -41,14 +46,14 @@ class CreateJob extends Component {
 
   static propTypes = {
     algorithms: React.PropTypes.array.isRequired,
+    bbox: React.PropTypes.arrayOf(React.PropTypes.number),
     catalogApiKey: React.PropTypes.string,
     dispatch: React.PropTypes.func.isRequired,
     isSearching: React.PropTypes.bool.isRequired,
     searchCriteria: React.PropTypes.object,
     error: React.PropTypes.object,
     selectedImage: React.PropTypes.object,
-    location: React.PropTypes.object.isRequired,
-    params: React.PropTypes.object.isRequired
+    location: React.PropTypes.object.isRequired
   }
 
   constructor() {
@@ -63,16 +68,15 @@ class CreateJob extends Component {
   }
 
   render() {
-    const bbox = deserialize(this.props.params.bbox)
     return (
       <div className={styles.root}>
         <header>
           <h1>Create Job</h1>
         </header>
         <ul>
-          {bbox && (
+          {this.props.bbox && (
             <li className={styles.imagery}>
-              <ImagerySearch bbox={bbox}
+              <ImagerySearch bbox={this.props.bbox}
                              catalogApiKey={this.props.catalogApiKey}
                              dateFrom={this.props.searchCriteria.dateFrom}
                              dateTo={this.props.searchCriteria.dateTo}
@@ -84,12 +88,12 @@ class CreateJob extends Component {
                              onSubmit={this._handleSearchSubmit}/>
             </li>
           )}
-          {bbox && this.props.selectedImage && (
+          {this.props.bbox && this.props.selectedImage && (
             <li className={styles.details}>
               <NewJobDetails onNameChange={this._handleNameChange}/>
             </li>
           )}
-          {bbox && this.props.selectedImage && (
+          {this.props.bbox && this.props.selectedImage && (
             <li className={styles.algorithms}>
               <AlgorithmList algorithms={this.props.algorithms}
                              imageProperties={this.props.selectedImage.properties}
@@ -97,7 +101,7 @@ class CreateJob extends Component {
             </li>
           )}
 
-          {!bbox && (
+          {!this.props.bbox && (
             <li className={styles.placeholder}>
               <h3>Draw bounding box to search for imagery</h3>
               <p>or</p>
@@ -116,7 +120,7 @@ class CreateJob extends Component {
   //
 
   _handleClearBbox() {
-    this.context.router.push({...this.props.location, pathname: '/create-job'})
+    this.props.dispatch(updateImageSearchBbox())
   }
 
   _handleJobSubmit(algorithm) {

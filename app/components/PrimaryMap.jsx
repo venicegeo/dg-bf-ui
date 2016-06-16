@@ -53,7 +53,7 @@ export const MODE_SELECT_IMAGERY = 'MODE_SELECT_IMAGERY'
 export default class PrimaryMap extends Component {
   static propTypes = {
     anchor: React.PropTypes.string,
-    bbox: React.PropTypes.string,
+    bbox: React.PropTypes.arrayOf(React.PropTypes.number),
     datasets: React.PropTypes.array,
     imagery: React.PropTypes.shape({
       count: React.PropTypes.number.isRequired,
@@ -77,7 +77,7 @@ export default class PrimaryMap extends Component {
     this._handleDrawEnd = this._handleDrawEnd.bind(this)
     this._handleSelect = this._handleSelect.bind(this)
     this._recenter = debounce(this._recenter.bind(this))
-    this._renderSearchBbox = debounce(this._renderSearchBbox.bind(this))
+    this._renderImagerySearchBbox = debounce(this._renderImagerySearchBbox.bind(this))
   }
 
   componentDidMount() {
@@ -88,7 +88,7 @@ export default class PrimaryMap extends Component {
     this._renderImagerySearchResultsOverlay()
     this._recenter(this.props.anchor)
     if (this.props.bbox) {
-      this._renderSearchBbox()
+      this._renderImagerySearchBbox()
     }
     if (this.props.mode === MODE_DRAW_BBOX) {
       this._activateDrawInteraction()
@@ -116,7 +116,7 @@ export default class PrimaryMap extends Component {
       this._renderImagerySearchResultsOverlay()
     }
     if (this.props.bbox !== previousProps.bbox) {
-      this._renderSearchBbox()
+      this._renderImagerySearchBbox()
     }
     if (this.state.basemapIndex !== previousState.basemapIndex) {
       this._updateBasemap()
