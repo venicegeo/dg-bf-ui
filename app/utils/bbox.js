@@ -15,18 +15,14 @@
  **/
 
 import ol from 'openlayers'
+import {truncate, unwrapPoint} from './coordinates'
 
 const WGS84 = 'EPSG:4326'
 const WEB_MERCATOR = 'EPSG:3857'
 
-export function serialize(bbox) {
-  return bbox.map(n => Math.round(n * 1000) / 1000).join(',')
-}
-
 export function deserialize(serialized) {
-  const coordinates = decodeURIComponent(serialized).split(',').map(parseFloat)
-  if (coordinates.length === 4) {
-    return ol.proj.transformExtent(coordinates, WGS84, WEB_MERCATOR)
+  if (serialized && serialized.length === 4) {
+    return ol.proj.transformExtent(serialized, WGS84, WEB_MERCATOR)
   }
   return null
 }
@@ -37,4 +33,11 @@ export function fromFeature(geojsonFeature) {
   }
   const geometry = new ol.format.GeoJSON().readGeometry(geojsonFeature.geometry)
   return ol.proj.transformExtent(geometry.getExtent(), WEB_MERCATOR, WGS84)
+}
+
+export function serialize(extent) {
+  const bbox = ol.proj.transformExtent(extent, WEB_MERCATOR, WGS84)
+  const p1 = unwrapPoint(bbox.slice(0, 2))
+  const p2 = unwrapPoint(bbox.slice(2, 4))
+  return p1.concat(p2).map(truncate)
 }

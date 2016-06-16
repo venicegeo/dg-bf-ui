@@ -18,7 +18,7 @@ import React, {Component} from 'react'
 import moment from 'moment'
 import {Link} from 'react-router'
 import Timer from './Timestamp.jsx'
-import {serializeFromBbox} from '../utils/map-anchor'
+import {bboxToAnchor} from '../utils/map-anchor'
 import styles from './JobStatus.css'
 
 import {
@@ -90,7 +90,7 @@ export default class JobStatus extends Component {
         <div className={styles.controls}>
           <Link to={{pathname: '/',
                      query: {jobId: job.status === STATUS_SUCCESS ? job.id : undefined},
-                     hash: serializeFromBbox(job.bbox)}}
+                     hash: bboxToAnchor(job.bbox)}}
                 title="View on Map">
             <i className="fa fa-globe"/>
           </Link>

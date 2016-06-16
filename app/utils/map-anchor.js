@@ -15,14 +15,13 @@
  **/
 
 import ol from 'openlayers'
+import {truncate, unwrapPoint} from './coordinates'
 
-export function serializeFromBbox(bbox) {
-  return serialize(ol.extent.getCenter(bbox), 1000, 0)
-}
+const WGS_84 = 'EPSG:4326'
+const WEB_MERCATOR = 'EPSG:3857'
 
-export function serialize(coordinate, resolution = 25000, basemapIndex = 0) {
-  const [lat, long] = coordinate.map(truncate)
-  return `#${basemapIndex}:${Math.ceil(resolution)}:${lat},${long}`
+export function bboxToAnchor(bbox) {
+  return createAnchor(ol.extent.getCenter(bbox), 1000)
 }
 
 export function deserialize(serialized) {
@@ -40,6 +39,12 @@ export function deserialize(serialized) {
   return null
 }
 
-function truncate(number) {
-  return Math.round(number * 1000) / 1000
+export function serialize(center, resolution = 25000, basemapIndex = 0) {
+  const point = unwrapPoint(ol.proj.transform(center, WEB_MERCATOR, WGS_84))
+  return createAnchor(point, resolution, basemapIndex)
+}
+
+function createAnchor(point, resolution, basemapIndex) {
+  const [x, y] = point.map(truncate)
+  return `#${basemapIndex}:${Math.ceil(resolution)}:${x},${y}`
 }

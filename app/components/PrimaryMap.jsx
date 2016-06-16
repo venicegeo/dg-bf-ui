@@ -178,8 +178,8 @@ export default class PrimaryMap extends Component {
 
   _emitAnchorChange() {
     const view = this._map.getView()
-    const resolution = Math.floor(view.getResolution())
-    const center = ol.proj.transform(view.getCenter(), 'EPSG:3857', 'EPSG:4326')
+    const center = view.getCenter()
+    const resolution = view.getResolution()
     const anchor = anchorUtil.serialize(center, resolution, this.state.basemapIndex)
     // Don't emit false positives
     if (this.props.anchor !== anchor) {
@@ -194,9 +194,9 @@ export default class PrimaryMap extends Component {
   }
 
   _handleDrawEnd(event) {
-    const extent = event.feature.getGeometry().getExtent()
-    const bbox = ol.proj.transformExtent(extent, 'EPSG:3857', 'EPSG:4326')
-    this.props.onBoundingBoxChange(bboxUtil.serialize(bbox))
+    const geometry = event.feature.getGeometry()
+    const bbox = bboxUtil.serialize(geometry.getExtent())
+    this.props.onBoundingBoxChange(bbox)
   }
 
   _handleDrawStart() {
@@ -275,7 +275,7 @@ export default class PrimaryMap extends Component {
       const {basemapIndex, resolution, center} = deserialized
       this.setState({basemapIndex})
       const view = this._map.getView()
-      view.setCenter(center)
+      view.setCenter(view.constrainCenter(center))
       view.setResolution(view.constrainResolution(resolution))
     }
   }
@@ -390,14 +390,14 @@ export default class PrimaryMap extends Component {
     })
   }
 
-  _renderSearchBbox() {
+  _renderImagerySearchBbox() {
     this._clearDraw()
-    const deserialized = bboxUtil.deserialize(this.props.bbox)
-    if (!deserialized) {
+    const bbox = bboxUtil.deserialize(this.props.bbox)
+    if (!bbox) {
       return
     }
     const feature = new ol.Feature({
-      geometry: ol.geom.Polygon.fromExtent(deserialized)
+      geometry: ol.geom.Polygon.fromExtent(bbox)
     })
     this._drawLayer.getSource().addFeature(feature)
   }
