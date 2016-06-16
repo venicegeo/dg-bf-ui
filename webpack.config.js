@@ -72,7 +72,7 @@ module.exports = {
     }),
     new HtmlWebpackPlugin({
       template: 'index.ejs',
-      favicon: 'images/favicon.png',
+      favicon: process.env.NODE_ENV === 'production' ? 'images/favicon.png' : 'images/favicon-dev.png',
       hash: true,
       xhtml: true
     }),
