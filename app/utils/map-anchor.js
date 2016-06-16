@@ -21,7 +21,7 @@ const WGS_84 = 'EPSG:4326'
 const WEB_MERCATOR = 'EPSG:3857'
 
 export function bboxToAnchor(bbox) {
-  return createAnchor(ol.extent.getCenter(bbox), 1000)
+  return createAnchor(ol.extent.getCenter(bbox), 1000, 0)
 }
 
 export function deserialize(serialized) {
@@ -39,7 +39,7 @@ export function deserialize(serialized) {
   return null
 }
 
-export function serialize(center, resolution = 25000, basemapIndex = 0) {
+export function serialize(center, resolution, basemapIndex) {
   const point = unwrapPoint(ol.proj.transform(center, WEB_MERCATOR, WGS_84))
   return createAnchor(point, resolution, basemapIndex)
 }
