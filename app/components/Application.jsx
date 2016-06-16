@@ -23,6 +23,7 @@ import {
   clearImageSearchResults,
   changeLoadedResults,
   discoverServiceIfNeeded,
+  searchImageCatalog,
   selectImage,
   startAlgorithmsWorkerIfNeeded,
   startJobsWorkerIfNeeded,
@@ -40,8 +41,9 @@ function selector(state) {
         geojson: result ? result.geojson : null
       }
     }),
-    imagery: state.imagery,
+    imagerySearchResults: state.imagery.search.results,
     isLoggedIn: !!state.login.authToken,
+    isSearchingForImagery: state.imagery.search.searching,
     workers: state.workers
   }
 }
@@ -56,8 +58,9 @@ class Application extends Component {
     children: React.PropTypes.element,
     datasets: React.PropTypes.array.isRequired,
     dispatch: React.PropTypes.func.isRequired,
-    imagery: React.PropTypes.object.isRequired,
+    imagerySearchResults: React.PropTypes.object,
     isLoggedIn: React.PropTypes.bool.isRequired,
+    isSearchingForImagery: React.PropTypes.bool.isRequired,
     location: React.PropTypes.object.isRequired,
     workers: React.PropTypes.object.isRequired
   }
@@ -66,6 +69,7 @@ class Application extends Component {
     super()
     this._handleAnchorChange = this._handleAnchorChange.bind(this)
     this._handleBoundingBoxChange = this._handleBoundingBoxChange.bind(this)
+    this._handleImagerySearchPageChange = this._handleImagerySearchPageChange.bind(this)
     this._handleImageSelect = this._handleImageSelect.bind(this)
   }
 
@@ -100,12 +104,14 @@ class Application extends Component {
       <div className={styles.root}>
         <Navigation currentLocation={this.props.location}/>
         <PrimaryMap datasets={this.props.datasets}
-                    imagery={this.props.imagery.searchResults}
+                    imagery={this.props.imagerySearchResults}
+                    isSearching={this.props.isSearchingForImagery}
                     anchor={this.props.location.hash}
                     bbox={this.props.bbox}
                     mode={this._mapMode}
                     onAnchorChange={this._handleAnchorChange}
                     onBoundingBoxChange={this._handleBoundingBoxChange}
+                    onImagerySearchPageChange={this._handleImagerySearchPageChange}
                     onImageSelect={this._handleImageSelect}/>
         {this.props.children}
       </div>
@@ -136,6 +142,8 @@ class Application extends Component {
     this.props.dispatch(updateImageSearchBbox(bbox))
   }
 
+  _handleImagerySearchPageChange(paging) {
+    this.props.dispatch(searchImageCatalog(paging.startIndex, paging.count))
   }
 
   _handleImageSelect(geojson) {
