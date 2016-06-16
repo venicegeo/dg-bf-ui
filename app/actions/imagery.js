@@ -55,7 +55,7 @@ export function searchImageCatalog(startIndex=0, count=100) {
 
     const {bbox, dateFrom} = getState().imagery.search.criteria
     const acquiredDate = moment(dateFrom).toISOString()
-    return fetch(`${CATALOG}/discover?acquiredDate=${acquiredDate}&bbox=${bbox}&cloudCover=0.1&count=${count}&startIndex=${startIndex}`)
+    return fetch(`${CATALOG}/discover?acquiredDate=${acquiredDate}&bbox=${bbox}&cloudCover=10&count=${count}&startIndex=${startIndex}`)
       .then(response => {
         if (response.ok) {
           return response.json()
