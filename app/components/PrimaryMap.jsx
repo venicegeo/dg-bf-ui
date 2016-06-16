@@ -344,16 +344,20 @@ export default class PrimaryMap extends Component {
     this._imageSearchResultsOverlay.setPosition(undefined)
     // HACK HACK HACK HACK HACK HACK HACK HACK
     const bbox = bboxUtil.deserialize(this.props.bbox)
-    if (!bbox || !this.props.imagery || this.props.isSearching) {
-      return
+    if (!bbox) {
+      return  // Nothing to pin the overlay to
     }
+    if (!this.props.imagery || this.props.isSearching) {
+      return  // No results are in
+    }
+
     if (this.props.imagery.count) {
-      console.debug('has results')
+      // Pager
       this._imageSearchResultsOverlay.setPosition(ol.extent.getBottomRight(bbox))
       this._imageSearchResultsOverlay.setPositioning('top-right')
     }
     else {
-      console.debug('no results')
+      // No results
       this._imageSearchResultsOverlay.setPosition(ol.extent.getCenter(bbox))
       this._imageSearchResultsOverlay.setPositioning('center-center')
     }
