@@ -28,7 +28,7 @@ export default class Navigation extends Component {
   render() {
     const {currentLocation} = this.props
     return (
-      <nav className={`${styles.root} ${currentLocation.pathname === '/' ? styles.atHome : ''}`}>
+      <nav className={`${styles.root} ${this._classForAtHome}`}>
         <Link to={{...currentLocation, pathname: '/about'}}>
           <img className={styles.brand} src={brand} alt="Beachfront"/>
         </Link>
@@ -46,7 +46,7 @@ export default class Navigation extends Component {
             </Link>
           </li>
           <li>
-            <Link className={styles.link} activeClassName={styles.active} to="/create-job">
+            <Link className={styles.link} activeClassName={styles.active} to={{pathname: '/create-job', hash: currentLocation.hash}}>
               <svg className={styles.icon} viewBox="0 0 40 40"><path d="M23,17 L23,6 L17,6 L17,17 L6,17 L6,23 L17,23 L17,34 L23,34 L23,23 L34,23 L34,17 L23,17 Z"/></svg>
               <span className={styles.label}>Create Job</span>
             </Link>
@@ -60,5 +60,10 @@ export default class Navigation extends Component {
         </ul>
       </nav>
     )
+  }
+
+  get _classForAtHome() {
+    const {pathname} = this.props.currentLocation
+    return pathname === '/' || pathname === 'login' ? styles.atHome : ''
   }
 }
