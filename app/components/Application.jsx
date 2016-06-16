@@ -18,6 +18,7 @@ import React, {Component} from 'react'
 import {connect} from 'react-redux'
 import Navigation from './Navigation'
 import PrimaryMap, {MODE_DRAW_BBOX, MODE_NORMAL, MODE_SELECT_IMAGERY} from './PrimaryMap'
+import styles from './Application.css'
 import {
   clearImageSearchResults,
   changeLoadedResults,
@@ -26,7 +27,6 @@ import {
   startAlgorithmsWorkerIfNeeded,
   startJobsWorkerIfNeeded
 } from '../actions'
-import styles from './Application.css'
 
 function selector(state) {
   return {
@@ -39,7 +39,7 @@ function selector(state) {
       }
     }),
     imagery: state.imagery,
-    loggedIn: !!state.login.authToken,
+    isLoggedIn: !!state.login.authToken,
     workers: state.workers
   }
 }
@@ -54,8 +54,8 @@ class Application extends Component {
     datasets: React.PropTypes.array.isRequired,
     dispatch: React.PropTypes.func.isRequired,
     imagery: React.PropTypes.object.isRequired,
+    isLoggedIn: React.PropTypes.bool.isRequired,
     location: React.PropTypes.object.isRequired,
-    loggedIn: React.PropTypes.bool.isRequired,
     params: React.PropTypes.object.isRequired,
     workers: React.PropTypes.object.isRequired
   }
@@ -68,8 +68,8 @@ class Application extends Component {
   }
 
   componentDidMount() {
-    const {dispatch, location, loggedIn} = this.props
-    if (loggedIn) {
+    const {dispatch, location, isLoggedIn} = this.props
+    if (isLoggedIn) {
       dispatch(discoverServiceIfNeeded())
       dispatch(startAlgorithmsWorkerIfNeeded())
       dispatch(startJobsWorkerIfNeeded())
@@ -79,7 +79,7 @@ class Application extends Component {
 
   componentWillReceiveProps(nextProps) {
     const {dispatch} = this.props
-    if (!this.props.loggedIn && nextProps.loggedIn) {
+    if (!this.props.isLoggedIn && nextProps.isLoggedIn) {
       dispatch(discoverServiceIfNeeded())
       dispatch(startAlgorithmsWorkerIfNeeded())
       dispatch(startJobsWorkerIfNeeded())
@@ -98,7 +98,7 @@ class Application extends Component {
                     imagery={this.props.imagery.searchResults}
                     anchor={this.props.location.hash}
                     bbox={this.props.params.bbox}
-                    mode={this._getMapMode()}
+                    mode={this._mapMode}
                     onAnchorChange={this._handleAnchorChange}
                     onBoundingBoxChange={this._handleBoundingBoxChange}
                     onImageSelect={this._handleImageSelect}/>
@@ -111,9 +111,9 @@ class Application extends Component {
   // Internal API
   //
 
-  _getMapMode() {
     if (this.props.location.pathname.indexOf('create-job') === 0) {
       return (this.props.params.bbox && this.props.imagery.searchResults) ? MODE_SELECT_IMAGERY : MODE_DRAW_BBOX
+  get _mapMode() {
     }
     return MODE_NORMAL
   }

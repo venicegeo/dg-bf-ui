@@ -17,8 +17,8 @@
 import React, {Component} from 'react'
 import {connect} from 'react-redux'
 import JobStatus from './JobStatus'
-import {downloadResult} from '../actions'
 import styles from './JobStatusList.css'
+import {downloadResult} from '../actions'
 
 function selector(state) {
   return {
