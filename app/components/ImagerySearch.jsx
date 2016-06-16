@@ -15,7 +15,6 @@
  **/
 
 import React, {Component} from 'react'
-import moment from 'moment'
 import StaticMinimap from './StaticMinimap'
 import styles from './ImagerySearch.css'
 
@@ -28,7 +27,7 @@ export default class ImagerySearch extends Component {
     error: React.PropTypes.object,
     isSearching: React.PropTypes.bool.isRequired,
     onApiKeyChange: React.PropTypes.func.isRequired,
-    onCriteriaChange: React.PropTypes.func.isRequired,
+    onDateChange: React.PropTypes.func.isRequired,
     onClearBbox: React.PropTypes.func.isRequired,
     onSubmit: React.PropTypes.func.isRequired
   }
@@ -36,13 +35,13 @@ export default class ImagerySearch extends Component {
   constructor() {
     super()
     this._emitApiKeyChange = this._emitApiKeyChange.bind(this)
-    this._emitCriteriaChange = this._emitCriteriaChange.bind(this)
+    this._emitDateChange = this._emitDateChange.bind(this)
     this._handleSubmit = this._handleSubmit.bind(this)
   }
 
   componentDidMount() {
-    this.refs.dateFrom.value = moment(this.props.dateFrom).format('YYYY-MM-DD')
-    this.refs.dateTo.value = moment(this.props.dateTo).format('YYYY-MM-DD')
+    this.refs.dateFrom.value = this.props.dateFrom
+    this.refs.dateTo.value = this.props.dateTo
     this.refs.apiKey.value = this.props.catalogApiKey || ''
   }
 
@@ -80,7 +79,7 @@ export default class ImagerySearch extends Component {
         <h3>Date/Time</h3>
         <label className={styles.field}>
           <span>From</span>
-          <input ref="dateFrom" type="date" disabled={isSearching} onChange={this._emitCriteriaChange} />
+          <input ref="dateFrom" type="date" disabled={isSearching} onChange={this._emitDateChange} />
         </label>
         <label className={styles.field}>
           <span>To</span>
@@ -109,9 +108,9 @@ export default class ImagerySearch extends Component {
     this.props.onApiKeyChange(this.refs.apiKey.value)
   }
 
-  _emitCriteriaChange() {
+  _emitDateChange() {
     const {dateFrom, dateTo} = this.refs
-    this.props.onCriteriaChange(dateFrom.value, dateTo.value)
+    this.props.onDateChange(dateFrom.value, dateTo.value)
   }
 
   _handleSubmit(event) {

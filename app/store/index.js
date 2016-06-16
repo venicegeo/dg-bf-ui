@@ -16,6 +16,7 @@
 
 import {applyMiddleware, createStore, combineReducers, compose} from 'redux'
 import thunkMiddleware from 'redux-thunk'
+import moment from 'moment'
 
 import {
   LOG_IN,
@@ -33,8 +34,8 @@ import {
   SEARCH_IMAGE_CATALOG_ERROR,
   SEARCH_IMAGE_CATALOG_SUCCESS,
   SELECT_IMAGE,
-  UPDATE_IMAGE_SEARCH_CRITERIA,
   UPDATE_IMAGE_SEARCH_BBOX,
+  UPDATE_IMAGE_SEARCH_DATES,
   UPDATE_IMAGE_CATALOG_API_KEY,
 
   CREATE_JOB,
@@ -73,6 +74,8 @@ function algorithms(state = {
 
 function criteria(state = {
   bbox: JSON.parse(sessionStorage.getItem('bbox')),
+  dateFrom: moment().subtract(30, 'days').format('YYYY-MM-DD'),
+  dateTo: moment().format('YYYY-MM-DD')
 }, action) {
   switch (action.type) {
   case UPDATE_IMAGE_SEARCH_BBOX:
@@ -80,6 +83,12 @@ function criteria(state = {
     return {
       ...state,
       bbox: action.bbox
+    }
+  case UPDATE_IMAGE_SEARCH_DATES:
+    return {
+      ...state,
+      dateFrom: action.dateFrom,
+      dateTo: action.dateTo
     }
   default:
     return state
@@ -101,6 +110,7 @@ function imagery(state = {
     localStorage.setItem('catalogApiKey', action.value)
     return {...state, catalogApiKey: action.value}
   case UPDATE_IMAGE_SEARCH_BBOX:
+  case UPDATE_IMAGE_SEARCH_DATES:
     return {
       ...state,
       search: {

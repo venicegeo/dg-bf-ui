@@ -25,6 +25,7 @@ import {
   searchImageCatalog,
   updateImageryCatalogApiKey,
   updateImageSearchBbox,
+  updateImageSearchDates
 } from '../actions'
 
 function selector(state) {
@@ -32,8 +33,9 @@ function selector(state) {
     algorithms: state.algorithms.records,
     bbox: state.imagery.search.criteria.bbox,
     catalogApiKey: state.imagery.catalogApiKey,
+    dateFrom: state.imagery.search.criteria.dateFrom,
+    dateTo: state.imagery.search.criteria.dateTo,
     isSearching: state.imagery.search.searching,
-    searchCriteria: state.imagery.search.criteria,
     error: state.imagery.search.error,
     selectedImage: state.imagery.selection
   }
@@ -48,23 +50,24 @@ class CreateJob extends Component {
     algorithms: React.PropTypes.array.isRequired,
     bbox: React.PropTypes.arrayOf(React.PropTypes.number),
     catalogApiKey: React.PropTypes.string,
+    dateFrom: React.PropTypes.string.isRequired,
+    dateTo: React.PropTypes.string.isRequired,
     dispatch: React.PropTypes.func.isRequired,
-    isSearching: React.PropTypes.bool.isRequired,
-    searchCriteria: React.PropTypes.object,
     error: React.PropTypes.object,
-    selectedImage: React.PropTypes.object,
-    location: React.PropTypes.object.isRequired
+    isSearching: React.PropTypes.bool.isRequired,
+    location: React.PropTypes.object.isRequired,
+    selectedImage: React.PropTypes.object
   }
 
   constructor() {
     super()
     this.state = {name: null}
     this._handleJobSubmit = this._handleJobSubmit.bind(this)
-    this._handleNameChange = this._handleNameChange.bind(this)
-    this._handleImageryCatalogApiKeyChange = this._handleImageryCatalogApiKeyChange.bind(this)
+    this._handleCatalogApiKeyChange = this._handleCatalogApiKeyChange.bind(this)
     this._handleClearBbox = this._handleClearBbox.bind(this)
+    this._handleNameChange = this._handleNameChange.bind(this)
     this._handleSearchSubmit = this._handleSearchSubmit.bind(this)
-    this._handleSearchCriteriaChange = this._handleSearchCriteriaChange.bind(this)
+    this._handleSearchDateChange = this._handleSearchDateChange.bind(this)
   }
 
   render() {
@@ -78,13 +81,13 @@ class CreateJob extends Component {
             <li className={styles.imagery}>
               <ImagerySearch bbox={this.props.bbox}
                              catalogApiKey={this.props.catalogApiKey}
-                             dateFrom={this.props.searchCriteria.dateFrom}
-                             dateTo={this.props.searchCriteria.dateTo}
+                             dateFrom={this.props.dateFrom}
+                             dateTo={this.props.dateTo}
                              error={this.props.error}
                              isSearching={this.props.isSearching}
-                             onApiKeyChange={this._handleImageryCatalogApiKeyChange}
-                             onCriteriaChange={this._handleSearchCriteriaChange}
+                             onApiKeyChange={this._handleCatalogApiKeyChange}
                              onClearBbox={this._handleClearBbox}
+                             onDateChange={this._handleSearchDateChange}
                              onSubmit={this._handleSearchSubmit}/>
             </li>
           )}
@@ -119,6 +122,10 @@ class CreateJob extends Component {
   // Internals
   //
 
+  _handleCatalogApiKeyChange(apiKey) {
+    this.props.dispatch(updateImageryCatalogApiKey(apiKey))
+  }
+
   _handleClearBbox() {
     this.props.dispatch(updateImageSearchBbox())
   }
@@ -141,12 +148,8 @@ class CreateJob extends Component {
     this.setState({name})
   }
 
-  _handleImageryCatalogApiKeyChange(apiKey) {
-    this.props.dispatch(updateImageryCatalogApiKey(apiKey))
-  }
-
-  _handleSearchCriteriaChange(dateFrom, dateTo) {
-    this.props.dispatch(updateImageSearchCriteria(this.props.params.bbox, dateFrom, dateTo))
+  _handleSearchDateChange(dateFrom, dateTo) {
+    this.props.dispatch(updateImageSearchDates(dateFrom, dateTo))
   }
 
   _handleSearchSubmit() {
