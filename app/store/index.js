@@ -17,6 +17,7 @@
 import {applyMiddleware, createStore, combineReducers, compose} from 'redux'
 import thunkMiddleware from 'redux-thunk'
 import moment from 'moment'
+import debounce from 'lodash/debounce'
 
 import {
   LOG_IN,
@@ -73,13 +74,12 @@ function algorithms(state = {
 }
 
 function criteria(state = {
-  bbox: JSON.parse(sessionStorage.getItem('bbox')),
+  bbox: null,
   dateFrom: moment().subtract(30, 'days').format('YYYY-MM-DD'),
   dateTo: moment().format('YYYY-MM-DD')
 }, action) {
   switch (action.type) {
   case UPDATE_IMAGE_SEARCH_BBOX:
-    sessionStorage.setItem('bbox', JSON.stringify(action.bbox))
     return {
       ...state,
       bbox: action.bbox
@@ -95,8 +95,8 @@ function criteria(state = {
   }
 }
 
-function imagery(state = {
-  catalogApiKey: localStorage.getItem('catalogApiKey'),
+const INITIAL_IMAGERY = {
+  catalogApiKey: null,
   search: {
     criteria: criteria(undefined, {}),
     results: null,
@@ -104,10 +104,11 @@ function imagery(state = {
   },
   selection: null,
   error: null
-}, action) {
+}
+
+function imagery(state = INITIAL_IMAGERY, action) {
   switch (action.type) {
   case UPDATE_IMAGE_CATALOG_API_KEY:
-    localStorage.setItem('catalogApiKey', action.value)
     return {...state, catalogApiKey: action.value}
   case UPDATE_IMAGE_SEARCH_BBOX:
   case UPDATE_IMAGE_SEARCH_DATES:
@@ -135,14 +136,16 @@ function imagery(state = {
   }
 }
 
-function jobs(state = {
+const INITIAL_JOBS = {
   serviceId: null,
   creating: false,
   discovering: false,
   fetching: false,
-  records: JSON.parse(sessionStorage.getItem('jobs')) || [],
+  records: [],
   error: null
-}, action) {
+}
+
+function jobs(state = INITIAL_JOBS, action) {
   switch (action.type) {
   case DISCOVER_SERVICE:
     return {...state, discovering: true}
@@ -157,31 +160,32 @@ function jobs(state = {
   case CREATE_JOB:
     return {...state, creating: true}
   case CREATE_JOB_SUCCESS:
-    return {...state, creating: false, records: serializeJobRecords(state.records.concat(action.record))}
+    return {...state, creating: false, records: state.records.concat(action.record)}
   case CREATE_JOB_ERROR:
     return {...state, creating: false, error: action.err}
   case UPDATE_JOB:
-    return {...state, records: serializeJobRecords(state.records.map(job => {
+    return {...state, records: state.records.map(job => {
       if (job.id === action.jobId) {
         return {...job, status: action.status, resultId: action.resultId}
       }
       return job
-    }))}
+    })}
   default:
     return state
   }
 }
 
-function login(state = {
-  authToken: sessionStorage.getItem('authToken'),
+const INITIAL_LOGIN = {
+  authToken: null,
   verifying: false,
   error: null
-}, action) {
+}
+
+function login(state = INITIAL_LOGIN, action) {
   switch (action.type) {
   case LOG_IN:
     return {...state, verifying: true, error: null}
   case LOG_IN_SUCCESS:
-    sessionStorage.setItem('authToken', action.token)
     return {...state, verifying: false, error: null, authToken: action.token}
   case LOG_IN_ERROR:
     return {...state, verifying: false, error: action.err}
@@ -289,19 +293,60 @@ if (process.env.NODE_ENV === 'development') {
 }
 
 export function configureStore(initialState) {
-  return createStore(beachfrontApp, initialState,
+  const store = createStore(beachfrontApp, {...deserializeState(), ...initialState},
     compose(
       applyMiddleware(thunkMiddleware),
       devtoolsExtension
     )
   )
+  store.subscribe(debounce(() => serializeState(store.getState()), 1000))
+  return store
 }
 
 //
 // Internals
 //
 
-function serializeJobRecords(records) {
-  sessionStorage.setItem('jobs', JSON.stringify(records))
-  return records
+function deserializeState() {
+  try {
+    return {
+      login: {
+        ...INITIAL_LOGIN,
+        authToken: sessionStorage.getItem('state.login.authToken')
+      },
+      imagery: {
+        ...INITIAL_IMAGERY,
+        catalogApiKey: localStorage.getItem('state.imagery.catalogApiKey'),
+        search: {
+          ...INITIAL_IMAGERY.search,
+          criteria: {
+            ...INITIAL_IMAGERY.search.criteria,
+            ...JSON.parse(sessionStorage.getItem('state.imagery.search.criteria'))
+          }
+        }
+      },
+      jobs: {
+        ...INITIAL_JOBS,
+        records: JSON.parse(localStorage.getItem('state.jobs.records')) || []
+      }
+    }
+  } catch (err) {
+    // TODO -- on 2x failure, prompt user to do a "hard reset"
+    console.error('(store:deserializeState) Could not deserialize state tree', err)
+  }
+}
+
+function serializeState(state) {
+  try {
+    // Permanent
+    localStorage.setItem('state.imagery.catalogApiKey', state.imagery.catalogApiKey)
+    localStorage.setItem('state.jobs.records', JSON.stringify(state.jobs.records))
+
+    // Transient
+    sessionStorage.setItem('state.login.authToken', JSON.stringify(state.login.authToken))
+    sessionStorage.setItem('state.imagery.search.criteria', JSON.stringify(state.imagery.search.criteria))
+    sessionStorage.setItem('state.imagery.selection', JSON.stringify(state.imagery.selection))
+  } catch (err) {
+    console.error('(store:serializeState) Could not serialize state tree', err)
+  }
 }
