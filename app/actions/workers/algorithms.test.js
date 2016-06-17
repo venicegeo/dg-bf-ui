@@ -5,18 +5,22 @@ import * as algorithms from './algorithms'
 
 let _client, _handlers, _instance
 
-//remove debug, error in console to clean up mocha test report.
-console.debug = function() {};
-console.error = function() {};
-
-
 // describe("James' first bf test", function() {
 // 	it('should pass', function() {
 // 		expect(true).toBeTruthy();
 // 	});
 // });
 
-describe('Algorithms', function() {
+describe('Algorithms Worker', function() {
+
+	beforeEach(function() {
+		spyOn(console, 'debug');
+		spyOn(console, 'error');
+	})
+
+	afterEach(function() {
+		restoreSpies();
+	})
 
 	describe('start()', function() {
 
@@ -31,25 +35,37 @@ describe('Algorithms', function() {
 					shouldRun: createSpy().andReturn(false)
 					};
 				_client = {
-					getServices: createSpy().andReturn(Promise.resolve(1))
+					getServices: createSpy().andReturn(Promise.resolve([
+						{
+							resourceMetadata: {
+								description: '',
+								name: '',
+								metadata: {
+									Interface: ''
+								}
+							},
+							serviceId: '',
+							url: ''
+						}
+					]))
 				};
 			});
 
 			afterEach(function() {
-				restoreSpies();
-				try {
-					algorithms.terminate()
-				}
-				catch(e) {}
+				algorithms.terminate()
+				// try {
+				// 	algorithms.terminate()
+				// }
+				// catch(e) {}
 			});
 
 			it('calls work() function.', function() {
-				algorithms.start(_client, 1, _handlers);
+				algorithms.start(_client, 50, _handlers);
 				expect(_handlers.shouldRun).toHaveBeenCalled();
 			});
 
 			it('calls shouldRun() if shouldRun() outputs false.', function() {
-				algorithms.start(_client, 1, _handlers);
+				algorithms.start(_client, 50, _handlers);
 				// Calls
 				expect(_handlers.shouldRun).toHaveBeenCalled();
 				// Doesn't
@@ -62,7 +78,7 @@ describe('Algorithms', function() {
 
 			it('calls beforeFetch() and getServices() if shouldRun() outputs true.', function() {
 				_handlers.shouldRun.andReturn(true);
-				algorithms.start(_client, 1, _handlers);
+				algorithms.start(_client, 50, _handlers);
 				// Calls
 				expect(_handlers.beforeFetch).toHaveBeenCalled();
 				expect(_client.getServices).toHaveBeenCalled();
@@ -74,43 +90,35 @@ describe('Algorithms', function() {
 			it('calls onUpdate() if getServices() produces metadata array.', function(done) {
 				_handlers.shouldRun.andReturn(true);
 				_handlers.onUpdate = function() {done();};
-				_client.getServices = function() {
-					return new Promise(function(fulfill, reject) {
-						fulfill([
-							{
-								resourceMetadata: {
-									description: '',
-									name: '',
-									metadata: {
-										Interface: ''
-									}
-								},
-								serviceId: '',
-								url: ''
-							}
-						]);
-					});
-				};
-				algorithms.start(_client, 1, _handlers);
+				algorithms.start(_client, 50, _handlers);
 			});
+		});
 
+		describe('errored program flow', function() {
 			it('calls onFailure() and onTerminate() if getServices() throws an error.', function(done) {
-				_handlers.shouldRun.andReturn(true);
-				_handlers.onTerminate = function() {
-					try {
-						// Calls
-						expect(_handlers.onFailure).toHaveBeenCalled();
-						// Doesn't
-						expect(_handlers.onUpdate).toNotHaveBeenCalled();
-						done();
+				var bad_handlers = {
+					beforeFetch: createSpy().andReturn(false),
+					onFailure: createSpy().andReturn(false),
+					onUpdate: createSpy().andReturn(false),
+					shouldRun: createSpy().andReturn(true),
+					onTerminate: function() {
+						try {
+							// Calls
+							expect(bad_handlers.onFailure).toHaveBeenCalled();
+							// Doesn't
+							expect(bad_handlers.onUpdate).toNotHaveBeenCalled();
+							done();
+						}
+						catch(e) {
+							done(e)
+						}
 					}
-					catch(e) {
-						done(e)
-					};
 				};
-				_client.getServices.andThrow()
-				algorithms.start(_client, 1, _handlers);
-			});
+				var bad_client = {
+					getServices: createSpy().andReturn(Promise.reject(new Error('Forced')))
+				};
+				algorithms.start(bad_client, 50, bad_handlers);
+			});			
 		});
 
 		describe('functionality', function() {
@@ -118,11 +126,7 @@ describe('Algorithms', function() {
 			var outputMeta
 
 			afterEach(function() {
-				restoreSpies();
-				try {
-					algorithms.terminate()
-				}
-				catch(e) {}
+				algorithms.terminate()
 			});
 
 			it('reformats metadata properly', function(done) {
@@ -163,12 +167,10 @@ describe('Algorithms', function() {
 				};
 				_client = {
 					getServices: function() {
-						return new Promise(function(fulfill, reject) {
-							fulfill([inputMeta]);
-						});
+						return Promise.resolve([inputMeta])
 					}
 				};
-				algorithms.start(_client, 1, _handlers);
+				algorithms.start(_client, 50, _handlers);
 			});
 
 			it('handles multiple elements in the array', function(done) {
@@ -258,7 +260,7 @@ describe('Algorithms', function() {
 						});
 					}
 				};
-				algorithms.start(_client, 1, _handlers);
+				algorithms.start(_client, 50, _handlers);
 			});
 
 			it('normalizes requirements', function(done) {
@@ -323,7 +325,7 @@ describe('Algorithms', function() {
 						});
 					}
 				};
-				algorithms.start(_client, 1, _handlers);
+				algorithms.start(_client, 50, _handlers);
 			});
 
 			it.skip('normalizes "cloudCover" requirement', function() {
@@ -346,7 +348,7 @@ describe('Algorithms', function() {
 						done();
 					}
 				};
-				algorithms.start(_client, 1, _handlers);
+				algorithms.start(_client, 50, _handlers);
 			});
 		});
 	});
@@ -362,7 +364,7 @@ describe('Algorithms', function() {
 					};
 				_client = {};
 
-				algorithms.start(_client, 1, _handlers);
+				algorithms.start(_client, 50, _handlers);
 			});
 
 			it('calls onTerminate()', function() {
@@ -385,7 +387,7 @@ describe('Algorithms', function() {
 					},
 					onTerminate: function() {return false;}
 					};
-				algorithms.start(_client, 1, _handlers);
+				algorithms.start(_client, 50, _handlers);
 				algorithms.terminate();
 				terminated = true;
 				setTimeout(done, 100); // Small delay to end, give work() a chance to run again.
@@ -397,12 +399,12 @@ describe('Algorithms', function() {
 					onTerminate: function() {return false;}
 					};
 				_client = {};
-				algorithms.start(_client, 1, _handlers);
+				algorithms.start(_client, 50, _handlers);
 				expect(function() {
-					algorithms.start(_client, 1, _handlers);
+					algorithms.start(_client, 50, _handlers);
 				}).toThrow('Attempted to start while already running');
 				algorithms.terminate();
-				algorithms.start(_client, 1, _handlers);
+				algorithms.start(_client, 50, _handlers);
 				algorithms.terminate();
 			});
 
@@ -412,7 +414,7 @@ describe('Algorithms', function() {
 					onTerminate: function() {return false;}
 					};
 				_client = {};
-				algorithms.start(_client, 1, _handlers);
+				algorithms.start(_client, 50, _handlers);
 				algorithms.terminate();
 				expect(function() {
 					algorithms.terminate();
@@ -431,10 +433,10 @@ describe('Algorithms', function() {
 				};
 				_client = {
 					getServices: function() {
-						throw('_client should be nullified before it is called');
+						throw(new Error('_client should be nullified before it is called'));
 					}};
 				expect(function() {
-					algorithms.start(_client, 1, _handlers);
+					algorithms.start(_client, 50, _handlers);
 				}).toThrow("Cannot read property 'getServices' of null");
 			});
 		});
