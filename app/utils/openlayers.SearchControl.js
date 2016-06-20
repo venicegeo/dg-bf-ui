@@ -30,13 +30,18 @@ export default class SearchControl extends openlayers.control.Control {
       this._dialog.style.top = '300px'
       this._dialog.style.left = '50%'
       this._dialog.style.transform = 'translateX(-50%)'
+      this._dialog.style.fontSize = '16px'
+      this._dialog.style.backgroundColor = 'white'
+      this._dialog.style.padding = '.5em'
+      this._dialog.style.width = '350px'
+      this._dialog.style.boxShadow = '0 0 0 1px rgba(0,0,0,.2), 0 5px rgba(0,0,0,.1)'
+      this._dialog.style.borderRadius = '2px'
 
-      //TODO: TOOLTIP_INVALIDCOORD: '<div class="coordinatebox-tooltip-invalid"><strong>Invalid coordinates</strong><p>Examples of valid coordinates are: <span>Decimal: <code>30, 30</code></span><span>DMS: <code>300000N0300000E</code></span><span>MGRS: <code>36Q AR 00000000</code></span><span>UTM: <code>30N 00000,00000</code></span></p></div>'
-      this._dialog.innerHTML = '<input id="inputTextbox" style="width: 400px; height: 25px;" name="coordinate">&nbsp<button class="fa fa-search fa-2x" style="vertical-align: bottom" type="submit"></button><button id="closeDialog" type="reset" style="vertical-align: bottom" class="fa fa-close fa-2x"></button>'
+      this._dialog.innerHTML = '<div style="display : flex;"><input placeholder="Enter Coordinates" style="flex: 1; font-size: inherit; border: none;" name="coordinate">&nbsp<button style="width: 3em;height: 3em;font-size: 1em;" type="submit"><i class="fa fa-search fa-2x"></i></button><button class="closeButton" type="reset" style="width: 3em;height: 3em;font-size: 1em;"><i class="fa fa-close fa-2x"></i></button></div><div class="error-message" style="display: none; background-color: #f04; color : white; padding : 1em; margin-top : .5em"><strong>Invalid coordinates</strong><p style="margin : 0">Examples of valid coordinates are: <br><span>Decimal: <code>30, 30</code></span><br><span>DMS: <code>300000N0300000E</code></span><br><span>MGRS: <code>36Q AR 00000000</code></span><br><span>UTM: <code>30N 00000,00000</code></span></p></div>'
       this._dialog.addEventListener('submit', (event) => this._formSubmitted(event))
       this.getMap().getTarget().appendChild(this._dialog)
 
-      const closeDialog = document.getElementById('closeDialog')
+      const closeDialog = this._dialog.querySelector('.closeButton')
       closeDialog.addEventListener('click', (event) => this._closeDialog())
     }
     return this._dialog
@@ -44,17 +49,19 @@ export default class SearchControl extends openlayers.control.Control {
 
   _formSubmitted(event) {
     event.preventDefault()
-    const input = document.getElementById('inputTextbox').value
-    if (input != '') {
-      const {longitude, latitude} = Coordinate.parseAny(this._dialog.querySelector('input').value)
+    const input = this._dialog.querySelector('input')
+    const errorMessage = this._dialog.querySelector('.error-message')
+    try {
+      const {longitude, latitude} = Coordinate.parseAny(input.value)
       const view = this.getMap().getView()
       view.setCenter(openlayers.proj.transform([longitude, latitude], 'EPSG:4326', 'EPSG:3857'))
       view.setZoom(8)
-      this._dialog.style.display = 'none'
-      this._dialog.querySelector('input').value = ''
+      this._closeDialog()
     }
-    else {
-      alert('You must enter a coordinate value')
+    catch (error) {
+      //FIXME: this will catch more than just coordinate errors.
+      console.error(error)
+      errorMessage.style.display = 'block'
     }
   }
 
@@ -65,7 +72,10 @@ export default class SearchControl extends openlayers.control.Control {
   }
 
   _closeDialog() {
+    this._dialog.reset();
     this._dialog.style.display = 'none'
+    this._dialog.querySelector('.error-message').style.display = 'none'
+
   }
 
   _searchClicked() {
