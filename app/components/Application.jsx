@@ -1,18 +1,38 @@
+/**
+ * Copyright 2016, RadiantBlue Technologies, Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ **/
+
 import React, {Component} from 'react'
 import {connect} from 'react-redux'
 import Navigation from './Navigation'
 import PrimaryMap, {MODE_DRAW_BBOX, MODE_NORMAL, MODE_SELECT_IMAGERY} from './PrimaryMap'
+import styles from './Application.css'
 import {
   clearImageSearchResults,
   changeLoadedResults,
+  discoverServiceIfNeeded,
+  searchImageCatalog,
   selectImage,
   startAlgorithmsWorkerIfNeeded,
-  startJobsWorkerIfNeeded
+  startJobsWorkerIfNeeded,
+  updateImageSearchBbox
 } from '../actions'
-import styles from './Application.css'
 
 function selector(state) {
   return {
+    bbox: state.imagery.search.criteria.bbox,
     datasets: state.jobs.records.map(job => {
       const result = state.results[job.id]
       return {
@@ -21,8 +41,9 @@ function selector(state) {
         geojson: result ? result.geojson : null
       }
     }),
-    imagery: state.imagery,
-    loggedIn: !!state.login.authToken,
+    imagerySearchResults: state.imagery.search.results,
+    isLoggedIn: !!state.login.authToken,
+    isSearchingForImagery: state.imagery.search.searching,
     workers: state.workers
   }
 }
@@ -33,25 +54,29 @@ class Application extends Component {
   }
 
   static propTypes = {
+    bbox: React.PropTypes.arrayOf(React.PropTypes.number),
     children: React.PropTypes.element,
-    datasets: React.PropTypes.array,
-    dispatch: React.PropTypes.func,
-    imagery: React.PropTypes.object,
-    location: React.PropTypes.object,
-    loggedIn: React.PropTypes.bool,
-    params: React.PropTypes.object,
-    workers: React.PropTypes.object
+    datasets: React.PropTypes.array.isRequired,
+    dispatch: React.PropTypes.func.isRequired,
+    imagerySearchResults: React.PropTypes.object,
+    isLoggedIn: React.PropTypes.bool.isRequired,
+    isSearchingForImagery: React.PropTypes.bool.isRequired,
+    location: React.PropTypes.object.isRequired,
+    workers: React.PropTypes.object.isRequired
   }
 
   constructor() {
     super()
+    this._handleAnchorChange = this._handleAnchorChange.bind(this)
     this._handleBoundingBoxChange = this._handleBoundingBoxChange.bind(this)
+    this._handleImagerySearchPageChange = this._handleImagerySearchPageChange.bind(this)
     this._handleImageSelect = this._handleImageSelect.bind(this)
   }
 
   componentDidMount() {
-    const {dispatch, location, loggedIn} = this.props
-    if (loggedIn) {
+    const {dispatch, location, isLoggedIn} = this.props
+    if (isLoggedIn) {
+      dispatch(discoverServiceIfNeeded())
       dispatch(startAlgorithmsWorkerIfNeeded())
       dispatch(startJobsWorkerIfNeeded())
     }
@@ -60,16 +85,18 @@ class Application extends Component {
 
   componentWillReceiveProps(nextProps) {
     const {dispatch} = this.props
-    if (nextProps.loggedIn) {
+    if (!this.props.isLoggedIn && nextProps.isLoggedIn) {
+      dispatch(discoverServiceIfNeeded())
       dispatch(startAlgorithmsWorkerIfNeeded())
       dispatch(startJobsWorkerIfNeeded())
     }
-    if (nextProps.location.query.jobId !== this.props.location.query.jobId) {
-      dispatch(changeLoadedResults(asArray(nextProps.location.query.jobId)))
+    if (nextProps.location.pathname !== this.props.location.pathname) {
+      dispatch(updateImageSearchBbox(null))
     }
-    if (nextProps.params.bbox !== this.props.params.bbox) {
+    if (nextProps.bbox !== this.props.bbox) {
       dispatch(clearImageSearchResults())
     }
+    dispatch(changeLoadedResults(asArray(nextProps.location.query.jobId)))
   }
 
   render() {
@@ -77,11 +104,14 @@ class Application extends Component {
       <div className={styles.root}>
         <Navigation currentLocation={this.props.location}/>
         <PrimaryMap datasets={this.props.datasets}
-                    imagery={this.props.imagery.searchResults}
+                    imagery={this.props.imagerySearchResults}
+                    isSearching={this.props.isSearchingForImagery}
                     anchor={this.props.location.hash}
-                    bbox={this.props.params.bbox}
-                    mode={this._getMapMode()}
+                    bbox={this.props.bbox}
+                    mode={this._mapMode}
+                    onAnchorChange={this._handleAnchorChange}
                     onBoundingBoxChange={this._handleBoundingBoxChange}
+                    onImagerySearchPageChange={this._handleImagerySearchPageChange}
                     onImageSelect={this._handleImageSelect}/>
         {this.props.children}
       </div>
@@ -92,18 +122,28 @@ class Application extends Component {
   // Internal API
   //
 
-  _getMapMode() {
-    if (this.props.location.pathname.indexOf('create-job') === 0) {
-      return (this.props.params.bbox && this.props.imagery.searchResults) ? MODE_SELECT_IMAGERY : MODE_DRAW_BBOX
+  get _mapMode() {
+    if (this.props.location.pathname === 'create-job') {
+      return (this.props.bbox && this.props.imagerySearchResults) ? MODE_SELECT_IMAGERY : MODE_DRAW_BBOX
     }
     return MODE_NORMAL
   }
 
+  _handleAnchorChange(anchor) {
+    if (this.props.location.hash !== anchor) {
+      this.context.router.replace({
+        ...this.props.location,
+        hash: anchor
+      })
+    }
+  }
+
   _handleBoundingBoxChange(bbox) {
-    this.context.router.push({
-      ...this.props.location,
-      pathname: `/create-job${bbox ? '/' + bbox : ''}`
-    })
+    this.props.dispatch(updateImageSearchBbox(bbox))
+  }
+
+  _handleImagerySearchPageChange(paging) {
+    this.props.dispatch(searchImageCatalog(paging.startIndex, paging.count))
   }
 
   _handleImageSelect(geojson) {

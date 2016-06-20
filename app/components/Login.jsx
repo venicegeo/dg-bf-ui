@@ -1,3 +1,19 @@
+/**
+ * Copyright 2016, RadiantBlue Technologies, Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ **/
+
 import React, {Component} from 'react'
 import {connect} from 'react-redux'
 import Modal from './Modal'
@@ -7,7 +23,6 @@ import {logIn} from '../actions'
 function selector(state) {
   return {
     error: state.login.error,
-    isLoggedIn: !!state.login.authToken,
     verifying: state.login.verifying
   }
 }
@@ -18,12 +33,10 @@ class Login extends Component {
   }
 
   static propTypes = {
-    dismiss: React.PropTypes.func,
     dispatch: React.PropTypes.func.isRequired,
-    error: React.PropTypes.bool,
-    isLoggedIn: React.PropTypes.bool,
-    location: React.PropTypes.object,
-    verifying: React.PropTypes.bool
+    error: React.PropTypes.any,
+    location: React.PropTypes.object.isRequired,
+    verifying: React.PropTypes.bool.isRequired
   }
 
   constructor() {
@@ -37,7 +50,7 @@ class Login extends Component {
 
   render() {
     return (
-      <Modal className={styles.root} dismiss={this.props.dismiss}>
+      <Modal className={styles.root} onDismiss={() => {}}>
         <h1>Login</h1><br />
         <form onSubmit={this._handleSubmit}>
           <label><input ref="username" placeholder="username"/></label>&nbsp;&nbsp;

@@ -1,9 +1,28 @@
+/**
+ * Copyright 2016, RadiantBlue Technologies, Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ **/
+
 import {Client} from '../utils/piazza-client'
 import * as worker from './workers/jobs'
 import {fromFeature} from '../utils/bbox'
 import {GATEWAY, JOBS_WORKER} from '../config'
 
-import {STATUS_RUNNING} from '../constants'
+import {
+  REQUIREMENT_BANDS,
+  STATUS_RUNNING
+} from '../constants'
 
 //
 // Action Types
@@ -12,6 +31,9 @@ import {STATUS_RUNNING} from '../constants'
 export const CREATE_JOB = 'CREATE_JOB'
 export const CREATE_JOB_SUCCESS = 'CREATE_JOB_SUCCESS'
 export const CREATE_JOB_ERROR = 'CREATE_JOB_ERROR'
+export const DISCOVER_SERVICE = 'DISCOVER_SERVICE'
+export const DISCOVER_SERVICE_SUCCESS = 'DISCOVER_SERVICE_SUCCESS'
+export const DISCOVER_SERVICE_ERROR = 'DISCOVER_SERVICE_ERROR'
 export const FETCH_JOBS = 'FETCH_JOBS'
 export const FETCH_JOBS_SUCCESS = 'FETCH_JOBS_SUCCESS'
 export const JOBS_WORKER_ERROR = 'JOBS_WORKER_ERROR'
@@ -25,47 +47,37 @@ export const UPDATE_JOB = 'UPDATE_JOB'
 
 export function createJob(catalogApiKey, name, algorithm, feature) {
   return (dispatch, getState) => {
-    const client = new Client(GATEWAY, getState().login.authToken)
-    const body = {
-      algoType: algorithm.type,
-      svcURL: algorithm.url,
-      pzAuthToken: client.authToken,
-      pzAddr: client.gateway,
-      dbAuthToken: catalogApiKey,
-      bands: ['green', 'swir1'],  // FIXME
-      metaDataJSON: feature
-    }
+    const state = getState()
+    const client = new Client(GATEWAY, state.login.authToken)
     dispatch({
       type: CREATE_JOB
     })
-    // return client.post('execute-service', body)
-    // HACK
-    return fetch('https://bf-handle.int.geointservices.io/execute', {
-      body: JSON.stringify(body),
-      headers: {
-        'content-type': 'application/json'
-      },
-      method: 'POST'
-    })
-      .then(response => {
-        if (!response.ok) {
-          throw new Error(`HttpError (code=${response.status})`)
+    return client.post('execute-service', {
+      dataInputs: {
+        body: {
+          content: JSON.stringify({
+            algoType: algorithm.type,
+            svcURL: algorithm.url,
+            pzAuthToken: client.authToken,
+            pzAddr: client.gateway,
+            dbAuthToken: catalogApiKey,
+            bands: algorithm.requirements.find(a => a.name === REQUIREMENT_BANDS).literal.split(','),
+            metaDataJSON: feature
+          }),
+          type: 'body',
+          mimeType: 'application/json'
         }
-        return response.text()
-      })
-    // HACK
+      },
+      dataOutput: [
+        {
+          mimeType: 'application/json',
+          type: 'text'
+        }
+      ],
+      serviceId: state.jobs.serviceId
+    })
       .then(id => {
         const bbox = fromFeature(feature)
-        // HACK HACK HACK HACK HACK
-        // Handles the direct calls to bf-handle until we get it pz-servicified
-        if (id.trim().match(/^[0-9a-f-]+$/i)) {
-          const resultId = id.trim()
-          const adhocJobId = 'ADHOC_' + resultId + '_' + Date.now()
-          dispatch(createJobSuccess(adhocJobId, name, algorithm, bbox, feature.id))
-          dispatch(updateJob(adhocJobId, 'Success', resultId))
-          return
-        }
-        // HACK HACK HACK HACK HACK
         dispatch(createJobSuccess(id, name, algorithm, bbox, feature.id))
         return id
       })
@@ -75,13 +87,34 @@ export function createJob(catalogApiKey, name, algorithm, feature) {
   }
 }
 
+export function discoverServiceIfNeeded() {
+  return (dispatch, getState) => {
+    const state = getState()
+    if (state.jobs.serviceId || state.jobs.discovering || state.jobs.error) {
+      return
+    }
+    dispatch(discoverService())
+    const client = new Client(GATEWAY, state.login.authToken)
+
+    return client.getServices({pattern: '^bf-handle'})
+      .then(([beachfrontApi]) => {
+        if (beachfrontApi) {
+          dispatch(discoverServiceSuccess(beachfrontApi.serviceId))
+        }
+        else {
+          dispatch(discoverServiceError('Could not find Beachfront API service'))
+        }
+      })
+      .catch(err => {
+        dispatch(discoverServiceError(err))
+      })
+  }
+}
+
 export function startJobsWorkerIfNeeded() {
   return (dispatch, getState) => {
     const state = getState()
-    if (state.workers.jobs.running) {
-      return
-    }
-    if (state.workers.jobs.error) {
+    if (state.workers.jobs.running || state.workers.jobs.error) {
       return
     }
     const client = new Client(GATEWAY, state.login.authToken)
@@ -126,6 +159,26 @@ function createJobSuccess(id, name, algorithm, bbox, imageId) {
       createdOn: Date.now(),
       status: STATUS_RUNNING
     }
+  }
+}
+
+function discoverService() {
+  return {
+    type: DISCOVER_SERVICE
+  }
+}
+
+function discoverServiceError(err) {
+  return {
+    type: DISCOVER_SERVICE_ERROR,
+    err
+  }
+}
+
+function discoverServiceSuccess(serviceId) {
+  return {
+    type: DISCOVER_SERVICE_SUCCESS,
+    serviceId
   }
 }
 

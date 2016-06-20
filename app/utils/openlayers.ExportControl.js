@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  **/
+
 import openlayers from 'openlayers'
 
 export default class ExportControl extends openlayers.control.Control {
@@ -57,7 +58,5 @@ export default class ExportControl extends openlayers.control.Control {
       newCanvas = null
     })
     map.renderSync()
-
-
   }
 }

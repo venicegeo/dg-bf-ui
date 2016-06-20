@@ -14,18 +14,10 @@
  * limitations under the License.
  **/
 
-.root {
-  z-index: 9999;
-  position: absolute;
-  top: 50%;
-  left: 0;
-  right: 0;
-  transform: translateY(-50%);
-  padding: 2em calc(50% - 20em);
-  font-size: 1.5em;
-  line-height: 1.5em;
-  background-color: rgba(255, 255, 255, 0.9);
-  box-shadow:
-      0 0 0 1px rgba(0,0,0,.3),
-      0 0 0 20px rgba(0,0,0,.3);
+export function truncate(number) {
+  return Math.round(number * 100) / 100
+}
+
+export function unwrapPoint([x, y]) {
+  return [x % 180.0, y % 90]
 }
