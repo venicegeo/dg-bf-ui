@@ -15,6 +15,7 @@
  **/
 
 import React, {Component} from 'react'
+const ESCAPE = 27
 
 export default class Modal extends Component {
   static propTypes = {
@@ -26,12 +27,19 @@ export default class Modal extends Component {
     onDismiss: React.PropTypes.func.isRequired
   }
 
+  constructor() {
+    super()
+    this._keypressed = this._keypressed.bind(this)
+  }
+
   componentDidMount() {
     document.addEventListener('click', this.props.onDismiss)
+    document.addEventListener('keyup', this._keypressed)
   }
 
   componentWillUnmount() {
     document.removeEventListener('click', this.props.onDismiss)
+    document.removeEventListener('keyup', this._keypressed)
   }
 
   render() {
@@ -40,5 +48,11 @@ export default class Modal extends Component {
         {this.props.children}
       </div>
     )
+  }
+
+  _keypressed(event) {
+    if (event.keyCode === ESCAPE) {
+      this.props.onDismiss()
+    }
   }
 }
