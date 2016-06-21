@@ -104,7 +104,7 @@ export function reducer(state = INITIAL_STATE, action) {
 export function deserialize() {
   return {
     ...INITIAL_STATE,
-    jobs: JSON.parse(localStorage.getItem('jobs.records'))
+    records: JSON.parse(localStorage.getItem('jobs.records')),
   }
 }
 
