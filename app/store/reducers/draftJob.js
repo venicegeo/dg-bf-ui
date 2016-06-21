@@ -20,7 +20,7 @@ import {
 } from '../../actions/draftJob'
 
 const INITIAL_STATE = {
-  name: null,
+  name: '',
   image: null
 }
 
