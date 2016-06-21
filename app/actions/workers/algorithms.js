@@ -34,6 +34,9 @@ export function start(client, interval, {beforeFetch, onFailure, onTerminate, on
 }
 
 export function terminate() {
+  if (typeof _instance !== 'number') {
+    return
+  }
   clearInterval(_instance)
   _handlers.onTerminate()
   _instance = null
@@ -47,7 +50,7 @@ export function terminate() {
 
 function work() {
   if (!_handlers.shouldRun()) {
-    console.debug('(algorithms:worker) fetch already in-flight; skipping cycle')
+    console.debug('(algorithms:worker) skipping cycle')
     return
   }
   console.debug('(algorithms:worker) updating')
