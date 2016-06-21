@@ -42,8 +42,8 @@ export function reducer(state = null, action) {
   case UPDATE_SEARCH_DATES:
     return {
       ...state,
-      dateFrom: state.dateFrom,
-      dateTo:   state.dateTo,
+      dateFrom: action.dateFrom,
+      dateTo:   action.dateTo,
     }
   case SEARCH_CATALOG:
     return {
