@@ -20,12 +20,14 @@ import debounce from 'lodash/debounce'
 import * as algorithms from './reducers/algorithms'
 import * as authentication from './reducers/authentication'
 import * as results from './reducers/results'
+import * as search from './reducers/search'
 import * as workers from './reducers/workers'
 
 const beachfrontApp = combineReducers({
   algorithms:     algorithms.reducer,
   authentication: authentication.reducer,
   results:        results.reducer,
+  search:         search.reducer,
   workers:        workers.reducer,
 })
 
@@ -55,6 +57,7 @@ function deserializeState() {
   try {
     return {
       authentication: authentication.deserialize(),
+      search: search.deserialize(),
     }
   } catch (err) {
     // TODO -- on 2x failure, prompt user to do a "hard reset"
@@ -65,6 +68,7 @@ function deserializeState() {
 function serializeState(state) {
   try {
     authentication.serialize(state.authentication)
+    search.serialize(state.search)
   } catch (err) {
     console.error('(store:serializeState) Could not serialize state tree', err)
   }

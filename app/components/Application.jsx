@@ -23,11 +23,11 @@ import {
   clearImageSearchResults,
   changeLoadedResults,
   discoverServiceIfNeeded,
-  searchImageCatalog,
+  searchCatalog,
   selectImage,
   startAlgorithmsWorkerIfNeeded,
   startJobsWorkerIfNeeded,
-  updateImageSearchBbox
+  updateSearchBbox
 } from '../actions'
 
 class Application extends Component {
@@ -73,7 +73,7 @@ class Application extends Component {
       dispatch(startJobsWorkerIfNeeded())
     }
     if (nextProps.location.pathname !== this.props.location.pathname) {
-      dispatch(updateImageSearchBbox(null))
+      dispatch(updateSearchBbox(null))
     }
     if (nextProps.bbox !== this.props.bbox) {
       dispatch(clearImageSearchResults())
@@ -121,11 +121,11 @@ class Application extends Component {
   }
 
   _handleBoundingBoxChange(bbox) {
-    this.props.dispatch(updateImageSearchBbox(bbox))
+    this.props.dispatch(updateSearchBbox(bbox))
   }
 
   _handleImagerySearchPageChange(paging) {
-    this.props.dispatch(searchImageCatalog(paging.startIndex, paging.count))
+    this.props.dispatch(searchCatalog(paging.startIndex, paging.count))
   }
 
   _handleImageSelect(geojson) {
@@ -134,7 +134,7 @@ class Application extends Component {
 }
 
 export default connect(state => ({
-  bbox:     state.imagery.search.criteria.bbox,
+  bbox:     state.search.bbox,
   datasets: state.jobs.records.map(job => {
     const result = state.results[job.id]
     return {
@@ -143,10 +143,10 @@ export default connect(state => ({
       progress: result ? result.progress : null
     }
   }),
-  imagerySearchResults:  state.imagery.search.results,
-  isLoggedIn:            !!state.authentication.token,
-  isSearchingForImagery: state.imagery.search.searching,
-  workers:               state.workers,
+  imagery:     state.imagery,
+  isLoggedIn:  !!state.authentication.token,
+  isSearching: state.search.searching,
+  workers:     state.workers,
 }))(Application)
 
 //

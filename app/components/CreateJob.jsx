@@ -22,24 +22,11 @@ import NewJobDetails from './NewJobDetails'
 import styles from './CreateJob.css'
 import {
   createJob,
-  searchImageCatalog,
-  updateImageryCatalogApiKey,
-  updateImageSearchBbox,
-  updateImageSearchDates
+  searchCatalog,
+  updateCatalogApiKey,
+  updateSearchBbox,
+  updateSearchDates
 } from '../actions'
-
-function selector(state) {
-  return {
-    algorithms: state.algorithms.records,
-    bbox: state.imagery.search.criteria.bbox,
-    catalogApiKey: state.imagery.catalogApiKey,
-    dateFrom: state.imagery.search.criteria.dateFrom,
-    dateTo: state.imagery.search.criteria.dateTo,
-    isSearching: state.imagery.search.searching,
-    error: state.imagery.search.error,
-    selectedImage: state.imagery.selection
-  }
-}
 
 class CreateJob extends Component {
   static contextTypes = {
@@ -47,15 +34,16 @@ class CreateJob extends Component {
   }
 
   static propTypes = {
-    algorithms: React.PropTypes.array.isRequired,
-    bbox: React.PropTypes.arrayOf(React.PropTypes.number),
+    algorithms:    React.PropTypes.array.isRequired,
+    bbox:          React.PropTypes.arrayOf(React.PropTypes.number),
     catalogApiKey: React.PropTypes.string,
-    dateFrom: React.PropTypes.string.isRequired,
-    dateTo: React.PropTypes.string.isRequired,
-    dispatch: React.PropTypes.func.isRequired,
-    error: React.PropTypes.object,
-    isSearching: React.PropTypes.bool.isRequired,
-    location: React.PropTypes.object.isRequired,
+    dateFrom:      React.PropTypes.string.isRequired,
+    dateTo:        React.PropTypes.string.isRequired,
+    dispatch:      React.PropTypes.func.isRequired,
+    error:         React.PropTypes.object,
+    isSearching:   React.PropTypes.bool.isRequired,
+    jobName:       React.PropTypes.string,
+    location:      React.PropTypes.object.isRequired,
     selectedImage: React.PropTypes.object
   }
 
@@ -123,11 +111,11 @@ class CreateJob extends Component {
   //
 
   _handleCatalogApiKeyChange(apiKey) {
-    this.props.dispatch(updateImageryCatalogApiKey(apiKey))
+    this.props.dispatch(updateCatalogApiKey(apiKey))
   }
 
   _handleClearBbox() {
-    this.props.dispatch(updateImageSearchBbox())
+    this.props.dispatch(updateSearchBbox())
   }
 
   _handleJobSubmit(algorithm) {
@@ -149,12 +137,22 @@ class CreateJob extends Component {
   }
 
   _handleSearchDateChange(dateFrom, dateTo) {
-    this.props.dispatch(updateImageSearchDates(dateFrom, dateTo))
+    this.props.dispatch(updateSearchDates(dateFrom, dateTo))
   }
 
   _handleSearchSubmit() {
-    this.props.dispatch(searchImageCatalog())
+    this.props.dispatch(searchCatalog())
   }
 }
 
-export default connect(selector)(CreateJob)
+export default connect(state => ({
+  algorithms:    state.algorithms.records,
+  bbox:          state.search.bbox,
+  catalogApiKey: state.catalog.apiKey,
+  dateFrom:      state.search.dateFrom,
+  dateTo:        state.search.dateTo,
+  error:         state.search.error,
+  isSearching:   state.search.searching,
+  jobName:       state.draftJob.name,
+  selectedImage: state.draftJob.image,
+}))(CreateJob)
