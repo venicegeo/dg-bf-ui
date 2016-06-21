@@ -19,10 +19,12 @@ import thunkMiddleware from 'redux-thunk'
 import debounce from 'lodash/debounce'
 import * as algorithms from './reducers/algorithms'
 import * as authentication from './reducers/authentication'
+import * as results from './reducers/results'
 
 const beachfrontApp = combineReducers({
   algorithms:     algorithms.reducer,
   authentication: authentication.reducer,
+  results:        results.reducer,
 })
 
 let devtoolsExtension = f => f

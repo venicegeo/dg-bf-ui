@@ -68,7 +68,7 @@ export function downloadResult(jobId) {
 function loadResult(jobId, resultId) {
   return (dispatch, getState) => {
     const state = getState()
-    const client = new Client(GATEWAY, state.login.authToken)
+    const client = new Client(GATEWAY, state.authentication.token)
 
     if (state.results[jobId]) {
       return  // Already loading or loaded
