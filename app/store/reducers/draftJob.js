@@ -29,7 +29,7 @@ export function reducer(state = INITIAL_STATE, action) {
   case CHANGE_JOB_NAME:
     return {
       ...state,
-      name: action.name
+      name: action.value
     }
   case SELECT_IMAGE:
     return {

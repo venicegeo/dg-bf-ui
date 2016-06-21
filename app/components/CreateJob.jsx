@@ -44,7 +44,7 @@ class CreateJob extends Component {
     dispatch:      React.PropTypes.func.isRequired,
     error:         React.PropTypes.object,
     isSearching:   React.PropTypes.bool.isRequired,
-    jobName:       React.PropTypes.string,
+    jobName:       React.PropTypes.string.isRequired,
     location:      React.PropTypes.object.isRequired,
     selectedImage: React.PropTypes.object
   }

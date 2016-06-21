@@ -37,15 +37,15 @@ class Application extends Component {
   }
 
   static propTypes = {
-    bbox: React.PropTypes.arrayOf(React.PropTypes.number),
-    children: React.PropTypes.element,
-    datasets: React.PropTypes.array.isRequired,
-    dispatch: React.PropTypes.func.isRequired,
-    imagerySearchResults: React.PropTypes.object,
-    isLoggedIn: React.PropTypes.bool.isRequired,
-    isSearchingForImagery: React.PropTypes.bool.isRequired,
-    location: React.PropTypes.object.isRequired,
-    workers: React.PropTypes.object.isRequired
+    bbox:        React.PropTypes.arrayOf(React.PropTypes.number),
+    children:    React.PropTypes.element,
+    datasets:    React.PropTypes.array.isRequired,
+    dispatch:    React.PropTypes.func.isRequired,
+    imagery:     React.PropTypes.object,
+    isLoggedIn:  React.PropTypes.bool.isRequired,
+    isSearching: React.PropTypes.bool.isRequired,
+    location:    React.PropTypes.object.isRequired,
+    workers:     React.PropTypes.object.isRequired
   }
 
   constructor() {
@@ -89,8 +89,8 @@ class Application extends Component {
       <div className={styles.root}>
         <Navigation currentLocation={this.props.location}/>
         <PrimaryMap datasets={this.props.datasets}
-                    imagery={this.props.imagerySearchResults}
-                    isSearching={this.props.isSearchingForImagery}
+                    imagery={this.props.imagery}
+                    isSearching={this.props.isSearching}
                     anchor={this.props.location.hash}
                     bbox={this.props.bbox}
                     mode={this._mapMode}
@@ -109,7 +109,7 @@ class Application extends Component {
 
   get _mapMode() {
     if (this.props.location.pathname === 'create-job') {
-      return (this.props.bbox && this.props.imagerySearchResults) ? MODE_SELECT_IMAGERY : MODE_DRAW_BBOX
+      return (this.props.bbox && this.props.imagery) ? MODE_SELECT_IMAGERY : MODE_DRAW_BBOX
     }
     return MODE_NORMAL
   }
