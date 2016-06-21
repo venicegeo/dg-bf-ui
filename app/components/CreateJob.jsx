@@ -22,10 +22,12 @@ import NewJobDetails from './NewJobDetails'
 import styles from './CreateJob.css'
 import {
   createJob,
+  changeJobName,
+  resetJobName,
   searchCatalog,
   updateCatalogApiKey,
   updateSearchBbox,
-  updateSearchDates
+  updateSearchDates,
 } from '../actions'
 
 class CreateJob extends Component {
@@ -49,13 +51,16 @@ class CreateJob extends Component {
 
   constructor() {
     super()
-    this.state = {name: null}
     this._handleJobSubmit = this._handleJobSubmit.bind(this)
     this._handleCatalogApiKeyChange = this._handleCatalogApiKeyChange.bind(this)
     this._handleClearBbox = this._handleClearBbox.bind(this)
     this._handleNameChange = this._handleNameChange.bind(this)
     this._handleSearchSubmit = this._handleSearchSubmit.bind(this)
     this._handleSearchDateChange = this._handleSearchDateChange.bind(this)
+  }
+
+  componentDidMount() {
+    this.props.dispatch(resetJobName())
   }
 
   render() {
@@ -81,7 +86,8 @@ class CreateJob extends Component {
           )}
           {this.props.bbox && this.props.selectedImage && (
             <li className={styles.details}>
-              <NewJobDetails onNameChange={this._handleNameChange}/>
+              <NewJobDetails name={this.props.jobName}
+                             onNameChange={this._handleNameChange}/>
             </li>
           )}
           {this.props.bbox && this.props.selectedImage && (
@@ -119,9 +125,8 @@ class CreateJob extends Component {
   }
 
   _handleJobSubmit(algorithm) {
-    const {selectedImage, catalogApiKey} = this.props
-    const {name} = this.state
-    this.props.dispatch(createJob(catalogApiKey, name, algorithm, selectedImage))
+    const {jobName, selectedImage, catalogApiKey} = this.props
+    this.props.dispatch(createJob(catalogApiKey, jobName, algorithm, selectedImage))
       .then(jobId => {
         this.context.router.push({
           pathname: '/jobs',
@@ -133,7 +138,7 @@ class CreateJob extends Component {
   }
 
   _handleNameChange(name) {
-    this.setState({name})
+    this.props.dispatch(changeJobName(name))
   }
 
   _handleSearchDateChange(dateFrom, dateTo) {
