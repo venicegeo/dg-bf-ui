@@ -14,10 +14,24 @@
  * limitations under the License.
  **/
 
-export const CLEAR_IMAGERY = 'CLEAR_IMAGERY'
+import {CLEAR_IMAGERY} from '../../actions/imagery'
+import {SEARCH_CATALOG_SUCCESS} from '../../actions/search'
 
-export function clearImagery() {
-  return {
-    type: CLEAR_IMAGERY
+export function reducer(state = null, action) {
+  switch (action.type) {
+  case CLEAR_IMAGERY:
+    return null
+  case SEARCH_CATALOG_SUCCESS:
+    return action.results
+  default:
+    return state
   }
+}
+
+export function deserialize() {
+  return JSON.parse(sessionStorage.getItem('imagery'))
+}
+
+export function serialize(state) {
+  sessionStorage.setItem('imagery', JSON.stringify(state))
 }

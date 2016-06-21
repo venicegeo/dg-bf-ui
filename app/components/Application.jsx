@@ -20,7 +20,7 @@ import Navigation from './Navigation'
 import PrimaryMap, {MODE_DRAW_BBOX, MODE_NORMAL, MODE_SELECT_IMAGERY} from './PrimaryMap'
 import styles from './Application.css'
 import {
-  clearImageSearchResults,
+  clearImagery,
   changeLoadedResults,
   discoverServiceIfNeeded,
   searchCatalog,
@@ -76,7 +76,7 @@ class Application extends Component {
       dispatch(updateSearchBbox(null))
     }
     if (nextProps.bbox !== this.props.bbox) {
-      dispatch(clearImageSearchResults())
+      dispatch(clearImagery())
     }
     dispatch(changeLoadedResults(asArray(nextProps.location.query.jobId)))
   }
