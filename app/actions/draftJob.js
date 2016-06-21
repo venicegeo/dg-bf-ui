@@ -14,11 +14,36 @@
  * limitations under the License.
  **/
 
-export * from './algorithms'
-export * from './authentication'
-export * from './catalog'
-export * from './draftJob'
-export * from './imagery'
-export * from './jobs'
-export * from './results'
-export * from './search'
+import moment from 'moment'
+
+//
+// Action Types
+//
+
+export const CHANGE_JOB_NAME = 'CHANGE_JOB_NAME'
+export const SELECT_IMAGE = 'SELECT_IMAGE'
+
+//
+// Action Creators
+//
+
+export function resetJobName() {
+  return {
+    type: CHANGE_JOB_NAME,
+    name: 'BF_' + moment().format('DDMMMYYYY').toUpperCase()
+  }
+}
+
+export function changeJobName(name) {
+  return {
+    type: CHANGE_JOB_NAME,
+    name
+  }
+}
+
+export function selectImage(feature) {
+  return {
+    type: SELECT_IMAGE,
+    feature
+  }
+}

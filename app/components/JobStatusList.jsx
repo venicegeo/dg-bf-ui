@@ -20,13 +20,6 @@ import JobStatus from './JobStatus'
 import styles from './JobStatusList.css'
 import {downloadResult} from '../actions'
 
-function selector(state) {
-  return {
-    jobs: state.jobs.records,
-    results: state.results
-  }
-}
-
 class JobStatusList extends Component {
   static contextTypes = {
     router: React.PropTypes.object
@@ -92,4 +85,7 @@ class JobStatusList extends Component {
   }
 }
 
-export default connect(selector)(JobStatusList)
+export default connect(state => ({
+  jobs:    state.jobs.records,
+  results: state.results,
+}))(JobStatusList)

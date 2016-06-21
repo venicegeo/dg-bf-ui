@@ -20,33 +20,16 @@ import Navigation from './Navigation'
 import PrimaryMap, {MODE_DRAW_BBOX, MODE_NORMAL, MODE_SELECT_IMAGERY} from './PrimaryMap'
 import styles from './Application.css'
 import {
-  clearImageSearchResults,
+  clearImagery,
   changeLoadedResults,
-  discoverServiceIfNeeded,
-  searchImageCatalog,
+  discoverCatalogIfNeeded,
+  discoverExecutorIfNeeded,
+  searchCatalog,
   selectImage,
   startAlgorithmsWorkerIfNeeded,
   startJobsWorkerIfNeeded,
-  updateImageSearchBbox
+  updateSearchBbox
 } from '../actions'
-
-function selector(state) {
-  return {
-    bbox: state.imagery.search.criteria.bbox,
-    datasets: state.jobs.records.map(job => {
-      const result = state.results[job.id]
-      return {
-        job,
-        progress: result ? result.progress : null,
-        geojson: result ? result.geojson : null
-      }
-    }),
-    imagerySearchResults: state.imagery.search.results,
-    isLoggedIn: !!state.login.authToken,
-    isSearchingForImagery: state.imagery.search.searching,
-    workers: state.workers
-  }
-}
 
 class Application extends Component {
   static contextTypes = {
@@ -54,15 +37,15 @@ class Application extends Component {
   }
 
   static propTypes = {
-    bbox: React.PropTypes.arrayOf(React.PropTypes.number),
-    children: React.PropTypes.element,
-    datasets: React.PropTypes.array.isRequired,
-    dispatch: React.PropTypes.func.isRequired,
-    imagerySearchResults: React.PropTypes.object,
-    isLoggedIn: React.PropTypes.bool.isRequired,
-    isSearchingForImagery: React.PropTypes.bool.isRequired,
-    location: React.PropTypes.object.isRequired,
-    workers: React.PropTypes.object.isRequired
+    bbox:        React.PropTypes.arrayOf(React.PropTypes.number),
+    children:    React.PropTypes.element,
+    datasets:    React.PropTypes.array.isRequired,
+    dispatch:    React.PropTypes.func.isRequired,
+    imagery:     React.PropTypes.object,
+    isLoggedIn:  React.PropTypes.bool.isRequired,
+    isSearching: React.PropTypes.bool.isRequired,
+    location:    React.PropTypes.object.isRequired,
+    workers:     React.PropTypes.object.isRequired
   }
 
   constructor() {
@@ -76,7 +59,8 @@ class Application extends Component {
   componentDidMount() {
     const {dispatch, location, isLoggedIn} = this.props
     if (isLoggedIn) {
-      dispatch(discoverServiceIfNeeded())
+      dispatch(discoverCatalogIfNeeded())
+      dispatch(discoverExecutorIfNeeded())
       dispatch(startAlgorithmsWorkerIfNeeded())
       dispatch(startJobsWorkerIfNeeded())
     }
@@ -86,15 +70,16 @@ class Application extends Component {
   componentWillReceiveProps(nextProps) {
     const {dispatch} = this.props
     if (!this.props.isLoggedIn && nextProps.isLoggedIn) {
-      dispatch(discoverServiceIfNeeded())
+      dispatch(discoverCatalogIfNeeded())
+      dispatch(discoverExecutorIfNeeded())
       dispatch(startAlgorithmsWorkerIfNeeded())
       dispatch(startJobsWorkerIfNeeded())
     }
     if (nextProps.location.pathname !== this.props.location.pathname) {
-      dispatch(updateImageSearchBbox(null))
+      dispatch(updateSearchBbox(null))
     }
     if (nextProps.bbox !== this.props.bbox) {
-      dispatch(clearImageSearchResults())
+      dispatch(clearImagery())
     }
     dispatch(changeLoadedResults(asArray(nextProps.location.query.jobId)))
   }
@@ -104,8 +89,8 @@ class Application extends Component {
       <div className={styles.root}>
         <Navigation currentLocation={this.props.location}/>
         <PrimaryMap datasets={this.props.datasets}
-                    imagery={this.props.imagerySearchResults}
-                    isSearching={this.props.isSearchingForImagery}
+                    imagery={this.props.imagery}
+                    isSearching={this.props.isSearching}
                     anchor={this.props.location.hash}
                     bbox={this.props.bbox}
                     mode={this._mapMode}
@@ -124,7 +109,7 @@ class Application extends Component {
 
   get _mapMode() {
     if (this.props.location.pathname === 'create-job') {
-      return (this.props.bbox && this.props.imagerySearchResults) ? MODE_SELECT_IMAGERY : MODE_DRAW_BBOX
+      return (this.props.bbox && this.props.imagery) ? MODE_SELECT_IMAGERY : MODE_DRAW_BBOX
     }
     return MODE_NORMAL
   }
@@ -139,11 +124,11 @@ class Application extends Component {
   }
 
   _handleBoundingBoxChange(bbox) {
-    this.props.dispatch(updateImageSearchBbox(bbox))
+    this.props.dispatch(updateSearchBbox(bbox))
   }
 
   _handleImagerySearchPageChange(paging) {
-    this.props.dispatch(searchImageCatalog(paging.startIndex, paging.count))
+    this.props.dispatch(searchCatalog(paging.startIndex, paging.count))
   }
 
   _handleImageSelect(geojson) {
@@ -151,7 +136,21 @@ class Application extends Component {
   }
 }
 
-export default connect(selector)(Application)
+export default connect(state => ({
+  bbox:     state.search.bbox,
+  datasets: state.jobs.records.map(job => {
+    const result = state.results[job.id]
+    return {
+      job,
+      geojson: result ? result.geojson : null,
+      progress: result ? result.progress : null
+    }
+  }),
+  imagery:     state.imagery,
+  isLoggedIn:  !!state.authentication.token,
+  isSearching: state.search.searching,
+  workers:     state.workers,
+}))(Application)
 
 //
 // Internals

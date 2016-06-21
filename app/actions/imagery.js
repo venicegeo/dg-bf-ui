@@ -14,99 +14,10 @@
  * limitations under the License.
  **/
 
-import moment from 'moment'
-import {CATALOG} from '../config'
+export const CLEAR_IMAGERY = 'CLEAR_IMAGERY'
 
-//
-// Action Types
-//
-
-export const CLEAR_IMAGE_SEARCH_RESULTS = 'CLEAR_IMAGE_SEARCH_RESULTS'
-export const SEARCH_IMAGE_CATALOG = 'SEARCH_IMAGE_CATALOG'
-export const SEARCH_IMAGE_CATALOG_SUCCESS = 'SEARCH_IMAGE_CATALOG_SUCCESS'
-export const SEARCH_IMAGE_CATALOG_ERROR = 'SEARCH_IMAGE_CATALOG_ERROR'
-export const SELECT_IMAGE = 'SELECT_IMAGE'
-export const UPDATE_IMAGE_SEARCH_BBOX = 'UPDATE_IMAGE_SEARCH_BBOX'
-export const UPDATE_IMAGE_SEARCH_DATES = 'UPDATE_IMAGE_SEARCH_DATES'
-export const UPDATE_IMAGE_CATALOG_API_KEY = 'UPDATE_IMAGE_CATALOG_API_KEY'
-
-//
-// Action Creators
-//
-
-export function clearImageSearchResults() {
+export function clearImagery() {
   return {
-    type: CLEAR_IMAGE_SEARCH_RESULTS
-  }
-}
-
-export function selectImage(feature) {
-  return {
-    type: SELECT_IMAGE,
-    feature
-  }
-}
-
-export function searchImageCatalog(startIndex=0, count=100) {
-  return (dispatch, getState) => {
-    dispatch({
-      type: SEARCH_IMAGE_CATALOG
-    })
-
-    const {bbox, dateFrom} = getState().imagery.search.criteria
-    const acquiredDate = moment(dateFrom).toISOString()
-    return fetch(`${CATALOG}/discover?acquiredDate=${acquiredDate}&bbox=${bbox}&cloudCover=10&count=${count}&startIndex=${startIndex}`)
-      .then(response => {
-        if (response.ok) {
-          return response.json()
-        }
-        throw new Error('HTTP Error ' + response.status)
-      })
-      .then(results => {
-        dispatch(searchImageCatalogSuccess(results))
-      })
-      .catch(err => {
-        dispatch(searchImageCatalogError(err))
-      })
-  }
-}
-
-export function updateImageryCatalogApiKey(value) {
-  return {
-    type: UPDATE_IMAGE_CATALOG_API_KEY,
-    value
-  }
-}
-
-export function updateImageSearchBbox(bbox) {
-  return {
-    type: UPDATE_IMAGE_SEARCH_BBOX,
-    bbox: bbox || null
-  }
-}
-
-export function updateImageSearchDates(dateFrom, dateTo) {
-  return {
-    type: UPDATE_IMAGE_SEARCH_DATES,
-    dateFrom,
-    dateTo
-  }
-}
-
-//
-// Internals
-//
-
-function searchImageCatalogError(err) {
-  return {
-    type: SEARCH_IMAGE_CATALOG_ERROR,
-    err
-  }
-}
-
-function searchImageCatalogSuccess(results) {
-  return {
-    type: SEARCH_IMAGE_CATALOG_SUCCESS,
-    results
+    type: CLEAR_IMAGERY
   }
 }

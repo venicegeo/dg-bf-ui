@@ -14,11 +14,24 @@
  * limitations under the License.
  **/
 
-export * from './algorithms'
-export * from './authentication'
-export * from './catalog'
-export * from './draftJob'
-export * from './imagery'
-export * from './jobs'
-export * from './results'
-export * from './search'
+import {CLEAR_IMAGERY} from '../../actions/imagery'
+import {SEARCH_CATALOG_SUCCESS} from '../../actions/search'
+
+export function reducer(state = null, action) {
+  switch (action.type) {
+  case CLEAR_IMAGERY:
+    return null
+  case SEARCH_CATALOG_SUCCESS:
+    return action.results
+  default:
+    return state
+  }
+}
+
+export function deserialize() {
+  return JSON.parse(sessionStorage.getItem('imagery'))
+}
+
+export function serialize(state) {
+  sessionStorage.setItem('imagery', JSON.stringify(state))
+}

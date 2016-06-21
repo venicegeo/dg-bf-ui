@@ -19,8 +19,9 @@ import styles from './NewJobDetails.css'
 
 export default class NewJobDetails extends Component {
   static propTypes = {
-    className: React.PropTypes.string,
-    onNameChange: React.PropTypes.func.isRequired
+    className:    React.PropTypes.string,
+    name:         React.PropTypes.string.isRequired,
+    onNameChange: React.PropTypes.func.isRequired,
   }
 
   constructor() {
@@ -29,8 +30,13 @@ export default class NewJobDetails extends Component {
   }
 
   componentDidMount() {
-    this.refs.name.value = 'Beachfront_Job_' + Date.now()
-    this._emitNameChange()
+    this.refs.name.value = this.props.name
+  }
+
+  componentWillReceiveProps(nextProps) {
+    if (this.refs.name.value !== nextProps.name) {
+      this.refs.name.value = nextProps.name
+    }
   }
 
   render() {

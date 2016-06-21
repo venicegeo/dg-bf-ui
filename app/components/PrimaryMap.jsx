@@ -81,15 +81,16 @@ export default class PrimaryMap extends Component {
   }
 
   componentDidMount() {
-    this._initializeOpenLayers()
-    this._renderDetections()
-    this._renderFrames()
-    this._renderImagery()
-    this._renderImagerySearchResultsOverlay()
-    this._recenter(this.props.anchor)
-    if (this.props.bbox) {
-      this._renderImagerySearchBbox()
-    }
+    this._initializeOpenLayers().then(() => {
+      this._renderDetections()
+      this._renderFrames()
+      this._renderImagery()
+      this._renderImagerySearchResultsOverlay()
+      this._recenter(this.props.anchor)
+      if (this.props.bbox) {
+        this._renderImagerySearchBbox()
+      }
+    })
     if (this.props.mode === MODE_DRAW_BBOX) {
       this._activateDrawInteraction()
     }
@@ -263,6 +264,7 @@ export default class PrimaryMap extends Component {
     })
 
     this._map.on('moveend', this._emitAnchorChange)
+    return new Promise(resolve => this._map.once('postrender', resolve))
   }
 
   _recenter(anchor) {

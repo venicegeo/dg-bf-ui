@@ -54,7 +54,7 @@ export function bootstrap(element) {
 
 function createLoginFilter(store) {
   return (nextState, replace) => {
-    if (!store.getState().login.authToken) {
+    if (!store.getState().authentication.token) {
       replace({
         pathname: '/login',
         state: {

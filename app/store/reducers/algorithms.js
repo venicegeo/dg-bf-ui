@@ -14,11 +14,28 @@
  * limitations under the License.
  **/
 
-export * from './algorithms'
-export * from './authentication'
-export * from './catalog'
-export * from './draftJob'
-export * from './imagery'
-export * from './jobs'
-export * from './results'
-export * from './search'
+import {
+  FETCH_ALGORITHMS,
+  FETCH_ALGORITHMS_SUCCESS,
+} from '../../actions/algorithms'
+
+export function reducer(state = {
+  fetching: false,
+  records: []
+}, action) {
+  switch (action.type) {
+  case FETCH_ALGORITHMS:
+    return {
+      ...state,
+      fetching: true
+    }
+  case FETCH_ALGORITHMS_SUCCESS:
+    return {
+      ...state,
+      fetching: false,
+      records: action.records
+    }
+  default:
+    return state
+  }
+}
