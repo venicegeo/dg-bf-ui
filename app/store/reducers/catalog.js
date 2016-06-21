@@ -50,7 +50,7 @@ export function reducer(state = INITIAL_STATE, action) {
   case UPDATE_CATALOG_API_KEY:
     return {
       ...state,
-      apiKey: action.value
+      apiKey: action.apiKey
     }
   default:
     return state

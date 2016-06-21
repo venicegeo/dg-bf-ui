@@ -39,10 +39,10 @@ export function discoverCatalogIfNeeded() {
   }
 }
 
-export function updateCatalogApiKey(value) {
+export function updateCatalogApiKey(apiKey) {
   return {
     type: UPDATE_CATALOG_API_KEY,
-    value
+    apiKey
   }
 }
 

@@ -30,14 +30,14 @@ export const SELECT_IMAGE = 'SELECT_IMAGE'
 export function resetJobName() {
   return {
     type: CHANGE_JOB_NAME,
-    value: 'BF_' + moment().format('DDMMMYYYY').toUpperCase()
+    name: 'BF_' + moment().format('DDMMMYYYY').toUpperCase()
   }
 }
 
-export function changeJobName(value) {
+export function changeJobName(name) {
   return {
     type: CHANGE_JOB_NAME,
-    value
+    name
   }
 }
 
