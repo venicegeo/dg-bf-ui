@@ -20,18 +20,18 @@ import {GATEWAY} from '../config'
 // Action Types
 //
 
-export const LOG_IN = 'LOG_IN'
-export const LOG_IN_SUCCESS = 'LOG_IN_SUCCESS'
-export const LOG_IN_ERROR = 'LOG_IN_ERROR'
+export const AUTHENTICATE = 'AUTHENTICATE'
+export const AUTHENTICATE_SUCCESS = 'AUTHENTICATE_SUCCESS'
+export const AUTHENTICATE_ERROR = 'AUTHENTICATE_ERROR'
 
 //
 // Action Creators
 //
 
-export function logIn(username, password) {
+export function authenticate(username, password) {
   return dispatch => {
     dispatch({
-      type: LOG_IN
+      type: AUTHENTICATE
     })
     return fetch(GATEWAY.replace('pz-gateway.', 'pz-security.') + '/verification', {
       method: 'POST',
@@ -48,30 +48,30 @@ export function logIn(username, password) {
 
         // HACK HACK HACK HACK
         if (token === 'false') {
-          dispatch(logInError('Credentials rejected'))
+          dispatch(authenticateError('Credentials rejected'))
           return
         }
         token = `Basic ${btoa(username + ':' + password)}`
         // HACK HACK HACK HACK
 
-        dispatch(logInSuccess(token))
+        dispatch(authenticateSuccess(token))
       })
       .catch(err => {
-        dispatch(logInError(err))
+        dispatch(authenticateError(err))
       })
   }
 }
 
-function logInError(err) {
+function authenticateError(err) {
   return {
-    type: LOG_IN_ERROR,
+    type: AUTHENTICATE_ERROR,
     err
   }
 }
 
-function logInSuccess(token) {
+function authenticateSuccess(token) {
   return {
-    type: LOG_IN_SUCCESS,
+    type: AUTHENTICATE_SUCCESS,
     token
   }
 }

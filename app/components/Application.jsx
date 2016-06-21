@@ -30,24 +30,6 @@ import {
   updateImageSearchBbox
 } from '../actions'
 
-function selector(state) {
-  return {
-    bbox: state.imagery.search.criteria.bbox,
-    datasets: state.jobs.records.map(job => {
-      const result = state.results[job.id]
-      return {
-        job,
-        progress: result ? result.progress : null,
-        geojson: result ? result.geojson : null
-      }
-    }),
-    imagerySearchResults: state.imagery.search.results,
-    isLoggedIn: !!state.login.authToken,
-    isSearchingForImagery: state.imagery.search.searching,
-    workers: state.workers
-  }
-}
-
 class Application extends Component {
   static contextTypes = {
     router: React.PropTypes.object
@@ -151,7 +133,21 @@ class Application extends Component {
   }
 }
 
-export default connect(selector)(Application)
+export default connect(state => ({
+  bbox:     state.imagery.search.criteria.bbox,
+  datasets: state.jobs.records.map(job => {
+    const result = state.results[job.id]
+    return {
+      job,
+      geojson: result ? result.geojson : null,
+      progress: result ? result.progress : null
+    }
+  }),
+  imagerySearchResults:  state.imagery.search.results,
+  isLoggedIn:            !!state.authentication.token,
+  isSearchingForImagery: state.imagery.search.searching,
+  workers:               state.workers,
+}))(Application)
 
 //
 // Internals

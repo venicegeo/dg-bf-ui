@@ -41,7 +41,7 @@ export function startAlgorithmsWorkerIfNeeded() {
     if (state.workers.algorithms.error) {
       return
     }
-    const client = new Client(GATEWAY, state.login.authToken)
+    const client = new Client(GATEWAY, state.authentication.token)
     worker.start(client, ALGORITHMS_WORKER.INTERVAL, {
       shouldRun() {
         return !state.algorithms.fetching

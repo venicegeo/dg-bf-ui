@@ -48,7 +48,7 @@ export const UPDATE_JOB = 'UPDATE_JOB'
 export function createJob(catalogApiKey, name, algorithm, feature) {
   return (dispatch, getState) => {
     const state = getState()
-    const client = new Client(GATEWAY, state.login.authToken)
+    const client = new Client(GATEWAY, state.authentication.token)
     dispatch({
       type: CREATE_JOB
     })
@@ -94,7 +94,7 @@ export function discoverServiceIfNeeded() {
       return
     }
     dispatch(discoverService())
-    const client = new Client(GATEWAY, state.login.authToken)
+    const client = new Client(GATEWAY, state.authentication.token)
 
     return client.getServices({pattern: '^bf-handle'})
       .then(([beachfrontApi]) => {
@@ -117,7 +117,7 @@ export function startJobsWorkerIfNeeded() {
     if (state.workers.jobs.running || state.workers.jobs.error) {
       return
     }
-    const client = new Client(GATEWAY, state.login.authToken)
+    const client = new Client(GATEWAY, state.authentication.token)
     worker.start(client, JOBS_WORKER.INTERVAL, JOBS_WORKER.JOB_TTL, {
       select() {
         return getState().jobs

@@ -18,14 +18,7 @@ import React, {Component} from 'react'
 import {connect} from 'react-redux'
 import Modal from './Modal'
 import styles from './Login.css'
-import {logIn} from '../actions'
-
-function selector(state) {
-  return {
-    error: state.login.error,
-    verifying: state.login.verifying
-  }
-}
+import {authenticate} from '../actions'
 
 class Login extends Component {
   static contextTypes = {
@@ -33,10 +26,10 @@ class Login extends Component {
   }
 
   static propTypes = {
-    dispatch: React.PropTypes.func.isRequired,
-    error: React.PropTypes.any,
-    location: React.PropTypes.object.isRequired,
-    verifying: React.PropTypes.bool.isRequired
+    authenticating: React.PropTypes.bool.isRequired,
+    dispatch:       React.PropTypes.func.isRequired,
+    error:          React.PropTypes.any,
+    location:       React.PropTypes.object.isRequired
   }
 
   constructor() {
@@ -55,7 +48,7 @@ class Login extends Component {
         <form onSubmit={this._handleSubmit}>
           <label><input ref="username" placeholder="username"/></label>&nbsp;&nbsp;
           <label><input ref="pass" placeholder="password" type="password"/></label> <br /><br />
-          <button type="submit" disabled={this.props.verifying}>login</button>
+          <button type="submit" disabled={this.props.authenticating}>login</button>
           {this.props.error && (
             <p>Bad login information</p>
           )}
@@ -68,7 +61,7 @@ class Login extends Component {
     event.preventDefault()
     const username = this.refs.username.value
     const password = this.refs.pass.value
-    this.props.dispatch(logIn(username, password))
+    this.props.dispatch(authenticate(username, password))
       .then(() => {
         const {router} = this.context
         const {location} = this.props
@@ -81,4 +74,7 @@ class Login extends Component {
   }
 }
 
-export default connect(selector)(Login)
+export default connect(state => ({
+  authenticating: state.authorization.authenticating,
+  error:          state.authorization.error
+}))(Login)
