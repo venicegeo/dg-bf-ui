@@ -22,7 +22,8 @@ import styles from './Application.css'
 import {
   clearImagery,
   changeLoadedResults,
-  discoverServiceIfNeeded,
+  discoverCatalogIfNeeded,
+  discoverExecutorIfNeeded,
   searchCatalog,
   selectImage,
   startAlgorithmsWorkerIfNeeded,
@@ -58,7 +59,8 @@ class Application extends Component {
   componentDidMount() {
     const {dispatch, location, isLoggedIn} = this.props
     if (isLoggedIn) {
-      dispatch(discoverServiceIfNeeded())
+      dispatch(discoverCatalogIfNeeded())
+      dispatch(discoverExecutorIfNeeded())
       dispatch(startAlgorithmsWorkerIfNeeded())
       dispatch(startJobsWorkerIfNeeded())
     }
@@ -68,7 +70,8 @@ class Application extends Component {
   componentWillReceiveProps(nextProps) {
     const {dispatch} = this.props
     if (!this.props.isLoggedIn && nextProps.isLoggedIn) {
-      dispatch(discoverServiceIfNeeded())
+      dispatch(discoverCatalogIfNeeded())
+      dispatch(discoverExecutorIfNeeded())
       dispatch(startAlgorithmsWorkerIfNeeded())
       dispatch(startJobsWorkerIfNeeded())
     }

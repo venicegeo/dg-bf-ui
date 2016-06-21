@@ -16,6 +16,7 @@
 
 export * from './algorithms'
 export * from './authentication'
+export * from './catalog'
 export * from './draftJob'
 export * from './imagery'
 export * from './jobs'
