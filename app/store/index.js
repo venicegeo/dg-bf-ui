@@ -17,9 +17,11 @@
 import {applyMiddleware, createStore, combineReducers, compose} from 'redux'
 import thunkMiddleware from 'redux-thunk'
 import debounce from 'lodash/debounce'
+import * as algorithms from './reducers/algorithms'
 import * as authentication from './reducers/authentication'
 
 const beachfrontApp = combineReducers({
+  algorithms:     algorithms.reducer,
   authentication: authentication.reducer,
 })
 
