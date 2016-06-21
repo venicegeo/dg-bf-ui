@@ -75,6 +75,6 @@ class Login extends Component {
 }
 
 export default connect(state => ({
-  authenticating: state.authorization.authenticating,
-  error:          state.authorization.error
+  authenticating: state.authentication.authenticating,
+  error:          state.authentication.error
 }))(Login)

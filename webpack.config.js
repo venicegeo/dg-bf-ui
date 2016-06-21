@@ -26,18 +26,6 @@ module.exports = {
   entry: './index.js',
   devtool: 'cheap-module-eval-source-map',
 
-  devServer: {
-    proxy: {
-      /*
-       2016-06-01 -- This accounts for the way connect-history-api-fallback treats URIs
-       containing dots (.) as file requests.  No easy way to solve that problem without
-       making CHAF's file detection logic smarter, THEN propagating whatever required
-       configuration changes are needed to the webpack-dev-server project. ¯\_(ツ)_/¯
-       */
-      '/create-job/*': {bypass: () => '/index.html'}
-    }
-  },
-
   resolve: {
     alias: process.env.NODE_ENV === 'production' ? {} : {openlayers$: 'openlayers/dist/ol-debug.js'},
     extensions: ['', '.js', '.jsx']

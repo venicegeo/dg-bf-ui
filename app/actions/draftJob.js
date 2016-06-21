@@ -16,8 +16,16 @@
 
 import moment from 'moment'
 
+//
+// Action Types
+//
+
 export const CHANGE_JOB_NAME = 'CHANGE_JOB_NAME'
 export const SELECT_IMAGE = 'SELECT_IMAGE'
+
+//
+// Action Creators
+//
 
 export function resetJobName() {
   return {

@@ -16,11 +16,19 @@
 
 import moment from 'moment'
 
+//
+// Action Types
+//
+
 export const SEARCH_CATALOG = 'SEARCH_CATALOG'
 export const SEARCH_CATALOG_SUCCESS = 'SEARCH_CATALOG_SUCCESS'
 export const SEARCH_CATALOG_ERROR = 'SEARCH_CATALOG_ERROR'
 export const UPDATE_SEARCH_BBOX = 'UPDATE_SEARCH_BBOX'
 export const UPDATE_SEARCH_DATES = 'UPDATE_SEARCH_DATES'
+
+//
+// Action Creators
+//
 
 export function searchCatalog(startIndex = 0, count = 100) {
   return (dispatch, getState) => {
