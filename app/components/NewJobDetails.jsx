@@ -30,7 +30,7 @@ export default class NewJobDetails extends Component {
   }
 
   componentDidMount() {
-    this.refs.name.value = name
+    this.refs.name.value = this.props.name
   }
 
   componentWillReceiveProps(nextProps) {
