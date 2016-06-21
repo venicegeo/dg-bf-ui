@@ -19,6 +19,7 @@ import thunkMiddleware from 'redux-thunk'
 import debounce from 'lodash/debounce'
 import * as algorithms from './reducers/algorithms'
 import * as authentication from './reducers/authentication'
+import * as jobs from './reducers/jobs'
 import * as results from './reducers/results'
 import * as search from './reducers/search'
 import * as workers from './reducers/workers'
@@ -26,6 +27,7 @@ import * as workers from './reducers/workers'
 const beachfrontApp = combineReducers({
   algorithms:     algorithms.reducer,
   authentication: authentication.reducer,
+  jobs:           jobs.reducer,
   results:        results.reducer,
   search:         search.reducer,
   workers:        workers.reducer,
@@ -57,6 +59,7 @@ function deserializeState() {
   try {
     return {
       authentication: authentication.deserialize(),
+      jobs: jobs.deserialize(),
       search: search.deserialize(),
     }
   } catch (err) {
@@ -68,6 +71,7 @@ function deserializeState() {
 function serializeState(state) {
   try {
     authentication.serialize(state.authentication)
+    jobs.serialize(state.jobs)
     search.serialize(state.search)
   } catch (err) {
     console.error('(store:serializeState) Could not serialize state tree', err)

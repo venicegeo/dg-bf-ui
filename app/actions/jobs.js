@@ -31,9 +31,9 @@ import {
 export const CREATE_JOB = 'CREATE_JOB'
 export const CREATE_JOB_SUCCESS = 'CREATE_JOB_SUCCESS'
 export const CREATE_JOB_ERROR = 'CREATE_JOB_ERROR'
-export const DISCOVER_SERVICE = 'DISCOVER_SERVICE'
-export const DISCOVER_SERVICE_SUCCESS = 'DISCOVER_SERVICE_SUCCESS'
-export const DISCOVER_SERVICE_ERROR = 'DISCOVER_SERVICE_ERROR'
+export const DISCOVER_EXECUTOR = 'DISCOVER_EXECUTOR'
+export const DISCOVER_EXECUTOR_SUCCESS = 'DISCOVER_EXECUTOR_SUCCESS'
+export const DISCOVER_EXECUTOR_ERROR = 'DISCOVER_EXECUTOR_ERROR'
 export const FETCH_JOBS = 'FETCH_JOBS'
 export const FETCH_JOBS_SUCCESS = 'FETCH_JOBS_SUCCESS'
 export const JOBS_WORKER_ERROR = 'JOBS_WORKER_ERROR'
@@ -87,26 +87,26 @@ export function createJob(catalogApiKey, name, algorithm, feature) {
   }
 }
 
-export function discoverServiceIfNeeded() {
+export function discoverExecutorIfNeeded() {
   return (dispatch, getState) => {
     const state = getState()
     if (state.jobs.serviceId || state.jobs.discovering || state.jobs.error) {
       return
     }
-    dispatch(discoverService())
+    dispatch(discoverExecutor())
     const client = new Client(GATEWAY, state.authentication.token)
 
     return client.getServices({pattern: '^bf-handle'})
-      .then(([beachfrontApi]) => {
-        if (beachfrontApi) {
-          dispatch(discoverServiceSuccess(beachfrontApi.serviceId))
+      .then(([executor]) => {
+        if (executor) {
+          dispatch(discoverExecutorSuccess(executor.serviceId))
         }
         else {
-          dispatch(discoverServiceError('Could not find Beachfront API service'))
+          dispatch(discoverExecutorError('Could not find Beachfront API service'))
         }
       })
       .catch(err => {
-        dispatch(discoverServiceError(err))
+        dispatch(discoverExecutorError(err))
       })
   }
 }
@@ -162,22 +162,22 @@ function createJobSuccess(id, name, algorithm, bbox, imageId) {
   }
 }
 
-function discoverService() {
+function discoverExecutor() {
   return {
-    type: DISCOVER_SERVICE
+    type: DISCOVER_EXECUTOR
   }
 }
 
-function discoverServiceError(err) {
+function discoverExecutorError(err) {
   return {
-    type: DISCOVER_SERVICE_ERROR,
+    type: DISCOVER_EXECUTOR_ERROR,
     err
   }
 }
 
-function discoverServiceSuccess(serviceId) {
+function discoverExecutorSuccess(serviceId) {
   return {
-    type: DISCOVER_SERVICE_SUCCESS,
+    type: DISCOVER_EXECUTOR_SUCCESS,
     serviceId
   }
 }
