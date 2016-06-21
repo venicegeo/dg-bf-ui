@@ -20,11 +20,13 @@ import debounce from 'lodash/debounce'
 import * as algorithms from './reducers/algorithms'
 import * as authentication from './reducers/authentication'
 import * as results from './reducers/results'
+import * as workers from './reducers/workers'
 
 const beachfrontApp = combineReducers({
   algorithms:     algorithms.reducer,
   authentication: authentication.reducer,
   results:        results.reducer,
+  workers:        workers.reducer,
 })
 
 let devtoolsExtension = f => f
