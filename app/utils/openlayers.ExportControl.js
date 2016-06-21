@@ -15,6 +15,7 @@
  **/
 
 import openlayers from 'openlayers'
+import moment from 'moment'
 
 export default class ExportControl extends openlayers.control.Control {
   constructor(className) {
@@ -25,37 +26,41 @@ export default class ExportControl extends openlayers.control.Control {
     element.innerHTML = '<a href="map.png"><i class="fa fa-download"/></a>'
     const hyperlink = this.element.firstChild
     hyperlink.addEventListener('click',  this._clicked.bind(this))
-
   }
 
   _clicked() {
     const map = this.getMap()
     const hyperlink = this.element.firstChild
-    const timestamp = new Date().toISOString().replace(/(\D+|\.\d+)/g, '')
+    const timestamp = moment().format('llll')
 
     hyperlink.download = `BEACHFRONT_EXPORT_${timestamp}.png`
     map.once('postcompose', event => {
       const canvas = event.context.canvas
-
-      var imageData = event.context.getImageData(0,0,canvas.width,canvas.height)
-
-      var newCanvas = document.querySelector('canvas')
-      var context = newCanvas.getContext('2d')
+      const imageData = event.context.getImageData(0, 0, canvas.width, canvas.height)
+      const newCanvas = document.querySelector('canvas')
+      const context = newCanvas.getContext('2d')
 
       newCanvas.width = canvas.width
       newCanvas.height = canvas.height
-
       context.putImageData(imageData, 0, 0)
 
-      var extent = map.getView().calculateExtent(map.getSize())
-      extent = openlayers.proj.transformExtent(extent, 'EPSG:3857', 'EPSG:3857')
+      const extent = map.getView().calculateExtent(map.getSize())
+      const transformedExtent = openlayers.proj.transformExtent(extent, 'EPSG:3857', 'EPSG:4326')
+      const truncatedExtent = []
 
-      context.font = "14px serif"
-      context.fillText('Timestamp: '+timestamp, 0, (newCanvas.height - 30))
-      context.fillText('Viewport: '+extent, 0, (newCanvas.height - 10))
+      for (let i=0; i < transformedExtent.length; i++) {
+        truncatedExtent[i] = transformedExtent[i].toFixed(6)
+      }
 
+      context.fillStyle = 'white'
+      context.fillRect(0, newCanvas.height-50, newCanvas.width, 50)
+      context.font = '12pt monospace'
+      context.fillStyle = 'black'
+      context.textAlign='left'
+      context.fillText(timestamp, 10, (newCanvas.height - 20))
+      context.textAlign='right'
+      context.fillText('Viewport: '+truncatedExtent, newCanvas.width-10, (newCanvas.height - 20))
       hyperlink.href = newCanvas.toDataURL()
-      newCanvas = null
     })
     map.renderSync()
   }
