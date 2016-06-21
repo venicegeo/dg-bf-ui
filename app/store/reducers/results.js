@@ -34,7 +34,8 @@ export function reducer(state = {}, action) {
     }
   case LOAD_RESULT_SUCCESS:
     return {
-      ...state, [jobId]: {
+      ...state,
+      [jobId]: {
         ...state[jobId],
         loading: false,
         geojson: action.geojson
@@ -42,7 +43,8 @@ export function reducer(state = {}, action) {
     }
   case LOAD_RESULT_ERROR:
     return {
-      ...state, [jobId]: {
+      ...state,
+      [jobId]: {
         ...state[jobId],
         loading: false,
         error: action.err
@@ -50,7 +52,8 @@ export function reducer(state = {}, action) {
     }
   case LOAD_RESULT_PROGRESSED:
     return {
-      ...state, [jobId]: {
+      ...state,
+      [jobId]: {
         ...state[jobId],
         progress: {
           loaded: action.loaded,
@@ -60,7 +63,8 @@ export function reducer(state = {}, action) {
     }
   case UNLOAD_RESULT:
     return {
-      ...state, [jobId]: undefined
+      ...state, 
+      [jobId]: undefined
     }
   default:
     return state
