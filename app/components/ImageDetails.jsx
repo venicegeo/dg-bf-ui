@@ -47,10 +47,8 @@ export default class ImageDetails extends Component {
         <h1 title={id}>{id}</h1>
 
         <dl>
-          {/*
           <dt>Thumbnail</dt>
-          <dd><img ref="thumbnail" crossOrigin={true} src={feature.get(KEY_THUMBNAIL)}/></dd>
-          */}
+          <dd><a className={styles.thumbnailLink} href={feature.properties[KEY_THUMBNAIL]} target="_blank">Click here to open</a></dd>
           <dt>Date Captured</dt>
           <dd>{moment(feature.properties[KEY_DATE]).format('llll')}</dd>
 
@@ -72,5 +70,5 @@ function normalizeId(featureId) {
   if (!featureId) {
     return 'nil'
   }
-  return featureId.replace('pl:landsat:', '')
+  return featureId.replace(/^(pl:)?landsat:/i, '')
 }
