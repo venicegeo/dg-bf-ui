@@ -46,6 +46,7 @@ const KEY_JOB_ID = 'jobId'
 const KEY_DETECTION = 'detection'
 const KEY_JOB_NAME = 'jobName'
 const KEY_JOB_STATUS = 'jobStatus'
+const KEY_THUMBNAIL = 'thumbnail'
 
 export const MODE_DRAW_BBOX = 'MODE_DRAW_BBOX'
 export const MODE_NORMAL = 'MODE_NORMAL'
@@ -212,13 +213,74 @@ export default class PrimaryMap extends Component {
       const feature = event.target.getFeatures().item(0)
       if (feature) {
         const selectedImageFeature = new ol.format.GeoJSON().writeFeatureObject(feature)
+        const extent = feature.getGeometry().getExtent()
+
+
+
+
+
+
+        // HACK HACK HACK HACK HACK HACK HACK HACK
+        this._thumbnailLayer.setSource(new ol.source.ImageStatic({
+          crossOrigin: 'Anonymous',
+          url: feature.get(KEY_THUMBNAIL),
+          imageExtent: extent,
+          imageLoadFunction(finalImage, src) {
+            // SUPERHACK SUPERHACK SUPERHACK SUPERHACK SUPERHACK
+            // SUPERHACK SUPERHACK SUPERHACK SUPERHACK SUPERHACK
+            // SUPERHACK SUPERHACK SUPERHACK SUPERHACK SUPERHACK
+            // SUPERHACK SUPERHACK SUPERHACK SUPERHACK SUPERHACK
+            const rawImage = new Image()
+            rawImage.crossOrigin = 'Anonymous'
+            rawImage.src = src
+
+            rawImage.onload = () => {
+              const canvas = document.createElement('canvas')
+              canvas.width = rawImage.width
+              canvas.height = rawImage.height
+              const context = canvas.getContext('2d')
+
+              const LIGHTNESS_THRESHOLD = 30
+              context.drawImage(rawImage, 0, 0, canvas.width, canvas.height)
+
+              const byteSlice = context.getImageData(0, 0, canvas.width, canvas.height)
+
+              const {data} = byteSlice
+
+              for (let i = 0, N=data.length; i < N; i += 4) {
+                const red = data[i]
+                const green = data[i + 1]
+                const blue = data[i + 2]
+
+                if (red < LIGHTNESS_THRESHOLD && green < LIGHTNESS_THRESHOLD && blue < LIGHTNESS_THRESHOLD) {
+                  data[i + 3] = Math.floor((red + green + blue) / 3)  // bootleg anti alias
+                }
+              }
+
+              context.putImageData(byteSlice, 0, 0)
+
+              finalImage.getImage().src = canvas.toDataURL('image/png')
+            }
+            // SUPERHACK SUPERHACK SUPERHACK SUPERHACK SUPERHACK
+            // SUPERHACK SUPERHACK SUPERHACK SUPERHACK SUPERHACK
+            // SUPERHACK SUPERHACK SUPERHACK SUPERHACK SUPERHACK
+            // SUPERHACK SUPERHACK SUPERHACK SUPERHACK SUPERHACK
+          }
+        }))
+        // HACK HACK HACK HACK HACK HACK HACK HACK
+
+
+
+
+        
         this.props.onImageSelect(selectedImageFeature)
         this.setState({selectedImageFeature})
-        this._imageDetailsOverlay.setPosition(ol.extent.getCenter(feature.getGeometry().getExtent()))
+        this._imageDetailsOverlay.setPosition(ol.extent.getCenter(extent))
       } else {
         this.props.onImageSelect(null)
         this.setState({selectedImageFeature: null})
         this._imageDetailsOverlay.setPosition(undefined)
+        this._thumbnailLayer.setSource(undefined)
       }
     }
   }
@@ -229,6 +291,7 @@ export default class PrimaryMap extends Component {
     this._drawLayer = generateDrawLayer()
     this._frameLayer = generateFrameLayer()
     this._imageryLayer = generateImageryLayer()
+    this._thumbnailLayer = generateThumbnailLayer()
 
     this._drawInteraction = generateDrawInteraction(this._drawLayer)
     this._drawInteraction.on('drawstart', this._handleDrawStart)
@@ -250,6 +313,7 @@ export default class PrimaryMap extends Component {
         this._frameLayer,
         this._drawLayer,
         this._imageryLayer,
+        this._thumbnailLayer,
         this._detectionsLayer
       ],
       overlays: [
@@ -654,9 +718,10 @@ function generateSelectInteraction(...layers) {
     layers,
     condition: ol.events.condition.click,
     style: new ol.style.Style({
-      fill: new ol.style.Fill({
-        color: 'rgba(0, 255, 0, 0.5)'
-      })
+      stroke: new ol.style.Stroke({
+        color: 'black',
+        width: 3
+      }),
     })
   })
 }
@@ -718,4 +783,8 @@ function generateStyleUnknownDetectionType() {
       width: 2
     })
   })
+}
+
+function generateThumbnailLayer() {
+  return new ol.layer.Image()
 }
