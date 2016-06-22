@@ -58,7 +58,7 @@ export default class ImageDetails extends Component {
           <dd>{Object.keys(feature.properties[KEY_BANDS]).join(', ')}</dd>
 
           <dt>Cloud Cover</dt>
-          <dd>{feature.properties[KEY_CLOUD_COVER]}</dd>
+          <dd>{feature.properties[KEY_CLOUD_COVER]}%</dd>
 
           <dt>Sensor Name</dt>
           <dd>{feature.properties[KEY_SENSOR_NAME]}</dd>
