@@ -58,7 +58,7 @@ export default class SearchControl extends openlayers.control.Control {
       this.getMap().getTarget().appendChild(this._dialog)
 
       const closeDialog = this._dialog.querySelector('.closeButton')
-      closeDialog.addEventListener('click', (event) => this._closeDialog())
+      closeDialog.addEventListener('click', () => this._closeDialog())
     }
     return this._dialog
   }
