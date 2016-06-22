@@ -37,7 +37,7 @@ export default class ExportControl extends openlayers.control.Control {
     map.once('postcompose', event => {
       const canvas = event.context.canvas
       const imageData = event.context.getImageData(0, 0, canvas.width, canvas.height)
-      const newCanvas = document.createElement('canvas');
+      const newCanvas = document.createElement('canvas')
       const context = newCanvas.getContext('2d')
 
       newCanvas.width = canvas.width
