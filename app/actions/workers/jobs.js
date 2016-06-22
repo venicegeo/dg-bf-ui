@@ -23,18 +23,21 @@ import {
 
 let _client, _handlers, _instance, _ttl
 
-export function start(client, interval, ttl, {select, onFailure, onTerminate, onUpdate}) {
+export function start(client, interval, ttl, {getRecords, onFailure, onTerminate, onUpdate}) {
   if (typeof _instance === 'number') {
     throw new Error('Attempted to start while already running')
   }
   _client = client
   _instance = setInterval(work, interval)
-  _handlers = {select, onFailure, onTerminate, onUpdate}
+  _handlers = {getRecords, onFailure, onTerminate, onUpdate}
   _ttl = ttl
   work()
 }
 
 export function terminate() {
+  if (typeof _instance !== 'number') {
+    return
+  }
   clearInterval(_instance)
   _handlers.onTerminate()
   _instance = null
@@ -61,7 +64,7 @@ function work() {
     .then(updates => {
       console.debug('(jobs:worker) committing changes')
       updates.forEach(update => {
-        _handlers.onUpdate(update.jobId, update.status, update.resultId)
+        _handlers.onUpdate(update.jobId, update.status, update.resultId || null)
       })
     })
     .catch(err => {
@@ -113,6 +116,5 @@ function fetchUpdates({id: jobId, createdOn}) {
 }
 
 function getRunningJobs() {
-  return _handlers.select().records
-    .filter(job => job.status === STATUS_RUNNING)
+  return _handlers.getRecords().filter(j => j.status === STATUS_RUNNING)
 }

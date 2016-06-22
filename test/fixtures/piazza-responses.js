@@ -66,21 +66,28 @@ export const RESPONSE_SERVICE_LIST = `{
     {
       "serviceId": "test-id-1",
       "url": "test-url",
+      "method": "POST",
       "resourceMetadata": {
         "name": "test-name",
         "description": "test-description",
-        "method": "POST",
-        "availability": "test-availability"
+        "classType": {
+          "classification": "UNCLASSIFIED"
+        },
+        "version": "test-version"
       }
     },
     {
       "serviceId": "test-id-2",
       "url": "test-url",
+      "method": "POST",
       "resourceMetadata": {
         "name": "test-name",
         "description": "test-description",
-        "method": "POST",
-        "availability": "test-availability"
+        "availability": "test-availability",
+        "classType": {
+          "classification": "UNCLASSIFIED"
+        },
+        "version": "test-version"
       }
     }
   ],

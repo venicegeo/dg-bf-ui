@@ -119,8 +119,8 @@ export function startJobsWorkerIfNeeded() {
     }
     const client = new Client(GATEWAY, state.authentication.token)
     worker.start(client, JOBS_WORKER.INTERVAL, JOBS_WORKER.JOB_TTL, {
-      select() {
-        return getState().jobs
+      getRecords() {
+        return getState().jobs.records
       },
       onFailure(err) {
         dispatch(jobsWorkerError(err))

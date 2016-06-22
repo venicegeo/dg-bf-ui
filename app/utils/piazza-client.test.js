@@ -151,9 +151,10 @@ describe('Piazza Client', function () {
       client.getServices({pattern: 'test-pattern'})
         .then(([firstService]) => {
           expect(firstService.serviceId).toEqual('test-id-1')
-          expect(firstService.resourceMetadata.availability).toEqual('test-availability')
+          expect(firstService.resourceMetadata.classType).toEqual({classification: 'UNCLASSIFIED'})
           expect(firstService.resourceMetadata.description).toEqual('test-description')
           expect(firstService.resourceMetadata.name).toEqual('test-name')
+          expect(firstService.resourceMetadata.version).toEqual('test-version')
           done()
         })
         .catch(done)
