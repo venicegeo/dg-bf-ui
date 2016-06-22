@@ -99,15 +99,19 @@ export default class SearchControl extends openlayers.control.Control {
   }
 }
 
+//
+// Helpers
+//
+
 class Coordinate {
-  constructor(latitude, longitude) {
-    const truncate = (n)=> Math.round(n * 1000000) / 1000000
-    const invalidConditions = []
+  constructor(latitude, longitude) {  // eslint-disable-line complexity
+    const truncate = n => Math.round(n * 1000000) / 1000000
 
     latitude = parseFloat(latitude)
     longitude = parseFloat(longitude)
 
     // Validate the inputs
+    const invalidConditions = []
     if (isNaN(latitude)) {
       invalidConditions.push('Latitude is not a number')
     }
@@ -120,12 +124,10 @@ class Coordinate {
     if (Math.abs(longitude) > 180) {
       invalidConditions.push('Longitude must be between -180 and 180')
     }
-
     if (invalidConditions.length) {
       throw new Error('Could not create coordinate: ' + invalidConditions.join('; '))
     }
 
-    // Continue with construction
     this.latitude = truncate(latitude)
     this.longitude = truncate(longitude)
   }
@@ -155,26 +157,33 @@ class Coordinate {
 
     let buffer = TEMPLATE_DMS
 
-    for (var name in values) {
-      buffer = buffer.replace('{{' + name + '}}', values[name])
-    }
+    Object.keys(values).forEach(key => buffer = buffer.replace('{{' + key + '}}', values[key]))
 
     return buffer
   }
 
+  /**
+   * Creates a Coordinate from Decimal inputs
+   *
+   * @param {int} latitude
+   * @param {int} longitude
+   * @returns {Coordinate}
+   */
   static fromDecimal(latitude, longitude) {
     return new Coordinate(latitude, longitude)
   }
 
   /**
-   * Creates a Coordinate from MGRS inputs
+   * Creates a Coordinate from DMS inputs
    *
-   * @param {int} zone
-   * @param {char} latitudeBand
-   * @param {char} column
-   * @param {char} row
-   * @param {int} easting
-   * @param {int} northing
+   * @param {string} latitudeHemisphere
+   * @param {int} latitudeHours
+   * @param {int} latitudeMinutes
+   * @param {int} latitudeSeconds
+   * @param {string} longitudeHemisphere
+   * @param {int} longitudeHours
+   * @param {int} longitudeMinutes
+   * @param {int} longitudeSeconds
    * @returns {Coordinate}
    */
   static fromDms(latitudeHemisphere, latitudeHours, latitudeMinutes, latitudeSeconds, longitudeHemisphere, longitudeHours, longitudeMinutes, longitudeSeconds) {
@@ -194,13 +203,30 @@ class Coordinate {
     return new Coordinate(latitudeDecimal, longitudeDecimal)
   }
 
+  /**
+   * Creates a Coordinate from MGRS inputs
+   *
+   * @param {int} zone
+   * @param {string} latitudeBand
+   * @param {string} column
+   * @param {string} row
+   * @param {int} easting
+   * @param {int} northing
+   * @returns {Coordinate}
+   */
   static fromMgrs(zone, latitudeBand, column, row, easting, northing) {
     const EASTING_IDS = 'ABCDEFGHJKLMNPQRSTUVWXYZ'
     const NORTHING_IDS = 'ABCDEFGHJKLMNPQRSTUV'
     let utmEasting,
-      utmNorthing,
-      hemisphere,
-      set, eastingIndex, northingIndex, northingModifier, eastingModifier, northingOffsets, minimumNorthing
+        utmNorthing,
+        hemisphere,
+        set,
+        eastingIndex,
+        northingIndex,
+        northingModifier,
+        eastingModifier,
+        northingOffsets,
+        minimumNorthing
 
     // Normalize the inputs
     zone = parseInt(zone)
@@ -228,6 +254,7 @@ class Coordinate {
      *     The original source code has been modified in an attempt to add
      *     clarity to what is actually happening.
      */
+    /* eslint-disable prefer-const */
 
     set = ((zone - 1) % 6) + 1
 
@@ -236,7 +263,7 @@ class Coordinate {
 
     northingIndex = NORTHING_IDS.indexOf(row)
     // Northing ID offset for sets 2, 4 and 6
-    if (set % 2 == 0) {
+    if (set % 2 === 0) {
       northingIndex -= 5
     }
     if (northingIndex < 0) {
@@ -277,6 +304,7 @@ class Coordinate {
     hemisphere = NORTHING_IDS.indexOf(latitudeBand) >= NORTHING_IDS.indexOf('N') ? 'N' : 'S'
     utmEasting = eastingModifier + easting
     utmNorthing = northingModifier + northing
+    /* eslint-enable prefer-const */
 
     return Coordinate.fromUtm(zone, hemisphere, utmEasting, utmNorthing)
   }
@@ -285,23 +313,53 @@ class Coordinate {
    * Creates a Coordinate from UTM inputs
    *
    * @param {int} zone
-   * @param {char} hemisphere
-   * @param {float} easting
-   * @param {float} northing
+   * @param {string} hemisphere
+   * @param {number} easting
+   * @param {number} northing
    * @returns {Coordinate}
    */
   static fromUtm(zone, hemisphere, easting, northing) {
-    const deg2rad = (n) => (n / 180.0 * Math.PI)
-    const rad2deg = (n) => (n / Math.PI * 180.0)
+    const deg2rad = n => (n / 180.0 * Math.PI)
+    const rad2deg = n => (n / Math.PI * 180.0)
     const SCALE_FACTOR = 0.9996
     const WGS84_ELLIPSOID_MAJAXIS = 6378137.0
-    const  WGS84_ELLIPSOID_MINAXIS = 6356752.314
-    let  latitudeDecimal,
-      longitudeDecimal,
-      centralMeridian, x, y, n, y_, alpha_, beta_, gamma_, delta_, epsilon_,
-      phif, ep2, cf, nuf2, Nf, Nfpow, tf, tf2, tf4, x1frac, x2frac, x3frac,
-      x4frac, x5frac, x6frac, x7frac, x8frac, x2poly, x3poly, x4poly, x5poly,
-      x6poly, x7poly, x8poly
+    const WGS84_ELLIPSOID_MINAXIS = 6356752.314
+    let latitudeDecimal,
+        longitudeDecimal,
+        centralMeridian,
+        x,
+        y,
+        n,
+        y_,
+        alpha_,
+        beta_,
+        gamma_,
+        delta_,
+        epsilon_,
+        phif,
+        ep2,
+        cf,
+        nuf2,
+        Nf,
+        Nfpow,
+        tf,
+        tf2,
+        tf4,
+        x1frac,
+        x2frac,
+        x3frac,
+        x4frac,
+        x5frac,
+        x6frac,
+        x7frac,
+        x8frac,
+        x2poly,
+        x3poly,
+        x4poly,
+        x5poly,
+        x6poly,
+        x7poly,
+        x8poly
 
     // Normalize the inputs
     zone = parseInt(zone)
@@ -330,6 +388,7 @@ class Coordinate {
      *     even sure they are valid in the first place), but this is
      *     something to be aware of.
      */
+    /* eslint-disable prefer-const */
 
     centralMeridian = deg2rad(-183 + (zone * 6))
 
@@ -455,6 +514,7 @@ class Coordinate {
       + x3frac * x3poly * Math.pow(x, 3.0)
       + x5frac * x5poly * Math.pow(x, 5.0)
       + x7frac * x7poly * Math.pow(x, 7.0))
+    /* eslint-enable prefer-const */
 
     return Coordinate.fromDecimal(latitudeDecimal, longitudeDecimal)
   }
@@ -462,28 +522,22 @@ class Coordinate {
   /**
    * Attempts to parse a string of any format into a Coordinate object
    *
-   * @param {String} input
+   * @param {string} input
    * @returns {Coordinate}
    */
   static parseAny(input) {
     input = input.toUpperCase().replace(/[^A-Z0-9.,\- ]+/g, '')
-
-    if (Coordinate.stringIsDms(input)) {
-      return Coordinate.parseDms(input)
-    } else if (Coordinate.stringIsMgrs(input)) {
-      return Coordinate.parseMgrs(input)
-    } else if (Coordinate.stringIsUtm(input)) {
-      return Coordinate.parseUtm(input)
-    } else if (Coordinate.stringIsDecimal(input)) {
-      return Coordinate.parseDecimal(input)
-    }
+    if (Coordinate.stringIsDms(input)) { return Coordinate.parseDms(input) }
+    if (Coordinate.stringIsMgrs(input)) { return Coordinate.parseMgrs(input) }
+    if (Coordinate.stringIsUtm(input)) { return Coordinate.parseUtm(input) }
+    if (Coordinate.stringIsDecimal(input)) { return Coordinate.parseDecimal(input) }
     throw new Error('Invalid coordinate format: ' + input)
   }
 
   /**
    * Parse a decimal-formatted string into a Coordinate
    *
-   * @param {String} input  Example: "30.123, 30.456"
+   * @param {string} input  Example: "30.123, 30.456"
    * @returns {Coordinate}
    */
   static parseDecimal(input) {
@@ -494,25 +548,25 @@ class Coordinate {
   /**
    * Parse a DMS-formatted string into a Coordinate object
    *
-   * @param {String} input  Example: "300000N0300000E" or "N300000 E0300000"
+   * @param {string} input  Example: "300000N0300000E" or "N300000 E0300000"
    * @returns {Coordinate}
    */
   static parseDms(input) {
     let latitudeHemisphere,
-      latitudeHours,
-      latitudeMinutes,
-      latitudeSeconds,
-      longitudeHemisphere,
-      longitudeHours,
-      longitudeMinutes,
-      longitudeSeconds,
-      chunks
+        latitudeHours,
+        latitudeMinutes,
+        latitudeSeconds,
+        longitudeHemisphere,
+        longitudeHours,
+        longitudeMinutes,
+        longitudeSeconds,
+        chunks
 
     // Normalize the input string
     input = input.replace(/\W+/g, '').toUpperCase()
 
     // Get the values from both post and prefixed hemispheres
-    if (chunks = input.match(DMS_POSTFIX)) {
+    if ((chunks = input.match(DMS_POSTFIX))) {
       latitudeHours = chunks[1]
       latitudeMinutes = chunks[2]
       latitudeSeconds = chunks[3]
@@ -521,7 +575,8 @@ class Coordinate {
       longitudeMinutes = chunks[6]
       longitudeSeconds = chunks[7]
       longitudeHemisphere = chunks[8]
-    } else if (chunks = input.match(DMS_PREFIX)) {
+    }
+    else if ((chunks = input.match(DMS_PREFIX))) {
       // Less common but equally valid(?)
       latitudeHemisphere = chunks[1]
       latitudeHours = chunks[2]
@@ -531,7 +586,8 @@ class Coordinate {
       longitudeHours = chunks[6]
       longitudeMinutes = chunks[7]
       longitudeSeconds = chunks[8]
-    } else {
+    }
+    else {
       throw new Error('Could not parse as DMS: ' + input)
     }
 
@@ -543,7 +599,7 @@ class Coordinate {
   /**
    * Parse an MGRS-formatted string into a Coordinate object
    *
-   * @param {String} input  Example: "30QDB00000000" or "30QDB 00000000"
+   * @param {string} input  Example: "30QDB00000000" or "30QDB 00000000"
    * @returns {Coordinate}
    */
   static parseMgrs(input) {
@@ -562,15 +618,15 @@ class Coordinate {
   /**
    * Parse a UTM-formatted string into a Coordinate object
    *
-   * @param {String} input  Example: "30T 00000,000000" or "30T 00000 000000" or "00000, 000000 30T"
+   * @param {string} input  Example: "30T 00000,000000" or "30T 00000 000000" or "00000, 000000 30T"
    * @returns {Coordinate}
    */
   static parseUtm(input) {
     let chunks,
-      zone,
-      hemisphere,
-      easting,
-      northing
+        zone,
+        hemisphere,
+        easting,
+        northing
 
     // Parse and normalize the input segments
     chunks = input.match(UTM_SPACE_PREFIX)
@@ -599,8 +655,8 @@ class Coordinate {
   /**
    * Tests if a given string is decimal-formatted
    *
-   * @param {String} input
-   * @returns {Boolean}
+   * @param {string} input
+   * @returns {boolean}
    */
   static stringIsDecimal(input) {
     return DECIMAL.test(input)
@@ -609,8 +665,8 @@ class Coordinate {
   /**
    * Tests if a given string is DMS-formatted
    *
-   * @param {String} input
-   * @returns {Boolean}
+   * @param {string} input
+   * @returns {boolean}
    */
   static stringIsDms(input) {
     return DMS_POSTFIX.test(input)
@@ -620,8 +676,8 @@ class Coordinate {
   /**
    * Tests if a given string is DMS-formatted
    *
-   * @param {String} input
-   * @returns {Boolean}
+   * @param {string} input
+   * @returns {boolean}
    */
   static stringIsMgrs(input) {
     return MGRS.test(input)
@@ -630,8 +686,8 @@ class Coordinate {
   /**
    * Tests if a given string is UTM-formatted
    *
-   * @param {String} input
-   * @returns {Boolean}
+   * @param {string} input
+   * @returns {boolean}
    */
   static stringIsUtm(input) {
     return UTM_SPACE_PREFIX.test(input)

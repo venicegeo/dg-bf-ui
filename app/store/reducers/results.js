@@ -63,7 +63,7 @@ export function reducer(state = {}, action) {
     }
   case UNLOAD_RESULT:
     return {
-      ...state, 
+      ...state,
       [jobId]: undefined
     }
   default:

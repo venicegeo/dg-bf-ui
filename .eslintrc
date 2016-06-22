@@ -21,7 +21,7 @@
     "constructor-super": 1,
     "curly": 1,
     "eqeqeq": 1,
-    "indent": [1, 2],
+    "indent": [1, 2, {"VariableDeclarator": 2}],
     "new-cap": 1,
     "no-alert": 1,
     "no-caller": 2,
