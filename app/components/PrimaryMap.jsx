@@ -28,44 +28,45 @@ import * as anchorUtil from '../utils/map-anchor'
 import * as bboxUtil from '../utils/bbox'
 import {TILE_PROVIDERS} from '../config'
 import styles from './PrimaryMap.css'
-
-const INITIAL_CENTER = [110, 0]
-const MIN_ZOOM = 2.5
-const MAX_ZOOM = 22
-const RESOLUTION_CLOSE = 1000
-
 import {
   STATUS_ERROR,
   STATUS_RUNNING,
   STATUS_SUCCESS,
   STATUS_TIMED_OUT
 } from '../constants'
+
+const INITIAL_CENTER = [110, 0]
+const MIN_ZOOM = 2.5
+const MAX_ZOOM = 22
+const RESOLUTION_CLOSE = 1000
 const DISPOSITION_DETECTED = 'Detected'
 const DISPOSITION_UNDETECTED = 'Undetected'
 const DISPOSITION_NEW_DETECTION = 'New Detection'
-const JOB_ID = 'JOB_ID'
-const JOB_NAME = 'JOB_NAME'
-const JOB_STATUS = 'JOB_STATUS'
+const KEY_JOB_ID = 'jobId'
+const KEY_DETECTION = 'detection'
+const KEY_JOB_NAME = 'jobName'
+const KEY_JOB_STATUS = 'jobStatus'
+
 export const MODE_DRAW_BBOX = 'MODE_DRAW_BBOX'
 export const MODE_NORMAL = 'MODE_NORMAL'
 export const MODE_SELECT_IMAGERY = 'MODE_SELECT_IMAGERY'
 
 export default class PrimaryMap extends Component {
   static propTypes = {
-    anchor: React.PropTypes.string,
-    bbox: React.PropTypes.arrayOf(React.PropTypes.number),
-    datasets: React.PropTypes.array,
-    imagery: React.PropTypes.shape({
-      count: React.PropTypes.number.isRequired,
+    anchor:                    React.PropTypes.string,
+    bbox:                      React.PropTypes.arrayOf(React.PropTypes.number),
+    datasets:                  React.PropTypes.array,
+    imagery:                   React.PropTypes.shape({
+      count:      React.PropTypes.number.isRequired,
       startIndex: React.PropTypes.number.isRequired,
-      images: React.PropTypes.object.isRequired
+      images:     React.PropTypes.object.isRequired
     }),
-    isSearching: React.PropTypes.bool.isRequired,
-    mode: React.PropTypes.string.isRequired,
-    onAnchorChange: React.PropTypes.func.isRequired,
-    onBoundingBoxChange: React.PropTypes.func.isRequired,
+    isSearching:               React.PropTypes.bool.isRequired,
+    mode:                      React.PropTypes.string.isRequired,
+    onAnchorChange:            React.PropTypes.func.isRequired,
+    onBoundingBoxChange:       React.PropTypes.func.isRequired,
     onImagerySearchPageChange: React.PropTypes.func.isRequired,
-    onImageSelect: React.PropTypes.func.isRequired
+    onImageSelect:             React.PropTypes.func.isRequired
   }
 
   constructor() {
@@ -81,19 +82,20 @@ export default class PrimaryMap extends Component {
   }
 
   componentDidMount() {
-    this._initializeOpenLayers().then(() => {
-      this._renderDetections()
-      this._renderFrames()
-      this._renderImagery()
-      this._renderImagerySearchResultsOverlay()
-      this._recenter(this.props.anchor)
-      if (this.props.bbox) {
-        this._renderImagerySearchBbox()
-      }
-    })
-    if (this.props.mode === MODE_DRAW_BBOX) {
-      this._activateDrawInteraction()
-    }
+    this._initializeOpenLayers()
+      .then(() => {
+        this._renderDetections()
+        this._renderFrames()
+        this._renderImagery()
+        this._renderImagerySearchResultsOverlay()
+        this._recenter(this.props.anchor)
+        if (this.props.bbox) {
+          this._renderImagerySearchBbox()
+        }
+        if (this.props.mode === MODE_DRAW_BBOX) {
+          this._activateDrawInteraction()
+        }
+      })
     // DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG
     // DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG
     if (process.env.NODE_ENV === 'development') {
@@ -291,7 +293,7 @@ export default class PrimaryMap extends Component {
 
     // Removals (no updates)
     source.getFeatures().slice().forEach(feature => {
-      const jobId = feature.get(JOB_ID)
+      const jobId = feature.get(KEY_JOB_ID)
       previous[jobId] = true
       if (!incomingJobs[jobId]) {
         source.removeFeature(feature)
@@ -303,9 +305,9 @@ export default class PrimaryMap extends Component {
     datasets.filter(d => d.geojson && !previous[d.job.id]).forEach(dataset => {
       const features = reader.readFeatures(dataset.geojson, {featureProjection: 'EPSG:3857'})
       features.forEach(f => f.setProperties({
-        [JOB_ID]: dataset.job.id,
-        [JOB_NAME]: dataset.job.name,
-        [JOB_STATUS]: dataset.job.status
+        [KEY_JOB_ID]: dataset.job.id,
+        [KEY_JOB_NAME]: dataset.job.name,
+        [KEY_JOB_STATUS]: dataset.job.status
       }))
       source.addFeatures(features)
     })
@@ -319,9 +321,9 @@ export default class PrimaryMap extends Component {
         geometry: ol.geom.Polygon.fromExtent(ol.proj.transformExtent(dataset.job.bbox, 'EPSG:4326', 'EPSG:3857'))
       })
       feature.setProperties({
-        [JOB_ID]: dataset.job.id,
-        [JOB_NAME]: dataset.job.name,
-        [JOB_STATUS]: dataset.job.status
+        [KEY_JOB_ID]: dataset.job.id,
+        [KEY_JOB_NAME]: dataset.job.name,
+        [KEY_JOB_STATUS]: dataset.job.status
       })
       return feature
     }))
@@ -475,7 +477,7 @@ function generateDetectionsLayer() {
     source: new ol.source.Vector(),
     style(feature) {
       const geometry = feature.getGeometry()
-      switch (feature.get('detection')) {
+      switch (feature.get(KEY_DETECTION)) {
       case DISPOSITION_DETECTED:
         const [baseline, detection] = geometry.getGeometries()
         return [generateStyleDetectionBaseline(baseline), generateStyleDetection(detection)]
@@ -558,7 +560,7 @@ function generateFrameLayer() {
     source: new ol.source.Vector(),
     style(feature, resolution) {
       // FIXME -- convert labels to overlays
-      const labelText = `${feature.get(JOB_NAME).toUpperCase()} (${feature.get(JOB_STATUS)})`
+      const labelText = `${feature.get(KEY_JOB_NAME).toUpperCase()} (${feature.get(KEY_JOB_STATUS)})`
       const zoomedOut = resolution > RESOLUTION_CLOSE
       if (zoomedOut) {
         return new ol.style.Style({
@@ -570,7 +572,7 @@ function generateFrameLayer() {
             text: labelText
           }),
           fill: new ol.style.Fill({
-            color: _getFillColor(feature.get(JOB_STATUS))
+            color: _getFillColor(feature.get(KEY_JOB_STATUS))
           }),
           stroke: new ol.style.Stroke({
             color: 'rgba(0, 0, 0, .5)'
