@@ -46,11 +46,9 @@ export default class ExportControl extends openlayers.control.Control {
 
       const extent = map.getView().calculateExtent(map.getSize())
       const transformedExtent = openlayers.proj.transformExtent(extent, 'EPSG:3857', 'EPSG:4326')
-      const truncatedExtent = []
-
-      for (let i=0; i < transformedExtent.length; i++) {
-        truncatedExtent[i] = transformedExtent[i].toFixed(6)
-      }
+      const truncatedExtent = transformedExtent.map(function(num) {
+        return num.toFixed(6);
+      });
 
       context.fillStyle = 'white'
       context.fillRect(0, newCanvas.height-50, newCanvas.width, 50)
