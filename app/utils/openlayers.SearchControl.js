@@ -25,6 +25,26 @@ const UTM_SPACE_PREFIX = /^(\d{1,2})([NS])\s+(\d{5,6}\.?\d*)\s+(\d{1,7}\.?\d*)$/
 const UTM_COMMA_POSTFIX = /^(\d{5,6}\.?\d*),\s*(\d{1,7}\.?\d*),?\s*(\d{1,2})([NS])$/i
 const UTM_SPACE_POSTFIX = /^(\d{5,6}\.?\d*)\s+(\d{1,7}\.?\d*)\s+(\d{1,2})([NS])$/i
 const TEMPLATE_DMS = '{{lat_hours}}{{lat_minutes}}{{lat_seconds}}{{lat_hemisphere}}{{lon_hours}}{{lon_minutes}}{{lon_seconds}}{{lon_hemisphere}}'
+const TEMPLATE_DIALOG = `
+<div style="display: flex; position: relative;">
+  <input placeholder="Enter Coordinates" style="flex: 1; font-size: inherit; border: none; background-color: #eee;" name="coordinate">
+  <button type="submit" style="border: none; background-color: transparent; width: 2em; line-height: 2em; font-size: 1em; color: #555;"><i class="fa fa-search" style="vertical-align: text-top;"></i></button>
+  <button class="closeButton" type="reset" style="border: none; background-color: transparent; width: 2em; line-height: 2em; font-size: 1em; color: #555;"><i class="fa fa-close"></i></button>
+</div>
+<h3 class="error-message" style="display: none; margin-top: .25em; padding: 1em; background-color: #f03; text-align: center; font-size: inherit; color: white;">Invalid entry</h3>
+<div style="margin-top:.25em; font-size: .9em;">
+  Examples of valid coordinates are:
+  <dl style="display: flex; flex-wrap: wrap; margin: 0;">
+    <dt style="width: 45%; text-align: right; color: #888;">Decimal (Lat, Lon):</dt>
+    <dd style="margin-left: .5em;"><code>30, 30</code></dd>
+    <dt style="width: 45%; text-align: right; color: #888;">DMS:</dt>
+    <dd style="margin-left: .5em;"><code>300000N0300000E</code></dd>
+    <dt style="width: 45%; text-align: right; color: #888;">MGRS:</dt>
+    <dd style="margin-left: .5em;"><code>36R TU 1059022575</code></dd>
+    <dt style="width: 45%; text-align: right; color: #888;">UTM:</dt>
+    <dd style="margin-left: .5em;"><code>36N 210590,3322575</code></dd>
+  </dl>
+</div>`
 
 export default class SearchControl extends openlayers.control.Control {
   constructor(className) {
@@ -48,13 +68,14 @@ export default class SearchControl extends openlayers.control.Control {
       this._dialog.style.transform = 'translateX(-50%)'
       this._dialog.style.fontSize = '16px'
       this._dialog.style.backgroundColor = 'white'
-      this._dialog.style.padding = '.5em'
+      this._dialog.style.padding = '.25em'
       this._dialog.style.width = '350px'
       this._dialog.style.boxShadow = '0 0 0 1px rgba(0,0,0,.2), 0 5px rgba(0,0,0,.1)'
       this._dialog.style.borderRadius = '2px'
 
-      this._dialog.innerHTML = '<div style="display : flex;"><input placeholder="Enter Coordinates" style="flex: 1; font-size: inherit; border: none;" name="coordinate">&nbsp<button style="width: 3em;height: 3em;font-size: 1em;" type="submit"><i class="fa fa-search fa-2x"></i></button><button class="closeButton" type="reset" style="width: 3em;height: 3em;font-size: 1em;"><i class="fa fa-close fa-2x"></i></button></div><div class="error-message" style="display: none; background-color: #f04; color : white; padding : 1em; margin-top : .5em"><strong>Invalid coordinates</strong><p style="margin : 0">Examples of valid coordinates are: <br><span>Decimal: <code>30, 30</code></span><br><span>DMS: <code>300000N0300000E</code></span><br><span>MGRS: <code>36Q AR 00000000</code></span><br><span>UTM: <code>30N 00000,00000</code></span></p></div>'
+      this._dialog.innerHTML = TEMPLATE_DIALOG
       this._dialog.addEventListener('submit', (event) => this._formSubmitted(event))
+      this._dialog.addEventListener('reset', () => this._formReset())
       this.getMap().getTarget().appendChild(this._dialog)
 
       const closeDialog = this._dialog.querySelector('.closeButton')
@@ -68,7 +89,7 @@ export default class SearchControl extends openlayers.control.Control {
     const input = this._dialog.querySelector('input')
     const errorMessage = this._dialog.querySelector('.error-message')
     try {
-      const {longitude, latitude} = Coordinate.parseAny(input.value)
+      const {longitude, latitude} = Coordinate.parseAny(input.value.trim())
       const view = this.getMap().getView()
       view.setCenter(openlayers.proj.transform([longitude, latitude], 'EPSG:4326', 'EPSG:3857'))
       view.setZoom(8)
@@ -78,7 +99,16 @@ export default class SearchControl extends openlayers.control.Control {
       //FIXME: this will catch more than just coordinate errors.
       console.error(error)
       errorMessage.style.display = 'block'
+      input.style.backgroundColor = '#fdd'
     }
+  }
+
+  _formReset() {
+    const input = this._dialog.querySelector('input')
+    input.style.backgroundColor = '#eee'
+    input.style.color = 'black'
+    const errorMessage = this._dialog.querySelector('.error-message')
+    errorMessage.style.display = 'none'
   }
 
   _escPressed() {
@@ -88,10 +118,8 @@ export default class SearchControl extends openlayers.control.Control {
   }
 
   _closeDialog() {
-    this._dialog.reset();
+    this._dialog.reset()
     this._dialog.style.display = 'none'
-    this._dialog.querySelector('.error-message').style.display = 'none'
-
   }
 
   _searchClicked() {
