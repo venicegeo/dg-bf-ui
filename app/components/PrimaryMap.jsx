@@ -21,7 +21,7 @@ import ol from 'openlayers'
 import ExportControl from '../utils/openlayers.ExportControl.js'
 import SearchControl from '../utils/openlayers.SearchControl.js'
 import BasemapSelect from './BasemapSelect'
-import ImageDetails from './ImageDetails'
+import FeatureDetails from './FeatureDetails'
 import ImagerySearchResults from './ImagerySearchResults'
 import debounce from 'lodash/debounce'
 import throttle from 'lodash/throttle'
@@ -47,7 +47,6 @@ const KEY_JOB_ID = 'jobId'
 const KEY_DETECTION = 'detection'
 const KEY_JOB_NAME = 'jobName'
 const KEY_JOB_STATUS = 'jobStatus'
-const KEY_THUMBNAIL = 'thumb_large'
 
 export const MODE_DRAW_BBOX = 'MODE_DRAW_BBOX'
 export const MODE_NORMAL = 'MODE_NORMAL'
@@ -73,13 +72,14 @@ export default class PrimaryMap extends Component {
 
   constructor() {
     super()
-    this.state = {basemapIndex: 0, selectedImageFeature: null}
+    this.state = {basemapIndex: 0, selectedFeature: null}
     this._emitAnchorChange = debounce(this._emitAnchorChange.bind(this), 1000)
     this._handleBasemapChange = this._handleBasemapChange.bind(this)
     this._handleDrawStart = this._handleDrawStart.bind(this)
     this._handleDrawEnd = this._handleDrawEnd.bind(this)
     this._handleMouseMove = throttle(this._handleMouseMove.bind(this), 15)
     this._handleSelect = this._handleSelect.bind(this)
+    this._handleThumbnailLoaded = this._handleThumbnailLoaded.bind(this)
     this._recenter = debounce(this._recenter.bind(this), 100)
     this._renderImagerySearchBbox = debounce(this._renderImagerySearchBbox.bind(this))
   }
@@ -146,9 +146,10 @@ export default class PrimaryMap extends Component {
           basemaps={basemapNames}
           onChange={this._handleBasemapChange}
         />
-        <ImageDetails
-          ref="imageDetails"
-          feature={this.state.selectedImageFeature}
+        <FeatureDetails
+          ref="featureDetails"
+          feature={this.state.selectedFeature}
+          onThumbnailLoaded={this._handleThumbnailLoaded}
         />
         <ImagerySearchResults
           ref="imageSearchResults"
@@ -178,7 +179,8 @@ export default class PrimaryMap extends Component {
 
   _clearSelection() {
     this._selectInteraction.getFeatures().clear()
-    this.setState({selectedImageFeature: null})
+    this.setState({selectedFeature: null})
+  }
   }
 
   _deactivateDrawInteraction() {
@@ -224,74 +226,21 @@ export default class PrimaryMap extends Component {
   }
 
   _handleSelect(event) {
-    if (this.props.mode === MODE_SELECT_IMAGERY) {
-      const feature = event.target.getFeatures().item(0)
-      if (feature) {
-        const selectedImageFeature = new ol.format.GeoJSON().writeFeatureObject(feature)
-        const extent = feature.getGeometry().getExtent()
-
-
-
-
-
-
-        // HACK HACK HACK HACK HACK HACK HACK HACK
-        this._thumbnailLayer.setSource(new ol.source.ImageStatic({
-          crossOrigin: 'Anonymous',
-          url: feature.get(KEY_THUMBNAIL),
-          imageExtent: extent,
-          imageLoadFunction(finalImage, src) {
-            // SUPERHACK SUPERHACK SUPERHACK SUPERHACK SUPERHACK
-            // SUPERHACK SUPERHACK SUPERHACK SUPERHACK SUPERHACK
-            // SUPERHACK SUPERHACK SUPERHACK SUPERHACK SUPERHACK
-            // SUPERHACK SUPERHACK SUPERHACK SUPERHACK SUPERHACK
-            const rawImage = new Image()
-            rawImage.crossOrigin = 'Anonymous'
-            rawImage.src = src
-
-            rawImage.onload = () => {
-              const canvas = document.createElement('canvas')
-              canvas.width = rawImage.width
-              canvas.height = rawImage.height
-              const context = canvas.getContext('2d')
-
-              context.setTransform(1, 0, 0, 1, canvas.width * 0.01, canvas.height * -0.035)
-              context.beginPath()
-              context.rotate(12.25 * (Math.PI / 180))
-              context.rect(
-                canvas.width * 0.178,
-                canvas.height * 0,
-                canvas.width * 0.83,
-                canvas.height * 0.83
-              )
-              context.clip()
-              context.setTransform(1, 0, 0, 1, 0, 0)
-              context.drawImage(rawImage, 0, 0, canvas.width, canvas.height)
-
-              finalImage.getImage().src = canvas.toDataURL('image/png')
-            }
-            // SUPERHACK SUPERHACK SUPERHACK SUPERHACK SUPERHACK
-            // SUPERHACK SUPERHACK SUPERHACK SUPERHACK SUPERHACK
-            // SUPERHACK SUPERHACK SUPERHACK SUPERHACK SUPERHACK
-            // SUPERHACK SUPERHACK SUPERHACK SUPERHACK SUPERHACK
-          }
-        }))
-        // HACK HACK HACK HACK HACK HACK HACK HACK
-
-
-
-
-
-        this.props.onImageSelect(selectedImageFeature)
-        this.setState({selectedImageFeature})
-        this._imageDetailsOverlay.setPosition(ol.extent.getCenter(extent))
-      } else {
-        this.props.onImageSelect(null)
-        this.setState({selectedImageFeature: null})
-        this._imageDetailsOverlay.setPosition(undefined)
-        this._thumbnailLayer.setSource(undefined)
-      }
+    if (this.props.mode === MODE_DRAW_BBOX) {
+      return
     }
+    const feature = event.target.getFeatures().item(0)
+    const geojson = feature ? new ol.format.GeoJSON().writeFeatureObject(feature) : null
+    const position = feature ? ol.extent.getCenter(feature.getGeometry().getExtent()) : undefined
+
+    this._clearThumbnail()
+    this.setState({selectedFeature: geojson})
+    this._featureDetailsOverlay.setPosition(position)
+    this.props.onImageSelect(geojson)
+  }
+
+  _handleThumbnailLoaded(imageSource) {
+    this._thumbnailLayer.setSource(imageSource || null)
   }
 
   _initializeOpenLayers() {
@@ -310,7 +259,7 @@ export default class PrimaryMap extends Component {
     this._selectInteraction.on('select', this._handleSelect)
 
     this._progressBars = {}
-    this._imageDetailsOverlay = generateImageDetailsOverlay(this.refs.imageDetails)
+    this._featureDetailsOverlay = generateFeatureDetailsOverlay(this.refs.featureDetails)
     this._imageSearchResultsOverlay = generateImageSearchResultsOverlay(this.refs.imageSearchResults)
 
     this._map = new ol.Map({
@@ -327,7 +276,7 @@ export default class PrimaryMap extends Component {
       ],
       overlays: [
         this._imageSearchResultsOverlay,
-        this._imageDetailsOverlay
+        this._featureDetailsOverlay,
       ],
       target: this.refs.container,
       view: new ol.View({
@@ -690,11 +639,11 @@ function generateImageryLayer() {
   })
 }
 
-function generateImageDetailsOverlay(componentRef) {
+function generateFeatureDetailsOverlay(componentRef) {
   return new ol.Overlay({
     autoPan: true,
     element: findDOMNode(componentRef),
-    id: 'imageDetails',
+    id: 'featureDetails',
     positioning: 'top-left'
   })
 }

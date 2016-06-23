@@ -16,7 +16,7 @@
 
 import React, {Component} from 'react'
 import moment from 'moment'
-import styles from './ImageDetails.css'
+import styles from './SceneFeatureDetails.css'
 
 const KEY_DATE = 'acquiredDate'
 const KEY_BANDS = 'bands'
@@ -24,7 +24,7 @@ const KEY_CLOUD_COVER = 'cloudCover'
 const KEY_SENSOR_NAME = 'sensorName'
 const KEY_THUMBNAIL = 'thumb_large'
 
-export default class ImageDetails extends Component {
+export default class SceneFeatureDetails extends Component {
   static propTypes = {
     className: React.PropTypes.string,
     feature: React.PropTypes.object
@@ -37,10 +37,6 @@ export default class ImageDetails extends Component {
 
   render() {
     const {feature} = this.props
-    if (!feature) {
-      return <div role="no-feature-selected"/>
-    }
-
     const id = normalizeId(feature.id)
     return (
       <div className={styles.root}>
