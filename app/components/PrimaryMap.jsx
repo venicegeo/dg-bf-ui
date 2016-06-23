@@ -23,7 +23,8 @@ import SearchControl from '../utils/openlayers.SearchControl.js'
 import BasemapSelect from './BasemapSelect'
 import ImageDetails from './ImageDetails'
 import ImagerySearchResults from './ImagerySearchResults'
-import {debounce} from '../utils/debounce'
+import debounce from 'lodash/debounce'
+import throttle from 'lodash/throttle'
 import * as anchorUtil from '../utils/map-anchor'
 import * as bboxUtil from '../utils/bbox'
 import {TILE_PROVIDERS} from '../config'
@@ -77,8 +78,9 @@ export default class PrimaryMap extends Component {
     this._handleBasemapChange = this._handleBasemapChange.bind(this)
     this._handleDrawStart = this._handleDrawStart.bind(this)
     this._handleDrawEnd = this._handleDrawEnd.bind(this)
+    this._handleMouseMove = throttle(this._handleMouseMove.bind(this), 15)
     this._handleSelect = this._handleSelect.bind(this)
-    this._recenter = debounce(this._recenter.bind(this))
+    this._recenter = debounce(this._recenter.bind(this), 100)
     this._renderImagerySearchBbox = debounce(this._renderImagerySearchBbox.bind(this))
   }
 
@@ -216,6 +218,11 @@ export default class PrimaryMap extends Component {
     this.props.onBoundingBoxChange(null)
   }
 
+  _handleMouseMove(event) {
+    const excludingDraw = l => l !== this._drawLayer
+    this._map.getTarget().style.cursor = this._map.hasFeatureAtPixel(event.pixel, excludingDraw) ? 'pointer' : 'default'
+  }
+
   _handleSelect(event) {
     if (this.props.mode === MODE_SELECT_IMAGERY) {
       const feature = event.target.getFeatures().item(0)
@@ -331,6 +338,7 @@ export default class PrimaryMap extends Component {
       })
     })
 
+    this._map.on('pointermove', this._handleMouseMove)
     this._map.on('moveend', this._emitAnchorChange)
     return new Promise(resolve => this._map.once('postrender', resolve))
   }
