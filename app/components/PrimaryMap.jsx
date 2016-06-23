@@ -20,9 +20,9 @@ import {findDOMNode} from 'react-dom'
 import ol from 'openlayers'
 import ExportControl from '../utils/openlayers.ExportControl.js'
 import SearchControl from '../utils/openlayers.SearchControl.js'
-import BasemapSelect from './BasemapSelect.jsx'
-import ImageDetails from './ImageDetails.jsx'
-import ImagerySearchResults from './ImagerySearchResults.jsx'
+import BasemapSelect from './BasemapSelect'
+import ImageDetails from './ImageDetails'
+import ImagerySearchResults from './ImagerySearchResults'
 import {debounce} from '../utils/debounce'
 import * as anchorUtil from '../utils/map-anchor'
 import * as bboxUtil from '../utils/bbox'
@@ -54,20 +54,20 @@ export const MODE_SELECT_IMAGERY = 'MODE_SELECT_IMAGERY'
 
 export default class PrimaryMap extends Component {
   static propTypes = {
-    anchor:                    React.PropTypes.string,
-    bbox:                      React.PropTypes.arrayOf(React.PropTypes.number),
-    datasets:                  React.PropTypes.array,
-    imagery:                   React.PropTypes.shape({
+    anchor:              React.PropTypes.string,
+    bbox:                React.PropTypes.arrayOf(React.PropTypes.number),
+    datasets:            React.PropTypes.array,
+    imagery:             React.PropTypes.shape({
       count:      React.PropTypes.number.isRequired,
       startIndex: React.PropTypes.number.isRequired,
       images:     React.PropTypes.object.isRequired
     }),
-    isSearching:               React.PropTypes.bool.isRequired,
-    mode:                      React.PropTypes.string.isRequired,
-    onAnchorChange:            React.PropTypes.func.isRequired,
-    onBoundingBoxChange:       React.PropTypes.func.isRequired,
-    onImagerySearchPageChange: React.PropTypes.func.isRequired,
-    onImageSelect:             React.PropTypes.func.isRequired
+    isSearching:         React.PropTypes.bool.isRequired,
+    mode:                React.PropTypes.string.isRequired,
+    onAnchorChange:      React.PropTypes.func.isRequired,
+    onBoundingBoxChange: React.PropTypes.func.isRequired,
+    onImageSelect:       React.PropTypes.func.isRequired,
+    onSearchPageChange:  React.PropTypes.func.isRequired,
   }
 
   constructor() {
@@ -102,6 +102,7 @@ export default class PrimaryMap extends Component {
     if (process.env.NODE_ENV === 'development') {
       window.ol = ol
       window.map = this._map
+      window.primaryMap = this
     }
     // DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG
     // DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG
@@ -137,15 +138,22 @@ export default class PrimaryMap extends Component {
     const basemapNames = TILE_PROVIDERS.map(b => b.name)
     return (
       <main className={styles.root} ref="container" tabIndex="1">
-        <BasemapSelect className={styles.basemapSelect}
-                       index={this.state.basemapIndex}
-                       basemaps={basemapNames}
-                       onChange={this._handleBasemapChange}/>
-        <ImageDetails ref="imageDetails" feature={this.state.selectedImageFeature}/>
-        <ImagerySearchResults ref="imageSearchResults"
-                              imagery={this.props.imagery}
-                              isSearching={this.props.isSearching}
-                              onPageChange={this.props.onImagerySearchPageChange}/>
+        <BasemapSelect
+          className={styles.basemapSelect}
+          index={this.state.basemapIndex}
+          basemaps={basemapNames}
+          onChange={this._handleBasemapChange}
+        />
+        <ImageDetails
+          ref="imageDetails"
+          feature={this.state.selectedImageFeature}
+        />
+        <ImagerySearchResults
+          ref="imageSearchResults"
+          imagery={this.props.imagery}
+          isSearching={this.props.isSearching}
+          onPageChange={this.props.onSearchPageChange}
+        />
       </main>
     )
   }
@@ -272,7 +280,7 @@ export default class PrimaryMap extends Component {
 
 
 
-        
+
         this.props.onImageSelect(selectedImageFeature)
         this.setState({selectedImageFeature})
         this._imageDetailsOverlay.setPosition(ol.extent.getCenter(extent))

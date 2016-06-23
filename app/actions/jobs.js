@@ -52,6 +52,7 @@ export function createJob(catalogApiKey, name, algorithm, feature) {
     dispatch({
       type: CREATE_JOB
     })
+
     return client.post('execute-service', {
       dataInputs: {
         body: {
@@ -94,20 +95,6 @@ export function discoverExecutorIfNeeded() {
       return
     }
     dispatch(discoverExecutor())
-    const client = new Client(GATEWAY, state.authentication.token)
-
-    return client.getServices({pattern: '^bf-handle'})
-      .then(([executor]) => {
-        if (executor) {
-          dispatch(discoverExecutorSuccess(executor.serviceId))
-        }
-        else {
-          dispatch(discoverExecutorError('Could not find Beachfront API service'))
-        }
-      })
-      .catch(err => {
-        dispatch(discoverExecutorError(err))
-      })
   }
 }
 
@@ -117,21 +104,6 @@ export function startJobsWorkerIfNeeded() {
     if (state.workers.jobs.running || state.workers.jobs.error) {
       return
     }
-    const client = new Client(GATEWAY, state.authentication.token)
-    worker.start(client, JOBS_WORKER.INTERVAL, JOBS_WORKER.JOB_TTL, {
-      getRecords() {
-        return getState().jobs.records
-      },
-      onFailure(err) {
-        dispatch(jobsWorkerError(err))
-      },
-      onTerminate() {
-        dispatch(stopJobsWorker())
-      },
-      onUpdate(jobId, status, resultId) {
-        dispatch(updateJob(jobId, status, resultId))
-      }
-    })
     dispatch(startJobsWorker())
   }
 }
@@ -163,8 +135,24 @@ function createJobSuccess(id, name, algorithm, bbox, imageId) {
 }
 
 function discoverExecutor() {
-  return {
-    type: DISCOVER_EXECUTOR
+  return (dispatch, getState) => {
+    dispatch({
+      type: DISCOVER_EXECUTOR
+    })
+
+    const client = new Client(GATEWAY, getState().authentication.token)
+    client.getServices({pattern: '^bf-handle'})
+      .then(([executor]) => {
+        if (executor) {
+          dispatch(discoverExecutorSuccess(executor.serviceId))
+        }
+        else {
+          dispatch(discoverExecutorError('Could not find Beachfront API service'))
+        }
+      })
+      .catch(err => {
+        dispatch(discoverExecutorError(err))
+      })
   }
 }
 
@@ -190,8 +178,26 @@ function jobsWorkerError(err) {
 }
 
 function startJobsWorker() {
-  return {
-    type: START_JOBS_WORKER
+  return (dispatch, getState) => {
+    dispatch({
+      type: START_JOBS_WORKER
+    })
+
+    const client = new Client(GATEWAY, getState().authentication.token)
+    worker.start(client, JOBS_WORKER.INTERVAL, JOBS_WORKER.JOB_TTL, {
+      getRecords() {
+        return getState().jobs.records
+      },
+      onFailure(err) {
+        dispatch(jobsWorkerError(err))
+      },
+      onTerminate() {
+        dispatch(stopJobsWorker())
+      },
+      onUpdate(jobId, status, resultId) {
+        dispatch(updateJob(jobId, status, resultId))
+      }
+    })
   }
 }
 

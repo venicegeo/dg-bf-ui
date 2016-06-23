@@ -52,7 +52,7 @@ class Application extends Component {
     super()
     this._handleAnchorChange = this._handleAnchorChange.bind(this)
     this._handleBoundingBoxChange = this._handleBoundingBoxChange.bind(this)
-    this._handleImagerySearchPageChange = this._handleImagerySearchPageChange.bind(this)
+    this._handleSearchPageChange = this._handleSearchPageChange.bind(this)
     this._handleImageSelect = this._handleImageSelect.bind(this)
   }
 
@@ -88,16 +88,18 @@ class Application extends Component {
     return (
       <div className={styles.root}>
         <Navigation currentLocation={this.props.location}/>
-        <PrimaryMap datasets={this.props.datasets}
-                    imagery={this.props.imagery}
-                    isSearching={this.props.isSearching}
-                    anchor={this.props.location.hash}
-                    bbox={this.props.bbox}
-                    mode={this._mapMode}
-                    onAnchorChange={this._handleAnchorChange}
-                    onBoundingBoxChange={this._handleBoundingBoxChange}
-                    onImagerySearchPageChange={this._handleImagerySearchPageChange}
-                    onImageSelect={this._handleImageSelect}/>
+        <PrimaryMap
+          datasets={this.props.datasets}
+          imagery={this.props.imagery}
+          isSearching={this.props.isSearching}
+          anchor={this.props.location.hash}
+          bbox={this.props.bbox}
+          mode={this._mapMode}
+          onAnchorChange={this._handleAnchorChange}
+          onBoundingBoxChange={this._handleBoundingBoxChange}
+          onImageSelect={this._handleImageSelect}
+          onSearchPageChange={this._handleSearchPageChange}
+        />
         {this.props.children}
       </div>
     )
@@ -127,7 +129,7 @@ class Application extends Component {
     this.props.dispatch(updateSearchBbox(bbox))
   }
 
-  _handleImagerySearchPageChange(paging) {
+  _handleSearchPageChange(paging) {
     this.props.dispatch(searchCatalog(paging.startIndex, paging.count))
   }
 
@@ -137,15 +139,8 @@ class Application extends Component {
 }
 
 export default connect(state => ({
-  bbox:     state.search.bbox,
-  datasets: state.jobs.records.map(job => {
-    const result = state.results[job.id]
-    return {
-      job,
-      geojson: result ? result.geojson : null,
-      progress: result ? result.progress : null
-    }
-  }),
+  bbox:        state.search.bbox,
+  datasets:    state.jobs.records.map(job => ({job, ...state.results[job.id]})),
   imagery:     state.imagery,
   isLoggedIn:  !!state.authentication.token,
   isSearching: state.search.searching,

@@ -41,24 +41,6 @@ export function startAlgorithmsWorkerIfNeeded() {
     if (state.workers.algorithms.error) {
       return
     }
-    const client = new Client(GATEWAY, state.authentication.token)
-    worker.start(client, ALGORITHMS_WORKER.INTERVAL, {
-      shouldRun() {
-        return !state.algorithms.fetching
-      },
-      onFailure(err) {
-        dispatch(algorithmsWorkerError(err))
-      },
-      beforeFetch() {
-        dispatch(fetchAlgorithms())
-      },
-      onTerminate() {
-        dispatch(stopAlgorithmsWorker())
-      },
-      onUpdate(records) {
-        dispatch(fetchAlgorithmsSuccess(records))
-      }
-    })
     dispatch(startAlgorithmsWorker())
   }
 }
@@ -88,8 +70,30 @@ function fetchAlgorithmsSuccess(records) {
 }
 
 function startAlgorithmsWorker() {
-  return {
-    type: START_ALGORITHMS_WORKER
+  return (dispatch, getState) => {
+    dispatch({
+      type: START_ALGORITHMS_WORKER
+    })
+
+    const state = getState()
+    const client = new Client(GATEWAY, state.authentication.token)
+    worker.start(client, ALGORITHMS_WORKER.INTERVAL, {
+      shouldRun() {
+        return !state.algorithms.fetching
+      },
+      onFailure(err) {
+        dispatch(algorithmsWorkerError(err))
+      },
+      beforeFetch() {
+        dispatch(fetchAlgorithms())
+      },
+      onTerminate() {
+        dispatch(stopAlgorithmsWorker())
+      },
+      onUpdate(records) {
+        dispatch(fetchAlgorithmsSuccess(records))
+      }
+    })
   }
 }
 
