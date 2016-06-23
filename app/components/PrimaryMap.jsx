@@ -248,24 +248,18 @@ export default class PrimaryMap extends Component {
               canvas.height = rawImage.height
               const context = canvas.getContext('2d')
 
-              const LIGHTNESS_THRESHOLD = 30
+              context.setTransform(1, 0, 0, 1, canvas.width * 0.01, canvas.height * -0.035)
+              context.beginPath()
+              context.rotate(12.25 * (Math.PI / 180))
+              context.rect(
+                canvas.width * 0.178,
+                canvas.height * 0,
+                canvas.width * 0.83,
+                canvas.height * 0.83
+              )
+              context.clip()
+              context.setTransform(1, 0, 0, 1, 0, 0)
               context.drawImage(rawImage, 0, 0, canvas.width, canvas.height)
-
-              const byteSlice = context.getImageData(0, 0, canvas.width, canvas.height)
-
-              const {data} = byteSlice
-
-              for (let i = 0, N=data.length; i < N; i += 4) {
-                const red = data[i]
-                const green = data[i + 1]
-                const blue = data[i + 2]
-
-                if (red < LIGHTNESS_THRESHOLD && green < LIGHTNESS_THRESHOLD && blue < LIGHTNESS_THRESHOLD) {
-                  data[i + 3] = Math.floor((red + green + blue) / 3)  // bootleg anti alias
-                }
-              }
-
-              context.putImageData(byteSlice, 0, 0)
 
               finalImage.getImage().src = canvas.toDataURL('image/png')
             }
