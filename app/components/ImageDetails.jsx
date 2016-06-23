@@ -22,7 +22,7 @@ const KEY_DATE = 'acquiredDate'
 const KEY_BANDS = 'bands'
 const KEY_CLOUD_COVER = 'cloudCover'
 const KEY_SENSOR_NAME = 'sensorName'
-const KEY_THUMBNAIL = 'thumbnail'
+const KEY_THUMBNAIL = 'thumb_large'
 
 export default class ImageDetails extends Component {
   static propTypes = {

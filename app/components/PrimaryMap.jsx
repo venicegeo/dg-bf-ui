@@ -46,7 +46,7 @@ const KEY_JOB_ID = 'jobId'
 const KEY_DETECTION = 'detection'
 const KEY_JOB_NAME = 'jobName'
 const KEY_JOB_STATUS = 'jobStatus'
-const KEY_THUMBNAIL = 'thumbnail'
+const KEY_THUMBNAIL = 'thumb_large'
 
 export const MODE_DRAW_BBOX = 'MODE_DRAW_BBOX'
 export const MODE_NORMAL = 'MODE_NORMAL'
