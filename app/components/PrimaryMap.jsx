@@ -412,7 +412,10 @@ export default class PrimaryMap extends Component {
     if (imagery) {
       const features = reader.readFeatures(imagery.images, {featureProjection: 'EPSG:3857'})
       if (features.length) {
-        source.setAttributions(['<a href="https://www.planet.com">Planet Labs</a>'])  // HACK -- this should be dynamic, not hardcoded
+        source.setAttributions([
+          '<a href="https://www.planet.com" target="_blank" rel="noopener">Planet Labs</a>',
+          '<a href="https://landsat.usgs.gov" target="_blank" rel="noopener">LANDSAT (USGS)</a>',
+        ])  // HACK -- this should be dynamic, not hardcoded
         source.addFeatures(features)
       }
     }
