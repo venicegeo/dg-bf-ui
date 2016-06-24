@@ -16,6 +16,7 @@
 
 :root {
   --header-height: 60px;
+  --header-margin-horizontal: 15px;
 }
 
 .submenu {
@@ -30,7 +31,7 @@
   top: 0;
   left: 0;
   right: 0;
-  padding: 0 calc(var(--header-height) / 2);
+  padding: 0 var(--header-margin-horizontal);
   line-height: var(--header-height);
   font-weight: 100;
   background-color: hsl(202, 70%, 30%);
@@ -44,7 +45,7 @@
 
 .submenu h2 {
   margin: 1px 0;
-  padding: 5px 15px;
+  padding: 5px var(--header-margin-horizontal);
   font-size: 1.2em;
   background-color: #3d94c5;
   color: white;
