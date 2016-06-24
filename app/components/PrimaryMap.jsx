@@ -43,10 +43,13 @@ const RESOLUTION_CLOSE = 1000
 const DISPOSITION_DETECTED = 'Detected'
 const DISPOSITION_UNDETECTED = 'Undetected'
 const DISPOSITION_NEW_DETECTION = 'New Detection'
+const KEY_TYPE = 'type'
 const KEY_JOB_ID = 'jobId'
 const KEY_DETECTION = 'detection'
 const KEY_JOB_NAME = 'jobName'
 const KEY_JOB_STATUS = 'jobStatus'
+const TYPE_JOB = 'job'
+const TYPE_SCENE = 'scene'
 
 export const MODE_DRAW_BBOX = 'MODE_DRAW_BBOX'
 export const MODE_NORMAL = 'MODE_NORMAL'
@@ -181,6 +184,9 @@ export default class PrimaryMap extends Component {
     this._selectInteraction.getFeatures().clear()
     this.setState({selectedFeature: null})
   }
+
+  _clearThumbnail() {
+    this._thumbnailLayer.setSource(null)
   }
 
   _deactivateDrawInteraction() {
@@ -226,10 +232,12 @@ export default class PrimaryMap extends Component {
   }
 
   _handleSelect(event) {
-    if (this.props.mode === MODE_DRAW_BBOX) {
-      return
+    const {selected, deselected} = event
+    if (selected.length === 0 && deselected.length === 0) {
+      return  // Disregard spurious select event
     }
-    const feature = event.target.getFeatures().item(0)
+
+    const [feature] = selected
     const geojson = feature ? new ol.format.GeoJSON().writeFeatureObject(feature) : null
     const position = feature ? ol.extent.getCenter(feature.getGeometry().getExtent()) : undefined
 
@@ -239,8 +247,16 @@ export default class PrimaryMap extends Component {
     this.props.onImageSelect(geojson)
   }
 
-  _handleThumbnailLoaded(imageSource) {
-    this._thumbnailLayer.setSource(imageSource || null)
+  _handleThumbnailLoaded(image, feature) {
+    if (!feature) {
+      return
+    }
+    const reader = new ol.format.GeoJSON()
+    this._thumbnailLayer.setSource(new ol.source.ImageStatic({
+      crossOrigin: 'Anonymous',
+      imageExtent: reader.readGeometry(feature.geometry, {dataProjection: 'EPSG:4326'}).getExtent(),
+      url:         image.src
+    }))
   }
 
   _initializeOpenLayers() {
@@ -361,6 +377,9 @@ export default class PrimaryMap extends Component {
     if (imagery) {
       const features = reader.readFeatures(imagery.images, {featureProjection: 'EPSG:3857'})
       if (features.length) {
+        features.forEach(feature => {
+          feature.set(KEY_TYPE, TYPE_SCENE)
+        })
         source.setAttributions([
           '<a href="https://www.planet.com" target="_blank" rel="noopener">Planet Labs</a>',
           '<a href="https://landsat.usgs.gov" target="_blank" rel="noopener">LANDSAT (USGS)</a>',

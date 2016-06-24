@@ -17,9 +17,9 @@
 import React, {Component} from 'react'
 import JobFeatureDetails from './JobFeatureDetails'
 import SceneFeatureDetails from './SceneFeatureDetails'
-import LoadFailed from './LoadFailed'
 import LoadingAnimation from './LoadingAnimation'
 import {fetchThumbnail} from '../utils/fetch-thumbnail'
+import errorPlaceholder from '../images/error-placeholder.png'
 import styles from './FeatureDetails.css'
 
 const KEY_THUMBNAIL = 'thumb_large'
@@ -39,31 +39,39 @@ export default class FeatureDetails extends Component {
 
   constructor() {
     super()
-    this.state = {thumbnailLoading: false, thumbnailError: null}
+    this.state = {loadRefCount: 0}
+  }
+
+  _incrementLoading() {
+    this.setState({
+      loadRefCount: this.state.loadRefCount + 1
+    })
+  }
+
+  _decrementLoading() {
+    this.setState({
+      loadRefCount: Math.max(this.state.loadRefCount - 1, 0)
+    })
   }
 
   componentWillReceiveProps(nextProps) {
     const {feature} = nextProps
-    if (feature) {
-      // TODO -- show loading anim
-      fetchThumbnail(feature.properties[KEY_THUMBNAIL])
-        .promise
+    if (feature && this.props.feature !== feature) {
+      this._incrementLoading()
+      this._fetchThumbnail(feature.properties[KEY_THUMBNAIL])
         .then(image => {
-          // TODO -- fade out loader anim
-          this.props.onThumbnailLoaded(image, feature.properties.geometry)
+          this._decrementLoading()
+          this.props.onThumbnailLoaded(image, feature)
         })
         .catch(err => {
+          this._decrementLoading()
           if (err.isCancellation) {
             return
           }
-          console.error('Ack!', err)
-          this.setState({
-            thumbnailError: err
-          })
-          // TODO -- swap loading anim with loaderror
+          console.error('Could not load thumbnail!', err)
+          const placeholder = generateErrorPlaceholder()
+          this.props.onThumbnailLoaded(placeholder, feature)
         })
-    } else {
-      this.props.onThumbnailLoaded(null)
     }
   }
 
@@ -73,22 +81,41 @@ export default class FeatureDetails extends Component {
       return <div role="nothing-selected"/>
     }
     return (
-      <div className={styles.root}>
+      <div className={`${styles.root} ${this._classForLoading}`}>
         <LoadingAnimation className={styles.loadingAnimation}/>
-        <LoadFailed className={styles.loadFailed}/>
 
         {feature.properties[KEY_TYPE] === TYPE_JOB && (
           <JobFeatureDetails
+            className={styles.jobDetails}
             feature={feature}
           />
         )}
 
         {feature.properties[KEY_TYPE] === TYPE_SCENE && (
           <SceneFeatureDetails
+            className={styles.sceneDetails}
             feature={feature}
           />
         )}
       </div>
     )
   }
+
+  get _classForLoading() {
+    return this.state.loadRefCount ? styles.isLoading : ''
+  }
+
+  _fetchThumbnail(url) {
+    if (this._thumbnailPromise) {
+      this._thumbnailPromise.cancel()
+    }
+    this._thumbnailPromise = fetchThumbnail(url)
+    return this._thumbnailPromise.promise
+  }
+}
+
+function generateErrorPlaceholder() {
+  const placeholder = new Image()
+  placeholder.src = errorPlaceholder
+  return placeholder
 }

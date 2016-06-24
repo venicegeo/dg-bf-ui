@@ -14,3 +14,19 @@
  * limitations under the License.
  **/
 
+.root {
+  position: absolute;
+}
+
+.loadingAnimation {
+  position: absolute;
+  top: -50px;
+  left: -50px;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity .2s ease-out;
+}
+
+.isLoading .loadingAnimation {
+  opacity: 1;
+}
