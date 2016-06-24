@@ -39,7 +39,7 @@ export default class SceneFeatureDetails extends Component {
     const {feature} = this.props
     const id = normalizeId(feature.id)
     return (
-      <div className={styles.root}>
+      <div className={`${styles.root} ${this.props.className || ''}`}>
         <h1 title={id}>{id}</h1>
 
         <dl>

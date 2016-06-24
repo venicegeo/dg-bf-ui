@@ -26,5 +26,5 @@ export default function JobFeatureDetails() {
 }
 
 JobFeatureDetails.propTypes = {
-  className: React.PropTypes.string
+  className: React.PropTypes.string,
 }
