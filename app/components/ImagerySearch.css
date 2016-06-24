@@ -14,27 +14,7 @@
  * limitations under the License.
  **/
 
-.root {
-  position: relative;
-}
-
-.root.isSearching:after {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  z-index: 9;
-  animation: strobe 1s alternate infinite;
-  cursor: wait;
-  background-color: #fff;
-}
-
-@keyframes strobe {
-  from { opacity: .7; }
-  to { opacity: .3; }
-}
+.root {}
 
 .minimap {
   position: relative;
@@ -92,4 +72,27 @@
   text-align: left;
   background-color: rgba(0,0,0,.2);
   overflow-x: auto;
+}
+
+.loadingMask {
+  display: none;
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
+  padding-top: 10vh;
+  cursor: wait;
+  background-color: #3d94c5;
+  text-align: center;
+  opacity: .6;
+}
+
+.isSearching .loadingMask {
+  display: block;
+}
+
+.loadingAnimation {
+  width: 100px;
+  height: 100px;
 }
