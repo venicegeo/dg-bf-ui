@@ -72,29 +72,35 @@ class CreateJob extends Component {
         <ul>
           {this.props.bbox && (
             <li className={styles.imagery}>
-              <ImagerySearch bbox={this.props.bbox}
-                             catalogApiKey={this.props.catalogApiKey}
-                             dateFrom={this.props.dateFrom}
-                             dateTo={this.props.dateTo}
-                             error={this.props.error}
-                             isSearching={this.props.isSearching}
-                             onApiKeyChange={this._handleCatalogApiKeyChange}
-                             onClearBbox={this._handleClearBbox}
-                             onDateChange={this._handleSearchDateChange}
-                             onSubmit={this._handleSearchSubmit}/>
+              <ImagerySearch
+                bbox={this.props.bbox}
+                catalogApiKey={this.props.catalogApiKey}
+                dateFrom={this.props.dateFrom}
+                dateTo={this.props.dateTo}
+                error={this.props.error}
+                isSearching={this.props.isSearching}
+                onApiKeyChange={this._handleCatalogApiKeyChange}
+                onClearBbox={this._handleClearBbox}
+                onDateChange={this._handleSearchDateChange}
+                onSubmit={this._handleSearchSubmit}
+              />
             </li>
           )}
           {this.props.bbox && this.props.selectedImage && (
             <li className={styles.details}>
-              <NewJobDetails name={this.props.jobName}
-                             onNameChange={this._handleNameChange}/>
+              <NewJobDetails
+                name={this.props.jobName}
+                onNameChange={this._handleNameChange}
+              />
             </li>
           )}
           {this.props.bbox && this.props.selectedImage && (
             <li className={styles.algorithms}>
-              <AlgorithmList algorithms={this.props.algorithms}
-                             imageProperties={this.props.selectedImage.properties}
-                             onSubmit={this._handleJobSubmit}/>
+              <AlgorithmList
+                algorithms={this.props.algorithms}
+                imageProperties={this.props.selectedImage.properties}
+                onSubmit={this._handleJobSubmit}
+              />
             </li>
           )}
 
