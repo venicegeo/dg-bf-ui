@@ -43,6 +43,7 @@ class CreateJob extends Component {
     dateTo:        React.PropTypes.string.isRequired,
     dispatch:      React.PropTypes.func.isRequired,
     error:         React.PropTypes.object,
+    isCreating:    React.PropTypes.bool.isRequired,
     isSearching:   React.PropTypes.bool.isRequired,
     jobName:       React.PropTypes.string.isRequired,
     location:      React.PropTypes.object.isRequired,
@@ -99,6 +100,7 @@ class CreateJob extends Component {
               <AlgorithmList
                 algorithms={this.props.algorithms}
                 imageProperties={this.props.selectedImage.properties}
+                isSubmitting={this.props.isCreating}
                 onSubmit={this._handleJobSubmit}
               />
             </li>
@@ -163,6 +165,7 @@ export default connect(state => ({
   dateFrom:      state.search.dateFrom,
   dateTo:        state.search.dateTo,
   error:         state.search.error,
+  isCreating:    state.jobs.creating,
   isSearching:   state.search.searching,
   jobName:       state.draftJob.name,
   selectedImage: state.draftJob.image,
