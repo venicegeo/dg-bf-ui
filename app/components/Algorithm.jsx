@@ -50,7 +50,7 @@ export default class Algorithm extends Component {
             <h4><i className="fa fa-warning"/> Incompatible Image Selected</h4>
             <p>The image you've selected does not meet all of this algorithm's requirements.  You can run it anyway but it may not produce the expected results.</p>
           </div>
-          <button className={styles.startButton} disabled={this._canSubmit}>
+          <button className={styles.startButton} disabled={!this._canSubmit}>
             {this.props.isSubmitting ? 'Starting' : 'Run Algorithm'}
           </button>
         </div>
