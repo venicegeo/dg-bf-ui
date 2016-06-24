@@ -54,7 +54,7 @@
   white-space: nowrap;
   text-overflow: ellipsis;
   overflow-x: hidden;
-  max-width: 200px;
+  max-width: 250px;
   font-size: 1.1em;
   border-top-right-radius: 3px;
   background-color: var(--detail-overlay-heading-color);
@@ -89,4 +89,11 @@
 
 .root dd + dt {
   margin-top: 1em;
+}
+
+.thumbnailLink {
+  composes: heading from '../styles/typography.css';
+  color: cyan;
+  text-decoration: none;
+  border-bottom: 1px solid;
 }

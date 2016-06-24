@@ -20,10 +20,11 @@ import {findDOMNode} from 'react-dom'
 import ol from 'openlayers'
 import ExportControl from '../utils/openlayers.ExportControl.js'
 import SearchControl from '../utils/openlayers.SearchControl.js'
-import BasemapSelect from './BasemapSelect.jsx'
-import ImageDetails from './ImageDetails.jsx'
-import ImagerySearchResults from './ImagerySearchResults.jsx'
-import {debounce} from '../utils/debounce'
+import BasemapSelect from './BasemapSelect'
+import FeatureDetails from './FeatureDetails'
+import ImagerySearchResults from './ImagerySearchResults'
+import debounce from 'lodash/debounce'
+import throttle from 'lodash/throttle'
 import * as anchorUtil from '../utils/map-anchor'
 import * as bboxUtil from '../utils/bbox'
 import {TILE_PROVIDERS} from '../config'
@@ -42,10 +43,13 @@ const RESOLUTION_CLOSE = 1000
 const DISPOSITION_DETECTED = 'Detected'
 const DISPOSITION_UNDETECTED = 'Undetected'
 const DISPOSITION_NEW_DETECTION = 'New Detection'
+const KEY_TYPE = 'type'
 const KEY_JOB_ID = 'jobId'
 const KEY_DETECTION = 'detection'
 const KEY_JOB_NAME = 'jobName'
 const KEY_JOB_STATUS = 'jobStatus'
+const TYPE_JOB = 'job'
+const TYPE_SCENE = 'scene'
 
 export const MODE_DRAW_BBOX = 'MODE_DRAW_BBOX'
 export const MODE_NORMAL = 'MODE_NORMAL'
@@ -53,31 +57,33 @@ export const MODE_SELECT_IMAGERY = 'MODE_SELECT_IMAGERY'
 
 export default class PrimaryMap extends Component {
   static propTypes = {
-    anchor:                    React.PropTypes.string,
-    bbox:                      React.PropTypes.arrayOf(React.PropTypes.number),
-    datasets:                  React.PropTypes.array,
-    imagery:                   React.PropTypes.shape({
+    anchor:              React.PropTypes.string,
+    bbox:                React.PropTypes.arrayOf(React.PropTypes.number),
+    datasets:            React.PropTypes.array,
+    imagery:             React.PropTypes.shape({
       count:      React.PropTypes.number.isRequired,
       startIndex: React.PropTypes.number.isRequired,
       images:     React.PropTypes.object.isRequired
     }),
-    isSearching:               React.PropTypes.bool.isRequired,
-    mode:                      React.PropTypes.string.isRequired,
-    onAnchorChange:            React.PropTypes.func.isRequired,
-    onBoundingBoxChange:       React.PropTypes.func.isRequired,
-    onImagerySearchPageChange: React.PropTypes.func.isRequired,
-    onImageSelect:             React.PropTypes.func.isRequired
+    isSearching:         React.PropTypes.bool.isRequired,
+    mode:                React.PropTypes.string.isRequired,
+    onAnchorChange:      React.PropTypes.func.isRequired,
+    onBoundingBoxChange: React.PropTypes.func.isRequired,
+    onImageSelect:       React.PropTypes.func.isRequired,
+    onSearchPageChange:  React.PropTypes.func.isRequired,
   }
 
   constructor() {
     super()
-    this.state = {basemapIndex: 0, selectedImageFeature: null}
+    this.state = {basemapIndex: 0, selectedFeature: null}
     this._emitAnchorChange = debounce(this._emitAnchorChange.bind(this), 1000)
     this._handleBasemapChange = this._handleBasemapChange.bind(this)
     this._handleDrawStart = this._handleDrawStart.bind(this)
     this._handleDrawEnd = this._handleDrawEnd.bind(this)
+    this._handleMouseMove = throttle(this._handleMouseMove.bind(this), 15)
     this._handleSelect = this._handleSelect.bind(this)
-    this._recenter = debounce(this._recenter.bind(this))
+    this._handleThumbnailLoaded = this._handleThumbnailLoaded.bind(this)
+    this._recenter = debounce(this._recenter.bind(this), 100)
     this._renderImagerySearchBbox = debounce(this._renderImagerySearchBbox.bind(this))
   }
 
@@ -101,6 +107,7 @@ export default class PrimaryMap extends Component {
     if (process.env.NODE_ENV === 'development') {
       window.ol = ol
       window.map = this._map
+      window.primaryMap = this
     }
     // DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG
     // DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG
@@ -136,15 +143,23 @@ export default class PrimaryMap extends Component {
     const basemapNames = TILE_PROVIDERS.map(b => b.name)
     return (
       <main className={styles.root} ref="container" tabIndex="1">
-        <BasemapSelect className={styles.basemapSelect}
-                       index={this.state.basemapIndex}
-                       basemaps={basemapNames}
-                       onChange={this._handleBasemapChange}/>
-        <ImageDetails ref="imageDetails" feature={this.state.selectedImageFeature}/>
-        <ImagerySearchResults ref="imageSearchResults"
-                              imagery={this.props.imagery}
-                              isSearching={this.props.isSearching}
-                              onPageChange={this.props.onImagerySearchPageChange}/>
+        <BasemapSelect
+          className={styles.basemapSelect}
+          index={this.state.basemapIndex}
+          basemaps={basemapNames}
+          onChange={this._handleBasemapChange}
+        />
+        <FeatureDetails
+          ref="featureDetails"
+          feature={this.state.selectedFeature}
+          onThumbnailLoaded={this._handleThumbnailLoaded}
+        />
+        <ImagerySearchResults
+          ref="imageSearchResults"
+          imagery={this.props.imagery}
+          isSearching={this.props.isSearching}
+          onPageChange={this.props.onSearchPageChange}
+        />
       </main>
     )
   }
@@ -167,7 +182,11 @@ export default class PrimaryMap extends Component {
 
   _clearSelection() {
     this._selectInteraction.getFeatures().clear()
-    this.setState({selectedImageFeature: null})
+    this.setState({selectedFeature: null})
+  }
+
+  _clearThumbnail() {
+    this._thumbnailLayer.setSource(null)
   }
 
   _deactivateDrawInteraction() {
@@ -207,20 +226,37 @@ export default class PrimaryMap extends Component {
     this.props.onBoundingBoxChange(null)
   }
 
+  _handleMouseMove(event) {
+    const excludingDraw = l => l !== this._drawLayer
+    this._map.getTarget().style.cursor = this._map.hasFeatureAtPixel(event.pixel, excludingDraw) ? 'pointer' : 'default'
+  }
+
   _handleSelect(event) {
-    if (this.props.mode === MODE_SELECT_IMAGERY) {
-      const feature = event.target.getFeatures().item(0)
-      if (feature) {
-        const selectedImageFeature = new ol.format.GeoJSON().writeFeatureObject(feature)
-        this.props.onImageSelect(selectedImageFeature)
-        this.setState({selectedImageFeature})
-        this._imageDetailsOverlay.setPosition(ol.extent.getCenter(feature.getGeometry().getExtent()))
-      } else {
-        this.props.onImageSelect(null)
-        this.setState({selectedImageFeature: null})
-        this._imageDetailsOverlay.setPosition(undefined)
-      }
+    const {selected, deselected} = event
+    if (selected.length === 0 && deselected.length === 0) {
+      return  // Disregard spurious select event
     }
+
+    const [feature] = selected
+    const geojson = feature ? new ol.format.GeoJSON().writeFeatureObject(feature) : null
+    const position = feature ? ol.extent.getCenter(feature.getGeometry().getExtent()) : undefined
+
+    this._clearThumbnail()
+    this.setState({selectedFeature: geojson})
+    this._featureDetailsOverlay.setPosition(position)
+    this.props.onImageSelect(geojson)
+  }
+
+  _handleThumbnailLoaded(image, feature) {
+    if (!feature) {
+      return
+    }
+    const reader = new ol.format.GeoJSON()
+    this._thumbnailLayer.setSource(new ol.source.ImageStatic({
+      crossOrigin: 'Anonymous',
+      imageExtent: reader.readGeometry(feature.geometry, {dataProjection: 'EPSG:4326'}).getExtent(),
+      url:         image.src
+    }))
   }
 
   _initializeOpenLayers() {
@@ -229,6 +265,7 @@ export default class PrimaryMap extends Component {
     this._drawLayer = generateDrawLayer()
     this._frameLayer = generateFrameLayer()
     this._imageryLayer = generateImageryLayer()
+    this._thumbnailLayer = generateThumbnailLayer()
 
     this._drawInteraction = generateDrawInteraction(this._drawLayer)
     this._drawInteraction.on('drawstart', this._handleDrawStart)
@@ -238,7 +275,7 @@ export default class PrimaryMap extends Component {
     this._selectInteraction.on('select', this._handleSelect)
 
     this._progressBars = {}
-    this._imageDetailsOverlay = generateImageDetailsOverlay(this.refs.imageDetails)
+    this._featureDetailsOverlay = generateFeatureDetailsOverlay(this.refs.featureDetails)
     this._imageSearchResultsOverlay = generateImageSearchResultsOverlay(this.refs.imageSearchResults)
 
     this._map = new ol.Map({
@@ -250,11 +287,12 @@ export default class PrimaryMap extends Component {
         this._frameLayer,
         this._drawLayer,
         this._imageryLayer,
+        this._thumbnailLayer,
         this._detectionsLayer
       ],
       overlays: [
         this._imageSearchResultsOverlay,
-        this._imageDetailsOverlay
+        this._featureDetailsOverlay,
       ],
       target: this.refs.container,
       view: new ol.View({
@@ -265,6 +303,7 @@ export default class PrimaryMap extends Component {
       })
     })
 
+    this._map.on('pointermove', this._handleMouseMove)
     this._map.on('moveend', this._emitAnchorChange)
     return new Promise(resolve => this._map.once('postrender', resolve))
   }
@@ -338,7 +377,13 @@ export default class PrimaryMap extends Component {
     if (imagery) {
       const features = reader.readFeatures(imagery.images, {featureProjection: 'EPSG:3857'})
       if (features.length) {
-        source.setAttributions(['<a href="https://www.planet.com">Planet Labs</a>'])  // HACK -- this should be dynamic, not hardcoded
+        features.forEach(feature => {
+          feature.set(KEY_TYPE, TYPE_SCENE)
+        })
+        source.setAttributions([
+          '<a href="https://www.planet.com" target="_blank" rel="noopener">Planet Labs</a>',
+          '<a href="https://landsat.usgs.gov" target="_blank" rel="noopener">LANDSAT (USGS)</a>',
+        ])  // HACK -- this should be dynamic, not hardcoded
         source.addFeatures(features)
       }
     }
@@ -613,11 +658,11 @@ function generateImageryLayer() {
   })
 }
 
-function generateImageDetailsOverlay(componentRef) {
+function generateFeatureDetailsOverlay(componentRef) {
   return new ol.Overlay({
     autoPan: true,
     element: findDOMNode(componentRef),
-    id: 'imageDetails',
+    id: 'featureDetails',
     positioning: 'top-left'
   })
 }
@@ -654,9 +699,10 @@ function generateSelectInteraction(...layers) {
     layers,
     condition: ol.events.condition.click,
     style: new ol.style.Style({
-      fill: new ol.style.Fill({
-        color: 'rgba(0, 255, 0, 0.5)'
-      })
+      stroke: new ol.style.Stroke({
+        color: 'black',
+        width: 3
+      }),
     })
   })
 }
@@ -718,4 +764,8 @@ function generateStyleUnknownDetectionType() {
       width: 2
     })
   })
+}
+
+function generateThumbnailLayer() {
+  return new ol.layer.Image()
 }

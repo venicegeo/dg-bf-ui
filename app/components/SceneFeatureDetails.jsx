@@ -16,18 +16,18 @@
 
 import React, {Component} from 'react'
 import moment from 'moment'
-import styles from './ImageDetails.css'
+import styles from './SceneFeatureDetails.css'
 
 const KEY_DATE = 'acquiredDate'
 const KEY_BANDS = 'bands'
 const KEY_CLOUD_COVER = 'cloudCover'
 const KEY_SENSOR_NAME = 'sensorName'
-const KEY_THUMBNAIL = 'thumbnail'
+const KEY_THUMBNAIL = 'thumb_large'
 
-export default class ImageDetails extends Component {
+export default class SceneFeatureDetails extends Component {
   static propTypes = {
     className: React.PropTypes.string,
-    feature: React.PropTypes.object
+    feature: React.PropTypes.object.isRequired,
   }
 
   constructor() {
@@ -37,20 +37,14 @@ export default class ImageDetails extends Component {
 
   render() {
     const {feature} = this.props
-    if (!feature) {
-      return <div role="no-feature-selected"/>
-    }
-
     const id = normalizeId(feature.id)
     return (
-      <div className={styles.root}>
+      <div className={`${styles.root} ${this.props.className || ''}`}>
         <h1 title={id}>{id}</h1>
 
         <dl>
-          {/*
           <dt>Thumbnail</dt>
-          <dd><img ref="thumbnail" crossOrigin={true} src={feature.get(KEY_THUMBNAIL)}/></dd>
-          */}
+          <dd><a className={styles.thumbnailLink} href={feature.properties[KEY_THUMBNAIL]} target="_blank">Click here to open</a></dd>
           <dt>Date Captured</dt>
           <dd>{moment(feature.properties[KEY_DATE]).format('llll')}</dd>
 
@@ -72,5 +66,5 @@ function normalizeId(featureId) {
   if (!featureId) {
     return 'nil'
   }
-  return featureId.replace('pl:landsat:', '')
+  return featureId.replace(/^(pl:)?landsat:/i, '')
 }
