@@ -75,7 +75,7 @@ export default class JobStatus extends Component {
             <div className={styles.puck} style={{width: progress.percentage}}></div>
           </div>
 
-          <div className={styles.metadata}>
+          <div className={styles.metadata} onClick={e => e.stopPropagation()}>
             <dl>
               <dt>Image ID</dt>
               <dd>{job.imageId || 'No ID?'}</dd>
