@@ -30,10 +30,15 @@ import * as bboxUtil from '../utils/bbox'
 import {TILE_PROVIDERS} from '../config'
 import styles from './PrimaryMap.css'
 import {
+  KEY_NAME,
+  KEY_STATUS,
+  KEY_TYPE,
   STATUS_ERROR,
   STATUS_RUNNING,
   STATUS_SUCCESS,
-  STATUS_TIMED_OUT
+  STATUS_TIMED_OUT,
+  TYPE_JOB,
+  TYPE_SCENE,
 } from '../constants'
 
 const INITIAL_CENTER = [110, 0]
@@ -43,14 +48,8 @@ const RESOLUTION_CLOSE = 1000
 const DISPOSITION_DETECTED = 'Detected'
 const DISPOSITION_UNDETECTED = 'Undetected'
 const DISPOSITION_NEW_DETECTION = 'New Detection'
-const KEY_TYPE = 'type'
-const KEY_JOB_ID = 'jobId'
+const KEY_OWNER_ID = 'OWNER_ID'
 const KEY_DETECTION = 'detection'
-const KEY_JOB_NAME = 'jobName'
-const KEY_JOB_STATUS = 'jobStatus'
-const TYPE_JOB = 'job'
-const TYPE_SCENE = 'scene'
-
 export const MODE_DRAW_BBOX = 'MODE_DRAW_BBOX'
 export const MODE_NORMAL = 'MODE_NORMAL'
 export const MODE_SELECT_IMAGERY = 'MODE_SELECT_IMAGERY'
@@ -59,7 +58,18 @@ export default class PrimaryMap extends Component {
   static propTypes = {
     anchor:              React.PropTypes.string,
     bbox:                React.PropTypes.arrayOf(React.PropTypes.number),
-    datasets:            React.PropTypes.array,
+    datasets:            React.PropTypes.arrayOf(React.PropTypes.shape({
+      job:      React.PropTypes.shape({
+        geometry:   React.PropTypes.object.isRequired,
+        id:         React.PropTypes.string.isRequired,
+        properties: React.PropTypes.object.isRequired,
+        type:       React.PropTypes.string.isRequired,
+      }).isRequired,
+      progress: React.PropTypes.shape({
+        loaded: React.PropTypes.number,
+        total:  React.PropTypes.number,
+      }),
+    })).isRequired,
     imagery:             React.PropTypes.shape({
       count:      React.PropTypes.number.isRequired,
       startIndex: React.PropTypes.number.isRequired,
@@ -271,7 +281,7 @@ export default class PrimaryMap extends Component {
     this._drawInteraction.on('drawstart', this._handleDrawStart)
     this._drawInteraction.on('drawend', this._handleDrawEnd)
 
-    this._selectInteraction = generateSelectInteraction(this._imageryLayer)
+    this._selectInteraction = generateSelectInteraction(this._frameLayer, this._imageryLayer)
     this._selectInteraction.on('select', this._handleSelect)
 
     this._progressBars = {}
@@ -332,7 +342,7 @@ export default class PrimaryMap extends Component {
 
     // Removals (no updates)
     source.getFeatures().slice().forEach(feature => {
-      const jobId = feature.get(KEY_JOB_ID)
+      const jobId = feature.get(KEY_OWNER_ID)
       previous[jobId] = true
       if (!incomingJobs[jobId]) {
         source.removeFeature(feature)
@@ -344,28 +354,20 @@ export default class PrimaryMap extends Component {
     datasets.filter(d => d.geojson && !previous[d.job.id]).forEach(dataset => {
       const features = reader.readFeatures(dataset.geojson, {featureProjection: 'EPSG:3857'})
       features.forEach(f => f.setProperties({
-        [KEY_JOB_ID]: dataset.job.id,
-        [KEY_JOB_NAME]: dataset.job.name,
-        [KEY_JOB_STATUS]: dataset.job.status
+        [KEY_OWNER_ID]: dataset.job.id,
+        [KEY_NAME]: dataset.job.name,
+        [KEY_STATUS]: dataset.job.status
       }))
       source.addFeatures(features)
     })
   }
 
   _renderFrames() {
-    const {datasets} = this.props
-    this._frameLayer.getSource().clear()
-    this._frameLayer.getSource().addFeatures(datasets.map(dataset => {
-      const feature = new ol.Feature({
-        geometry: ol.geom.Polygon.fromExtent(ol.proj.transformExtent(dataset.job.bbox, 'EPSG:4326', 'EPSG:3857'))
-      })
-      feature.setProperties({
-        [KEY_JOB_ID]: dataset.job.id,
-        [KEY_JOB_NAME]: dataset.job.name,
-        [KEY_JOB_STATUS]: dataset.job.status
-      })
-      return feature
-    }))
+    const source = this._frameLayer.getSource()
+    source.clear()
+    const reader = new ol.format.GeoJSON()
+    const features = this.props.datasets.map(({job}) => reader.readFeature(job, {featureProjection: 'EPSG:3857'}))
+    source.addFeatures(features)
   }
 
   _renderImagery() {
@@ -605,7 +607,7 @@ function generateFrameLayer() {
     source: new ol.source.Vector(),
     style(feature, resolution) {
       // FIXME -- convert labels to overlays
-      const labelText = `${feature.get(KEY_JOB_NAME).toUpperCase()} (${feature.get(KEY_JOB_STATUS)})`
+      const labelText = `${feature.get(KEY_NAME).toUpperCase()} (${feature.get(KEY_STATUS)})`
       const zoomedOut = resolution > RESOLUTION_CLOSE
       if (zoomedOut) {
         return new ol.style.Style({
@@ -617,7 +619,7 @@ function generateFrameLayer() {
             text: labelText
           }),
           fill: new ol.style.Fill({
-            color: _getFillColor(feature.get(KEY_JOB_STATUS))
+            color: _getFillColor(feature.get(KEY_STATUS))
           }),
           stroke: new ol.style.Stroke({
             color: 'rgba(0, 0, 0, .5)'

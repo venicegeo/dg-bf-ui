@@ -22,10 +22,12 @@ import {fetchThumbnail} from '../utils/fetch-thumbnail'
 import errorPlaceholder from '../images/error-placeholder.png'
 import styles from './FeatureDetails.css'
 
-const KEY_THUMBNAIL = 'thumb_large'
-const KEY_TYPE = 'type'
-const TYPE_JOB = 'job'
-const TYPE_SCENE = 'scene'
+import {
+  KEY_THUMBNAIL,
+  TYPE_JOB,
+  TYPE_SCENE,
+  KEY_TYPE,
+} from '../constants'
 
 export default class FeatureDetails extends Component {
   static propTypes = {

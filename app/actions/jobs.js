@@ -20,8 +20,18 @@ import {fromFeature} from '../utils/bbox'
 import {GATEWAY, JOBS_WORKER} from '../config'
 
 import {
+  KEY_IMAGE_ID,
+  KEY_ALGORITHM_NAME,
+  KEY_CREATED_ON,
+  KEY_NAME,
+  KEY_RESULT_ID,
+  KEY_STATUS,
+  KEY_TYPE,
+  KEY_VERSION,
+  KEY_THUMBNAIL,
   REQUIREMENT_BANDS,
-  STATUS_RUNNING
+  STATUS_RUNNING,
+  TYPE_JOB,
 } from '../constants'
 
 //
@@ -79,8 +89,7 @@ export function createJob(catalogApiKey, name, algorithm, feature) {
       serviceId: state.jobs.serviceId
     })
       .then(id => {
-        const bbox = fromFeature(feature)
-        dispatch(createJobSuccess(id, name, algorithm, bbox, feature.id))
+        dispatch(createJobSuccess(id, name, algorithm, feature))
         return id
       })
       .catch(err => {
@@ -126,17 +135,22 @@ function createJobError(err) {
   }
 }
 
-function createJobSuccess(id, name, algorithm, bbox, imageId) {
+function createJobSuccess(id, name, algorithm, feature) {
   return {
     type: CREATE_JOB_SUCCESS,
     record: {
-      bbox,
       id,
-      imageId,
-      name,
-      algorithmName: algorithm.name,
-      createdOn: Date.now(),
-      status: STATUS_RUNNING
+      geometry: feature.geometry,
+      properties: {
+        [KEY_ALGORITHM_NAME]: algorithm.name,
+        [KEY_CREATED_ON]:     new Date().toISOString(),
+        [KEY_IMAGE_ID]:       feature.id,
+        [KEY_NAME]:           name,
+        [KEY_STATUS]:         STATUS_RUNNING,
+        [KEY_THUMBNAIL]:      feature.properties[KEY_THUMBNAIL],
+        [KEY_TYPE]:           TYPE_JOB,
+      },
+      type: 'Feature',
     }
   }
 }
