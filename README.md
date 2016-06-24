@@ -20,6 +20,7 @@ npm run build
 
 ### Environment Variables
 
+| Variable  | Description                                           |
 |-----------|-------------------------------------------------------|
 | `GATEWAY` | A URL pointing at a specific Piazza Gateway instance. |
 
