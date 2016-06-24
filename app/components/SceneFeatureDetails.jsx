@@ -27,7 +27,7 @@ const KEY_THUMBNAIL = 'thumb_large'
 export default class SceneFeatureDetails extends Component {
   static propTypes = {
     className: React.PropTypes.string,
-    feature: React.PropTypes.object
+    feature: React.PropTypes.object.isRequired,
   }
 
   constructor() {
