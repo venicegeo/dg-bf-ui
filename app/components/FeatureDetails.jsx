@@ -61,7 +61,7 @@ export default class FeatureDetails extends Component {
       this._fetchThumbnail(feature.properties[KEY_THUMBNAIL])
         .then(image => {
           this._decrementLoading()
-          this.props.onThumbnailLoaded(image, feature)
+          this._emitThumbnailLoaded(image, feature)
         })
         .catch(err => {
           this._decrementLoading()
@@ -69,8 +69,8 @@ export default class FeatureDetails extends Component {
             return
           }
           console.error('Could not load thumbnail!', err)
-          const placeholder = generateErrorPlaceholder()
-          this.props.onThumbnailLoaded(placeholder, feature)
+          const image = generateErrorPlaceholder()
+          this._emitThumbnailLoaded(image, feature)
         })
     }
   }
@@ -103,6 +103,10 @@ export default class FeatureDetails extends Component {
 
   get _classForLoading() {
     return this.state.loadRefCount ? styles.isLoading : ''
+  }
+
+  _emitThumbnailLoaded(image, feature) {
+    setTimeout(() => this.props.onThumbnailLoaded(image, feature), 200)
   }
 
   _fetchThumbnail(url) {
