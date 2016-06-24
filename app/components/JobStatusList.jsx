@@ -44,8 +44,9 @@ class JobStatusList extends Component {
   }
 
   render() {
+    const isEmpty = (this.props.jobs.length === 0)
     return (
-      <div className={styles.root}>
+      <div className={`${styles.root} ${isEmpty ? styles.isEmpty : ''}`}>
         <header>
           <h1>Jobs</h1>
         </header>
@@ -59,13 +60,17 @@ class JobStatusList extends Component {
             </li>
           )}
 
-          {this.props.jobs.length ?
-            this.props.jobs.map(job => <JobStatus key={job.id}
-                                                  job={job}
-                                                  result={this.props.results[job.id]}
-                                                  onDownload={this._handleDownload}/>) :
+          {isEmpty ? (
             <li className={styles.placeholder}>You haven't started any jobs yet</li>
-          }
+          ) : this.props.jobs.map(job => (
+            <JobStatus
+              key={job.id}
+              isActive={this._isActive(job.id)}
+              job={job}
+              result={this.props.results[job.id]}
+              onDownload={this._handleDownload}
+            />
+          ))}
         </ul>
       </div>
     )
@@ -84,6 +89,11 @@ class JobStatusList extends Component {
       }
     })
     this.props.dispatch(downloadResult(job.id))
+  }
+
+  _isActive(jobId) {
+    const activeIds = [].concat(this.props.location.query.jobId)
+    return activeIds.indexOf(jobId) !== -1
   }
 }
 

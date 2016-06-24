@@ -30,15 +30,16 @@ import {
 
 export default class JobStatus extends Component {
   static propTypes = {
-    className: React.PropTypes.string,
-    job: React.PropTypes.shape({
-      id: React.PropTypes.string,
-      name: React.PropTypes.string,
+    className:  React.PropTypes.string,
+    isActive:   React.PropTypes.bool,
+    job:        React.PropTypes.shape({
+      id:       React.PropTypes.string,
+      name:     React.PropTypes.string,
       resultId: React.PropTypes.string,
-      status: React.PropTypes.string
+      status:   React.PropTypes.string
     }).isRequired,
     onDownload: React.PropTypes.func.isRequired,
-    result: React.PropTypes.object
+    result:     React.PropTypes.object
   }
 
   constructor() {
@@ -55,11 +56,10 @@ export default class JobStatus extends Component {
   }
 
   render() {  // eslint-disable-line
-    // TODO -- style for "active"
     const {job} = this.props
     const progress = calculateProgress(this.props.result) || {}
     return (
-      <li className={`${styles.root} ${this._classForStatus} ${this._classForExpansion} ${this._classForDownloading} ${this._classForLoading}`}>
+      <li className={`${styles.root} ${this._aggregatedClassNames}`}>
         <div className={styles.details} onClick={this._handleExpansionToggle}>
           <h3 className={styles.title}>
             <i className={`fa fa-chevron-right ${styles.caret}`}/>
@@ -89,7 +89,7 @@ export default class JobStatus extends Component {
 
         <div className={styles.controls}>
           <Link to={{pathname: '/',
-                     query: {jobId: job.status === STATUS_SUCCESS ? job.id : undefined},
+                     query: {jobId: job.id},
                      hash: bboxToAnchor(job.bbox)}}
                 title="View on Map">
             <i className="fa fa-globe"/>
@@ -109,6 +109,20 @@ export default class JobStatus extends Component {
   //
   // Internals
   //
+
+  get _aggregatedClassNames() {
+    return [
+      this._classForActive,
+      this._classForDownloading,
+      this._classForExpansion,
+      this._classForLoading,
+      this._classForStatus,
+    ].filter(Boolean).join(' ')
+  }
+
+  get _classForActive() {
+    return this.props.isActive ? styles.isActive : ''
+  }
 
   get _classForDownloading() {
     return this.state.isDownloading ? styles.isDownloading : ''

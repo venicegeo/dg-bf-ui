@@ -34,7 +34,7 @@
 }
 
 .root ul {
-  background-color: #c8ced2;
+  background-color: hsl(202, 30%, 90%);
 }
 
 .isEmpty ul {
