@@ -19,24 +19,31 @@
 }
 
 .communicationError {
-  background-color: #f04;
+  padding: 15px;
+  background-color: hsl(349, 100%, 60%);
   color: white;
-  padding: 1.5em .5em;
-  text-align: center;
+  font-size: 13px;
+  border-top: 1px solid white;
+  border-bottom: 1px solid white;
+}
+
+.communicationError h4 {
+  margin: 0 0 .5em;
+  color: inherit;
+  font-size: 1.3em;
 }
 
 .root ul {
   background-color: #c8ced2;
 }
 
+.isEmpty ul {
+  background-color: white;
+}
+
 .placeholder {
-  position: absolute;
-  top: 0;
-  left: 0;
-  bottom: 0;
-  right: 0;
   padding-top: 10vh;
-  font-size: 1.4em;
+  font-size: 1.2em;
   font-weight: 100;
   text-align: center;
   background-color: white;

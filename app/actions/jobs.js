@@ -34,6 +34,7 @@ export const CREATE_JOB_ERROR = 'CREATE_JOB_ERROR'
 export const DISCOVER_EXECUTOR = 'DISCOVER_EXECUTOR'
 export const DISCOVER_EXECUTOR_SUCCESS = 'DISCOVER_EXECUTOR_SUCCESS'
 export const DISCOVER_EXECUTOR_ERROR = 'DISCOVER_EXECUTOR_ERROR'
+export const DISMISS_JOB_ERROR = 'DISMISS_JOB_ERROR'
 export const FETCH_JOBS = 'FETCH_JOBS'
 export const FETCH_JOBS_SUCCESS = 'FETCH_JOBS_SUCCESS'
 export const JOBS_WORKER_ERROR = 'JOBS_WORKER_ERROR'
@@ -95,6 +96,12 @@ export function discoverExecutorIfNeeded() {
       return
     }
     dispatch(discoverExecutor())
+  }
+}
+
+export function dismissJobError() {
+  return {
+    type: DISMISS_JOB_ERROR
   }
 }
 

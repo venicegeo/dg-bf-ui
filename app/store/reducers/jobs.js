@@ -21,8 +21,10 @@ import {
   DISCOVER_EXECUTOR,
   DISCOVER_EXECUTOR_ERROR,
   DISCOVER_EXECUTOR_SUCCESS,
+  DISMISS_JOB_ERROR,
   FETCH_JOBS,
   FETCH_JOBS_SUCCESS,
+  JOBS_WORKER_ERROR,
   UPDATE_JOB,
 } from '../../actions/jobs'
 
@@ -81,6 +83,16 @@ export function reducer(state = INITIAL_STATE, action) {
       ...state,
       creating: false,
       error: action.err
+    }
+  case JOBS_WORKER_ERROR:
+    return {
+      ...state,
+      error: action.err
+    }
+  case DISMISS_JOB_ERROR:
+    return {
+      ...state,
+      error: null
     }
   case UPDATE_JOB:
     return {
