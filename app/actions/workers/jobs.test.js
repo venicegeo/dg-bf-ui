@@ -22,6 +22,15 @@ import {
   RESPONSE_JOB_SUCCESS,
 } from '../../../test/fixtures/piazza-responses'
 import {
+  KEY_IMAGE_ID,
+  KEY_ALGORITHM_NAME,
+  KEY_CREATED_ON,
+  KEY_NAME,
+  KEY_STATUS,
+  KEY_TYPE,
+  KEY_VERSION,
+  KEY_THUMBNAIL,
+  TYPE_JOB,
   STATUS_ERROR,
   STATUS_RUNNING,
   STATUS_SUCCESS,
@@ -373,12 +382,18 @@ function generateHandlerSpies() {
 function generateJob(id = 'test-id', status = STATUS_RUNNING) {
   return {
     id,
-    status,
-    algorithmName: 'test-algo-name',
-    bbox:          [0, 0, 0, 0],
-    createdOn:     Date.now(),
-    imageId:       'test-image-id',
-    name:          'test-name'
+    properties: {
+      [KEY_ALGORITHM_NAME]: 'test-algo-name',
+      [KEY_IMAGE_ID]:       'test-image-id',
+      [KEY_CREATED_ON]:     new Date().toISOString(),
+      [KEY_NAME]:           'test-name',
+      [KEY_STATUS]:         status,
+      [KEY_TYPE]:           TYPE_JOB,
+      [KEY_VERSION]:        1,
+      [KEY_THUMBNAIL]:      'test-thumbnail',
+    },
+    geometry: {},
+    type: 'Feature',
   }
 }
 

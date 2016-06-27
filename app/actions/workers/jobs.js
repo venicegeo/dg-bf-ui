@@ -15,10 +15,12 @@
  **/
 
 import {
+  KEY_CREATED_ON,
+  KEY_STATUS,
   STATUS_ERROR,
   STATUS_RUNNING,
   STATUS_SUCCESS,
-  STATUS_TIMED_OUT
+  STATUS_TIMED_OUT,
 } from '../../constants'
 
 let _client, _handlers, _instance, _ttl
@@ -92,8 +94,8 @@ function fetchGeoJsonId(status) {
     })
 }
 
-function fetchUpdates({id: jobId, createdOn}) {
-  return _client.getStatus(jobId)
+function fetchUpdates(job) {
+  return _client.getStatus(job.id)
     .then(status => {
       console.debug('(jobs:worker) <%s> polled (%s)', status.jobId, status.status)
 
@@ -101,7 +103,7 @@ function fetchUpdates({id: jobId, createdOn}) {
         return fetchGeoJsonId(status)
       }
 
-      else if (exceededTTL(createdOn)) {
+      else if (exceededTTL(job.properties[KEY_CREATED_ON])) {
         console.warn('(jobs:worker) <%s> appears to have stalled and will no longer be tracked', status.jobId)
         return {...status, status: STATUS_TIMED_OUT}
       }
@@ -110,11 +112,12 @@ function fetchUpdates({id: jobId, createdOn}) {
     })
     .catch(err => {
       // One update failure should not halt the train
-      console.error('(jobs:worker) <%s> update failed:', jobId, err)
-      return {jobId, status: STATUS_ERROR}
+      console.error('(jobs:worker) <%s> update failed:', job.id, err)
+      return {jobId: job.id, status: STATUS_ERROR}
     })
 }
 
 function getRunningJobs() {
-  return _handlers.getRecords().filter(j => j.status === STATUS_RUNNING)
+  return _handlers.getRecords()
+    .filter(j => j.properties[KEY_STATUS] === STATUS_RUNNING)
 }
