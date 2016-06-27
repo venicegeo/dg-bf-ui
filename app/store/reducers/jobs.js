@@ -110,8 +110,11 @@ export function reducer(state = INITIAL_STATE, action) {
         }
         return {
           ...job,
-          [KEY_STATUS]: action.status,
-          [KEY_RESULT_ID]: action.resultId
+          properties: {
+            ...job.properties,
+            [KEY_STATUS]:    action.status,
+            [KEY_RESULT_ID]: action.resultId,
+          }
         }
       })
     }
