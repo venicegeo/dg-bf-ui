@@ -247,7 +247,7 @@ export default class PrimaryMap extends Component {
     }
 
     const [feature] = selected
-    const geojson = feature ? new ol.format.GeoJSON().writeFeatureObject(feature) : null
+    const geojson = feature ? new ol.format.GeoJSON().writeFeatureObject(feature, {dataProjection: 'EPSG:4326', featureProjection: 'EPSG:3857'}) : null
     const position = feature ? ol.extent.getCenter(feature.getGeometry().getExtent()) : undefined
 
     this._clearThumbnail()

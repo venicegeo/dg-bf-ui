@@ -22,7 +22,7 @@ const WEB_MERCATOR = 'EPSG:3857'
 
 export function featureToAnchor(feature) {
   const reader = new ol.format.GeoJSON()
-  const geometry = reader.readGeometry(feature.geometry, {featureProjection: WEB_MERCATOR})
+  const geometry = reader.readGeometry(feature.geometry)
   return createAnchor(ol.extent.getCenter(geometry.getExtent()), 1000, 0)
 }
 
