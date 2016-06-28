@@ -38,8 +38,8 @@ export default class JobStatus extends Component {
     className:  React.PropTypes.string,
     isActive:   React.PropTypes.bool.isRequired,
     job:        React.PropTypes.shape({
-      id:       React.PropTypes.string.isRequired,
-      geometry: React.PropTypes.object.isRequired,
+      id:         React.PropTypes.string.isRequired,
+      geometry:   React.PropTypes.object.isRequired,
       properties: React.PropTypes.object.isRequired,
     }).isRequired,
     onDownload: React.PropTypes.func.isRequired,
