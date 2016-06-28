@@ -263,7 +263,7 @@ export default class PrimaryMap extends Component {
     const reader = new ol.format.GeoJSON()
     this._thumbnailLayer.setSource(new ol.source.ImageStatic({
       crossOrigin: 'Anonymous',
-      imageExtent: reader.readGeometry(feature.geometry, {dataProjection: 'EPSG:4326'}).getExtent(),
+      imageExtent: reader.readGeometry(feature.geometry, {dataProjection: 'EPSG:4326', featureProjection: 'EPSG:3857'}).getExtent(),
       url:         image.src
     }))
   }
