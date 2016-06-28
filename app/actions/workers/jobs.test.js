@@ -17,6 +17,9 @@
 import expect, {spyOn, restoreSpies, createSpy} from 'expect'
 import * as worker from './jobs'
 import {
+  SCHEMA_VERSION
+} from '../../config'
+import {
   RESPONSE_JOB_ERROR,
   RESPONSE_JOB_RUNNING,
   RESPONSE_JOB_SUCCESS,
@@ -28,7 +31,7 @@ import {
   KEY_NAME,
   KEY_STATUS,
   KEY_TYPE,
-  KEY_VERSION,
+  KEY_SCHEMA_VERSION,
   KEY_THUMBNAIL,
   TYPE_JOB,
   STATUS_ERROR,
@@ -395,7 +398,7 @@ function generateJob(id = 'test-id', status = STATUS_RUNNING) {
       [KEY_NAME]:           'test-name',
       [KEY_STATUS]:         status,
       [KEY_TYPE]:           TYPE_JOB,
-      [KEY_VERSION]:        1,
+      [KEY_SCHEMA_VERSION]: SCHEMA_VERSION,
       [KEY_THUMBNAIL]:      'test-thumbnail',
     },
     geometry: {},

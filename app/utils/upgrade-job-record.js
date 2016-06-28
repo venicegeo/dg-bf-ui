@@ -1,4 +1,5 @@
 import ol from 'openlayers'
+import {SCHEMA_VERSION} from '../config'
 
 import {
   KEY_IMAGE_ID,
@@ -8,17 +9,14 @@ import {
   KEY_RESULT_ID,
   KEY_STATUS,
   KEY_TYPE,
-  KEY_VERSION,
-  KEY_THUMBNAIL,
+  KEY_SCHEMA_VERSION,
   STATUS_RUNNING,
   TYPE_JOB,
 } from '../constants'
 
-const CURRENT_VERSION = 1
-
 export function upgradeIfNeeded(record) {
   if (typeof record.properties === 'undefined'
-    || record.properties[KEY_VERSION] < CURRENT_VERSION) {
+    || record.properties[KEY_SCHEMA_VERSION] < SCHEMA_VERSION) {
     return upgrade(record)
   }
   return record
@@ -36,8 +34,8 @@ export function upgrade(legacyRecord) {
         [KEY_RESULT_ID]:      legacyRecord.resultId,
         [KEY_STATUS]:         STATUS_RUNNING,
         [KEY_TYPE]:           TYPE_JOB,
-        [KEY_VERSION]:        CURRENT_VERSION,
         [KEY_THUMBNAIL]:      legacyRecord.thumbnail,
+        [KEY_SCHEMA_VERSION]: SCHEMA_VERSION,
       },
       geometry: bboxToGeometry(legacyRecord.bbox),
       type: 'Feature'

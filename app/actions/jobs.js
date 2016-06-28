@@ -17,7 +17,7 @@
 import {Client} from '../utils/piazza-client'
 import * as worker from './workers/jobs'
 import {fromFeature} from '../utils/bbox'
-import {GATEWAY, JOBS_WORKER} from '../config'
+import {GATEWAY, JOBS_WORKER, SCHEMA_VERSION} from '../config'
 
 import {
   KEY_IMAGE_ID,
@@ -27,7 +27,7 @@ import {
   KEY_RESULT_ID,
   KEY_STATUS,
   KEY_TYPE,
-  KEY_VERSION,
+  KEY_SCHEMA_VERSION,
   KEY_THUMBNAIL,
   REQUIREMENT_BANDS,
   STATUS_RUNNING,
@@ -149,6 +149,7 @@ function createJobSuccess(id, name, algorithm, feature) {
         [KEY_STATUS]:         STATUS_RUNNING,
         [KEY_THUMBNAIL]:      feature.properties[KEY_THUMBNAIL],
         [KEY_TYPE]:           TYPE_JOB,
+        [KEY_SCHEMA_VERSION]: SCHEMA_VERSION,
       },
       type: 'Feature',
     }
