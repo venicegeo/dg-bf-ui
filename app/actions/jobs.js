@@ -16,7 +16,6 @@
 
 import {Client} from '../utils/piazza-client'
 import * as worker from './workers/jobs'
-import {fromFeature} from '../utils/bbox'
 import {GATEWAY, JOBS_WORKER, SCHEMA_VERSION} from '../config'
 
 import {
@@ -24,7 +23,6 @@ import {
   KEY_ALGORITHM_NAME,
   KEY_CREATED_ON,
   KEY_NAME,
-  KEY_RESULT_ID,
   KEY_STATUS,
   KEY_TYPE,
   KEY_SCHEMA_VERSION,
@@ -68,22 +66,22 @@ export function createJob(catalogApiKey, name, algorithm, feature) {
       dataInputs: {
         body: {
           content: JSON.stringify({
-            algoType: algorithm.type,
-            svcURL: algorithm.url,
-            pzAuthToken: client.authToken,
-            pzAddr: client.gateway,
-            dbAuthToken: catalogApiKey,
-            bands: algorithm.requirements.find(a => a.name === REQUIREMENT_BANDS).literal.split(','),
+            algoType:     algorithm.type,
+            svcURL:       algorithm.url,
+            pzAuthToken:  client.authToken,
+            pzAddr:       client.gateway,
+            dbAuthToken:  catalogApiKey,
+            bands:        algorithm.requirements.find(a => a.name === REQUIREMENT_BANDS).literal.split(','),
             metaDataJSON: feature
           }),
-          type: 'body',
+          type:     'body',
           mimeType: 'application/json'
         }
       },
       dataOutput: [
         {
           mimeType: 'application/json',
-          type: 'text'
+          type:     'text'
         }
       ],
       serviceId: state.jobs.serviceId

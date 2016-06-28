@@ -27,14 +27,6 @@ export function deserialize(serialized) {
   return null
 }
 
-export function fromFeature(geojsonFeature) {
-  if (!geojsonFeature || !geojsonFeature.geometry) {
-    throw new Error('Input must be a GeoJSON Feature')
-  }
-  const geometry = new ol.format.GeoJSON().readGeometry(geojsonFeature.geometry)
-  return ol.proj.transformExtent(geometry.getExtent(), WEB_MERCATOR, WGS84)
-}
-
 export function serialize(extent) {
   const bbox = ol.proj.transformExtent(extent, WEB_MERCATOR, WGS84)
   const p1 = unwrapPoint(bbox.slice(0, 2))
