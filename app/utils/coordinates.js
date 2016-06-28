@@ -19,5 +19,8 @@ export function truncate(number) {
 }
 
 export function unwrapPoint([x, y]) {
-  return [x % 180.0, y % 90]
+  return [
+    x > 0 ? Math.min(180, x) : Math.max(-180, x),
+    y
+  ]
 }
