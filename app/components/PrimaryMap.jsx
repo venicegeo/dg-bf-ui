@@ -107,9 +107,7 @@ export default class PrimaryMap extends Component {
         if (this.props.bbox) {
           this._renderImagerySearchBbox()
         }
-        if (this.props.mode === MODE_DRAW_BBOX) {
-          this._activateDrawInteraction()
-        }
+        this._updateInteractions()
       })
     // DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG
     // DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG
@@ -469,8 +467,8 @@ export default class PrimaryMap extends Component {
       this._activateSelectInteraction()
       break
     case MODE_DRAW_BBOX:
-      this._deactivateSelectInteraction()
       this._activateDrawInteraction()
+      this._deactivateSelectInteraction()
       break
     case MODE_NORMAL:
       this._clearDraw()
