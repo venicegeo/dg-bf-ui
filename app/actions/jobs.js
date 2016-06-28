@@ -16,12 +16,20 @@
 
 import {Client} from '../utils/piazza-client'
 import * as worker from './workers/jobs'
-import {fromFeature} from '../utils/bbox'
-import {GATEWAY, JOBS_WORKER} from '../config'
+import {GATEWAY, JOBS_WORKER, SCHEMA_VERSION} from '../config'
 
 import {
+  KEY_IMAGE_ID,
+  KEY_ALGORITHM_NAME,
+  KEY_CREATED_ON,
+  KEY_NAME,
+  KEY_STATUS,
+  KEY_TYPE,
+  KEY_SCHEMA_VERSION,
+  KEY_THUMBNAIL,
   REQUIREMENT_BANDS,
-  STATUS_RUNNING
+  STATUS_RUNNING,
+  TYPE_JOB,
 } from '../constants'
 
 //
@@ -34,6 +42,7 @@ export const CREATE_JOB_ERROR = 'CREATE_JOB_ERROR'
 export const DISCOVER_EXECUTOR = 'DISCOVER_EXECUTOR'
 export const DISCOVER_EXECUTOR_SUCCESS = 'DISCOVER_EXECUTOR_SUCCESS'
 export const DISCOVER_EXECUTOR_ERROR = 'DISCOVER_EXECUTOR_ERROR'
+export const DISMISS_JOB_ERROR = 'DISMISS_JOB_ERROR'
 export const FETCH_JOBS = 'FETCH_JOBS'
 export const FETCH_JOBS_SUCCESS = 'FETCH_JOBS_SUCCESS'
 export const JOBS_WORKER_ERROR = 'JOBS_WORKER_ERROR'
@@ -57,29 +66,28 @@ export function createJob(catalogApiKey, name, algorithm, feature) {
       dataInputs: {
         body: {
           content: JSON.stringify({
-            algoType: algorithm.type,
-            svcURL: algorithm.url,
-            pzAuthToken: client.authToken,
-            pzAddr: client.gateway,
-            dbAuthToken: catalogApiKey,
-            bands: algorithm.requirements.find(a => a.name === REQUIREMENT_BANDS).literal.split(','),
+            algoType:     algorithm.type,
+            svcURL:       algorithm.url,
+            pzAuthToken:  client.authToken,
+            pzAddr:       client.gateway,
+            dbAuthToken:  catalogApiKey,
+            bands:        algorithm.requirements.find(a => a.name === REQUIREMENT_BANDS).literal.split(','),
             metaDataJSON: feature
           }),
-          type: 'body',
+          type:     'body',
           mimeType: 'application/json'
         }
       },
       dataOutput: [
         {
           mimeType: 'application/json',
-          type: 'text'
+          type:     'text'
         }
       ],
       serviceId: state.jobs.serviceId
     })
       .then(id => {
-        const bbox = fromFeature(feature)
-        dispatch(createJobSuccess(id, name, algorithm, bbox, feature.id))
+        dispatch(createJobSuccess(id, name, algorithm, feature))
         return id
       })
       .catch(err => {
@@ -95,6 +103,12 @@ export function discoverExecutorIfNeeded() {
       return
     }
     dispatch(discoverExecutor())
+  }
+}
+
+export function dismissJobError() {
+  return {
+    type: DISMISS_JOB_ERROR
   }
 }
 
@@ -119,17 +133,23 @@ function createJobError(err) {
   }
 }
 
-function createJobSuccess(id, name, algorithm, bbox, imageId) {
+function createJobSuccess(id, name, algorithm, feature) {
   return {
     type: CREATE_JOB_SUCCESS,
     record: {
-      bbox,
       id,
-      imageId,
-      name,
-      algorithmName: algorithm.name,
-      createdOn: Date.now(),
-      status: STATUS_RUNNING
+      geometry: feature.geometry,
+      properties: {
+        [KEY_ALGORITHM_NAME]: algorithm.name,
+        [KEY_CREATED_ON]:     new Date().toISOString(),
+        [KEY_IMAGE_ID]:       feature.id,
+        [KEY_NAME]:           name,
+        [KEY_STATUS]:         STATUS_RUNNING,
+        [KEY_THUMBNAIL]:      feature.properties[KEY_THUMBNAIL],
+        [KEY_TYPE]:           TYPE_JOB,
+        [KEY_SCHEMA_VERSION]: SCHEMA_VERSION,
+      },
+      type: 'Feature',
     }
   }
 }

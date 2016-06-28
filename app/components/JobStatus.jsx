@@ -18,10 +18,15 @@ import React, {Component} from 'react'
 import moment from 'moment'
 import {Link} from 'react-router'
 import Timer from './Timestamp.jsx'
-import {bboxToAnchor} from '../utils/map-anchor'
+import {featureToAnchor} from '../utils/map-anchor'
 import styles from './JobStatus.css'
 
 import {
+  KEY_ALGORITHM_NAME,
+  KEY_CREATED_ON,
+  KEY_IMAGE_ID,
+  KEY_NAME,
+  KEY_STATUS,
   STATUS_SUCCESS,
   STATUS_RUNNING,
   STATUS_ERROR,
@@ -30,15 +35,15 @@ import {
 
 export default class JobStatus extends Component {
   static propTypes = {
-    className: React.PropTypes.string,
-    job: React.PropTypes.shape({
-      id: React.PropTypes.string,
-      name: React.PropTypes.string,
-      resultId: React.PropTypes.string,
-      status: React.PropTypes.string
+    className:  React.PropTypes.string,
+    isActive:   React.PropTypes.bool.isRequired,
+    job:        React.PropTypes.shape({
+      id:         React.PropTypes.string.isRequired,
+      geometry:   React.PropTypes.object.isRequired,
+      properties: React.PropTypes.object.isRequired,
     }).isRequired,
     onDownload: React.PropTypes.func.isRequired,
-    result: React.PropTypes.object
+    result:     React.PropTypes.object
   }
 
   constructor() {
@@ -55,49 +60,62 @@ export default class JobStatus extends Component {
   }
 
   render() {  // eslint-disable-line
-    // TODO -- style for "active"
-    const {job} = this.props
+    const {id, properties} = this.props.job
     const progress = calculateProgress(this.props.result) || {}
+    const name = properties[KEY_NAME]
+    const status = properties[KEY_STATUS]
+    const createdOn = properties[KEY_CREATED_ON]
+    const imageId = properties[KEY_IMAGE_ID]
+    const algorithmName = properties[KEY_ALGORITHM_NAME]
     return (
-      <li className={`${styles.root} ${this._classForStatus} ${this._classForExpansion} ${this._classForDownloading} ${this._classForLoading}`}>
+      <li className={`${styles.root} ${this._aggregatedClassNames}`}>
         <div className={styles.details} onClick={this._handleExpansionToggle}>
           <h3 className={styles.title}>
             <i className={`fa fa-chevron-right ${styles.caret}`}/>
-            <span>{job.name}</span>
+            <span>{name}</span>
           </h3>
 
           <div className={styles.summary}>
-            <span className={styles.status}>{job.status}</span>
-            <Timer className={styles.timer} timestamp={job.createdOn}/>
+            <span className={styles.status}>{status}</span>
+            <Timer
+              className={styles.timer}
+              timestamp={createdOn}
+            />
           </div>
 
           <div className={styles.progressBar} title={progress.verbose}>
             <div className={styles.puck} style={{width: progress.percentage}}></div>
           </div>
 
-          <div className={styles.metadata}>
+          <div className={styles.metadata} onClick={e => e.stopPropagation()}>
             <dl>
               <dt>Image ID</dt>
-              <dd>{job.imageId || 'No ID?'}</dd>
+              <dd>{imageId || 'No ID?'}</dd>
               <dt>Algorithm</dt>
-              <dd>{job.algorithmName}</dd>
+              <dd>{algorithmName}</dd>
               <dt>Date Started</dt>
-              <dd>{moment(job.createdOn).format('llll')}</dd>
+              <dd>{moment(createdOn).format('llll')}</dd>
             </dl>
           </div>
         </div>
 
         <div className={styles.controls}>
-          <Link to={{pathname: '/',
-                     query: {jobId: job.status === STATUS_SUCCESS ? job.id : undefined},
-                     hash: bboxToAnchor(job.bbox)}}
-                title="View on Map">
+          <Link
+            to={{
+              pathname: '/',
+              query: {jobId: id},
+              hash: featureToAnchor(this.props.job)
+            }}
+            title="View on Map"
+          >
             <i className="fa fa-globe"/>
           </Link>
-          {job.status === STATUS_SUCCESS && (
-            <a className={styles.download}
-               title={this.state.isDownloading ? progress.percentage : 'Download'}
-               onClick={this._handleDownloadClicked}>
+          {status === STATUS_SUCCESS && (
+            <a
+              className={styles.download}
+              title={this.state.isDownloading ? progress.percentage : 'Download'}
+              onClick={this._handleDownloadClicked}
+            >
               {this.state.isDownloading ? progress.percentage : <i className="fa fa-cloud-download"/>}
             </a>
           )}
@@ -109,6 +127,20 @@ export default class JobStatus extends Component {
   //
   // Internals
   //
+
+  get _aggregatedClassNames() {
+    return [
+      this._classForActive,
+      this._classForDownloading,
+      this._classForExpansion,
+      this._classForLoading,
+      this._classForStatus,
+    ].filter(Boolean).join(' ')
+  }
+
+  get _classForActive() {
+    return this.props.isActive ? styles.isActive : ''
+  }
 
   get _classForDownloading() {
     return this.state.isDownloading ? styles.isDownloading : ''
@@ -123,7 +155,7 @@ export default class JobStatus extends Component {
   }
 
   get _classForStatus() {
-    switch (this.props.job.status) {
+    switch (this.props.job.properties[KEY_STATUS]) {
     case STATUS_SUCCESS: return styles.succeeded
     case STATUS_RUNNING: return styles.running
     case STATUS_TIMED_OUT: return styles.timedOut
@@ -153,7 +185,7 @@ export default class JobStatus extends Component {
     const file = new File([contents], {type: 'application/json'})
     const virtualHyperlink = document.createElement('a')
     virtualHyperlink.href = URL.createObjectURL(file)
-    virtualHyperlink.download = this.props.job.name + '.geojson'
+    virtualHyperlink.download = this.props.job.properties[KEY_NAME] + '.geojson'
     document.body.appendChild(virtualHyperlink)
     virtualHyperlink.click()
     document.body.removeChild(virtualHyperlink)

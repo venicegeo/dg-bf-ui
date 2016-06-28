@@ -15,10 +15,14 @@
  **/
 
 :root {
-  --control-background-color: #739cb4;
-  --control-hover-background-color: #175B82;
-  --progressbar-background-color: #eee;
-  --progressbar-puck-color: #3d94c5;
+  --bgcolor-active: #f2faff;
+  --bordercolor-active: hsla(201, 100%, 50%, 0.27);
+  --bordercolor-failed: hsla(344, 100%, 34%, 0.46);
+  --bgcolor-control: #739cb4;
+  --bgcolor-control-hover: #175b82;
+  --bgcolor-failed: hsl(344, 100%, 50%);
+  --bgcolor-progressbar: #eee;
+  --bgcolor-progressbar-puck: #3d94c5;
   --padding-size: 15px;
 }
 
@@ -36,13 +40,20 @@
 /* Container: Statuses
    ========================================================================= */
 
+.isActive {
+  border-left: 10px solid var(--bordercolor-active);
+  background-color: var(--bgcolor-active);
+  color: var(--bgcolor-control-hover);
+}
+
 .succeeded {}
 
 .running {}
 
 .failed {
-  background-color: #f04;
+  background-color: var(--bgcolor-failed);
   color: white;
+  border-color: var(--bordercolor-failed);
 }
 
 .failed h3 {
@@ -51,11 +62,6 @@
 
 .timedOut {
   composes: failed;
-}
-
-/* TODO actually use this */
-.active {
-  background-color: color(#00a3ff alpha(10%));
 }
 
 /* =========================================================================
@@ -86,6 +92,10 @@
   transform: rotate(0deg);
   transform-origin: .4em .5em;
   transition: transform .15s ease-in-out;
+}
+
+.failed .caret {
+  color: white;
 }
 
 .isExpanded .caret {
@@ -119,6 +129,10 @@
   max-height: 0;
   background-color: rgba(0, 0, 0, .04);
   transition: max-height .15s ease-in-out;
+}
+
+.failed .metadata {
+  background-color: rgba(0, 0, 0, 0.12);
 }
 
 .metadata dl {
@@ -155,7 +169,7 @@
   position: relative;
   height: 0;
   overflow: hidden;
-  background-color: var(--progressbar-background-color);
+  background-color: var(--bgcolor-progressbar);
   transition: height .2s ease-in-out;
 }
 
@@ -164,7 +178,7 @@
   top: 0;
   left: 0;
   bottom: 0;
-  background-color: var(--progressbar-puck-color);
+  background-color: var(--bgcolor-progressbar-puck);
   transition: width .5s ease;
 }
 
@@ -192,7 +206,7 @@
   width: 15px;
   flex: 1;
   padding: 0 15px;
-  background-color: var(--control-background-color);
+  background-color: var(--bgcolor-control);
   color: white;
   text-decoration: none;
 }
@@ -203,7 +217,7 @@
 
 .controls a:hover,
 .controls a:hover:before {
-  background-color: var(--control-hover-background-color);
+  background-color: var(--bgcolor-control-hover);
 }
 
 .controls a:before {
@@ -219,7 +233,7 @@
   overflow: hidden;
   transition: width .1s ease-in-out;
   white-space: nowrap;
-  background-color: var(--control-background-color);
+  background-color: var(--bgcolor-control);
 }
 
 .controls:hover a:before {
@@ -227,7 +241,7 @@
 }
 
 .controls a:hover:before {
-  background-color: var(--control-hover-background-color);
+  background-color: var(--bgcolor-control-hover);
 }
 
 .isDownloading .download {
@@ -237,7 +251,7 @@
 
 .isDownloading .controls a:hover,
 .isDownloading .controls a:hover:before {
-  background-color: var(--control-background-color);
+  background-color: var(--bgcolor-control);
 }
 
 .isDownloading .download:before {

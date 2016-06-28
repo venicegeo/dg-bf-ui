@@ -15,21 +15,22 @@
  **/
 
 import React, {Component} from 'react'
+import LoadingAnimation from './LoadingAnimation'
 import StaticMinimap from './StaticMinimap'
 import styles from './ImagerySearch.css'
 
 export default class ImagerySearch extends Component {
   static propTypes = {
-    bbox: React.PropTypes.array.isRequired,
-    catalogApiKey: React.PropTypes.string,
-    dateFrom: React.PropTypes.string.isRequired,
-    dateTo: React.PropTypes.string.isRequired,
-    error: React.PropTypes.object,
-    isSearching: React.PropTypes.bool.isRequired,
+    bbox:           React.PropTypes.array.isRequired,
+    catalogApiKey:  React.PropTypes.string,
+    dateFrom:       React.PropTypes.string.isRequired,
+    dateTo:         React.PropTypes.string.isRequired,
+    error:          React.PropTypes.object,
+    isSearching:    React.PropTypes.bool.isRequired,
     onApiKeyChange: React.PropTypes.func.isRequired,
-    onDateChange: React.PropTypes.func.isRequired,
-    onClearBbox: React.PropTypes.func.isRequired,
-    onSubmit: React.PropTypes.func.isRequired
+    onDateChange:   React.PropTypes.func.isRequired,
+    onClearBbox:    React.PropTypes.func.isRequired,
+    onSubmit:       React.PropTypes.func.isRequired
   }
 
   constructor() {
@@ -88,6 +89,10 @@ export default class ImagerySearch extends Component {
 
         <div className={styles.controls}>
           <button disabled={!this._canSubmit}>Search for imagery</button>
+        </div>
+
+        <div className={styles.loadingMask}>
+          <LoadingAnimation className={styles.loadingAnimation}/>
         </div>
       </form>
     )

@@ -14,6 +14,8 @@
  * limitations under the License.
  **/
 
+export const SCHEMA_VERSION = 1
+
 export const GATEWAY = process.env.GATEWAY
 
 const time = {millisecond: 1, second: 1000, minute: 60000}

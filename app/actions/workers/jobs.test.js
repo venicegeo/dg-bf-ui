@@ -17,11 +17,23 @@
 import expect, {spyOn, restoreSpies, createSpy} from 'expect'
 import * as worker from './jobs'
 import {
+  SCHEMA_VERSION
+} from '../../config'
+import {
   RESPONSE_JOB_ERROR,
   RESPONSE_JOB_RUNNING,
   RESPONSE_JOB_SUCCESS,
 } from '../../../test/fixtures/piazza-responses'
 import {
+  KEY_IMAGE_ID,
+  KEY_ALGORITHM_NAME,
+  KEY_CREATED_ON,
+  KEY_NAME,
+  KEY_STATUS,
+  KEY_TYPE,
+  KEY_SCHEMA_VERSION,
+  KEY_THUMBNAIL,
+  TYPE_JOB,
   STATUS_ERROR,
   STATUS_RUNNING,
   STATUS_SUCCESS,
@@ -86,11 +98,14 @@ describe('Jobs Worker', () => {
     })
 
     it('yields appropriate status for stalled jobs', (done) => {
-      handlers.getRecords.andReturn([{...generateJob(), createdOn: Date.now() - 10}])
-      client.getStatus.andReturn(Promise.resolve(generateStatusRunning()))
+      const job = generateJob('test-stalled', STATUS_RUNNING)
+      job.properties[KEY_CREATED_ON] -= 1000
+
+      handlers.getRecords.andReturn([job])
+      client.getStatus.andReturn(Promise.resolve(generateStatusRunning('test-stalled')))
       worker.start(client, 0, 0, handlers)
       defer(() => {
-        expect(handlers.onUpdate).toHaveBeenCalledWith('test-id', STATUS_TIMED_OUT, null)
+        expect(handlers.onUpdate).toHaveBeenCalledWith('test-stalled', STATUS_TIMED_OUT, null)
       }, done)
     })
 
@@ -106,10 +121,10 @@ describe('Jobs Worker', () => {
     it('yields appropriate status for successful jobs', (done) => {
       handlers.getRecords.andReturn([generateJob()])
       client.getStatus.andReturn(Promise.resolve(generateStatusSuccess()))
-      client.getFile.andReturn(Promise.resolve('01234567789abcdef'))
+      client.getFile.andReturn(Promise.resolve('{"shoreDataID":"test-shore-data-id"}'))
       worker.start(client, 0, 1000, handlers)
       defer(() => {
-        expect(handlers.onUpdate).toHaveBeenCalledWith('test-id', STATUS_SUCCESS, '01234567789abcdef')
+        expect(handlers.onUpdate).toHaveBeenCalledWith('test-id', STATUS_SUCCESS, 'test-shore-data-id')
       }, done)
     })
 
@@ -150,7 +165,7 @@ describe('Jobs Worker', () => {
       )
       client.getFile.andReturn(jobId => (jobId === 'test-will-explode') ?
         Promise.reject(new Error('test-error')) :
-        Promise.resolve('0123456789abcdef')
+        Promise.resolve('{"shoreDataID":"0123456789abcdef"}')
       )
       worker.start(client, 0, 1000, handlers)
       defer(() => {
@@ -190,11 +205,14 @@ describe('Jobs Worker', () => {
     })
 
     it('emits timeout warnings via console', (done) => {
-      handlers.getRecords.andReturn([{...generateJob(), createdOn: Date.now() - 10}])
-      client.getStatus.andReturn(Promise.resolve(generateStatusRunning()))
+      const job = generateJob('test-stalled', STATUS_RUNNING)
+      job.properties[KEY_CREATED_ON] -= 1000
+
+      handlers.getRecords.andReturn([job])
+      client.getStatus.andReturn(Promise.resolve(generateStatusRunning('test-stalled')))
       worker.start(client, 0, 0, handlers)
       defer(() => {
-        expect(console.warn).toHaveBeenCalledWith('(jobs:worker) <%s> appears to have stalled and will no longer be tracked', 'test-id')
+        expect(console.warn).toHaveBeenCalledWith('(jobs:worker) <%s> appears to have stalled and will no longer be tracked', 'test-stalled')
       }, done)
     })
 
@@ -205,11 +223,11 @@ describe('Jobs Worker', () => {
         generateJob('test-succeeded', STATUS_SUCCESS),
         generateJob('test-stalled', STATUS_TIMED_OUT),
       ])
-      client.getStatus.andReturn(Promise.resolve(generateStatusRunning()))
+      client.getStatus.andReturn(Promise.resolve(generateStatusRunning('test-succeeded')))
       worker.start(client, 0, 1000, handlers)
       defer(() => {
         expect(handlers.onUpdate.calls.length).toEqual(1)
-        expect(handlers.onUpdate).toHaveBeenCalledWith('test-id', STATUS_RUNNING, null)
+        expect(handlers.onUpdate).toHaveBeenCalledWith('test-succeeded', STATUS_RUNNING, null)
       }, done)
     })
 
@@ -373,12 +391,18 @@ function generateHandlerSpies() {
 function generateJob(id = 'test-id', status = STATUS_RUNNING) {
   return {
     id,
-    status,
-    algorithmName: 'test-algo-name',
-    bbox:          [0, 0, 0, 0],
-    createdOn:     Date.now(),
-    imageId:       'test-image-id',
-    name:          'test-name'
+    properties: {
+      [KEY_ALGORITHM_NAME]: 'test-algo-name',
+      [KEY_IMAGE_ID]:       'test-image-id',
+      [KEY_CREATED_ON]:     Date.now(),
+      [KEY_NAME]:           'test-name',
+      [KEY_STATUS]:         status,
+      [KEY_TYPE]:           TYPE_JOB,
+      [KEY_SCHEMA_VERSION]: SCHEMA_VERSION,
+      [KEY_THUMBNAIL]:      'test-thumbnail',
+    },
+    geometry: {},
+    type: 'Feature',
   }
 }
 

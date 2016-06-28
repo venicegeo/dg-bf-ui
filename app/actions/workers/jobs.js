@@ -15,10 +15,12 @@
  **/
 
 import {
+  KEY_CREATED_ON,
+  KEY_STATUS,
   STATUS_ERROR,
   STATUS_RUNNING,
   STATUS_SUCCESS,
-  STATUS_TIMED_OUT
+  STATUS_TIMED_OUT,
 } from '../../constants'
 
 let _client, _handlers, _instance, _ttl
@@ -83,17 +85,17 @@ function fetchGeoJsonId(status) {
 
   console.debug('(jobs:worker) <%s> resolving file ID (via <%s>)', status.jobId, metadataId)
   return _client.getFile(metadataId)
-    .then(metadata => {
-      const normalized = metadata.trim()
-      if (!normalized.match(/^[0-9a-f-]+$/i)) {
-        throw new Error('Could not find GeoJSON file in execution output')
+    .then(normalizeExecutionOutput)
+    .then(output => {
+      if (!output.resultId) {
+        throw new Error('GeoJSON data ID missing from execution output')
       }
-      return {...status, resultId: normalized}
+      return {...status, resultId: output.resultId}
     })
 }
 
-function fetchUpdates({id: jobId, createdOn}) {
-  return _client.getStatus(jobId)
+function fetchUpdates(job) {
+  return _client.getStatus(job.id)
     .then(status => {
       console.debug('(jobs:worker) <%s> polled (%s)', status.jobId, status.status)
 
@@ -101,7 +103,7 @@ function fetchUpdates({id: jobId, createdOn}) {
         return fetchGeoJsonId(status)
       }
 
-      else if (exceededTTL(createdOn)) {
+      else if (exceededTTL(job.properties[KEY_CREATED_ON])) {
         console.warn('(jobs:worker) <%s> appears to have stalled and will no longer be tracked', status.jobId)
         return {...status, status: STATUS_TIMED_OUT}
       }
@@ -110,11 +112,25 @@ function fetchUpdates({id: jobId, createdOn}) {
     })
     .catch(err => {
       // One update failure should not halt the train
-      console.error('(jobs:worker) <%s> update failed:', jobId, err)
-      return {jobId, status: STATUS_ERROR}
+      console.error('(jobs:worker) <%s> update failed:', job.id, err)
+      return {jobId: job.id, status: STATUS_ERROR}
     })
 }
 
 function getRunningJobs() {
-  return _handlers.getRecords().filter(j => j.status === STATUS_RUNNING)
+  return _handlers.getRecords()
+    .filter(j => j.properties[KEY_STATUS] === STATUS_RUNNING)
+}
+
+function normalizeExecutionOutput(raw) {
+  try {
+    const parsed = JSON.parse(raw)
+    return {
+      error:      parsed.error || null,
+      resultId:   parsed.shoreDataID || null,
+      wmsLayerId: parsed.rgbLoc || null
+    }
+  } catch (err) {
+    throw new Error('Execution output could not be parsed')
+  }
 }

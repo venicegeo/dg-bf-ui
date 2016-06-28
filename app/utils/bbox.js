@@ -20,19 +20,17 @@ import {truncate, unwrapPoint} from './coordinates'
 const WGS84 = 'EPSG:4326'
 const WEB_MERCATOR = 'EPSG:3857'
 
+export function featureToBbox(feature) {
+  const reader = new ol.format.GeoJSON()
+  const geometry = reader.readGeometry(feature.geometry, {featureProjection: WEB_MERCATOR})
+  return geometry.getExtent()
+}
+
 export function deserialize(serialized) {
   if (serialized && serialized.length === 4) {
     return ol.proj.transformExtent(serialized, WGS84, WEB_MERCATOR)
   }
   return null
-}
-
-export function fromFeature(geojsonFeature) {
-  if (!geojsonFeature || !geojsonFeature.geometry) {
-    throw new Error('Input must be a GeoJSON Feature')
-  }
-  const geometry = new ol.format.GeoJSON().readGeometry(geojsonFeature.geometry)
-  return ol.proj.transformExtent(geometry.getExtent(), WEB_MERCATOR, WGS84)
 }
 
 export function serialize(extent) {

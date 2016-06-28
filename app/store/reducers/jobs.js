@@ -14,6 +14,8 @@
  * limitations under the License.
  **/
 
+import {upgradeIfNeeded} from '../../utils/upgrade-job-record'
+
 import {
   CREATE_JOB,
   CREATE_JOB_SUCCESS,
@@ -21,10 +23,17 @@ import {
   DISCOVER_EXECUTOR,
   DISCOVER_EXECUTOR_ERROR,
   DISCOVER_EXECUTOR_SUCCESS,
+  DISMISS_JOB_ERROR,
   FETCH_JOBS,
   FETCH_JOBS_SUCCESS,
+  JOBS_WORKER_ERROR,
   UPDATE_JOB,
 } from '../../actions/jobs'
+
+import {
+  KEY_RESULT_ID,
+  KEY_STATUS,
+} from '../../constants'
 
 const INITIAL_STATE = {
   serviceId:   null,
@@ -82,6 +91,16 @@ export function reducer(state = INITIAL_STATE, action) {
       creating: false,
       error: action.err
     }
+  case JOBS_WORKER_ERROR:
+    return {
+      ...state,
+      error: action.err
+    }
+  case DISMISS_JOB_ERROR:
+    return {
+      ...state,
+      error: null
+    }
   case UPDATE_JOB:
     return {
       ...state,
@@ -91,8 +110,11 @@ export function reducer(state = INITIAL_STATE, action) {
         }
         return {
           ...job,
-          status: action.status,
-          resultId: action.resultId
+          properties: {
+            ...job.properties,
+            [KEY_STATUS]:    action.status,
+            [KEY_RESULT_ID]: action.resultId,
+          }
         }
       })
     }
@@ -104,7 +126,7 @@ export function reducer(state = INITIAL_STATE, action) {
 export function deserialize() {
   return {
     ...INITIAL_STATE,
-    records: JSON.parse(localStorage.getItem('jobs.records')) || INITIAL_STATE.records,
+    records: (JSON.parse(localStorage.getItem('jobs.records')) || INITIAL_STATE.records).map(upgradeIfNeeded).filter(Boolean),
   }
 }
 

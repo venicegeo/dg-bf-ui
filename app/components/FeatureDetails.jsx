@@ -22,10 +22,12 @@ import {fetchThumbnail} from '../utils/fetch-thumbnail'
 import errorPlaceholder from '../images/error-placeholder.png'
 import styles from './FeatureDetails.css'
 
-const KEY_THUMBNAIL = 'thumb_large'
-const KEY_TYPE = 'type'
-const TYPE_JOB = 'job'
-const TYPE_SCENE = 'scene'
+import {
+  KEY_THUMBNAIL,
+  TYPE_JOB,
+  TYPE_SCENE,
+  KEY_TYPE,
+} from '../constants'
 
 export default class FeatureDetails extends Component {
   static propTypes = {
@@ -54,24 +56,16 @@ export default class FeatureDetails extends Component {
     })
   }
 
+  componentDidMount() {
+    if (this.props.feature) {
+      this._updateThumbnail(this.props.feature)
+    }
+  }
+
   componentWillReceiveProps(nextProps) {
     const {feature} = nextProps
     if (feature && this.props.feature !== feature) {
-      this._incrementLoading()
-      this._fetchThumbnail(feature.properties[KEY_THUMBNAIL])
-        .then(image => {
-          this._decrementLoading()
-          this.props.onThumbnailLoaded(image, feature)
-        })
-        .catch(err => {
-          this._decrementLoading()
-          if (err.isCancellation) {
-            return
-          }
-          console.error('Could not load thumbnail!', err)
-          const placeholder = generateErrorPlaceholder()
-          this.props.onThumbnailLoaded(placeholder, feature)
-        })
+      this._updateThumbnail(feature)
     }
   }
 
@@ -111,6 +105,24 @@ export default class FeatureDetails extends Component {
     }
     this._thumbnailPromise = fetchThumbnail(url)
     return this._thumbnailPromise.promise
+  }
+
+  _updateThumbnail(feature) {
+    this._incrementLoading()
+    this._fetchThumbnail(feature.properties[KEY_THUMBNAIL])
+      .then(image => {
+        this._decrementLoading()
+        this.props.onThumbnailLoaded(image, feature)
+      })
+      .catch(err => {
+        this._decrementLoading()
+        if (err.isCancellation) {
+          return
+        }
+        console.error('Could not load thumbnail!', err)
+        const placeholder = generateErrorPlaceholder()
+        this.props.onThumbnailLoaded(placeholder, feature)
+      })
   }
 }
 

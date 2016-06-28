@@ -18,7 +18,11 @@ import React, {Component} from 'react'
 import {connect} from 'react-redux'
 import JobStatus from './JobStatus'
 import styles from './JobStatusList.css'
-import {downloadResult} from '../actions'
+import {
+  dismissJobError,
+  downloadResult,
+  startJobsWorkerIfNeeded,
+} from '../actions'
 
 class JobStatusList extends Component {
   static contextTypes = {
@@ -27,10 +31,10 @@ class JobStatusList extends Component {
 
   static propTypes = {
     dispatch: React.PropTypes.func.isRequired,
-    jobs: React.PropTypes.array.isRequired,
+    error:    React.PropTypes.object,
+    jobs:     React.PropTypes.array.isRequired,
     location: React.PropTypes.object,
-    params: React.PropTypes.object.isRequired,
-    results: React.PropTypes.object.isRequired
+    results:  React.PropTypes.object.isRequired,
   }
 
   constructor() {
@@ -40,38 +44,41 @@ class JobStatusList extends Component {
   }
 
   render() {
-    const err = null  // FIXME
+    const isEmpty = (this.props.jobs.length === 0)
     return (
-      <div className={styles.root}>
+      <div className={`${styles.root} ${isEmpty ? styles.isEmpty : ''}`}>
         <header>
           <h1>Jobs</h1>
         </header>
 
         <ul>
-
-          {err && (
+          {this.props.error && (
             <li className={styles.communicationError}>
-              <div className={styles.message}>
-                <i className="fa fa-warning"/> Cannot communicate with the server
-              </div>
+              <h4><i className="fa fa-warning"/> Communication Error</h4>
+              <p>Cannot communicate with the server. (<code>{this.props.error.toString()}</code>)</p>
               <button onClick={this._dismissError}>Retry</button>
             </li>
           )}
 
-          {this.props.jobs.length ?
-            this.props.jobs.map(job => <JobStatus key={job.id}
-                                                  job={job}
-                                                  result={this.props.results[job.id]}
-                                                  onDownload={this._handleDownload}/>) :
+          {isEmpty ? (
             <li className={styles.placeholder}>You haven't started any jobs yet</li>
-          }
+          ) : this.props.jobs.map(job => (
+            <JobStatus
+              key={job.id}
+              isActive={this._isActive(job.id)}
+              job={job}
+              result={this.props.results[job.id]}
+              onDownload={this._handleDownload}
+            />
+          ))}
         </ul>
       </div>
     )
   }
 
   _dismissError() {
-    console.warn('_dismissError: Not yet implemented')
+    this.props.dispatch(dismissJobError())
+    this.props.dispatch(startJobsWorkerIfNeeded())
   }
 
   _handleDownload(job) {
@@ -83,9 +90,15 @@ class JobStatusList extends Component {
     })
     this.props.dispatch(downloadResult(job.id))
   }
+
+  _isActive(jobId) {
+    const activeIds = [].concat(this.props.location.query.jobId)
+    return activeIds.indexOf(jobId) !== -1
+  }
 }
 
 export default connect(state => ({
+  error:   state.jobs.error,
   jobs:    state.jobs.records,
   results: state.results,
 }))(JobStatusList)

@@ -20,10 +20,11 @@ import styles from './AlgorithmList.css'
 
 export default class AlgorithmList extends Component {
   static propTypes = {
-    algorithms: React.PropTypes.array.isRequired,
-    className: React.PropTypes.string,
+    algorithms:      React.PropTypes.array.isRequired,
+    className:       React.PropTypes.string,
     imageProperties: React.PropTypes.object.isRequired,
-    onSubmit: React.PropTypes.func.isRequired
+    isSubmitting:    React.PropTypes.bool.isRequired,
+    onSubmit:        React.PropTypes.func.isRequired,
   }
 
   render() {
@@ -31,9 +32,16 @@ export default class AlgorithmList extends Component {
       <div className={styles.root}>
         <h2>Select Algorithm</h2>
         <ul>
-          {this.props.algorithms.map(algorithm => <li key={algorithm.id}>
-            <Algorithm algorithm={algorithm} imageProperties={this.props.imageProperties} onSubmit={this.props.onSubmit}/>
-          </li>)}
+          {this.props.algorithms.map(algorithm => (
+            <li key={algorithm.id}>
+              <Algorithm
+                algorithm={algorithm}
+                imageProperties={this.props.imageProperties}
+                isSubmitting={this.props.isSubmitting}
+                onSubmit={this.props.onSubmit}
+              />
+            </li>
+          ))}
         </ul>
       </div>
     )
