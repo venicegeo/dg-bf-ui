@@ -16,8 +16,11 @@
 
 import {
   CHANGE_JOB_NAME,
-  SELECT_IMAGE
+  SELECT_IMAGE,
 } from '../../actions/draftJob'
+import {
+  CLEAR_IMAGERY,
+} from '../../actions/imagery'
 
 const INITIAL_STATE = {
   name: '',
@@ -30,6 +33,11 @@ export function reducer(state = INITIAL_STATE, action) {
     return {
       ...state,
       name: action.name
+    }
+  case CLEAR_IMAGERY:
+    return {
+      ...state,
+      image: null
     }
   case SELECT_IMAGE:
     return {

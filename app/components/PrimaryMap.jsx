@@ -133,6 +133,8 @@ export default class PrimaryMap extends Component {
       this._renderImagery()
     }
     if (this.props.isSearching !== previousProps.isSearching) {
+      this._clearSelection()
+      this._clearThumbnail()
       this._renderImagerySearchResultsOverlay()
     }
     if (this.props.bbox !== previousProps.bbox) {
