@@ -38,6 +38,7 @@ import {
   STATUS_SUCCESS,
   STATUS_TIMED_OUT,
   TYPE_SCENE,
+  TYPE_JOB,
 } from '../constants'
 
 const INITIAL_CENTER = [110, 0]
@@ -78,13 +79,15 @@ export default class PrimaryMap extends Component {
     mode:                React.PropTypes.string.isRequired,
     onAnchorChange:      React.PropTypes.func.isRequired,
     onBoundingBoxChange: React.PropTypes.func.isRequired,
-    onImageSelect:       React.PropTypes.func.isRequired,
+    onSelectImage:       React.PropTypes.func.isRequired,
+    onSelectJob:         React.PropTypes.func.isRequired,
     onSearchPageChange:  React.PropTypes.func.isRequired,
+    selectedFeature:     React.PropTypes.object,
   }
 
   constructor() {
     super()
-    this.state = {basemapIndex: 0, selectedFeature: null}
+    this.state = {basemapIndex: 0}
     this._emitAnchorChange = debounce(this._emitAnchorChange.bind(this), 1000)
     this._handleBasemapChange = this._handleBasemapChange.bind(this)
     this._handleDrawStart = this._handleDrawStart.bind(this)
@@ -158,7 +161,7 @@ export default class PrimaryMap extends Component {
         />
         <FeatureDetails
           ref="featureDetails"
-          feature={this.state.selectedFeature}
+          feature={this.props.selectedFeature}
           onThumbnailLoaded={this._handleThumbnailLoaded}
         />
         <ImagerySearchResults
@@ -189,7 +192,8 @@ export default class PrimaryMap extends Component {
 
   _clearSelection() {
     this._selectInteraction.getFeatures().clear()
-    this.setState({selectedFeature: null})
+    this.props.onSelectImage(null)
+    this.props.onSelectJob(null)
   }
 
   _clearThumbnail() {
@@ -239,24 +243,35 @@ export default class PrimaryMap extends Component {
   }
 
   _handleSelect(event) {
-    const {selected, deselected} = event
-    if (selected.length === 0 && deselected.length === 0) {
+    if (event.selected.length === 0 && event.deselected.length === 0) {
       return  // Disregard spurious select event
     }
 
-    const [feature] = selected
-    const geojson = feature ? new ol.format.GeoJSON().writeFeatureObject(feature, {dataProjection: 'EPSG:4326', featureProjection: 'EPSG:3857'}) : null
-    const position = feature ? ol.extent.getCenter(feature.getGeometry().getExtent()) : undefined
+    const [feature] = event.selected
+    let position, geojson, type
+    if (feature) {
+      position = ol.extent.getCenter(feature.getGeometry().getExtent())
+      const writer = new ol.format.GeoJSON()
+      geojson = writer.writeFeatureObject(feature, {dataProjection: 'EPSG:4326', featureProjection: 'EPSG:3857'})
+      type = feature.get(KEY_TYPE)
+    }
 
     this._clearThumbnail()
-    this.setState({selectedFeature: geojson})
     this._featureDetailsOverlay.setPosition(position)
 
-    if (feature && feature.get(KEY_TYPE) === TYPE_SCENE) {
-      this.props.onImageSelect(geojson)
-    }
-    else {
-      this.props.onImageSelect(null)
+    switch (type) {
+    case TYPE_JOB:
+      this.props.onSelectImage(null)
+      this.props.onSelectJob(geojson)
+      break
+    case TYPE_SCENE:
+      this.props.onSelectImage(geojson)
+      this.props.onSelectJob(null)
+      break
+    default:
+      this.props.onSelectImage(null)
+      this.props.onSelectJob(null)
+      break
     }
   }
 
@@ -473,7 +488,7 @@ export default class PrimaryMap extends Component {
     case MODE_NORMAL:
       this._clearDraw()
       this._deactivateDrawInteraction()
-      this._deactivateSelectInteraction()
+      this._activateSelectInteraction()
       break
     default:
       console.warn('wat mode=%s', this.props.mode)

@@ -45,6 +45,7 @@ class Application extends Component {
     isLoggedIn:  React.PropTypes.bool.isRequired,
     isSearching: React.PropTypes.bool.isRequired,
     location:    React.PropTypes.object.isRequired,
+    selectedFeature: React.PropTypes.object,
     workers:     React.PropTypes.object.isRequired
   }
 
@@ -53,7 +54,8 @@ class Application extends Component {
     this._handleAnchorChange = this._handleAnchorChange.bind(this)
     this._handleBoundingBoxChange = this._handleBoundingBoxChange.bind(this)
     this._handleSearchPageChange = this._handleSearchPageChange.bind(this)
-    this._handleImageSelect = this._handleImageSelect.bind(this)
+    this._handleSelectImage = this._handleSelectImage.bind(this)
+    this._handleSelectJob = this._handleSelectJob.bind(this)
   }
 
   componentDidMount() {
@@ -95,10 +97,12 @@ class Application extends Component {
           anchor={this.props.location.hash}
           bbox={this.props.bbox}
           mode={this._mapMode}
+          selectedFeature={this.props.selectedFeature}
           onAnchorChange={this._handleAnchorChange}
           onBoundingBoxChange={this._handleBoundingBoxChange}
-          onImageSelect={this._handleImageSelect}
           onSearchPageChange={this._handleSearchPageChange}
+          onSelectImage={this._handleSelectImage}
+          onSelectJob={this._handleSelectJob}
         />
         {this.props.children}
       </div>
@@ -129,21 +133,31 @@ class Application extends Component {
     this.props.dispatch(updateSearchBbox(bbox))
   }
 
+  _handleSelectImage(feature) {
+    this.props.dispatch(selectImage(feature))
+  }
+
+  _handleSelectJob(feature) {
+    this.context.router.push({
+      ...this.props.location,
+      query: {
+        jobId: feature ? feature.id : undefined
+      }
+    })
+  }
+
   _handleSearchPageChange(paging) {
     this.props.dispatch(searchCatalog(paging.startIndex, paging.count))
   }
-
-  _handleImageSelect(geojson) {
-    this.props.dispatch(selectImage(geojson))
-  }
 }
 
-export default connect(state => ({
+export default connect((state, ownProps) => ({
   bbox:        state.search.bbox,
   datasets:    state.jobs.records.map(job => ({job, ...state.results[job.id]})),
   imagery:     state.imagery,
   isLoggedIn:  !!state.authentication.token,
   isSearching: state.search.searching,
+  selectedFeature: state.draftJob.image || state.jobs.records.find(j => j.id === ownProps.location.query.jobId) || null,
   workers:     state.workers,
 }))(Application)
 
