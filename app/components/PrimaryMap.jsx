@@ -691,7 +691,7 @@ function generateProgressBarOverlay(dataset) {
   return new ol.Overlay({
     id: dataset.job.id,
     element,
-    position: ol.extent.getBottomLeft(ol.proj.transformExtent(dataset.job.bbox, 'EPSG:4326', 'EPSG:3857')),
+    position: ol.extent.getBottomLeft(bboxUtil.featureToBbox(dataset.job)),
     positioning: 'bottom-left'
   })
 }

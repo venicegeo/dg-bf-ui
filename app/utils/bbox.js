@@ -20,6 +20,12 @@ import {truncate, unwrapPoint} from './coordinates'
 const WGS84 = 'EPSG:4326'
 const WEB_MERCATOR = 'EPSG:3857'
 
+export function featureToBbox(feature) {
+  const reader = new ol.format.GeoJSON()
+  const geometry = reader.readGeometry(feature.geometry, {featureProjection: WEB_MERCATOR})
+  return geometry.getExtent()
+}
+
 export function deserialize(serialized) {
   if (serialized && serialized.length === 4) {
     return ol.proj.transformExtent(serialized, WGS84, WEB_MERCATOR)

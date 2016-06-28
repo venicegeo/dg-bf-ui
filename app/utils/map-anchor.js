@@ -20,8 +20,10 @@ import {truncate, unwrapPoint} from './coordinates'
 const WGS_84 = 'EPSG:4326'
 const WEB_MERCATOR = 'EPSG:3857'
 
-export function bboxToAnchor(bbox) {
-  return createAnchor(ol.extent.getCenter(bbox), 1000, 0)
+export function featureToAnchor(feature) {
+  const reader = new ol.format.GeoJSON()
+  const geometry = reader.readGeometry(feature.geometry, {featureProjection: WEB_MERCATOR})
+  return createAnchor(ol.extent.getCenter(geometry.getExtent()), 1000, 0)
 }
 
 export function deserialize(serialized) {
