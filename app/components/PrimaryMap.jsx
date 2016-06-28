@@ -37,7 +37,6 @@ import {
   STATUS_RUNNING,
   STATUS_SUCCESS,
   STATUS_TIMED_OUT,
-  TYPE_JOB,
   TYPE_SCENE,
 } from '../constants'
 
@@ -353,11 +352,7 @@ export default class PrimaryMap extends Component {
     const reader = new ol.format.GeoJSON()
     datasets.filter(d => d.geojson && !previous[d.job.id]).forEach(dataset => {
       const features = reader.readFeatures(dataset.geojson, {featureProjection: 'EPSG:3857'})
-      features.forEach(f => f.setProperties({
-        [KEY_OWNER_ID]: dataset.job.id,
-        [KEY_NAME]: dataset.job.name,
-        [KEY_STATUS]: dataset.job.status
-      }))
+      features.forEach(f => f.set(KEY_OWNER_ID, dataset.job.id))
       source.addFeatures(features)
     })
   }
