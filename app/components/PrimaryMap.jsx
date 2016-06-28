@@ -253,7 +253,13 @@ export default class PrimaryMap extends Component {
     this._clearThumbnail()
     this.setState({selectedFeature: geojson})
     this._featureDetailsOverlay.setPosition(position)
-    this.props.onImageSelect(geojson)
+
+    if (feature && feature.get(KEY_TYPE) === TYPE_SCENE) {
+      this.props.onImageSelect(geojson)
+    }
+    else {
+      this.props.onImageSelect(null)
+    }
   }
 
   _handleThumbnailLoaded(image, feature) {
