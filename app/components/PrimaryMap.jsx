@@ -111,6 +111,9 @@ export default class PrimaryMap extends Component {
           this._renderImagerySearchBbox()
         }
         this._updateInteractions()
+        if (this.props.selectedFeature) {
+          this._updateSelectedFeature()
+        }
       })
     // DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG
     // DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG
@@ -496,6 +499,14 @@ export default class PrimaryMap extends Component {
       console.warn('wat mode=%s', this.props.mode)
       break
     }
+  }
+
+  _updateSelectedFeature() {
+    const reader = new ol.format.GeoJSON()
+    const feature = reader.readFeature(this.props.selectedFeature, {dataProjection: 'EPSG:4326', featureProjection: 'EPSG:3857'})
+    const center = ol.extent.getCenter(feature.getGeometry().getExtent())
+    this._selectInteraction.getFeatures().push(feature)
+    this._featureDetailsOverlay.setPosition(center)
   }
 }
 
