@@ -37,16 +37,16 @@ class Application extends Component {
   }
 
   static propTypes = {
-    bbox:        React.PropTypes.arrayOf(React.PropTypes.number),
-    children:    React.PropTypes.element,
-    datasets:    React.PropTypes.array.isRequired,
-    dispatch:    React.PropTypes.func.isRequired,
-    imagery:     React.PropTypes.object,
-    isLoggedIn:  React.PropTypes.bool.isRequired,
-    isSearching: React.PropTypes.bool.isRequired,
-    location:    React.PropTypes.object.isRequired,
+    bbox:            React.PropTypes.arrayOf(React.PropTypes.number),
+    children:        React.PropTypes.element,
+    datasets:        React.PropTypes.array.isRequired,
+    dispatch:        React.PropTypes.func.isRequired,
+    imagery:         React.PropTypes.object,
+    isLoggedIn:      React.PropTypes.bool.isRequired,
+    isSearching:     React.PropTypes.bool.isRequired,
+    location:        React.PropTypes.object.isRequired,
     selectedFeature: React.PropTypes.object,
-    workers:     React.PropTypes.object.isRequired
+    workers:         React.PropTypes.object.isRequired
   }
 
   constructor() {
@@ -152,13 +152,13 @@ class Application extends Component {
 }
 
 export default connect((state, ownProps) => ({
-  bbox:        state.search.bbox,
-  datasets:    state.jobs.records.map(job => ({job, ...state.results[job.id]})),
-  imagery:     state.imagery,
-  isLoggedIn:  !!state.authentication.token,
-  isSearching: state.search.searching,
+  bbox:            state.search.bbox,
+  datasets:        state.jobs.records.map(job => ({job, ...state.results[job.id]})),
+  imagery:         state.imagery,
+  isLoggedIn:      !!state.authentication.token,
+  isSearching:     state.search.searching,
   selectedFeature: state.draftJob.image || state.jobs.records.find(j => j.id === ownProps.location.query.jobId) || null,
-  workers:     state.workers,
+  workers:         state.workers,
 }))(Application)
 
 //
