@@ -55,6 +55,7 @@ export function reducer(state = {}, action) {
       ...state,
       [jobId]: {
         ...state[jobId],
+        loading: true,
         progress: {
           loaded: action.loaded,
           total: action.total
