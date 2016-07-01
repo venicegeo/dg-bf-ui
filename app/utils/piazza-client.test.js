@@ -154,7 +154,49 @@ describe('Piazza Client', function () {
       client.getFile('test-id', stub)
         .then(() => {
           expect(stub.called).toBeTruthy()
-          expect(stub.alwaysCalledWithMatch(sinon.match.number, sinon.match.number)).toBeTruthy()
+          expect(stub.alwaysCalledWithMatch(sinon.match({
+            loaded: sinon.match.number,
+            total: sinon.match.number,
+          }))).toBeTruthy()
+          done()
+        })
+        .catch(done)
+    })
+
+    it('allows callers to cancel a retrieval', (done) => {
+      server.respondWith([200, {}, RESPONSE_FILE])
+      const stub = sinon.stub()
+      const client = new Client('http://m', 'test-auth-token')
+      client.getFile('test-id', stub)
+        .then(() => {
+          expect(stub.alwaysCalledWithMatch({
+            cancel: sinon.match.func
+          })).toBeTruthy()
+          done()
+        })
+        .catch(done)
+    })
+
+    it('on cancellation, rejects promise', (done) => {
+      server.respondWith([200, {}, RESPONSE_FILE])
+      const onProgress = ({cancel}) => cancel()
+      const client = new Client('http://m', 'test-auth-token')
+      client.getFile('test-id', onProgress)
+        .then(() => done(new Error('Should have rejected')))
+        .catch(err => {
+          expect(err).toEqual({isCancellation: true})
+          done()
+        })
+        .catch(done)
+    })
+
+    it('on cancellation, halts the XHR', (done) => {
+      server.respondWith([200, {}, RESPONSE_FILE])
+      const onProgress = ({cancel}) => cancel()
+      const client = new Client('http://m', 'test-auth-token')
+      client.getFile('test-id', onProgress)
+        .catch(() => {
+          expect(server.requests[0].aborted).toBe(true)
           done()
         })
         .catch(done)
