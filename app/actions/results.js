@@ -18,7 +18,7 @@ import {Client} from '../utils/piazza-client'
 import {GATEWAY} from '../config'
 
 import {
-  KEY_RESULT_ID
+  KEY_GEOJSON_DATA_ID
 } from '../constants'
 
 //
@@ -38,7 +38,7 @@ export const UNLOAD_RESULT = 'UNLOAD_RESULT'
 export function changeLoadedResults(ids = []) {
   return (dispatch, getState) => {
     const state = getState()
-    const promises = state.jobs.records.filter(job => job.properties[KEY_RESULT_ID]).map(job => {
+    const promises = state.jobs.records.filter(job => job.properties[KEY_GEOJSON_DATA_ID]).map(job => {
       const shouldLoad = ids.indexOf(job.id) !== -1
       const isLoadedOrLoading = state.results[job.id]
 
@@ -51,7 +51,7 @@ export function changeLoadedResults(ids = []) {
       }
 
       if (shouldLoad && !isLoadedOrLoading) {
-        return dispatch(loadResult(job.id, job.properties[KEY_RESULT_ID]))
+        return dispatch(loadResult(job.id, job.properties[KEY_GEOJSON_DATA_ID]))
       }
     })
     return Promise.all(promises)
@@ -65,7 +65,7 @@ export function downloadResult(jobId) {
       console.error('Job <%s> does not exist', jobId)
       return
     }
-    return dispatch(loadResult(job.id, job.properties[KEY_RESULT_ID]))
+    return dispatch(loadResult(job.id, job.properties[KEY_GEOJSON_DATA_ID]))
   }
 }
 
