@@ -224,7 +224,7 @@ describe('Jobs Worker', () => {
         generateJob('test-succeeded', STATUS_SUCCESS),
         generateJob('test-stalled', STATUS_TIMED_OUT),
       ])
-      client.getStatus.andReturn(Promise.resolve(generateStatusRunning('test-succeeded')))
+      client.getStatus.andReturn(Promise.resolve(generateStatusRunning('test-still-running')))
       worker.start(client, 0, 1000, handlers)
       defer(() => {
         expect(handlers.onUpdate.calls.length).toEqual(1)
