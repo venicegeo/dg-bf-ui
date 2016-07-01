@@ -63,9 +63,8 @@ export default class FeatureDetails extends Component {
   }
 
   componentWillReceiveProps(nextProps) {
-    const {feature} = nextProps
-    if (feature && this.props.feature !== feature) {
-      this._updateThumbnail(feature)
+    if (nextProps.feature && nextProps.feature !== this.props.feature) {
+      this._updateThumbnail(nextProps.feature)
     }
   }
 
