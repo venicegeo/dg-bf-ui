@@ -22,8 +22,8 @@ import {
   KEY_IMAGE_ID,
   KEY_ALGORITHM_NAME,
   KEY_CREATED_ON,
+  KEY_GEOJSON_DATA_ID,
   KEY_NAME,
-  KEY_RESULT_ID,
   KEY_SCHEMA_VERSION,
   KEY_STATUS,
   KEY_TYPE,
@@ -32,27 +32,47 @@ import {
 } from '../constants'
 
 export function upgradeIfNeeded(record) {
-  if (typeof record.properties === 'undefined'
-    || record.properties[KEY_SCHEMA_VERSION] < SCHEMA_VERSION) {
-    return upgrade(record)
+  const recordVersion = record.properties ? record.properties[KEY_SCHEMA_VERSION] : 0
+  switch (recordVersion) {
+  case SCHEMA_VERSION: return record
+  case 1: return upgradeFromV1(record)
+  case 0: return upgradeFromV0(record)
+  default: return null  // Discard incompatible record
   }
-  return record
+}
+
+function upgradeFromV1(legacyRecord) {
+  console.debug('upgrade-job-record:upgradeFromV1', legacyRecord)
+  return {
+    ...legacyRecord,
+    properties: {
+      ...legacyRecord.properties,
+      [KEY_SCHEMA_VERSION]:  SCHEMA_VERSION,
+
+      // Force a re-fetch to populate the missing fields
+      [KEY_STATUS]: STATUS_RUNNING,
+
+      // Prune dead properties
+      'beachfront:resultId': undefined,
+    }
+  }
 }
 
 /* eslint-disable complexity */
-export function upgrade(legacyRecord) {
+function upgradeFromV0(legacyRecord) {
+  console.debug('upgrade-job-record:upgradeFromV0', legacyRecord)
   try {
     return {
       id: legacyRecord.id,
       properties: {
-        [KEY_IMAGE_ID]:       legacyRecord.imageId,
-        [KEY_ALGORITHM_NAME]: legacyRecord.algorithmName || 'Unknown Algorithm',
-        [KEY_CREATED_ON]:     legacyRecord.createdOn || new Date().toISOString(),
-        [KEY_NAME]:           legacyRecord.name || legacyRecord.createdOn || 'Untitled Job',
-        [KEY_RESULT_ID]:      legacyRecord.resultId,
-        [KEY_STATUS]:         STATUS_RUNNING,
-        [KEY_TYPE]:           TYPE_JOB,
-        [KEY_SCHEMA_VERSION]: SCHEMA_VERSION,
+        [KEY_IMAGE_ID]:        legacyRecord.imageId,
+        [KEY_ALGORITHM_NAME]:  legacyRecord.algorithmName || 'Unknown Algorithm',
+        [KEY_CREATED_ON]:      legacyRecord.createdOn || new Date().toISOString(),
+        [KEY_NAME]:            legacyRecord.name || legacyRecord.createdOn || 'Untitled Job',
+        [KEY_GEOJSON_DATA_ID]: legacyRecord.resultId,
+        [KEY_STATUS]:          STATUS_RUNNING,
+        [KEY_TYPE]:            TYPE_JOB,
+        [KEY_SCHEMA_VERSION]:  SCHEMA_VERSION,
       },
       geometry: bboxToGeometry(legacyRecord.bbox),
       type: 'Feature'
