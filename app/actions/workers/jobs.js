@@ -65,9 +65,7 @@ function work() {
   Promise.all(jobs.map(fetchUpdates))
     .then(updates => {
       console.debug('(jobs:worker) committing changes')
-      updates.forEach(update => {
-        _handlers.onUpdate(update.jobId, update.status, update.resultId || null)
-      })
+      updates.forEach(u => _handlers.onUpdate(u.jobId, u.status, u.geojsonDataId, u.rasterDataId, u.wmsLayerId, u.wmsUrl))
     })
     .catch(err => {
       console.error('(jobs:worker) cycle failed; terminating.', err)
@@ -80,27 +78,13 @@ function exceededTTL(createdOn) {
   return (Date.now() - new Date(createdOn).getTime()) > _ttl
 }
 
-function fetchGeoJsonId(status) {
-  const metadataId = status.result.dataId
-
-  console.debug('(jobs:worker) <%s> resolving file ID (via <%s>)', status.jobId, metadataId)
-  return _client.getFile(metadataId)
-    .then(normalizeExecutionOutput)
-    .then(output => {
-      if (!output.resultId) {
-        throw new Error('GeoJSON data ID missing from execution output')
-      }
-      return {...status, resultId: output.resultId}
-    })
-}
-
 function fetchUpdates(job) {
   return _client.getStatus(job.id)
     .then(status => {
       console.debug('(jobs:worker) <%s> polled (%s)', status.jobId, status.status)
 
       if (status.status === STATUS_SUCCESS) {
-        return fetchGeoJsonId(status)
+        return resolveResultIdentifiers(status)
       }
 
       else if (exceededTTL(job.properties[KEY_CREATED_ON])) {
@@ -117,6 +101,36 @@ function fetchUpdates(job) {
     })
 }
 
+function resolveResultIdentifiers(status) {
+  const executionOutputDataId = status.result.dataId
+
+  console.debug('(jobs:worker) <%s> resolving result IDs (via <%s>)', status.jobId, executionOutputDataId)
+  return _client.getFile(executionOutputDataId)
+    .then(normalizeExecutionOutput)
+    .then(output => {
+      const {deploymentId, geojsonDataId} = output
+
+      if (!geojsonDataId) {
+        throw new Error('GeoJSON data ID missing from execution output')
+      }
+
+      if (!deploymentId) {
+        // TODO -- warning for now but will probably become required in the near future
+        console.warn('(jobs:worker) <%s> missing WMS deployment info', status.jobId, executionOutputDataId)
+        return {...status, geojsonDataId}
+      }
+
+      return _client.getDeployment(deploymentId)
+        .then(deploymentDescriptor => ({
+          ...status,
+          geojsonDataId,
+          rasterDataId: deploymentDescriptor.dataId,
+          wmsLayerId:   deploymentDescriptor.layerId,
+          wmsUrl:       deploymentDescriptor.endpoint,
+        }))
+    })
+}
+
 function getRunningJobs() {
   return _handlers.getRecords()
     .filter(j => j.properties[KEY_STATUS] === STATUS_RUNNING)
@@ -126,9 +140,9 @@ function normalizeExecutionOutput(raw) {
   try {
     const parsed = JSON.parse(raw)
     return {
-      error:      parsed.error || null,
-      resultId:   parsed.shoreDataID || null,
-      wmsLayerId: parsed.rgbLoc || null
+      deploymentId:  parsed.rgbLoc || null,
+      error:         parsed.error || null,
+      geojsonDataId: parsed.shoreDataID || null,
     }
   } catch (err) {
     throw new Error('Execution output could not be parsed')

@@ -214,8 +214,8 @@ function startJobsWorker() {
       onTerminate() {
         dispatch(stopJobsWorker())
       },
-      onUpdate(jobId, status, resultId) {
-        dispatch(updateJob(jobId, status, resultId))
+      onUpdate(...args) {
+        dispatch(updateJob(...args))
       }
     })
   }
@@ -227,11 +227,21 @@ function stopJobsWorker() {
   }
 }
 
-function updateJob(jobId, status, resultId) {
+function updateJob(
+  jobId,
+  status,
+  geojsonDataId = null,
+  imageryDataId = null,
+  wmsLayerId = null,
+  wmsUrl = null
+) {
   return {
     type: UPDATE_JOB,
     jobId,
     status,
-    resultId
+    geojsonDataId,
+    imageryDataId,
+    wmsLayerId,
+    wmsUrl,
   }
 }
