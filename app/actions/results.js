@@ -37,10 +37,10 @@ export const UNLOAD_RESULT = 'UNLOAD_RESULT'
 
 export function changeLoadedResults(ids = []) {
   return (dispatch, getState) => {
-    const {results, jobs} = getState()
-    const promises = jobs.records.filter(job => job.properties[KEY_RESULT_ID]).map(job => {
+    const state = getState()
+    const promises = state.jobs.records.filter(job => job.properties[KEY_RESULT_ID]).map(job => {
       const shouldLoad = ids.indexOf(job.id) !== -1
-      const isLoadedOrLoading = results[job.id]
+      const isLoadedOrLoading = state.results[job.id]
 
       if (shouldLoad && isLoadedOrLoading) {
         return  // Nothing to do
