@@ -19,6 +19,8 @@ import sinon from 'sinon'
 import {Client, STATUS_ERROR, STATUS_RUNNING, STATUS_SUCCESS} from './piazza-client'
 import {
   ERROR_GENERIC,
+  RESPONSE_DEPLOYMENT,
+  RESPONSE_DEPLOYMENT_NOT_FOUND,
   RESPONSE_FILE,
   RESPONSE_JOB_CREATED,
   RESPONSE_JOB_RUNNING,
@@ -46,6 +48,44 @@ describe('Piazza Client', function () {
     it('normalizes auth token', () => {
       const client = new Client('http://test-gateway', 'test-auth-token')
       expect(client.authToken).toEqual('test-auth-token')
+    })
+  })
+
+  describe('getDeployment()', () => {
+    it('calls correct URL', (done) => {
+      const stub = expect.spyOn(window, 'fetch').andReturn(resolveJson(RESPONSE_DEPLOYMENT))
+      const client = new Client('http://m', 'test-auth-token')
+      client.getDeployment('test-deployment-id')
+        .then(() => {
+          expect(stub.calls[0].arguments[0]).toEqual('http://m/deployment/test-deployment-id')
+          done()
+        })
+        .catch(done)
+    })
+
+    it('properly deserializes GeoServer deployment descriptor', (done) => {
+      expect.spyOn(window, 'fetch').andReturn(resolveJson(RESPONSE_DEPLOYMENT))
+      const client = new Client('http://m', 'test-auth-token')
+      client.getDeployment('test-deployment-id')
+        .then(descriptor => {
+          expect(descriptor.dataId).toEqual('test-data-id')
+          expect(descriptor.endpoint).toEqual('http://test-capabilities-url/arbitrary/context/path')
+          expect(descriptor.layerId).toEqual('piazza:test-layer-id')
+          done()
+        })
+        .catch(done)
+    })
+
+    it('handles HTTP errors gracefully', (done) => {
+      expect.spyOn(window, 'fetch').andReturn(resolveJson(RESPONSE_DEPLOYMENT_NOT_FOUND, 500))
+      const client = new Client('http://m', 'test-auth-token')
+      client.getDeployment('nopenope')
+        .then(() => done(new Error('Should have thrown')))
+        .catch(err => {
+          expect(err.status).toEqual(500)
+          done()
+        })
+        .catch(done)
     })
   })
 

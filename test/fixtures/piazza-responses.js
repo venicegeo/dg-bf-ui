@@ -9,6 +9,21 @@ export const ERROR_GENERIC = `{
   "path": "/any/where"
 }`
 
+export const RESPONSE_DEPLOYMENT = `{
+  "capabilitiesUrl": "http://test-capabilities-url/arbitrary/context/path?service=wfs&version=2.0.0&request=GetCapabilities",
+  "dataId": "test-data-id",
+  "deploymentId": "test-deployment-id",
+  "host": "test-host",
+  "layer": "test-layer-id",
+  "port": "test-port"
+}`
+
+export const RESPONSE_DEPLOYMENT_NOT_FOUND = `{
+  "type": "error",
+  "message": "Deployment not found: nopenope",
+  "origin": "Access"
+}`
+
 export const RESPONSE_FILE = `{
   "foo": "bar"
 }`

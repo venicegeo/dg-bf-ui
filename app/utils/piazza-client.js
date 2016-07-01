@@ -24,6 +24,12 @@ export class Client {
     this.authToken = authToken
   }
 
+  getDeployment(id) {
+    return this._fetch(`/deployment/${id}`)
+      .then(asJson)
+      .then(normalizeDeployment)
+  }
+
   getFile(id, progress) {
     return new Promise((resolve, reject) => {
       const xhr = new XMLHttpRequest()
@@ -87,6 +93,14 @@ function asJson(response) {
     throw new HttpError(response)
   }
   return response.json()
+}
+
+function normalizeDeployment(descriptor) {
+  return {
+    dataId:   descriptor.dataId,
+    endpoint: descriptor.capabilitiesUrl.replace(/\?.*$/, ''),
+    layerId:  'piazza:' + descriptor.layer,
+  }
 }
 
 function normalizePostMetadata(metadata) {
