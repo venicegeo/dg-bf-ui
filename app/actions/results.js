@@ -47,7 +47,7 @@ export function changeLoadedResults(ids = []) {
       }
 
       if (!shouldLoad && isLoadedOrLoading) {
-        return dispatch(unloadResult(job.id))  // TODO -- cancel any in-flight promises
+        return dispatch(unloadResult(job.id))
       }
 
       if (shouldLoad && !isLoadedOrLoading) {
@@ -83,13 +83,20 @@ function loadResult(jobId, resultId) {
       jobId
     })
 
-    return client.getFile(resultId, (loaded, total) => {
+    return client.getFile(resultId, ({loaded, total, cancel}) => {
+      if (!getState().results[jobId]) {
+        cancel()  // Result was unloaded; abandon retrieval
+        return
+      }
       dispatch(loadResultProgressed(jobId, loaded, total))
     })
       .then(str => {
         dispatch(loadResultSuccess(jobId, str))
       })
       .catch(err => {
+        if (err.isCancellation) {
+          return
+        }
         console.error('Could not load result <job:%s> <result:%s>', jobId, resultId, err)
         dispatch(loadResultError(jobId, err))
       })
