@@ -65,7 +65,14 @@ function work() {
   Promise.all(jobs.map(fetchUpdates))
     .then(updates => {
       console.debug('(jobs:worker) committing changes')
-      updates.forEach(u => _handlers.onUpdate(u.jobId, u.status, u.geojsonDataId, u.rasterDataId, u.wmsLayerId, u.wmsUrl))
+      updates.forEach(u => _handlers.onUpdate(
+        u.jobId,
+        u.status,
+        u.geojsonDataId || null,
+        u.rasterDataId || null,
+        u.wmsLayerId || null,
+        u.wmsUrl || null
+      ))
     })
     .catch(err => {
       console.error('(jobs:worker) cycle failed; terminating.', err)
