@@ -32,9 +32,9 @@
 .brand {
   display: none;
   position: absolute;
-  left: calc(100% + 10px);
-  top: 10px;
-  height: 70px;
+  left: 100%;
+  top: 0;
+  height: 90px;
   filter: drop-shadow(0 5px rgba(0,0,0,.1));
   -webkit-filter: drop-shadow(0 5px rgba(0,0,0,.1));
 }
@@ -207,7 +207,7 @@ li.home {
 
 .home .icon {
   opacity: 0;
-  fill: #85C8F1 !important;
+  fill: #d9f1ff !important;
 }
 
 .atHome .home .complexIcon {
