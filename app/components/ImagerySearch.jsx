@@ -15,7 +15,7 @@
  **/
 
 import React, {Component} from 'react'
-import StaticMinimap from './StaticMinimap'
+import StaticMinimap from './StaticMinimap.jsx'
 import styles from './ImagerySearch.css'
 
 export default class ImagerySearch extends Component {
