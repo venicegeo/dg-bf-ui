@@ -370,7 +370,7 @@ export default class PrimaryMap extends Component {
 
   _renderCompositeImage() {
     const {datasets} = this.props
-    const insertionIndex = this._map.getLayers().getArray().indexOf(this._detectionsLayer) - 1
+    const insertionIndex = this._map.getLayers().getArray().indexOf(this._frameLayer) - 1
     datasets.forEach(dataset => {
       const shouldLoad = dataset.geojson && dataset.job.properties[KEY_WMS_URL] && dataset.job.properties[KEY_WMS_LAYER_ID]
       const existingLayer = this._wmsLayers[dataset.job.id]
