@@ -32,6 +32,7 @@ import styles from './PrimaryMap.css'
 import {
   KEY_NAME,
   KEY_STATUS,
+  KEY_IMAGE_ID,
   KEY_TYPE,
   KEY_WMS_LAYER_ID,
   KEY_WMS_URL,
@@ -430,8 +431,125 @@ export default class PrimaryMap extends Component {
     const source = this._frameLayer.getSource()
     source.clear()
     const reader = new ol.format.GeoJSON()
-    const features = this.props.datasets.map(({job}) => reader.readFeature(job, {featureProjection: 'EPSG:3857'}))
-    source.addFeatures(features)
+    console.debug('rendering frames')
+    this.props.datasets.map(dataset => {
+      const mainFeature = reader.readFeature(dataset.job, {featureProjection: 'EPSG:3857'})
+
+      const STEM_OFFSET = 10000
+      const DIVOT_SIZE = 5000
+      const DIVOT_MULTIPLIER = 8
+
+      source.addFeature(mainFeature)
+      source.addFeature(stem())
+      source.addFeature(divot1())
+      source.addFeature(divot2())
+      source.addFeature(name())
+      source.addFeature(status())
+
+      function _getFillColor(status) {
+        switch (status) {
+        case STATUS_RUNNING: return 'rgba(255,255,0, .5)'
+        case STATUS_SUCCESS: return 'rgba(0,255,0, .5)'
+        case STATUS_TIMED_OUT:
+        case STATUS_ERROR: return 'rgba(255,0,0, .5)'
+        default: return 'magenta'
+        }
+      }
+
+      function stem() {
+        const origin = mainFeature.getGeometry().getExtent()
+        const p1 = ol.extent.getCenter(origin)
+        const p2 = ol.extent.getTopRight(ol.extent.buffer(origin, STEM_OFFSET))
+        const feature = new ol.Feature({
+          geometry: new ol.geom.LineString([p1, p2])
+        })
+        feature.setStyle(new ol.style.Style({
+          stroke: new ol.style.Stroke({
+            color: 'black',
+            width: 1
+          })
+        }))
+        return feature
+      }
+
+      function divot1() {
+        const origin = mainFeature.getGeometry().getExtent()
+        const p1 = ol.extent.getCenter(origin)
+        const p2 = ol.extent.buffer([...p1, ...p1], DIVOT_SIZE)
+        const feature = new ol.Feature({
+          geometry: ol.geom.Polygon.fromExtent(p2)
+        })
+        feature.setStyle(new ol.style.Style({
+          fill: new ol.style.Fill({
+            color: 'black'
+          })
+        }))
+        return feature
+      }
+
+      function divot2() {
+        const origin = mainFeature.getGeometry().getExtent()
+        const p1 = ol.extent.getTopRight(ol.extent.buffer(origin, STEM_OFFSET))
+        const p2 = ol.extent.getTopRight(ol.extent.buffer(origin, STEM_OFFSET + (DIVOT_SIZE * DIVOT_MULTIPLIER)))
+        const feature = new ol.Feature({
+          geometry: ol.geom.Polygon.fromExtent([...p1, ...p2])
+        })
+        feature.setStyle(new ol.style.Style({
+          stroke: new ol.style.Stroke({
+            color: 'black',
+            width: 1
+          }),
+          fill: new ol.style.Fill({
+            color: _getFillColor(mainFeature.get(KEY_STATUS))
+          })
+        }))
+        return feature
+      }
+
+      function name() {
+        const origin = mainFeature.getGeometry().getExtent()
+        const p1 = ol.extent.getTopRight(ol.extent.buffer(origin, 50000))
+        const feature = new ol.Feature({
+          geometry: new ol.geom.Point(p1)
+        })
+        feature.setStyle(new ol.style.Style({
+          text: new ol.style.Text({
+            fill: new ol.style.Fill({
+              color: 'black'
+            }),
+            offsetX: 4,
+            offsetY: 23,
+            font: 'bold 18px Catamaran, Verdana, sans-serif',
+            text: mainFeature.get(KEY_NAME).toUpperCase(),
+            textAlign: 'left',
+            textBaseline: 'bottom'
+          })
+        }))
+        return feature
+      }
+
+      function status() {
+        const origin = mainFeature.getGeometry().getExtent()
+        const p1 = ol.extent.getTopRight(ol.extent.buffer(origin, 50000))
+        const feature = new ol.Feature({
+          geometry: new ol.geom.Point(p1)
+        })
+        feature.setStyle(new ol.style.Style({
+          text: new ol.style.Text({
+            fill: new ol.style.Fill({
+              color: 'rgba(0,0,0,.5)'
+            }),
+            offsetX: 4,
+            offsetY: 40,
+            font: '13px Catamaran, Verdana, sans-serif',
+            text: (mainFeature.get(KEY_STATUS) + ' // ' + mainFeature.get(KEY_IMAGE_ID)).toUpperCase(),
+            textAlign: 'left',
+            textBaseline: 'bottom'
+          })
+        }))
+        return feature
+      }
+    })
   }
 
   _renderImagery() {
@@ -666,49 +784,17 @@ function generateDrawInteraction(drawLayer) {
 }
 
 function generateFrameLayer() {
-  function _getFillColor(status) {
-    switch (status) {
-    case STATUS_RUNNING: return 'rgba(255,255,0, .5)'
-    case STATUS_SUCCESS: return 'rgba(0,255,0, .5)'
-    case STATUS_TIMED_OUT:
-    case STATUS_ERROR: return 'rgba(255,0,0, .5)'
-    default: return 'magenta'
-    }
-  }
   return new ol.layer.Vector({
     source: new ol.source.Vector(),
-    style(feature, resolution) {
-      // FIXME -- convert labels to overlays
-      const labelText = `${feature.get(KEY_NAME).toUpperCase()} (${feature.get(KEY_STATUS)})`
-      const zoomedOut = resolution > RESOLUTION_CLOSE
-      if (zoomedOut) {
-        return new ol.style.Style({
-          text: new ol.style.Text({
-            fill: new ol.style.Fill({
-              color: 'black'
-            }),
-            font: 'bold 18px Catamaran, Arial, sans-serif',
-            text: labelText
-          }),
-          fill: new ol.style.Fill({
-            color: _getFillColor(feature.get(KEY_STATUS))
-          }),
-          stroke: new ol.style.Stroke({
-            color: 'rgba(0, 0, 0, .5)'
-          })
-        })
-      }
+    style(_, resolution) {
+      const isClose = resolution < RESOLUTION_CLOSE
       return new ol.style.Style({
-        text: new ol.style.Text({
-          fill: new ol.style.Fill({
-            color: 'rgba(0, 0, 0, .4)'
-          }),
-          font: 'bold 13px Catamaran, Arial, sans-serif',
-          text: labelText
-        }),
         stroke: new ol.style.Stroke({
           color: 'rgba(0, 0, 0, .2)',
           lineDash: [10, 10]
+        }),
+        fill: new ol.style.Fill({
+          color: isClose ? 'transparent' : 'rgba(255,255,255, .4)'
         })
       })
     }
