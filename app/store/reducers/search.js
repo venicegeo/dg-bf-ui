@@ -21,15 +21,17 @@ import {
   SEARCH_CATALOG_ERROR,
   SEARCH_CATALOG_SUCCESS,
   UPDATE_SEARCH_BBOX,
+  UPDATE_SEARCH_CLOUDCOVER,
   UPDATE_SEARCH_DATES,
 } from '../../actions/search'
 
 const INITIAL_STATE = {
-  bbox:      null,
-  dateFrom:  moment().subtract(30, 'days').format('YYYY-MM-DD'),
-  dateTo:    moment().format('YYYY-MM-DD'),
-  searching: false,
-  error:     null
+  bbox:       null,
+  cloudCover: 10,
+  dateFrom:   moment().subtract(30, 'days').format('YYYY-MM-DD'),
+  dateTo:     moment().format('YYYY-MM-DD'),
+  searching:  false,
+  error:      null
 }
 
 export function reducer(state = null, action) {
@@ -38,6 +40,11 @@ export function reducer(state = null, action) {
     return {
       ...state,
       bbox: action.bbox,
+    }
+  case UPDATE_SEARCH_CLOUDCOVER:
+    return {
+      ...state,
+      cloudCover: action.cloudCover,
     }
   case UPDATE_SEARCH_DATES:
     return {
@@ -76,8 +83,9 @@ export function deserialize() {
 
 export function serialize(state) {
   sessionStorage.setItem('search', JSON.stringify({
-    bbox:     state.bbox,
-    dateFrom: state.dateFrom,
-    dateTo:   state.dateTo,
+    bbox:       state.bbox,
+    cloudCover: state.cloudCover,
+    dateFrom:   state.dateFrom,
+    dateTo:     state.dateTo,
   }))
 }
