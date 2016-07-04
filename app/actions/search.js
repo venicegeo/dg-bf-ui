@@ -24,6 +24,7 @@ export const SEARCH_CATALOG = 'SEARCH_CATALOG'
 export const SEARCH_CATALOG_SUCCESS = 'SEARCH_CATALOG_SUCCESS'
 export const SEARCH_CATALOG_ERROR = 'SEARCH_CATALOG_ERROR'
 export const UPDATE_SEARCH_BBOX = 'UPDATE_SEARCH_BBOX'
+export const UPDATE_SEARCH_CLOUDCOVER = 'UPDATE_SEARCH_CLOUDCOVER'
 export const UPDATE_SEARCH_DATES = 'UPDATE_SEARCH_DATES'
 
 //
@@ -37,10 +38,10 @@ export function searchCatalog(startIndex = 0, count = 100) {
     })
 
     const state = getState()
-    const {bbox, dateFrom} = state.search
+    const {bbox, cloudCover, dateFrom} = state.search
     const catalogUrl = state.catalog.url
     const acquiredDate = moment(dateFrom).toISOString()
-    return fetch(`${catalogUrl}/discover?acquiredDate=${acquiredDate}&bbox=${bbox}&cloudCover=10&count=${count}&startIndex=${startIndex}`)
+    return fetch(`${catalogUrl}/discover?acquiredDate=${acquiredDate}&bbox=${bbox}&cloudCover=${cloudCover}&count=${count}&startIndex=${startIndex}`)
       .then(response => {
         if (response.ok) {
           return response.json()
@@ -60,6 +61,13 @@ export function updateSearchBbox(bbox) {
   return {
     type: UPDATE_SEARCH_BBOX,
     bbox: bbox || null
+  }
+}
+
+export function updateSearchCloudCover(cloudCover) {
+  return {
+    type: UPDATE_SEARCH_CLOUDCOVER,
+    cloudCover
   }
 }
 
