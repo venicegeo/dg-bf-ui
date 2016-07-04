@@ -24,6 +24,8 @@ import styles from './FeatureDetails.css'
 
 import {
   KEY_THUMBNAIL,
+  KEY_WMS_LAYER_ID,
+  KEY_WMS_URL,
   TYPE_JOB,
   TYPE_SCENE,
   KEY_TYPE,
@@ -57,13 +59,13 @@ export default class FeatureDetails extends Component {
   }
 
   componentDidMount() {
-    if (this.props.feature) {
+    if (shouldFetchThumbnail(this.props.feature)) {
       this._updateThumbnail(this.props.feature)
     }
   }
 
   componentWillReceiveProps(nextProps) {
-    if (nextProps.feature && (!this.props.feature || this.props.feature.id !== nextProps.feature.id)) {
+    if (shouldFetchThumbnail(nextProps.feature) && (!this.props.feature || this.props.feature.id !== nextProps.feature.id)) {
       this._updateThumbnail(nextProps.feature)
     }
   }
@@ -129,4 +131,11 @@ function generateErrorPlaceholder() {
   const placeholder = new Image()
   placeholder.src = errorPlaceholder
   return placeholder
+}
+
+function shouldFetchThumbnail(feature) {
+  return feature
+    && feature.properties
+    && feature.properties[KEY_THUMBNAIL]
+    && (!feature.properties[KEY_WMS_LAYER_ID] && !feature.properties[KEY_WMS_URL])
 }

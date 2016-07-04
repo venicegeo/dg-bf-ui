@@ -285,7 +285,7 @@ export default class PrimaryMap extends Component {
   }
 
   _handleThumbnailLoaded(image, feature) {
-    if (!feature) {
+    if (!feature || hasWmsPresence(feature)) {
       return
     }
     const reader = new ol.format.GeoJSON()
