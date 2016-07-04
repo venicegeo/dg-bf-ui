@@ -46,18 +46,6 @@ export default class FeatureDetails extends Component {
     this.state = {loadRefCount: 0}
   }
 
-  _incrementLoading() {
-    this.setState({
-      loadRefCount: this.state.loadRefCount + 1
-    })
-  }
-
-  _decrementLoading() {
-    this.setState({
-      loadRefCount: Math.max(this.state.loadRefCount - 1, 0)
-    })
-  }
-
   componentDidMount() {
     if (shouldFetchThumbnail(this.props.feature)) {
       this._updateThumbnail(this.props.feature)
@@ -100,12 +88,24 @@ export default class FeatureDetails extends Component {
     return this.state.loadRefCount ? styles.isLoading : ''
   }
 
+  _decrementLoading() {
+    this.setState({
+      loadRefCount: Math.max(this.state.loadRefCount - 1, 0)
+    })
+  }
+
   _fetchThumbnail(url) {
     if (this._thumbnailPromise) {
       this._thumbnailPromise.cancel()
     }
     this._thumbnailPromise = fetchThumbnail(url)
     return this._thumbnailPromise.promise
+  }
+
+  _incrementLoading() {
+    this.setState({
+      loadRefCount: this.state.loadRefCount + 1
+    })
   }
 
   _updateThumbnail(feature) {
