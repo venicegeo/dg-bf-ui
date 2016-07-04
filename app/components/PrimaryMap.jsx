@@ -287,6 +287,8 @@ export default class PrimaryMap extends Component {
     default:
       this.props.onSelectImage(null)
       this.props.onSelectJob(null)
+      // Not a valid "selectable" feature
+      this._selectInteraction.getFeatures().clear()
       break
     }
   }
