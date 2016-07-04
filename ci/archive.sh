@@ -12,7 +12,7 @@ source $root/ci/vars.sh
 
 npm install
 xvfb-run npm run test:ci
-NODE_ENV=production GATEWAY="${PZ_GATEWAY_URL}" npm run build
+NODE_ENV=production GATEWAY="https://pz-gateway.stage.geointservices.io" npm run build
 echo "pushstate: enabled" > dist/Staticfile
 
 #
