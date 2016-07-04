@@ -93,7 +93,7 @@ describe('Jobs Worker', () => {
       client.getStatus.andReturn(Promise.resolve(generateStatusRunning()))
       worker.start(client, 0, 1000, handlers)
       defer(() => {
-        expect(handlers.onUpdate).toHaveBeenCalledWith('test-id', STATUS_RUNNING, null)
+        expect(handlers.onUpdate.calls[0].arguments).toEqual(['test-id', STATUS_RUNNING, null, null, null, null])
       }, done)
     })
 
@@ -105,7 +105,7 @@ describe('Jobs Worker', () => {
       client.getStatus.andReturn(Promise.resolve(generateStatusRunning('test-stalled')))
       worker.start(client, 0, 0, handlers)
       defer(() => {
-        expect(handlers.onUpdate).toHaveBeenCalledWith('test-stalled', STATUS_TIMED_OUT, null)
+        expect(handlers.onUpdate.calls[0].arguments).toEqual(['test-stalled', STATUS_TIMED_OUT, null, null, null, null])
       }, done)
     })
 
@@ -114,17 +114,18 @@ describe('Jobs Worker', () => {
       client.getStatus.andReturn(Promise.resolve(generateStatusError()))
       worker.start(client, 0, 1000, handlers)
       defer(() => {
-        expect(handlers.onUpdate).toHaveBeenCalledWith('test-id', STATUS_ERROR, null)
+        expect(handlers.onUpdate.calls[0].arguments).toEqual(['test-id', STATUS_ERROR, null, null, null, null])
       }, done)
     })
 
     it('yields appropriate status for successful jobs', (done) => {
       handlers.getRecords.andReturn([generateJob()])
       client.getStatus.andReturn(Promise.resolve(generateStatusSuccess()))
-      client.getFile.andReturn(Promise.resolve('{"shoreDataID":"test-shore-data-id"}'))
+      client.getFile.andReturn(Promise.resolve('{"shoreDataID":"test-vector-data-id","rgbLoc":"test-deployment-id","error":""}'))
+      client.getDeployment.andReturn(Promise.resolve(generateDeploymentDescriptor()))
       worker.start(client, 0, 1000, handlers)
       defer(() => {
-        expect(handlers.onUpdate).toHaveBeenCalledWith('test-id', STATUS_SUCCESS, 'test-shore-data-id')
+        expect(handlers.onUpdate.calls[0].arguments).toEqual(['test-id', STATUS_SUCCESS, 'test-vector-data-id', 'test-raster-data-id', 'test-layer-id', 'test-endpoint'])
       }, done)
     })
 
@@ -134,7 +135,7 @@ describe('Jobs Worker', () => {
       client.getFile.andReturn(Promise.resolve('clearly invalid execution metadata'))
       worker.start(client, 0, 1000, handlers)
       defer(() => {
-        expect(handlers.onUpdate).toHaveBeenCalledWith('test-id', STATUS_ERROR, null)
+        expect(handlers.onUpdate.calls[0].arguments).toEqual(['test-id', STATUS_ERROR, null, null, null, null])
       }, done)
     })
 
@@ -149,8 +150,8 @@ describe('Jobs Worker', () => {
       )
       worker.start(client, 0, 1000, handlers)
       defer(() => {
-        expect(handlers.onUpdate).toHaveBeenCalledWith('test-will-explode', STATUS_ERROR, null)
-        expect(handlers.onUpdate).toHaveBeenCalledWith('test-everything-is-okay', STATUS_RUNNING, null)
+        expect(handlers.onUpdate.calls[0].arguments).toEqual(['test-will-explode', STATUS_ERROR, null, null, null, null])
+        expect(handlers.onUpdate.calls[1].arguments).toEqual(['test-everything-is-okay', STATUS_RUNNING, null, null, null, null])
       }, done)
     })
 
@@ -169,8 +170,8 @@ describe('Jobs Worker', () => {
       )
       worker.start(client, 0, 1000, handlers)
       defer(() => {
-        expect(handlers.onUpdate).toHaveBeenCalledWith('test-will-explode', STATUS_ERROR, null)
-        expect(handlers.onUpdate).toHaveBeenCalledWith('test-everything-is-okay', STATUS_RUNNING, null)
+        expect(handlers.onUpdate.calls[0].arguments).toEqual(['test-will-explode', STATUS_ERROR, null, null, null, null])
+        expect(handlers.onUpdate.calls[1].arguments).toEqual(['test-everything-is-okay', STATUS_RUNNING, null, null, null, null])
       }, done)
     })
 
@@ -223,11 +224,11 @@ describe('Jobs Worker', () => {
         generateJob('test-succeeded', STATUS_SUCCESS),
         generateJob('test-stalled', STATUS_TIMED_OUT),
       ])
-      client.getStatus.andReturn(Promise.resolve(generateStatusRunning('test-succeeded')))
+      client.getStatus.andReturn(Promise.resolve(generateStatusRunning('test-still-running')))
       worker.start(client, 0, 1000, handlers)
       defer(() => {
         expect(handlers.onUpdate.calls.length).toEqual(1)
-        expect(handlers.onUpdate).toHaveBeenCalledWith('test-succeeded', STATUS_RUNNING, null)
+        expect(handlers.onUpdate.calls[0].arguments).toEqual(['test-still-running', STATUS_RUNNING, null, null, null, null])
       }, done)
     })
 
@@ -374,8 +375,17 @@ describe('Jobs Worker', () => {
 
 function generateClientSpy() {
   return {
+    getDeployment: createSpy(),
     getFile: createSpy(),
     getStatus: createSpy(),
+  }
+}
+
+function generateDeploymentDescriptor() {
+  return {
+    dataId:   'test-raster-data-id',
+    layerId:  'test-layer-id',
+    endpoint: 'test-endpoint',
   }
 }
 

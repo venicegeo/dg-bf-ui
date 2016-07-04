@@ -33,6 +33,8 @@ import {
   KEY_NAME,
   KEY_STATUS,
   KEY_TYPE,
+  KEY_WMS_LAYER_ID,
+  KEY_WMS_URL,
   STATUS_ERROR,
   STATUS_RUNNING,
   STATUS_SUCCESS,
@@ -102,6 +104,7 @@ export default class PrimaryMap extends Component {
   componentDidMount() {
     this._initializeOpenLayers()
       .then(() => {
+        this._renderCompositeImage()
         this._renderDetections()
         this._renderFrames()
         this._renderImagery()
@@ -128,6 +131,7 @@ export default class PrimaryMap extends Component {
 
   componentDidUpdate(previousProps, previousState) {  // eslint-disable-line complexity
     if (this.props.datasets !== previousProps.datasets) {
+      this._renderCompositeImage()
       this._renderDetections()
       this._renderFrames()
       this._renderProgressBars()
@@ -281,7 +285,7 @@ export default class PrimaryMap extends Component {
   }
 
   _handleThumbnailLoaded(image, feature) {
-    if (!feature) {
+    if (!feature || hasWmsPresence(feature)) {
       return
     }
     const reader = new ol.format.GeoJSON()
@@ -299,6 +303,7 @@ export default class PrimaryMap extends Component {
     this._frameLayer = generateFrameLayer()
     this._imageryLayer = generateImageryLayer()
     this._thumbnailLayer = generateThumbnailLayer()
+    this._wmsLayers = {}
 
     this._drawInteraction = generateDrawInteraction(this._drawLayer)
     this._drawInteraction.on('drawstart', this._handleDrawStart)
@@ -354,6 +359,46 @@ export default class PrimaryMap extends Component {
       view.setCenter(view.constrainCenter(center))
       view.setResolution(view.constrainResolution(resolution))
     }
+  }
+
+  _renderCompositeImage() {
+    const {datasets} = this.props
+    const insertionIndex = this._map.getLayers().getArray().indexOf(this._detectionsLayer) - 1
+    datasets.forEach(dataset => {
+      const shouldLoad = dataset.geojson && dataset.job.properties[KEY_WMS_URL] && dataset.job.properties[KEY_WMS_LAYER_ID]
+      const existingLayer = this._wmsLayers[dataset.job.id]
+
+      // Ignore
+      if (shouldLoad && existingLayer) {
+        return
+      }
+
+      // Removals
+      if (!shouldLoad && existingLayer) {
+        this._map.removeLayer(existingLayer)
+        delete this._wmsLayers[dataset.job.id]
+        return
+      }
+
+      // Additions
+      if (shouldLoad && !existingLayer) {
+        const geometry = new ol.format.GeoJSON().readGeometry(dataset.job.geometry, {dataProjection: 'EPSG:4326', featureProjection: 'EPSG:3857'})
+        const newLayer = new ol.layer.Tile({
+          extent: geometry.getExtent(),
+          source: new ol.source.TileWMS({
+            crossOrigin: 'anonymous',
+            serverType:  'geoserver',
+            url:         dataset.job.properties[KEY_WMS_URL],
+            params:      {
+              layers: dataset.job.properties[KEY_WMS_LAYER_ID]
+                        .replace('piazza:OSM-WMS', 'OSM-WMS')  // HACK HACK HACK HACK HACK HACK
+            }
+          })
+        })
+        this._wmsLayers[dataset.job.id] = newLayer
+        this._map.getLayers().insertAt(insertionIndex, newLayer)
+      }
+    })
   }
 
   _renderDetections() {
@@ -797,4 +842,11 @@ function generateStyleUnknownDetectionType() {
 
 function generateThumbnailLayer() {
   return new ol.layer.Image()
+}
+
+function hasWmsPresence(feature) {
+  return feature
+    && feature.properties
+    && feature.properties[KEY_WMS_LAYER_ID]
+    && feature.properties[KEY_WMS_URL]
 }

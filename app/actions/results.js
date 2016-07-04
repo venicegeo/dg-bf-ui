@@ -18,7 +18,7 @@ import {Client} from '../utils/piazza-client'
 import {GATEWAY} from '../config'
 
 import {
-  KEY_RESULT_ID
+  KEY_GEOJSON_DATA_ID
 } from '../constants'
 
 //
@@ -37,21 +37,21 @@ export const UNLOAD_RESULT = 'UNLOAD_RESULT'
 
 export function changeLoadedResults(ids = []) {
   return (dispatch, getState) => {
-    const {results, jobs} = getState()
-    const promises = jobs.records.filter(job => job.properties[KEY_RESULT_ID]).map(job => {
+    const state = getState()
+    const promises = state.jobs.records.filter(job => job.properties[KEY_GEOJSON_DATA_ID]).map(job => {
       const shouldLoad = ids.indexOf(job.id) !== -1
-      const isLoadedOrLoading = results[job.id]
+      const isLoadedOrLoading = state.results[job.id]
 
       if (shouldLoad && isLoadedOrLoading) {
         return  // Nothing to do
       }
 
       if (!shouldLoad && isLoadedOrLoading) {
-        return dispatch(unloadResult(job.id))  // TODO -- cancel any in-flight promises
+        return dispatch(unloadResult(job.id))
       }
 
       if (shouldLoad && !isLoadedOrLoading) {
-        return dispatch(loadResult(job.id, job.properties[KEY_RESULT_ID]))
+        return dispatch(loadResult(job.id, job.properties[KEY_GEOJSON_DATA_ID]))
       }
     })
     return Promise.all(promises)
@@ -65,7 +65,7 @@ export function downloadResult(jobId) {
       console.error('Job <%s> does not exist', jobId)
       return
     }
-    return dispatch(loadResult(job.id, job.properties[KEY_RESULT_ID]))
+    return dispatch(loadResult(job.id, job.properties[KEY_GEOJSON_DATA_ID]))
   }
 }
 
@@ -83,13 +83,20 @@ function loadResult(jobId, resultId) {
       jobId
     })
 
-    return client.getFile(resultId, (loaded, total) => {
+    return client.getFile(resultId, ({loaded, total, cancel}) => {
+      if (!getState().results[jobId]) {
+        cancel()  // Result was unloaded; abandon retrieval
+        return
+      }
       dispatch(loadResultProgressed(jobId, loaded, total))
     })
       .then(str => {
         dispatch(loadResultSuccess(jobId, str))
       })
       .catch(err => {
+        if (err.isCancellation) {
+          return
+        }
         console.error('Could not load result <job:%s> <result:%s>', jobId, resultId, err)
         dispatch(loadResultError(jobId, err))
       })

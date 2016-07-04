@@ -31,8 +31,11 @@ import {
 } from '../../actions/jobs'
 
 import {
-  KEY_RESULT_ID,
+  KEY_GEOJSON_DATA_ID,
+  KEY_RASTER_DATA_ID,
   KEY_STATUS,
+  KEY_WMS_LAYER_ID,
+  KEY_WMS_URL,
 } from '../../constants'
 
 const INITIAL_STATE = {
@@ -112,8 +115,11 @@ export function reducer(state = INITIAL_STATE, action) {
           ...job,
           properties: {
             ...job.properties,
-            [KEY_STATUS]:    action.status,
-            [KEY_RESULT_ID]: action.resultId,
+            [KEY_STATUS]:          action.status,
+            [KEY_GEOJSON_DATA_ID]: action.geojsonDataId,
+            [KEY_RASTER_DATA_ID]:  action.imageryDataId,
+            [KEY_WMS_LAYER_ID]:    action.wmsLayerId,
+            [KEY_WMS_URL]:         action.wmsUrl,
           }
         }
       })

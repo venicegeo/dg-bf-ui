@@ -54,6 +54,9 @@ export default class JobStatus extends Component {
   }
 
   componentWillReceiveProps(nextProps) {
+    if (this.state.isDownloading && !nextProps.result) {
+      this.setState({isDownloading: false})
+    }
     if (this.state.isDownloading && nextProps.result && nextProps.result.geojson) {
       this._triggerDownload(nextProps.result.geojson)
     }

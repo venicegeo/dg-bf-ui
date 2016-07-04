@@ -24,23 +24,49 @@ export class Client {
     this.authToken = authToken
   }
 
-  getFile(id, progress) {
+  getDeployment(id) {
+    return this._fetch(`/deployment/${id}`)
+      .then(asJson)
+      .then(normalizeDeployment)
+  }
+
+  getFile(id, onProgress) {
     return new Promise((resolve, reject) => {
       const xhr = new XMLHttpRequest()
       xhr.open('GET', encodeURI(`${this.gateway}/file/${id}`))
       xhr.setRequestHeader('authorization', this.authToken)
       xhr.addEventListener('error', () => reject(new Error('Network error')))
-      if (progress) {
-        xhr.addEventListener('progress', event => progress(event.loaded, event.total))
+      let canceled = false
+      if (onProgress) {
+        xhr.addEventListener('progress', event => {
+          onProgress({
+            cancel() {
+              if (!canceled) {
+                canceled = true
+                xhr.abort()
+              }
+            },
+            loaded: event.loaded,
+            total: event.total
+          })
+        })
       }
       xhr.addEventListener('readystatechange', () => {
-        if (xhr.readyState === 4) {
-          if (xhr.status === 200) {
-            resolve(xhr.responseText)
-            return
-          }
-          reject(new HttpError({status: xhr.status}))
+        if (xhr.readyState !== 4) {
+          return
         }
+
+        if (canceled) {
+          reject({isCancellation: true})
+          return
+        }
+
+        if (xhr.status !== 200) {
+          reject(new HttpError({status: xhr.status}))
+          return
+        }
+
+        resolve(xhr.responseText)
       })
       xhr.send(null)
     })
@@ -87,6 +113,14 @@ function asJson(response) {
     throw new HttpError(response)
   }
   return response.json()
+}
+
+function normalizeDeployment(descriptor) {
+  return {
+    dataId:   descriptor.dataId,
+    endpoint: descriptor.capabilitiesUrl.replace(/\?.*$/, ''),
+    layerId:  'piazza:' + descriptor.layer,
+  }
 }
 
 function normalizePostMetadata(metadata) {

@@ -24,6 +24,8 @@ import styles from './FeatureDetails.css'
 
 import {
   KEY_THUMBNAIL,
+  KEY_WMS_LAYER_ID,
+  KEY_WMS_URL,
   TYPE_JOB,
   TYPE_SCENE,
   KEY_TYPE,
@@ -44,28 +46,15 @@ export default class FeatureDetails extends Component {
     this.state = {loadRefCount: 0}
   }
 
-  _incrementLoading() {
-    this.setState({
-      loadRefCount: this.state.loadRefCount + 1
-    })
-  }
-
-  _decrementLoading() {
-    this.setState({
-      loadRefCount: Math.max(this.state.loadRefCount - 1, 0)
-    })
-  }
-
   componentDidMount() {
-    if (this.props.feature) {
+    if (shouldFetchThumbnail(this.props.feature)) {
       this._updateThumbnail(this.props.feature)
     }
   }
 
   componentWillReceiveProps(nextProps) {
-    const {feature} = nextProps
-    if (feature && this.props.feature !== feature) {
-      this._updateThumbnail(feature)
+    if (shouldFetchThumbnail(nextProps.feature) && (!this.props.feature || this.props.feature.id !== nextProps.feature.id)) {
+      this._updateThumbnail(nextProps.feature)
     }
   }
 
@@ -99,12 +88,24 @@ export default class FeatureDetails extends Component {
     return this.state.loadRefCount ? styles.isLoading : ''
   }
 
+  _decrementLoading() {
+    this.setState({
+      loadRefCount: Math.max(this.state.loadRefCount - 1, 0)
+    })
+  }
+
   _fetchThumbnail(url) {
     if (this._thumbnailPromise) {
       this._thumbnailPromise.cancel()
     }
     this._thumbnailPromise = fetchThumbnail(url)
     return this._thumbnailPromise.promise
+  }
+
+  _incrementLoading() {
+    this.setState({
+      loadRefCount: this.state.loadRefCount + 1
+    })
   }
 
   _updateThumbnail(feature) {
@@ -130,4 +131,11 @@ function generateErrorPlaceholder() {
   const placeholder = new Image()
   placeholder.src = errorPlaceholder
   return placeholder
+}
+
+function shouldFetchThumbnail(feature) {
+  return feature
+    && feature.properties
+    && feature.properties[KEY_THUMBNAIL]
+    && (!feature.properties[KEY_WMS_LAYER_ID] && !feature.properties[KEY_WMS_URL])
 }
