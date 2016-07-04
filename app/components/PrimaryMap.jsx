@@ -801,8 +801,8 @@ function generateFrameLayer() {
               color: 'rgba(0,0,0,.5)'
             }),
             offsetX: 4,
-            offsetY: 40,
-            font: '13px Catamaran, Verdana, sans-serif',
+            offsetY: 35,
+            font: '12px Catamaran, Verdana, sans-serif',
             text: (feature.get(KEY_STATUS) + ' // ' + feature.get(KEY_IMAGE_ID)).toUpperCase(),
             textAlign: 'left',
             textBaseline: 'bottom'
