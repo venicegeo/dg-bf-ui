@@ -15,14 +15,9 @@
  **/
 
 import React from 'react'
-import styles from './JobFeatureDetails.css'
 
 export default function JobFeatureDetails() {
-  return (
-    <div className={styles.root}>
-      <h1>JobFeatureDetails</h1>
-    </div>
-  )
+  return null
 }
 
 JobFeatureDetails.propTypes = {
