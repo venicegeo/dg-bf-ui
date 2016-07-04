@@ -27,6 +27,7 @@ import {
   searchCatalog,
   updateCatalogApiKey,
   updateSearchBbox,
+  updateSearchCloudCover,
   updateSearchDates,
 } from '../actions'
 
@@ -39,6 +40,7 @@ class CreateJob extends Component {
     algorithms:    React.PropTypes.array.isRequired,
     bbox:          React.PropTypes.arrayOf(React.PropTypes.number),
     catalogApiKey: React.PropTypes.string,
+    cloudCover:    React.PropTypes.number.isRequired,
     dateFrom:      React.PropTypes.string.isRequired,
     dateTo:        React.PropTypes.string.isRequired,
     dispatch:      React.PropTypes.func.isRequired,
@@ -57,6 +59,7 @@ class CreateJob extends Component {
     this._handleClearBbox = this._handleClearBbox.bind(this)
     this._handleNameChange = this._handleNameChange.bind(this)
     this._handleSearchSubmit = this._handleSearchSubmit.bind(this)
+    this._handleSearchCloudCoverChange = this._handleSearchCloudCoverChange.bind(this)
     this._handleSearchDateChange = this._handleSearchDateChange.bind(this)
   }
 
@@ -76,12 +79,14 @@ class CreateJob extends Component {
               <ImagerySearch
                 bbox={this.props.bbox}
                 catalogApiKey={this.props.catalogApiKey}
+                cloudCover={this.props.cloudCover}
                 dateFrom={this.props.dateFrom}
                 dateTo={this.props.dateTo}
                 error={this.props.error}
                 isSearching={this.props.isSearching}
                 onApiKeyChange={this._handleCatalogApiKeyChange}
                 onClearBbox={this._handleClearBbox}
+                onCloudCoverChange={this._handleSearchCloudCoverChange}
                 onDateChange={this._handleSearchDateChange}
                 onSubmit={this._handleSearchSubmit}
               />
@@ -149,6 +154,10 @@ class CreateJob extends Component {
     this.props.dispatch(changeJobName(name))
   }
 
+  _handleSearchCloudCoverChange(cloudCover) {
+    this.props.dispatch(updateSearchCloudCover(cloudCover))
+  }
+
   _handleSearchDateChange(dateFrom, dateTo) {
     this.props.dispatch(updateSearchDates(dateFrom, dateTo))
   }
@@ -162,6 +171,7 @@ export default connect(state => ({
   algorithms:    state.algorithms.records,
   bbox:          state.search.bbox,
   catalogApiKey: state.catalog.apiKey,
+  cloudCover:    state.search.cloudCover,
   dateFrom:      state.search.dateFrom,
   dateTo:        state.search.dateTo,
   error:         state.search.error,

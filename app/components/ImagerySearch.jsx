@@ -17,20 +17,23 @@
 import React, {Component} from 'react'
 import LoadingAnimation from './LoadingAnimation'
 import StaticMinimap from './StaticMinimap'
+import Slider from './Slider'
 import styles from './ImagerySearch.css'
 
 export default class ImagerySearch extends Component {
   static propTypes = {
-    bbox:           React.PropTypes.array.isRequired,
-    catalogApiKey:  React.PropTypes.string,
-    dateFrom:       React.PropTypes.string.isRequired,
-    dateTo:         React.PropTypes.string.isRequired,
-    error:          React.PropTypes.object,
-    isSearching:    React.PropTypes.bool.isRequired,
-    onApiKeyChange: React.PropTypes.func.isRequired,
-    onDateChange:   React.PropTypes.func.isRequired,
-    onClearBbox:    React.PropTypes.func.isRequired,
-    onSubmit:       React.PropTypes.func.isRequired
+    bbox:               React.PropTypes.array.isRequired,
+    catalogApiKey:      React.PropTypes.string,
+    cloudCover:         React.PropTypes.number.isRequired,
+    dateFrom:           React.PropTypes.string.isRequired,
+    dateTo:             React.PropTypes.string.isRequired,
+    error:              React.PropTypes.object,
+    isSearching:        React.PropTypes.bool.isRequired,
+    onApiKeyChange:     React.PropTypes.func.isRequired,
+    onDateChange:       React.PropTypes.func.isRequired,
+    onClearBbox:        React.PropTypes.func.isRequired,
+    onCloudCoverChange: React.PropTypes.func.isRequired,
+    onSubmit:           React.PropTypes.func.isRequired
   }
 
   constructor() {
@@ -47,7 +50,7 @@ export default class ImagerySearch extends Component {
   }
 
   render() {
-    const {error, bbox, isSearching} = this.props
+    const {error, bbox, cloudCover, isSearching} = this.props
     return (
       <form className={`${styles.root} ${isSearching ? styles.isSearching : ''}`} onSubmit={this._handleSubmit}>
         <h2>Search for Imagery</h2>
@@ -86,6 +89,13 @@ export default class ImagerySearch extends Component {
           <span>To</span>
           <input ref="dateTo" type="date" disabled={true} />
         </label>
+
+        <h3>Cloud Cover</h3>
+        <Slider
+          className={styles.slider}
+          value={cloudCover}
+          onChange={this.props.onCloudCoverChange}
+        />
 
         <div className={styles.controls}>
           <button disabled={!this._canSubmit}>Search for imagery</button>
