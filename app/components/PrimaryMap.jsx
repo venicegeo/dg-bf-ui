@@ -254,8 +254,15 @@ export default class PrimaryMap extends Component {
   }
 
   _handleMouseMove(event) {
-    const excludingDraw = l => l !== this._drawLayer
-    this._map.getTarget().style.cursor = this._map.hasFeatureAtPixel(event.pixel, excludingDraw) ? 'pointer' : 'default'
+    const layerFilter = l => l === this._frameLayer || l === this._imageryLayer
+    let cursor = 'default'
+    this._map.forEachFeatureAtPixel(event.pixel, (feature) => {
+      if (feature.get(KEY_TYPE)) {
+        cursor = 'pointer'
+      }
+      return true
+    }, null, layerFilter)
+    this.refs.container.style.cursor = cursor
   }
 
   _handleSelect(event) {
