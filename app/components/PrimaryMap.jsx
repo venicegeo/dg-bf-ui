@@ -681,9 +681,9 @@ function generateDetectionsLayer() {
   return new ol.layer.Vector({
     source: new ol.source.Vector(),
     style(feature) {
-      const geometry = feature.getGeometry()
       switch (feature.get(KEY_DETECTION)) {
       case DISPOSITION_DETECTED:
+        const geometry = feature.getGeometry()
         const [baseline, detection] = geometry.getGeometries()
         return [generateStyleDetectionBaseline(baseline), generateStyleDetection(detection)]
       case DISPOSITION_UNDETECTED:
