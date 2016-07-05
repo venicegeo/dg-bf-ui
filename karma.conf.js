@@ -58,7 +58,13 @@ module.exports = (config) => {
           'process.env.NODE_ENV': JSON.stringify('test'),
           'process.env.GATEWAY': JSON.stringify('/test-gateway')
         })
-      ]
+      ],
+      externals: {
+        'cheerio' : 'window',
+        'react/addons': true,
+        'react/lib/ExecutionEnvironment': true,
+        'react/lib/ReactContext': true
+      }
     },
 
     webpackMiddleware: {

@@ -15,7 +15,7 @@
  **/
 
 import React, {Component} from 'react'
-import Algorithm from './Algorithm'
+import Algorithm from './Algorithm.jsx'
 import styles from './AlgorithmList.css'
 
 export default class AlgorithmList extends Component {
