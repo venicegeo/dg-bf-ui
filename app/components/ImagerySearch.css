@@ -90,6 +90,7 @@
   background-color: #3d94c5;
   text-align: center;
   opacity: .6;
+  z-index: 2;  /* Place over slider */
 }
 
 .isSearching .loadingMask {
