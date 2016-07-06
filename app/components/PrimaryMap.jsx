@@ -32,6 +32,7 @@ import styles from './PrimaryMap.css'
 import {
   KEY_NAME,
   KEY_STATUS,
+  KEY_IMAGE_ID,
   KEY_TYPE,
   KEY_WMS_LAYER_ID,
   KEY_WMS_URL,
@@ -47,11 +48,18 @@ const INITIAL_CENTER = [110, 0]
 const MIN_ZOOM = 2.5
 const MAX_ZOOM = 22
 const RESOLUTION_CLOSE = 1000
+const STEM_OFFSET = 10000
 const DISPOSITION_DETECTED = 'Detected'
 const DISPOSITION_UNDETECTED = 'Undetected'
 const DISPOSITION_NEW_DETECTION = 'New Detection'
 const KEY_OWNER_ID = 'OWNER_ID'
 const KEY_DETECTION = 'detection'
+const KEY_ROLE = 'ROLE'
+const ROLE_DIVOT_OUTBOARD = 'ROLE_DIVOT_OUTBOARD'
+const ROLE_DIVOT_INBOARD = 'ROLE_DIVOT_INBOARD'
+const ROLE_STEM = 'ROLE_STEM'
+const ROLE_LABEL_MAJOR = 'ROLE_LABEL_MAJOR'
+const ROLE_LABEL_MINOR = 'ROLE_LABEL_MINOR'
 export const MODE_DRAW_BBOX = 'MODE_DRAW_BBOX'
 export const MODE_NORMAL = 'MODE_NORMAL'
 export const MODE_SELECT_IMAGERY = 'MODE_SELECT_IMAGERY'
@@ -247,8 +255,15 @@ export default class PrimaryMap extends Component {
   }
 
   _handleMouseMove(event) {
-    const excludingDraw = l => l !== this._drawLayer
-    this._map.getTarget().style.cursor = this._map.hasFeatureAtPixel(event.pixel, excludingDraw) ? 'pointer' : 'default'
+    const layerFilter = l => l === this._frameLayer || l === this._imageryLayer
+    let cursor = 'default'
+    this._map.forEachFeatureAtPixel(event.pixel, (feature) => {
+      if (feature.get(KEY_TYPE)) {
+        cursor = 'pointer'
+      }
+      return true
+    }, null, layerFilter)
+    this.refs.container.style.cursor = cursor
   }
 
   _handleSelect(event) {
@@ -280,6 +295,8 @@ export default class PrimaryMap extends Component {
     default:
       this.props.onSelectImage(null)
       this.props.onSelectJob(null)
+      // Not a valid "selectable" feature
+      this._selectInteraction.getFeatures().clear()
       break
     }
   }
@@ -363,7 +380,7 @@ export default class PrimaryMap extends Component {
 
   _renderCompositeImage() {
     const {datasets} = this.props
-    const insertionIndex = this._map.getLayers().getArray().indexOf(this._detectionsLayer) - 1
+    const insertionIndex = this._basemapLayers.length
     datasets.forEach(dataset => {
       const shouldLoad = dataset.geojson && dataset.job.properties[KEY_WMS_URL] && dataset.job.properties[KEY_WMS_LAYER_ID]
       const existingLayer = this._wmsLayers[dataset.job.id]
@@ -430,8 +447,52 @@ export default class PrimaryMap extends Component {
     const source = this._frameLayer.getSource()
     source.clear()
     const reader = new ol.format.GeoJSON()
-    const features = this.props.datasets.map(({job}) => reader.readFeature(job, {featureProjection: 'EPSG:3857'}))
-    source.addFeatures(features)
+    console.debug('rendering frames')
+    this.props.datasets.map(dataset => {
+      const frame = reader.readFeature(dataset.job, {featureProjection: 'EPSG:3857'})
+      source.addFeature(frame)
+
+      const frameExtent = frame.getGeometry().getExtent()
+      const topRight = ol.extent.getTopRight(ol.extent.buffer(frameExtent, STEM_OFFSET))
+      const center = ol.extent.getCenter(frameExtent)
+
+      const stem = new ol.Feature({
+        geometry: new ol.geom.LineString([
+          center,
+          topRight
+        ])
+      })
+      stem.set(KEY_ROLE, ROLE_STEM)
+      source.addFeature(stem)
+
+      const divotInboard = new ol.Feature({
+        geometry: new ol.geom.Point(center)
+      })
+      divotInboard.set(KEY_ROLE, ROLE_DIVOT_INBOARD)
+      source.addFeature(divotInboard)
+
+      const divotOutboard = new ol.Feature({
+        geometry: new ol.geom.Point(topRight)
+      })
+      divotOutboard.set(KEY_ROLE, ROLE_DIVOT_OUTBOARD)
+      divotOutboard.set(KEY_STATUS, frame.get(KEY_STATUS))
+      source.addFeature(divotOutboard)
+
+      const name = new ol.Feature({
+        geometry: new ol.geom.Point(topRight)
+      })
+      name.set(KEY_ROLE, ROLE_LABEL_MAJOR)
+      name.set(KEY_NAME, frame.get(KEY_NAME).toUpperCase())
+      source.addFeature(name)
+
+      const status = new ol.Feature({
+        geometry: new ol.geom.Point(topRight)
+      })
+      status.set(KEY_ROLE, ROLE_LABEL_MINOR)
+      status.set(KEY_STATUS, frame.get(KEY_STATUS))
+      status.set(KEY_IMAGE_ID, frame.get(KEY_IMAGE_ID))
+      source.addFeature(status)
+    })
   }
 
   _renderImagery() {
@@ -595,9 +656,9 @@ function generateDetectionsLayer() {
   return new ol.layer.Vector({
     source: new ol.source.Vector(),
     style(feature) {
-      const geometry = feature.getGeometry()
       switch (feature.get(KEY_DETECTION)) {
       case DISPOSITION_DETECTED:
+        const geometry = feature.getGeometry()
         const [baseline, detection] = geometry.getGeometries()
         return [generateStyleDetectionBaseline(baseline), generateStyleDetection(detection)]
       case DISPOSITION_UNDETECTED:
@@ -666,51 +727,83 @@ function generateDrawInteraction(drawLayer) {
 }
 
 function generateFrameLayer() {
-  function _getFillColor(status) {
-    switch (status) {
-    case STATUS_RUNNING: return 'rgba(255,255,0, .5)'
-    case STATUS_SUCCESS: return 'rgba(0,255,0, .5)'
-    case STATUS_TIMED_OUT:
-    case STATUS_ERROR: return 'rgba(255,0,0, .5)'
-    default: return 'magenta'
-    }
-  }
   return new ol.layer.Vector({
     source: new ol.source.Vector(),
     style(feature, resolution) {
-      // FIXME -- convert labels to overlays
-      const labelText = `${feature.get(KEY_NAME).toUpperCase()} (${feature.get(KEY_STATUS)})`
-      const zoomedOut = resolution > RESOLUTION_CLOSE
-      if (zoomedOut) {
+      const isClose = resolution < RESOLUTION_CLOSE
+      switch (feature.get(KEY_ROLE)) {
+      case ROLE_DIVOT_INBOARD:
+        return new ol.style.Style({
+          image: new ol.style.RegularShape({
+            angle: Math.PI / 4,
+            points: 4,
+            radius: 5,
+            fill: new ol.style.Fill({
+              color: 'black'
+            })
+          })
+        })
+      case ROLE_DIVOT_OUTBOARD:
+        return new ol.style.Style({
+          image: new ol.style.RegularShape({
+            angle: Math.PI / 4,
+            points: 4,
+            radius: 10,
+            stroke: new ol.style.Stroke({
+              color: 'black',
+              width: 1
+            }),
+            fill: new ol.style.Fill({
+              color: getColorForStatus(feature.get(KEY_STATUS))
+            })
+          })
+        })
+      case ROLE_STEM:
+        return new ol.style.Style({
+          stroke: new ol.style.Stroke({
+            color: 'black',
+            width: 1
+          })
+        })
+      case ROLE_LABEL_MAJOR:
         return new ol.style.Style({
           text: new ol.style.Text({
             fill: new ol.style.Fill({
               color: 'black'
             }),
-            font: 'bold 18px Catamaran, Arial, sans-serif',
-            text: labelText
+            offsetX: 13,
+            offsetY: 1,
+            font: 'bold 17px Catamaran, Verdana, sans-serif',
+            text: feature.get(KEY_NAME).toUpperCase(),
+            textAlign: 'left',
+            textBaseline: 'middle'
+          })
+        })
+      case ROLE_LABEL_MINOR:
+        return new ol.style.Style({
+          text: new ol.style.Text({
+            fill: new ol.style.Fill({
+              color: 'rgba(0,0,0,.6)'
+            }),
+            offsetX: 13,
+            offsetY: 15,
+            font: '11px Verdana, sans-serif',
+            text: (feature.get(KEY_STATUS) + ' // ' + feature.get(KEY_IMAGE_ID)).toUpperCase(),
+            textAlign: 'left',
+            textBaseline: 'middle'
+          })
+        })
+      default:
+        return new ol.style.Style({
+          stroke: new ol.style.Stroke({
+            color: 'rgba(0, 0, 0, .4)',
+            lineDash: [10, 10]
           }),
           fill: new ol.style.Fill({
-            color: _getFillColor(feature.get(KEY_STATUS))
-          }),
-          stroke: new ol.style.Stroke({
-            color: 'rgba(0, 0, 0, .5)'
+            color: isClose ? 'transparent' : 'hsla(202, 100%, 85%, 0.5)'
           })
         })
       }
-      return new ol.style.Style({
-        text: new ol.style.Text({
-          fill: new ol.style.Fill({
-            color: 'rgba(0, 0, 0, .4)'
-          }),
-          font: 'bold 13px Catamaran, Arial, sans-serif',
-          text: labelText
-        }),
-        stroke: new ol.style.Stroke({
-          color: 'rgba(0, 0, 0, .2)',
-          lineDash: [10, 10]
-        })
-      })
     }
   })
 }
@@ -720,7 +813,7 @@ function generateImageryLayer() {
     source: new ol.source.Vector(),
     style: new ol.style.Style({
       fill: new ol.style.Fill({
-        color: 'rgba(0,0,0, .5)'
+        color: 'rgba(0,0,0, .15)'
       }),
       stroke: new ol.style.Stroke({
         color: 'rgba(0,0,0, .5)',
@@ -840,6 +933,16 @@ function generateStyleUnknownDetectionType() {
 
 function generateThumbnailLayer() {
   return new ol.layer.Image()
+}
+
+function getColorForStatus(status) {
+  switch (status) {
+  case STATUS_RUNNING: return 'hsl(48, 94%, 54%)'
+  case STATUS_SUCCESS: return 'hsl(114, 100%, 45%)'
+  case STATUS_TIMED_OUT:
+  case STATUS_ERROR: return 'hsl(349, 100%, 60%)'
+  default: return 'magenta'
+  }
 }
 
 function hasWmsPresence(feature) {
