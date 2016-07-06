@@ -48,6 +48,7 @@ const INITIAL_CENTER = [110, 0]
 const MIN_ZOOM = 2.5
 const MAX_ZOOM = 22
 const RESOLUTION_CLOSE = 1000
+const STEM_OFFSET = 10000
 const DISPOSITION_DETECTED = 'Detected'
 const DISPOSITION_UNDETECTED = 'Undetected'
 const DISPOSITION_NEW_DETECTION = 'New Detection'
@@ -448,75 +449,49 @@ export default class PrimaryMap extends Component {
     const reader = new ol.format.GeoJSON()
     console.debug('rendering frames')
     this.props.datasets.map(dataset => {
-      const mainFeature = reader.readFeature(dataset.job, {featureProjection: 'EPSG:3857'})
+      const frame = reader.readFeature(dataset.job, {featureProjection: 'EPSG:3857'})
+      source.addFeature(frame)
 
-      const STEM_OFFSET = 10000
-      const DIVOT_SIZE = 5000
-      const DIVOT_MULTIPLIER = 8
+      const frameExtent = frame.getGeometry().getExtent()
+      const topRight = ol.extent.getTopRight(ol.extent.buffer(frameExtent, STEM_OFFSET))
+      const center = ol.extent.getCenter(frameExtent)
 
-      source.addFeature(mainFeature)
-      source.addFeature(stem())
-      source.addFeature(divot1())
-      source.addFeature(divot2())
-      source.addFeature(name())
-      source.addFeature(status())
+      const stem = new ol.Feature({
+        geometry: new ol.geom.LineString([
+          center,
+          topRight
+        ])
+      })
+      stem.set(KEY_ROLE, ROLE_STEM)
+      source.addFeature(stem)
 
-      function stem() {
-        const origin = mainFeature.getGeometry().getExtent()
-        const p1 = ol.extent.getCenter(origin)
-        const p2 = ol.extent.getTopRight(ol.extent.buffer(origin, STEM_OFFSET))
-        const feature = new ol.Feature({
-          geometry: new ol.geom.LineString([p1, p2])
-        })
-        feature.set(KEY_ROLE, ROLE_STEM)
-        return feature
-      }
+      const divotInboard = new ol.Feature({
+        geometry: new ol.geom.Point(center)
+      })
+      divotInboard.set(KEY_ROLE, ROLE_DIVOT_INBOARD)
+      source.addFeature(divotInboard)
 
-      function divot1() {
-        const origin = mainFeature.getGeometry().getExtent()
-        const p1 = ol.extent.getCenter(origin)
-        const p2 = ol.extent.buffer([...p1, ...p1], DIVOT_SIZE)
-        const feature = new ol.Feature({
-          geometry: ol.geom.Polygon.fromExtent(p2)
-        })
-        feature.set(KEY_ROLE, ROLE_DIVOT_INBOARD)
-        return feature
-      }
+      const divotOutboard = new ol.Feature({
+        geometry: new ol.geom.Point(topRight)
+      })
+      divotOutboard.set(KEY_ROLE, ROLE_DIVOT_OUTBOARD)
+      divotOutboard.set(KEY_STATUS, frame.get(KEY_STATUS))
+      source.addFeature(divotOutboard)
 
-      function divot2() {
-        const origin = mainFeature.getGeometry().getExtent()
-        const p1 = ol.extent.getTopRight(ol.extent.buffer(origin, STEM_OFFSET))
-        const p2 = ol.extent.getTopRight(ol.extent.buffer(origin, STEM_OFFSET + (DIVOT_SIZE * DIVOT_MULTIPLIER)))
-        const feature = new ol.Feature({
-          geometry: ol.geom.Polygon.fromExtent([...p1, ...p2])
-        })
-        feature.set(KEY_ROLE, ROLE_DIVOT_OUTBOARD)
-        feature.set(KEY_STATUS, mainFeature.get(KEY_STATUS))
-        return feature
-      }
+      const name = new ol.Feature({
+        geometry: new ol.geom.Point(topRight)
+      })
+      name.set(KEY_ROLE, ROLE_LABEL_MAJOR)
+      name.set(KEY_NAME, frame.get(KEY_NAME).toUpperCase())
+      source.addFeature(name)
 
-      function name() {
-        const origin = mainFeature.getGeometry().getExtent()
-        const p1 = ol.extent.getTopRight(ol.extent.buffer(origin, 50000))
-        const feature = new ol.Feature({
-          geometry: new ol.geom.Point(p1)
-        })
-        feature.set(KEY_ROLE, ROLE_LABEL_MAJOR)
-        feature.set(KEY_NAME, mainFeature.get(KEY_NAME).toUpperCase())
-        return feature
-      }
-
-      function status() {
-        const origin = mainFeature.getGeometry().getExtent()
-        const p1 = ol.extent.getTopRight(ol.extent.buffer(origin, 50000))
-        const feature = new ol.Feature({
-          geometry: new ol.geom.Point(p1)
-        })
-        feature.set(KEY_ROLE, ROLE_LABEL_MINOR)
-        feature.set(KEY_STATUS, mainFeature.get(KEY_STATUS))
-        feature.set(KEY_IMAGE_ID, mainFeature.get(KEY_IMAGE_ID))
-        return feature
-      }
+      const status = new ol.Feature({
+        geometry: new ol.geom.Point(topRight)
+      })
+      status.set(KEY_ROLE, ROLE_LABEL_MINOR)
+      status.set(KEY_STATUS, frame.get(KEY_STATUS))
+      status.set(KEY_IMAGE_ID, frame.get(KEY_IMAGE_ID))
+      source.addFeature(status)
     })
   }
 
@@ -759,18 +734,28 @@ function generateFrameLayer() {
       switch (feature.get(KEY_ROLE)) {
       case ROLE_DIVOT_INBOARD:
         return new ol.style.Style({
-          fill: new ol.style.Fill({
-            color: 'black'
+          image: new ol.style.RegularShape({
+            angle: Math.PI / 4,
+            points: 4,
+            radius: 5,
+            fill: new ol.style.Fill({
+              color: 'black'
+            })
           })
         })
       case ROLE_DIVOT_OUTBOARD:
         return new ol.style.Style({
-          stroke: new ol.style.Stroke({
-            color: 'black',
-            width: 1
-          }),
-          fill: new ol.style.Fill({
-            color: getColorForStatus(feature.get(KEY_STATUS))
+          image: new ol.style.RegularShape({
+            angle: Math.PI / 4,
+            points: 4,
+            radius: 10,
+            stroke: new ol.style.Stroke({
+              color: 'black',
+              width: 1
+            }),
+            fill: new ol.style.Fill({
+              color: getColorForStatus(feature.get(KEY_STATUS))
+            })
           })
         })
       case ROLE_STEM:
@@ -786,26 +771,26 @@ function generateFrameLayer() {
             fill: new ol.style.Fill({
               color: 'black'
             }),
-            offsetX: 4,
-            offsetY: 23,
-            font: 'bold 18px Catamaran, Verdana, sans-serif',
+            offsetX: 13,
+            offsetY: 1,
+            font: 'bold 17px Catamaran, Verdana, sans-serif',
             text: feature.get(KEY_NAME).toUpperCase(),
             textAlign: 'left',
-            textBaseline: 'bottom'
+            textBaseline: 'middle'
           })
         })
       case ROLE_LABEL_MINOR:
         return new ol.style.Style({
           text: new ol.style.Text({
             fill: new ol.style.Fill({
-              color: 'rgba(0,0,0,.5)'
+              color: 'rgba(0,0,0,.6)'
             }),
-            offsetX: 4,
-            offsetY: 35,
-            font: '12px Catamaran, Verdana, sans-serif',
+            offsetX: 13,
+            offsetY: 15,
+            font: '11px Verdana, sans-serif',
             text: (feature.get(KEY_STATUS) + ' // ' + feature.get(KEY_IMAGE_ID)).toUpperCase(),
             textAlign: 'left',
-            textBaseline: 'bottom'
+            textBaseline: 'middle'
           })
         })
       default:
