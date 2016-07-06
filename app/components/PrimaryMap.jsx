@@ -813,7 +813,7 @@ function generateImageryLayer() {
     source: new ol.source.Vector(),
     style: new ol.style.Style({
       fill: new ol.style.Fill({
-        color: 'rgba(0,0,0, .5)'
+        color: 'rgba(0,0,0, .15)'
       }),
       stroke: new ol.style.Stroke({
         color: 'rgba(0,0,0, .5)',
@@ -937,10 +937,10 @@ function generateThumbnailLayer() {
 
 function getColorForStatus(status) {
   switch (status) {
-  case STATUS_RUNNING: return 'rgba(255,255,0, .5)'
-  case STATUS_SUCCESS: return 'rgba(0,255,0, .5)'
+  case STATUS_RUNNING: return 'hsl(48, 94%, 54%)'
+  case STATUS_SUCCESS: return 'hsl(114, 100%, 45%)'
   case STATUS_TIMED_OUT:
-  case STATUS_ERROR: return 'rgba(255,0,0, .5)'
+  case STATUS_ERROR: return 'hsl(349, 100%, 60%)'
   default: return 'magenta'
   }
 }
