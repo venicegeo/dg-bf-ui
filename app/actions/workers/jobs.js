@@ -94,7 +94,7 @@ function fetchUpdates(job) {
         return resolveResultIdentifiers(status)
       }
 
-      else if (exceededTTL(job.properties[KEY_CREATED_ON])) {
+      else if (status.status === STATUS_RUNNING && exceededTTL(job.properties[KEY_CREATED_ON])) {
         console.warn('(jobs:worker) <%s> appears to have stalled and will no longer be tracked', status.jobId)
         return {...status, status: STATUS_TIMED_OUT}
       }
