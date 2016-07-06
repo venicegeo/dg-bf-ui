@@ -718,17 +718,15 @@ function generateFrameLayer() {
 function generateImageryLayer() {
   return new ol.layer.Vector({
     source: new ol.source.Vector(),
-    style() {
-      return new ol.style.Style({
-        fill: new ol.style.Fill({
-          color: 'rgba(0,0,0, .15)'
-        }),
-        stroke: new ol.style.Stroke({
-          color: 'rgba(0,0,0, .5)',
-          width: 1
-        })
+    style: new ol.style.Style({
+      fill: new ol.style.Fill({
+        color: 'rgba(0,0,0, .5)'
+      }),
+      stroke: new ol.style.Stroke({
+        color: 'rgba(0,0,0, .5)',
+        width: 1
       })
-    }
+    })
   })
 }
 
