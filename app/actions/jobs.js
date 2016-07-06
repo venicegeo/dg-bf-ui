@@ -66,13 +66,15 @@ export function createJob(catalogApiKey, name, algorithm, feature) {
       dataInputs: {
         body: {
           content: JSON.stringify({
-            algoType:     algorithm.type,
-            svcURL:       algorithm.url,
-            pzAuthToken:  client.authToken,
-            pzAddr:       client.gateway,
-            dbAuthToken:  catalogApiKey,
-            bands:        algorithm.requirements.find(a => a.name === REQUIREMENT_BANDS).literal.split(','),
-            metaDataJSON: feature
+            algoType:      algorithm.type,
+            bandMergeType: algorithm.type,
+            bandMergeURL:  algorithm.url,
+            svcURL:        algorithm.url,
+            pzAuthToken:   client.authToken,
+            pzAddr:        client.gateway,
+            dbAuthToken:   catalogApiKey,
+            bands:         algorithm.requirements.find(a => a.name === REQUIREMENT_BANDS).literal.split(','),
+            metaDataJSON:  feature
           }),
           type:     'body',
           mimeType: 'application/json'
