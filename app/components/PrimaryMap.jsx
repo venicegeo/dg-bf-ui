@@ -737,7 +737,7 @@ function generateDrawInteraction(drawLayer) {
 function generateFrameLayer() {
   return new ol.layer.Vector({
     source: new ol.source.Vector(),
-    style(feature, resolution) {
+    style(feature, resolution) {  // eslint-disable-line complexity
       const isClose = resolution < RESOLUTION_CLOSE
       switch (feature.get(KEY_TYPE)) {
       case TYPE_DIVOT_INBOARD:
