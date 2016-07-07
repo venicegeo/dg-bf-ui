@@ -139,18 +139,17 @@ export default class PrimaryMap extends Component {
   }
 
   componentDidUpdate(previousProps, previousState) {  // eslint-disable-line complexity
+    if (!this.props.selectedFeature) {
+      this._clearSelection()
+      this._clearThumbnail()
+    }
     if (this.props.detections !== previousProps.detections) {
       this._renderCompositeImage()
       this._renderDetections()
       this._renderProgressBars()
     }
-    // TODO -- cleanup {thumbnails, selection box} when job gets removed
     if (this.props.jobs !== previousProps.jobs) {
       this._renderFrames()
-    }
-    if (!this.props.selectedFeature) {
-      this._selectInteraction.getFeatures().clear()
-      this._clearThumbnail()
     }
     if (this.props.imagery !== previousProps.imagery) {
       this._renderImagery()
@@ -217,8 +216,6 @@ export default class PrimaryMap extends Component {
 
   _clearSelection() {
     this._selectInteraction.getFeatures().clear()
-    this.props.onSelectImage(null)
-    this.props.onSelectJob(null)
   }
 
   _clearThumbnail() {
@@ -231,6 +228,7 @@ export default class PrimaryMap extends Component {
 
   _deactivateSelectInteraction() {
     this._clearSelection()
+    this._emitDeselectAll()
     this._selectInteraction.setActive(false)
   }
 
@@ -244,6 +242,11 @@ export default class PrimaryMap extends Component {
       this._skipNextRecenter = true
       this.props.onAnchorChange(anchor)
     }
+  }
+
+  _emitDeselectAll() {
+    this.props.onSelectImage(null)
+    this.props.onSelectJob(null)
   }
 
   _handleBasemapChange(index) {
@@ -315,10 +318,9 @@ export default class PrimaryMap extends Component {
       this.props.onSelectJob(null)
       break
     default:
-      this.props.onSelectImage(null)
-      this.props.onSelectJob(null)
       // Not a valid "selectable" feature
-      selections.clear()
+      this._clearSelection()
+      this._emitDeselectAll()
       break
     }
   }
