@@ -139,11 +139,11 @@ class Application extends Component {
     this.props.dispatch(selectImage(feature))
   }
 
-  _handleSelectJob(feature) {
+  _handleSelectJob(jobId) {
     this.context.router.push({
       ...this.props.location,
       query: {
-        jobId: feature ? feature.id : undefined
+        jobId: jobId || undefined
       }
     })
   }

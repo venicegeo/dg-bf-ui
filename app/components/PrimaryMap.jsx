@@ -259,39 +259,54 @@ export default class PrimaryMap extends Component {
 
   _handleMouseMove(event) {
     const layerFilter = l => l === this._frameLayer || l === this._imageryLayer
+    const isClickable = f => [TYPE_DIVOT_INBOARD, TYPE_JOB, TYPE_SCENE].indexOf(f.get(KEY_TYPE)) !== -1
     let cursor = 'default'
     this._map.forEachFeatureAtPixel(event.pixel, (feature) => {
-      if (feature.get(KEY_TYPE)) {
+      switch (feature.get(KEY_TYPE)) {
+      case TYPE_DIVOT_INBOARD:
+      case TYPE_JOB:
+      case TYPE_SCENE:
         cursor = 'pointer'
+        return true
       }
-      return true
     }, null, layerFilter)
     this.refs.container.style.cursor = cursor
   }
 
-  _handleSelect(event) {
+  _handleSelect(event) {  // eslint-disable-line complexity
     if (event.selected.length === 0 && event.deselected.length === 0) {
       return  // Disregard spurious select event
     }
 
     const [feature] = event.selected
-    let position, geojson, type
+    let position, type
     if (feature) {
       position = ol.extent.getCenter(feature.getGeometry().getExtent())
-      const writer = new ol.format.GeoJSON()
-      geojson = writer.writeFeatureObject(feature, {dataProjection: 'EPSG:4326', featureProjection: 'EPSG:3857'})
       type = feature.get(KEY_TYPE)
     }
 
     this._clearThumbnail()
     this._featureDetailsOverlay.setPosition(position)
 
+    const selections = this._selectInteraction.getFeatures()
     switch (type) {
+    case TYPE_DIVOT_INBOARD:
+    case TYPE_STEM:
+      // Proxy clicks on "inner" decorations out to the job frame itself
+      const jobId = feature.get(KEY_OWNER_ID)
+      const jobFeature = this._frameLayer.getSource().getFeatureById(jobId)
+      selections.clear()
+      selections.push(jobFeature)
+      this.props.onSelectImage(null)
+      this.props.onSelectJob(jobId)
+      break
     case TYPE_JOB:
       this.props.onSelectImage(null)
-      this.props.onSelectJob(geojson)
+      this.props.onSelectJob(feature.getId())
       break
     case TYPE_SCENE:
+      const writer = new ol.format.GeoJSON()
+      const geojson = writer.writeFeatureObject(feature, {dataProjection: 'EPSG:4326', featureProjection: 'EPSG:3857'})
       this.props.onSelectImage(geojson)
       this.props.onSelectJob(null)
       break
@@ -299,7 +314,7 @@ export default class PrimaryMap extends Component {
       this.props.onSelectImage(null)
       this.props.onSelectJob(null)
       // Not a valid "selectable" feature
-      this._selectInteraction.getFeatures().clear()
+      selections.clear()
       break
     }
   }
@@ -458,6 +473,7 @@ export default class PrimaryMap extends Component {
       const frameExtent = frame.getGeometry().getExtent()
       const topRight = ol.extent.getTopRight(ol.extent.buffer(frameExtent, STEM_OFFSET))
       const center = ol.extent.getCenter(frameExtent)
+      const jobId = frame.getId()
 
       const stem = new ol.Feature({
         geometry: new ol.geom.LineString([
@@ -466,18 +482,21 @@ export default class PrimaryMap extends Component {
         ])
       })
       stem.set(KEY_TYPE, TYPE_STEM)
+      stem.set(KEY_OWNER_ID, jobId)
       source.addFeature(stem)
 
       const divotInboard = new ol.Feature({
         geometry: new ol.geom.Point(center)
       })
       divotInboard.set(KEY_TYPE, TYPE_DIVOT_INBOARD)
+      divotInboard.set(KEY_OWNER_ID, jobId)
       source.addFeature(divotInboard)
 
       const divotOutboard = new ol.Feature({
         geometry: new ol.geom.Point(topRight)
       })
       divotOutboard.set(KEY_TYPE, TYPE_DIVOT_OUTBOARD)
+      divotOutboard.set(KEY_OWNER_ID, jobId)
       divotOutboard.set(KEY_STATUS, frame.get(KEY_STATUS))
       source.addFeature(divotOutboard)
 
@@ -485,6 +504,7 @@ export default class PrimaryMap extends Component {
         geometry: new ol.geom.Point(topRight)
       })
       name.set(KEY_TYPE, TYPE_LABEL_MAJOR)
+      name.set(KEY_OWNER_ID, jobId)
       name.set(KEY_NAME, frame.get(KEY_NAME).toUpperCase())
       source.addFeature(name)
 
@@ -492,6 +512,7 @@ export default class PrimaryMap extends Component {
         geometry: new ol.geom.Point(topRight)
       })
       status.set(KEY_TYPE, TYPE_LABEL_MINOR)
+      status.set(KEY_OWNER_ID, jobId)
       status.set(KEY_STATUS, frame.get(KEY_STATUS))
       status.set(KEY_IMAGE_ID, frame.get(KEY_IMAGE_ID))
       source.addFeature(status)
