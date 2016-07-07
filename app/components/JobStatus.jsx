@@ -37,22 +37,25 @@ import {
 
 export default class JobStatus extends Component {
   static propTypes = {
-    className:  React.PropTypes.string,
-    isActive:   React.PropTypes.bool.isRequired,
-    job:        React.PropTypes.shape({
+    className:   React.PropTypes.string,
+    isActive:    React.PropTypes.bool.isRequired,
+    job:         React.PropTypes.shape({
       id:         React.PropTypes.string.isRequired,
       geometry:   React.PropTypes.object.isRequired,
       properties: React.PropTypes.object.isRequired,
     }).isRequired,
-    onDownload: React.PropTypes.func.isRequired,
-    result:     React.PropTypes.object
+    onDownload:  React.PropTypes.func.isRequired,
+    onForgetJob: React.PropTypes.func.isRequired,
+    result:      React.PropTypes.object
   }
 
   constructor() {
     super()
-    this.state = {isDownloading: false, isExpanded: false}
+    this.state = {isDownloading: false, isExpanded: false, isRemoving: false}
+    this._emitOnForgetJob = this._emitOnForgetJob.bind(this)
     this._handleDownloadClicked = this._handleDownloadClicked.bind(this)
     this._handleExpansionToggle = this._handleExpansionToggle.bind(this)
+    this._handleForgetToggle = this._handleForgetToggle.bind(this)
   }
 
   componentWillReceiveProps(nextProps) {
@@ -105,6 +108,18 @@ export default class JobStatus extends Component {
               <dt>Sensor</dt>
               <dd>{sensor}</dd>
             </dl>
+            <div className={styles.removeToggle}>
+              <button onClick={this._handleForgetToggle}>
+                Remove this Job
+              </button>
+            </div>
+            <div className={styles.removeWarning}>
+              <h4>
+                <i className="fa fa-warning"/> Are you sure you want to remove this job from your list?
+              </h4>
+              <button onClick={this._emitOnForgetJob}>Remove this Job</button>
+              <button onClick={this._handleForgetToggle}>Cancel</button>
+            </div>
           </div>
         </div>
 
@@ -143,6 +158,7 @@ export default class JobStatus extends Component {
       this._classForDownloading,
       this._classForExpansion,
       this._classForLoading,
+      this._classForRemoving,
       this._classForStatus,
     ].filter(Boolean).join(' ')
   }
@@ -163,6 +179,10 @@ export default class JobStatus extends Component {
     return (this.props.result && this.props.result.loading) ? styles.isLoading : ''
   }
 
+  get _classForRemoving() {
+    return this.state.isRemoving ? styles.isRemoving : ''
+  }
+
   get _classForStatus() {
     switch (this.props.job.properties[KEY_STATUS]) {
     case STATUS_SUCCESS: return styles.succeeded
@@ -171,6 +191,10 @@ export default class JobStatus extends Component {
     case STATUS_ERROR: return styles.failed
     default: return ''
     }
+  }
+
+  _emitOnForgetJob() {
+    this.props.onForgetJob(this.props.job.id)
   }
 
   _handleDownloadClicked() {
@@ -186,7 +210,14 @@ export default class JobStatus extends Component {
   }
 
   _handleExpansionToggle() {
-    this.setState({isExpanded: !this.state.isExpanded})
+    this.setState({
+      isExpanded: !this.state.isExpanded,
+      isRemoving: false,
+    })
+  }
+
+  _handleForgetToggle() {
+    this.setState({isRemoving: !this.state.isRemoving})
   }
 
   _triggerDownload(contents) {

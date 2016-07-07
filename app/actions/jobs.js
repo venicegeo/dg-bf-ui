@@ -48,6 +48,7 @@ export const DISCOVER_EXECUTOR_ERROR = 'DISCOVER_EXECUTOR_ERROR'
 export const DISMISS_JOB_ERROR = 'DISMISS_JOB_ERROR'
 export const FETCH_JOBS = 'FETCH_JOBS'
 export const FETCH_JOBS_SUCCESS = 'FETCH_JOBS_SUCCESS'
+export const REMOVE_JOB = 'REMOVE_JOB'
 export const JOBS_WORKER_ERROR = 'JOBS_WORKER_ERROR'
 export const START_JOBS_WORKER = 'START_JOBS_WORKER'
 export const STOP_JOBS_WORKER = 'STOP_JOBS_WORKER'
@@ -114,6 +115,13 @@ export function discoverExecutorIfNeeded() {
 export function dismissJobError() {
   return {
     type: DISMISS_JOB_ERROR
+  }
+}
+
+export function removeJob(id) {
+  return {
+    type: REMOVE_JOB,
+    id
   }
 }
 

@@ -21,6 +21,7 @@ import styles from './JobStatusList.css'
 import {
   dismissJobError,
   downloadResult,
+  removeJob,
   startJobsWorkerIfNeeded,
 } from '../actions'
 
@@ -41,6 +42,7 @@ class JobStatusList extends Component {
     super()
     this._dismissError = this._dismissError.bind(this)
     this._handleDownload = this._handleDownload.bind(this)
+    this._handleForgetJob = this._handleForgetJob.bind(this)
   }
 
   render() {
@@ -69,6 +71,7 @@ class JobStatusList extends Component {
               job={job}
               result={this.props.results.find(r => r.jobId === job.id)}
               onDownload={this._handleDownload}
+              onForgetJob={this._handleForgetJob}
             />
           ))}
         </ul>
@@ -89,6 +92,15 @@ class JobStatusList extends Component {
       }
     })
     this.props.dispatch(downloadResult(job.id))
+  }
+
+  _handleForgetJob(jobId) {
+    if (this._isActive(jobId)) {
+      this.context.router.push({...this.props.location,
+        query: {}
+      })
+    }
+    this.props.dispatch(removeJob(jobId))
   }
 
   _isActive(jobId) {

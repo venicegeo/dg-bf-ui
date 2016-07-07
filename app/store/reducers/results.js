@@ -15,6 +15,9 @@
  **/
 
 import {
+  REMOVE_JOB,
+} from '../../actions/jobs'
+import {
   LOAD_RESULT,
   LOAD_RESULT_SUCCESS,
   LOAD_RESULT_ERROR,
@@ -68,6 +71,8 @@ export function reducer(state = [], action) {
         }
       }
     })
+  case REMOVE_JOB:
+    return state.filter(r => r.jobId !== action.id)
   case UNLOAD_RESULT:
     return state.filter(r => r.jobId !== jobId)
   default:

@@ -27,6 +27,7 @@ import {
   FETCH_JOBS,
   FETCH_JOBS_SUCCESS,
   JOBS_WORKER_ERROR,
+  REMOVE_JOB,
   UPDATE_JOB,
 } from '../../actions/jobs'
 
@@ -76,6 +77,11 @@ export function reducer(state = INITIAL_STATE, action) {
       ...state,
       fetching: false,
       records: action.records
+    }
+  case REMOVE_JOB:
+    return {
+      ...state,
+      records: state.records.filter(j => j.id !== action.id)
     }
   case CREATE_JOB:
     return {

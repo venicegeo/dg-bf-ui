@@ -144,6 +144,7 @@ export default class PrimaryMap extends Component {
       this._renderDetections()
       this._renderProgressBars()
     }
+    // TODO -- cleanup {frames, wms layers, thumbnails} when job gets removed
     if (this.props.jobs !== previousProps.jobs) {
       this._renderFrames()
     }
