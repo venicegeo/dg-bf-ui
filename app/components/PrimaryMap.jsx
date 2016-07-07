@@ -335,6 +335,8 @@ export default class PrimaryMap extends Component {
       imageExtent: reader.readGeometry(feature.geometry, {dataProjection: 'EPSG:4326', featureProjection: 'EPSG:3857'}).getExtent(),
       url:         image.src
     }))
+    this._thumbnailLayer.set(KEY_OWNER_ID, feature.id)
+    this._thumbnailLayer.setOpacity(1)
   }
 
   _initializeOpenLayers() {
@@ -421,6 +423,11 @@ export default class PrimaryMap extends Component {
     // Additions
     const insertionIndex = this._basemapLayers.length
     jobs.filter(j => shouldRender[j.id] && !alreadyRendered[j.id] && hasWmsPresence(j)).forEach(job => {
+      // Remove thumbnail if it belongs to this job
+      if (this._thumbnailLayer.get(KEY_OWNER_ID) === job.id) {
+        this._scheduleThumbnailExit()
+      }
+
       const layer = new ol.layer.Tile({
         extent: bboxUtil.featureToBbox(job),
         source: new ol.source.TileWMS({
@@ -609,6 +616,21 @@ export default class PrimaryMap extends Component {
       geometry: ol.geom.Polygon.fromExtent(bbox)
     })
     this._drawLayer.getSource().addFeature(feature)
+  }
+
+  _scheduleThumbnailExit() {
+    const step = 0.05
+    let opacity = 1
+    const tick = () => {
+      if (opacity > 0) {
+        opacity -= step
+        this._thumbnailLayer.setOpacity(opacity)
+        requestAnimationFrame(tick)
+      } else {
+        this._clearThumbnail()
+      }
+    }
+    requestAnimationFrame(tick)
   }
 
   _updateBasemap() {
