@@ -34,7 +34,7 @@ class JobStatusList extends Component {
     error:    React.PropTypes.object,
     jobs:     React.PropTypes.array.isRequired,
     location: React.PropTypes.object,
-    results:  React.PropTypes.object.isRequired,
+    results:  React.PropTypes.array.isRequired,
   }
 
   constructor() {
@@ -67,7 +67,7 @@ class JobStatusList extends Component {
               key={job.id}
               isActive={this._isActive(job.id)}
               job={job}
-              result={this.props.results[job.id]}
+              result={this.props.results.find(r => r.jobId === job.id)}
               onDownload={this._handleDownload}
             />
           ))}

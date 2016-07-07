@@ -68,13 +68,9 @@ export default class PrimaryMap extends Component {
   static propTypes = {
     anchor:              React.PropTypes.string,
     bbox:                React.PropTypes.arrayOf(React.PropTypes.number),
-    datasets:            React.PropTypes.arrayOf(React.PropTypes.shape({
-      job:      React.PropTypes.shape({
-        geometry:   React.PropTypes.object.isRequired,
-        id:         React.PropTypes.string.isRequired,
-        properties: React.PropTypes.object.isRequired,
-        type:       React.PropTypes.string.isRequired,
-      }).isRequired,
+    detections:          React.PropTypes.arrayOf(React.PropTypes.shape({
+      geojson:  React.PropTypes.string,
+      jobId:    React.PropTypes.string.isRequired,
       progress: React.PropTypes.shape({
         loaded: React.PropTypes.number,
         total:  React.PropTypes.number,
@@ -86,6 +82,12 @@ export default class PrimaryMap extends Component {
       images:     React.PropTypes.object.isRequired
     }),
     isSearching:         React.PropTypes.bool.isRequired,
+    jobs:                React.PropTypes.arrayOf(React.PropTypes.shape({
+      geometry:   React.PropTypes.object.isRequired,
+      id:         React.PropTypes.string.isRequired,
+      properties: React.PropTypes.object.isRequired,
+      type:       React.PropTypes.string.isRequired,
+    })).isRequired,
     mode:                React.PropTypes.string.isRequired,
     onAnchorChange:      React.PropTypes.func.isRequired,
     onBoundingBoxChange: React.PropTypes.func.isRequired,
@@ -138,11 +140,13 @@ export default class PrimaryMap extends Component {
   }
 
   componentDidUpdate(previousProps, previousState) {  // eslint-disable-line complexity
-    if (this.props.datasets !== previousProps.datasets) {
+    if (this.props.detections !== previousProps.detections) {
       this._renderCompositeImage()
       this._renderDetections()
-      this._renderFrames()
       this._renderProgressBars()
+    }
+    if (this.props.jobs !== previousProps.jobs) {
+      this._renderFrames()
     }
     if (this.props.imagery !== previousProps.imagery) {
       this._renderImagery()
@@ -379,11 +383,12 @@ export default class PrimaryMap extends Component {
   }
 
   _renderCompositeImage() {
-    const {datasets} = this.props
+    const {detections} = this.props
     const insertionIndex = this._basemapLayers.length
-    datasets.forEach(dataset => {
-      const shouldLoad = dataset.geojson && dataset.job.properties[KEY_WMS_URL] && dataset.job.properties[KEY_WMS_LAYER_ID]
-      const existingLayer = this._wmsLayers[dataset.job.id]
+    detections.forEach(detection => {
+      const job = this.props.jobs.find(j => j.id === detection.jobId)
+      const shouldLoad = detection.geojson && job.properties[KEY_WMS_URL] && job.properties[KEY_WMS_LAYER_ID]
+      const existingLayer = this._wmsLayers[job.id]
 
       // Ignore
       if (shouldLoad && existingLayer) {
@@ -393,35 +398,34 @@ export default class PrimaryMap extends Component {
       // Removals
       if (!shouldLoad && existingLayer) {
         this._map.removeLayer(existingLayer)
-        delete this._wmsLayers[dataset.job.id]
+        delete this._wmsLayers[job.id]
         return
       }
 
       // Additions
       if (shouldLoad && !existingLayer) {
-        const geometry = new ol.format.GeoJSON().readGeometry(dataset.job.geometry, {dataProjection: 'EPSG:4326', featureProjection: 'EPSG:3857'})
+        const geometry = new ol.format.GeoJSON().readGeometry(job.geometry, {dataProjection: 'EPSG:4326', featureProjection: 'EPSG:3857'})
         const newLayer = new ol.layer.Tile({
           extent: geometry.getExtent(),
           source: new ol.source.TileWMS({
             crossOrigin: 'anonymous',
             serverType:  'geoserver',
-            url:         dataset.job.properties[KEY_WMS_URL],
+            url:         job.properties[KEY_WMS_URL],
             params:      {
-              layers: dataset.job.properties[KEY_WMS_LAYER_ID]
-                        .replace('piazza:OSM-WMS', 'OSM-WMS')  // HACK HACK HACK HACK HACK HACK
+              layers: job.properties[KEY_WMS_LAYER_ID]
             }
           })
         })
-        this._wmsLayers[dataset.job.id] = newLayer
+        this._wmsLayers[job.id] = newLayer
         this._map.getLayers().insertAt(insertionIndex, newLayer)
       }
     })
   }
 
   _renderDetections() {
-    const {datasets} = this.props
+    const {detections} = this.props
     const incomingJobs = {}
-    datasets.filter(d => d.geojson).forEach(dataset => incomingJobs[dataset.job.id] = true)
+    detections.filter(d => d.geojson).forEach(d => incomingJobs[d.jobId] = true)
     const source = this._detectionsLayer.getSource()
     const previous = {}
 
@@ -436,9 +440,9 @@ export default class PrimaryMap extends Component {
 
     // Additions
     const reader = new ol.format.GeoJSON()
-    datasets.filter(d => d.geojson && !previous[d.job.id]).forEach(dataset => {
-      const features = reader.readFeatures(dataset.geojson, {featureProjection: 'EPSG:3857'})
-      features.forEach(f => f.set(KEY_OWNER_ID, dataset.job.id))
+    detections.filter(d => d.geojson && !previous[d.jobId]).forEach(({geojson, jobId}) => {
+      const features = reader.readFeatures(geojson, {featureProjection: 'EPSG:3857'})
+      features.forEach(f => f.set(KEY_OWNER_ID, jobId))
       source.addFeatures(features)
     })
   }
@@ -448,8 +452,8 @@ export default class PrimaryMap extends Component {
     source.clear()
     const reader = new ol.format.GeoJSON()
     console.debug('rendering frames')
-    this.props.datasets.map(dataset => {
-      const frame = reader.readFeature(dataset.job, {featureProjection: 'EPSG:3857'})
+    this.props.jobs.map(job => {
+      const frame = reader.readFeature(job, {featureProjection: 'EPSG:3857'})
       source.addFeature(frame)
 
       const frameExtent = frame.getGeometry().getExtent()
@@ -499,6 +503,7 @@ export default class PrimaryMap extends Component {
     const {imagery} = this.props
     const reader = new ol.format.GeoJSON()
     const source = this._imageryLayer.getSource()
+    console.debug('rendering imagery')
     source.setAttributions(undefined)
     source.clear()
     if (imagery) {
@@ -541,30 +546,34 @@ export default class PrimaryMap extends Component {
   }
 
   _renderProgressBars() {
-    const {datasets} = this.props
+    const {detections} = this.props
     const indexes = {}
-    datasets.forEach((dataset, index) => indexes[dataset.job.id] = index)
+    detections.forEach((d, index) => indexes[d.jobId] = index)
 
     // Updates & Removals
-    const rendered = {}
-    Object.keys(this._progressBars).forEach(id => {
-      const overlay = this._progressBars[id]
-      rendered[id] = true
-      const dataset = datasets[indexes[id]]
+    const alreadyRendered = {}
+    Object.keys(this._progressBars).forEach(jobId => {
+      const overlay = this._progressBars[jobId]
+      alreadyRendered[jobId] = true
+      const detection = detections[indexes[jobId]]
+
       // Update
-      if (dataset && dataset.progress && dataset.progress.loaded < dataset.progress.total) {
-        const percentage = Math.floor(((dataset.progress.loaded / dataset.progress.total) || 0) * 100)
+      if (detection && detection.progress && detection.progress.loaded < detection.progress.total) {
+        const percentage = Math.floor(((detection.progress.loaded / detection.progress.total) || 0) * 100)
         overlay.getElement().firstChild.setAttribute('style', `width: ${percentage}%`)
         return
       }
+
       // Remove
       this._map.removeOverlay(overlay)
-      delete this._progressBars[id]
+      delete this._progressBars[jobId]
     })
 
     // Additions
-    datasets.filter(d => d.progress && d.progress.loaded < d.progress.total && !rendered[d.job.id]).forEach(dataset => {
-      const overlay = generateProgressBarOverlay(dataset)
+    detections.filter(r => r.loading && r.progress && !alreadyRendered[r.jobId]).forEach(result => {
+      const job = this.props.jobs.find(j => j.id === result.jobId)
+      const point = ol.extent.getBottomLeft(bboxUtil.featureToBbox(job))
+      const overlay = generateProgressBarOverlay(result, point)
       this._progressBars[overlay.getId()] = overlay
       this._map.addOverlay(overlay)
     })
@@ -841,20 +850,20 @@ function generateImageSearchResultsOverlay(componentRef) {
   })
 }
 
-function generateProgressBarOverlay(dataset) {
+function generateProgressBarOverlay(result, position) {
   const element = document.createElement('div')
   element.classList.add(styles.progress)
 
-  const percentage = Math.floor(((dataset.progress.loaded / dataset.progress.total) || 0) * 100)
+  const percentage = Math.floor(((result.progress.loaded / result.progress.total) || 0) * 100)
   const puck = document.createElement('div')
   puck.classList.add(styles.progressPuck)
   puck.setAttribute('style', `width: ${percentage}%;`)
   element.appendChild(puck)
 
   return new ol.Overlay({
-    id: dataset.job.id,
     element,
-    position: ol.extent.getBottomLeft(bboxUtil.featureToBbox(dataset.job)),
+    position,
+    id: result.jobId,
     positioning: 'bottom-left'
   })
 }

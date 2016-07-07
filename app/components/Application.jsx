@@ -39,11 +39,12 @@ class Application extends Component {
   static propTypes = {
     bbox:            React.PropTypes.arrayOf(React.PropTypes.number),
     children:        React.PropTypes.element,
-    datasets:        React.PropTypes.array.isRequired,
+    detections:      React.PropTypes.array.isRequired,
     dispatch:        React.PropTypes.func.isRequired,
     imagery:         React.PropTypes.object,
     isLoggedIn:      React.PropTypes.bool.isRequired,
     isSearching:     React.PropTypes.bool.isRequired,
+    jobs:            React.PropTypes.array.isRequired,
     location:        React.PropTypes.object.isRequired,
     selectedFeature: React.PropTypes.object,
     workers:         React.PropTypes.object.isRequired
@@ -91,7 +92,8 @@ class Application extends Component {
       <div className={styles.root}>
         <Navigation currentLocation={this.props.location}/>
         <PrimaryMap
-          datasets={this.props.datasets}
+          jobs={this.props.jobs}
+          detections={this.props.detections}
           imagery={this.props.imagery}
           isSearching={this.props.isSearching}
           anchor={this.props.location.hash}
@@ -153,8 +155,9 @@ class Application extends Component {
 
 export default connect((state, ownProps) => ({
   bbox:            state.search.bbox,
-  datasets:        state.jobs.records.map(job => ({job, ...state.results[job.id]})),
+  detections:      state.results,
   imagery:         state.imagery,
+  jobs:            state.jobs.records,
   isLoggedIn:      !!state.authentication.token,
   isSearching:     state.search.searching,
   selectedFeature: state.draftJob.image || state.jobs.records.find(j => j.id === ownProps.location.query.jobId) || null,
