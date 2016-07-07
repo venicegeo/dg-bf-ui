@@ -14,14 +14,17 @@
  * limitations under the License.
  **/
 
+import moment from 'moment'
 import {Client} from '../utils/piazza-client'
 import * as worker from './workers/jobs'
 import {GATEWAY, JOBS_WORKER, SCHEMA_VERSION} from '../config'
 
 import {
-  KEY_IMAGE_ID,
   KEY_ALGORITHM_NAME,
   KEY_CREATED_ON,
+  KEY_IMAGE_ID,
+  KEY_IMAGE_CAPTURED_ON,
+  KEY_IMAGE_SENSOR,
   KEY_NAME,
   KEY_STATUS,
   KEY_TYPE,
@@ -142,14 +145,16 @@ function createJobSuccess(id, name, algorithm, feature) {
       id,
       geometry: feature.geometry,
       properties: {
-        [KEY_ALGORITHM_NAME]: algorithm.name,
-        [KEY_CREATED_ON]:     new Date().toISOString(),
-        [KEY_IMAGE_ID]:       feature.id,
-        [KEY_NAME]:           name,
-        [KEY_STATUS]:         STATUS_RUNNING,
-        [KEY_THUMBNAIL]:      feature.properties[KEY_THUMBNAIL],
-        [KEY_TYPE]:           TYPE_JOB,
-        [KEY_SCHEMA_VERSION]: SCHEMA_VERSION,
+        [KEY_ALGORITHM_NAME]:    algorithm.name,
+        [KEY_CREATED_ON]:        new Date().toISOString(),
+        [KEY_IMAGE_CAPTURED_ON]: moment(feature.properties[KEY_IMAGE_CAPTURED_ON]).toISOString(),
+        [KEY_IMAGE_ID]:          feature.id,
+        [KEY_IMAGE_SENSOR]:      feature.properties[KEY_IMAGE_SENSOR],
+        [KEY_NAME]:              name,
+        [KEY_STATUS]:            STATUS_RUNNING,
+        [KEY_THUMBNAIL]:         feature.properties[KEY_THUMBNAIL],
+        [KEY_TYPE]:              TYPE_JOB,
+        [KEY_SCHEMA_VERSION]:    SCHEMA_VERSION,
       },
       type: 'Feature',
     }

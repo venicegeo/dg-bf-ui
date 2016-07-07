@@ -25,6 +25,8 @@ import {
   KEY_ALGORITHM_NAME,
   KEY_CREATED_ON,
   KEY_IMAGE_ID,
+  KEY_IMAGE_CAPTURED_ON,
+  KEY_IMAGE_SENSOR,
   KEY_NAME,
   KEY_STATUS,
   STATUS_SUCCESS,
@@ -70,6 +72,8 @@ export default class JobStatus extends Component {
     const createdOn = properties[KEY_CREATED_ON]
     const imageId = properties[KEY_IMAGE_ID]
     const algorithmName = properties[KEY_ALGORITHM_NAME]
+    const capturedOn = properties[KEY_IMAGE_CAPTURED_ON]
+    const sensor = properties[KEY_IMAGE_SENSOR]
     return (
       <li className={`${styles.root} ${this._aggregatedClassNames}`}>
         <div className={styles.details} onClick={this._handleExpansionToggle}>
@@ -92,12 +96,14 @@ export default class JobStatus extends Component {
 
           <div className={styles.metadata} onClick={e => e.stopPropagation()}>
             <dl>
-              <dt>Image ID</dt>
-              <dd>{imageId || 'No ID?'}</dd>
               <dt>Algorithm</dt>
               <dd>{algorithmName}</dd>
-              <dt>Date Started</dt>
-              <dd>{moment(createdOn).format('llll')}</dd>
+              <dt>Image ID</dt>
+              <dd>{imageId || 'No ID?'}</dd>
+              <dt>Date of Capture</dt>
+              <dd>{moment(capturedOn).utc().format('MM/DD/YYYY HH:mm z')}</dd>
+              <dt>Sensor</dt>
+              <dd>{sensor}</dd>
             </dl>
           </div>
         </div>
