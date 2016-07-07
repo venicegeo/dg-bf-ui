@@ -119,7 +119,7 @@ function normalizeDeployment(descriptor) {
   return {
     dataId:   descriptor.dataId,
     endpoint: descriptor.capabilitiesUrl.replace(/\?.*$/, ''),
-    layerId:  'piazza:' + descriptor.layer,
+    layerId:  descriptor.layer,
   }
 }
 

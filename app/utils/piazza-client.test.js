@@ -70,7 +70,7 @@ describe('Piazza Client', function () {
         .then(descriptor => {
           expect(descriptor.dataId).toEqual('test-data-id')
           expect(descriptor.endpoint).toEqual('http://test-capabilities-url/arbitrary/context/path')
-          expect(descriptor.layerId).toEqual('piazza:test-layer-id')
+          expect(descriptor.layerId).toEqual('test-layer-id')
           done()
         })
         .catch(done)
