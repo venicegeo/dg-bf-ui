@@ -259,7 +259,6 @@ export default class PrimaryMap extends Component {
 
   _handleMouseMove(event) {
     const layerFilter = l => l === this._frameLayer || l === this._imageryLayer
-    const isClickable = f => [TYPE_DIVOT_INBOARD, TYPE_JOB, TYPE_SCENE].indexOf(f.get(KEY_TYPE)) !== -1
     let cursor = 'default'
     this._map.forEachFeatureAtPixel(event.pixel, (feature) => {
       switch (feature.get(KEY_TYPE)) {
