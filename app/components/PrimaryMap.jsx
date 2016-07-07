@@ -465,7 +465,6 @@ export default class PrimaryMap extends Component {
     const source = this._frameLayer.getSource()
     source.clear()
     const reader = new ol.format.GeoJSON()
-    console.debug('rendering frames')
     this.props.jobs.map(job => {
       const frame = reader.readFeature(job, {featureProjection: 'EPSG:3857'})
       source.addFeature(frame)
@@ -523,7 +522,6 @@ export default class PrimaryMap extends Component {
     const {imagery} = this.props
     const reader = new ol.format.GeoJSON()
     const source = this._imageryLayer.getSource()
-    console.debug('rendering imagery')
     source.setAttributions(undefined)
     source.clear()
     if (imagery) {
