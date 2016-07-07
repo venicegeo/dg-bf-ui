@@ -54,12 +54,11 @@ const DISPOSITION_UNDETECTED = 'Undetected'
 const DISPOSITION_NEW_DETECTION = 'New Detection'
 const KEY_OWNER_ID = 'OWNER_ID'
 const KEY_DETECTION = 'detection'
-const KEY_ROLE = 'ROLE'
-const ROLE_DIVOT_OUTBOARD = 'ROLE_DIVOT_OUTBOARD'
-const ROLE_DIVOT_INBOARD = 'ROLE_DIVOT_INBOARD'
-const ROLE_STEM = 'ROLE_STEM'
-const ROLE_LABEL_MAJOR = 'ROLE_LABEL_MAJOR'
-const ROLE_LABEL_MINOR = 'ROLE_LABEL_MINOR'
+const TYPE_DIVOT_INBOARD = 'DIVOT_INBOARD'
+const TYPE_DIVOT_OUTBOARD = 'DIVOT_OUTBOARD'
+const TYPE_LABEL_MAJOR = 'LABEL_MAJOR'
+const TYPE_LABEL_MINOR = 'LABEL_MINOR'
+const TYPE_STEM = 'STEM'
 export const MODE_DRAW_BBOX = 'MODE_DRAW_BBOX'
 export const MODE_NORMAL = 'MODE_NORMAL'
 export const MODE_SELECT_IMAGERY = 'MODE_SELECT_IMAGERY'
@@ -466,33 +465,33 @@ export default class PrimaryMap extends Component {
           topRight
         ])
       })
-      stem.set(KEY_ROLE, ROLE_STEM)
+      stem.set(KEY_TYPE, TYPE_STEM)
       source.addFeature(stem)
 
       const divotInboard = new ol.Feature({
         geometry: new ol.geom.Point(center)
       })
-      divotInboard.set(KEY_ROLE, ROLE_DIVOT_INBOARD)
+      divotInboard.set(KEY_TYPE, TYPE_DIVOT_INBOARD)
       source.addFeature(divotInboard)
 
       const divotOutboard = new ol.Feature({
         geometry: new ol.geom.Point(topRight)
       })
-      divotOutboard.set(KEY_ROLE, ROLE_DIVOT_OUTBOARD)
+      divotOutboard.set(KEY_TYPE, TYPE_DIVOT_OUTBOARD)
       divotOutboard.set(KEY_STATUS, frame.get(KEY_STATUS))
       source.addFeature(divotOutboard)
 
       const name = new ol.Feature({
         geometry: new ol.geom.Point(topRight)
       })
-      name.set(KEY_ROLE, ROLE_LABEL_MAJOR)
+      name.set(KEY_TYPE, TYPE_LABEL_MAJOR)
       name.set(KEY_NAME, frame.get(KEY_NAME).toUpperCase())
       source.addFeature(name)
 
       const status = new ol.Feature({
         geometry: new ol.geom.Point(topRight)
       })
-      status.set(KEY_ROLE, ROLE_LABEL_MINOR)
+      status.set(KEY_TYPE, TYPE_LABEL_MINOR)
       status.set(KEY_STATUS, frame.get(KEY_STATUS))
       status.set(KEY_IMAGE_ID, frame.get(KEY_IMAGE_ID))
       source.addFeature(status)
@@ -740,8 +739,8 @@ function generateFrameLayer() {
     source: new ol.source.Vector(),
     style(feature, resolution) {
       const isClose = resolution < RESOLUTION_CLOSE
-      switch (feature.get(KEY_ROLE)) {
-      case ROLE_DIVOT_INBOARD:
+      switch (feature.get(KEY_TYPE)) {
+      case TYPE_DIVOT_INBOARD:
         return new ol.style.Style({
           image: new ol.style.RegularShape({
             angle: Math.PI / 4,
@@ -752,7 +751,7 @@ function generateFrameLayer() {
             })
           })
         })
-      case ROLE_DIVOT_OUTBOARD:
+      case TYPE_DIVOT_OUTBOARD:
         return new ol.style.Style({
           image: new ol.style.RegularShape({
             angle: Math.PI / 4,
@@ -767,14 +766,14 @@ function generateFrameLayer() {
             })
           })
         })
-      case ROLE_STEM:
+      case TYPE_STEM:
         return new ol.style.Style({
           stroke: new ol.style.Stroke({
             color: 'black',
             width: 1
           })
         })
-      case ROLE_LABEL_MAJOR:
+      case TYPE_LABEL_MAJOR:
         return new ol.style.Style({
           text: new ol.style.Text({
             fill: new ol.style.Fill({
@@ -788,7 +787,7 @@ function generateFrameLayer() {
             textBaseline: 'middle'
           })
         })
-      case ROLE_LABEL_MINOR:
+      case TYPE_LABEL_MINOR:
         return new ol.style.Style({
           text: new ol.style.Text({
             fill: new ol.style.Fill({
