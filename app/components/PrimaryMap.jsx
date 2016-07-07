@@ -382,11 +382,11 @@ export default class PrimaryMap extends Component {
   }
 
   _renderCompositeImage() {
-    const {detections} = this.props
+    const {detections, jobs} = this.props
     const insertionIndex = this._basemapLayers.length
-    detections.forEach(detection => {
-      const job = this.props.jobs.find(j => j.id === detection.jobId)
-      const shouldLoad = detection.geojson && job.properties[KEY_WMS_URL] && job.properties[KEY_WMS_LAYER_ID]
+    jobs.forEach(job => {
+      const detection = detections.find(d => d.jobId === job.id)
+      const shouldLoad = detection && job.properties[KEY_WMS_URL] && job.properties[KEY_WMS_LAYER_ID]
       const existingLayer = this._wmsLayers[job.id]
 
       // Ignore
