@@ -54,12 +54,11 @@ const DISPOSITION_UNDETECTED = 'Undetected'
 const DISPOSITION_NEW_DETECTION = 'New Detection'
 const KEY_OWNER_ID = 'OWNER_ID'
 const KEY_DETECTION = 'detection'
-const KEY_ROLE = 'ROLE'
-const ROLE_DIVOT_OUTBOARD = 'ROLE_DIVOT_OUTBOARD'
-const ROLE_DIVOT_INBOARD = 'ROLE_DIVOT_INBOARD'
-const ROLE_STEM = 'ROLE_STEM'
-const ROLE_LABEL_MAJOR = 'ROLE_LABEL_MAJOR'
-const ROLE_LABEL_MINOR = 'ROLE_LABEL_MINOR'
+const TYPE_DIVOT_INBOARD = 'DIVOT_INBOARD'
+const TYPE_DIVOT_OUTBOARD = 'DIVOT_OUTBOARD'
+const TYPE_LABEL_MAJOR = 'LABEL_MAJOR'
+const TYPE_LABEL_MINOR = 'LABEL_MINOR'
+const TYPE_STEM = 'STEM'
 export const MODE_DRAW_BBOX = 'MODE_DRAW_BBOX'
 export const MODE_NORMAL = 'MODE_NORMAL'
 export const MODE_SELECT_IMAGERY = 'MODE_SELECT_IMAGERY'
@@ -68,13 +67,9 @@ export default class PrimaryMap extends Component {
   static propTypes = {
     anchor:              React.PropTypes.string,
     bbox:                React.PropTypes.arrayOf(React.PropTypes.number),
-    datasets:            React.PropTypes.arrayOf(React.PropTypes.shape({
-      job:      React.PropTypes.shape({
-        geometry:   React.PropTypes.object.isRequired,
-        id:         React.PropTypes.string.isRequired,
-        properties: React.PropTypes.object.isRequired,
-        type:       React.PropTypes.string.isRequired,
-      }).isRequired,
+    detections:          React.PropTypes.arrayOf(React.PropTypes.shape({
+      geojson:  React.PropTypes.string,
+      jobId:    React.PropTypes.string.isRequired,
       progress: React.PropTypes.shape({
         loaded: React.PropTypes.number,
         total:  React.PropTypes.number,
@@ -86,6 +81,12 @@ export default class PrimaryMap extends Component {
       images:     React.PropTypes.object.isRequired
     }),
     isSearching:         React.PropTypes.bool.isRequired,
+    jobs:                React.PropTypes.arrayOf(React.PropTypes.shape({
+      geometry:   React.PropTypes.object.isRequired,
+      id:         React.PropTypes.string.isRequired,
+      properties: React.PropTypes.object.isRequired,
+      type:       React.PropTypes.string.isRequired,
+    })).isRequired,
     mode:                React.PropTypes.string.isRequired,
     onAnchorChange:      React.PropTypes.func.isRequired,
     onBoundingBoxChange: React.PropTypes.func.isRequired,
@@ -138,11 +139,13 @@ export default class PrimaryMap extends Component {
   }
 
   componentDidUpdate(previousProps, previousState) {  // eslint-disable-line complexity
-    if (this.props.datasets !== previousProps.datasets) {
+    if (this.props.detections !== previousProps.detections) {
       this._renderCompositeImage()
       this._renderDetections()
-      this._renderFrames()
       this._renderProgressBars()
+    }
+    if (this.props.jobs !== previousProps.jobs) {
+      this._renderFrames()
     }
     if (this.props.imagery !== previousProps.imagery) {
       this._renderImagery()
@@ -256,39 +259,54 @@ export default class PrimaryMap extends Component {
 
   _handleMouseMove(event) {
     const layerFilter = l => l === this._frameLayer || l === this._imageryLayer
+    const isClickable = f => [TYPE_DIVOT_INBOARD, TYPE_JOB, TYPE_SCENE].indexOf(f.get(KEY_TYPE)) !== -1
     let cursor = 'default'
     this._map.forEachFeatureAtPixel(event.pixel, (feature) => {
-      if (feature.get(KEY_TYPE)) {
+      switch (feature.get(KEY_TYPE)) {
+      case TYPE_DIVOT_INBOARD:
+      case TYPE_JOB:
+      case TYPE_SCENE:
         cursor = 'pointer'
+        return true
       }
-      return true
     }, null, layerFilter)
     this.refs.container.style.cursor = cursor
   }
 
-  _handleSelect(event) {
+  _handleSelect(event) {  // eslint-disable-line complexity
     if (event.selected.length === 0 && event.deselected.length === 0) {
       return  // Disregard spurious select event
     }
 
     const [feature] = event.selected
-    let position, geojson, type
+    let position, type
     if (feature) {
       position = ol.extent.getCenter(feature.getGeometry().getExtent())
-      const writer = new ol.format.GeoJSON()
-      geojson = writer.writeFeatureObject(feature, {dataProjection: 'EPSG:4326', featureProjection: 'EPSG:3857'})
       type = feature.get(KEY_TYPE)
     }
 
     this._clearThumbnail()
     this._featureDetailsOverlay.setPosition(position)
 
+    const selections = this._selectInteraction.getFeatures()
     switch (type) {
+    case TYPE_DIVOT_INBOARD:
+    case TYPE_STEM:
+      // Proxy clicks on "inner" decorations out to the job frame itself
+      const jobId = feature.get(KEY_OWNER_ID)
+      const jobFeature = this._frameLayer.getSource().getFeatureById(jobId)
+      selections.clear()
+      selections.push(jobFeature)
+      this.props.onSelectImage(null)
+      this.props.onSelectJob(jobId)
+      break
     case TYPE_JOB:
       this.props.onSelectImage(null)
-      this.props.onSelectJob(geojson)
+      this.props.onSelectJob(feature.getId())
       break
     case TYPE_SCENE:
+      const writer = new ol.format.GeoJSON()
+      const geojson = writer.writeFeatureObject(feature, {dataProjection: 'EPSG:4326', featureProjection: 'EPSG:3857'})
       this.props.onSelectImage(geojson)
       this.props.onSelectJob(null)
       break
@@ -296,7 +314,7 @@ export default class PrimaryMap extends Component {
       this.props.onSelectImage(null)
       this.props.onSelectJob(null)
       // Not a valid "selectable" feature
-      this._selectInteraction.getFeatures().clear()
+      selections.clear()
       break
     }
   }
@@ -379,11 +397,12 @@ export default class PrimaryMap extends Component {
   }
 
   _renderCompositeImage() {
-    const {datasets} = this.props
+    const {detections, jobs} = this.props
     const insertionIndex = this._basemapLayers.length
-    datasets.forEach(dataset => {
-      const shouldLoad = dataset.geojson && dataset.job.properties[KEY_WMS_URL] && dataset.job.properties[KEY_WMS_LAYER_ID]
-      const existingLayer = this._wmsLayers[dataset.job.id]
+    jobs.forEach(job => {
+      const detection = detections.find(d => d.jobId === job.id)
+      const shouldLoad = detection && job.properties[KEY_WMS_URL] && job.properties[KEY_WMS_LAYER_ID]
+      const existingLayer = this._wmsLayers[job.id]
 
       // Ignore
       if (shouldLoad && existingLayer) {
@@ -393,35 +412,34 @@ export default class PrimaryMap extends Component {
       // Removals
       if (!shouldLoad && existingLayer) {
         this._map.removeLayer(existingLayer)
-        delete this._wmsLayers[dataset.job.id]
+        delete this._wmsLayers[job.id]
         return
       }
 
       // Additions
       if (shouldLoad && !existingLayer) {
-        const geometry = new ol.format.GeoJSON().readGeometry(dataset.job.geometry, {dataProjection: 'EPSG:4326', featureProjection: 'EPSG:3857'})
+        const geometry = new ol.format.GeoJSON().readGeometry(job.geometry, {dataProjection: 'EPSG:4326', featureProjection: 'EPSG:3857'})
         const newLayer = new ol.layer.Tile({
           extent: geometry.getExtent(),
           source: new ol.source.TileWMS({
             crossOrigin: 'anonymous',
             serverType:  'geoserver',
-            url:         dataset.job.properties[KEY_WMS_URL],
+            url:         job.properties[KEY_WMS_URL],
             params:      {
-              layers: dataset.job.properties[KEY_WMS_LAYER_ID]
-                        .replace('piazza:OSM-WMS', 'OSM-WMS')  // HACK HACK HACK HACK HACK HACK
+              layers: job.properties[KEY_WMS_LAYER_ID]
             }
           })
         })
-        this._wmsLayers[dataset.job.id] = newLayer
+        this._wmsLayers[job.id] = newLayer
         this._map.getLayers().insertAt(insertionIndex, newLayer)
       }
     })
   }
 
   _renderDetections() {
-    const {datasets} = this.props
+    const {detections} = this.props
     const incomingJobs = {}
-    datasets.filter(d => d.geojson).forEach(dataset => incomingJobs[dataset.job.id] = true)
+    detections.filter(d => d.geojson).forEach(d => incomingJobs[d.jobId] = true)
     const source = this._detectionsLayer.getSource()
     const previous = {}
 
@@ -436,9 +454,9 @@ export default class PrimaryMap extends Component {
 
     // Additions
     const reader = new ol.format.GeoJSON()
-    datasets.filter(d => d.geojson && !previous[d.job.id]).forEach(dataset => {
-      const features = reader.readFeatures(dataset.geojson, {featureProjection: 'EPSG:3857'})
-      features.forEach(f => f.set(KEY_OWNER_ID, dataset.job.id))
+    detections.filter(d => d.geojson && !previous[d.jobId]).forEach(({geojson, jobId}) => {
+      const features = reader.readFeatures(geojson, {featureProjection: 'EPSG:3857'})
+      features.forEach(f => f.set(KEY_OWNER_ID, jobId))
       source.addFeatures(features)
     })
   }
@@ -448,13 +466,14 @@ export default class PrimaryMap extends Component {
     source.clear()
     const reader = new ol.format.GeoJSON()
     console.debug('rendering frames')
-    this.props.datasets.map(dataset => {
-      const frame = reader.readFeature(dataset.job, {featureProjection: 'EPSG:3857'})
+    this.props.jobs.map(job => {
+      const frame = reader.readFeature(job, {featureProjection: 'EPSG:3857'})
       source.addFeature(frame)
 
       const frameExtent = frame.getGeometry().getExtent()
       const topRight = ol.extent.getTopRight(ol.extent.buffer(frameExtent, STEM_OFFSET))
       const center = ol.extent.getCenter(frameExtent)
+      const jobId = frame.getId()
 
       const stem = new ol.Feature({
         geometry: new ol.geom.LineString([
@@ -462,33 +481,38 @@ export default class PrimaryMap extends Component {
           topRight
         ])
       })
-      stem.set(KEY_ROLE, ROLE_STEM)
+      stem.set(KEY_TYPE, TYPE_STEM)
+      stem.set(KEY_OWNER_ID, jobId)
       source.addFeature(stem)
 
       const divotInboard = new ol.Feature({
         geometry: new ol.geom.Point(center)
       })
-      divotInboard.set(KEY_ROLE, ROLE_DIVOT_INBOARD)
+      divotInboard.set(KEY_TYPE, TYPE_DIVOT_INBOARD)
+      divotInboard.set(KEY_OWNER_ID, jobId)
       source.addFeature(divotInboard)
 
       const divotOutboard = new ol.Feature({
         geometry: new ol.geom.Point(topRight)
       })
-      divotOutboard.set(KEY_ROLE, ROLE_DIVOT_OUTBOARD)
+      divotOutboard.set(KEY_TYPE, TYPE_DIVOT_OUTBOARD)
+      divotOutboard.set(KEY_OWNER_ID, jobId)
       divotOutboard.set(KEY_STATUS, frame.get(KEY_STATUS))
       source.addFeature(divotOutboard)
 
       const name = new ol.Feature({
         geometry: new ol.geom.Point(topRight)
       })
-      name.set(KEY_ROLE, ROLE_LABEL_MAJOR)
+      name.set(KEY_TYPE, TYPE_LABEL_MAJOR)
+      name.set(KEY_OWNER_ID, jobId)
       name.set(KEY_NAME, frame.get(KEY_NAME).toUpperCase())
       source.addFeature(name)
 
       const status = new ol.Feature({
         geometry: new ol.geom.Point(topRight)
       })
-      status.set(KEY_ROLE, ROLE_LABEL_MINOR)
+      status.set(KEY_TYPE, TYPE_LABEL_MINOR)
+      status.set(KEY_OWNER_ID, jobId)
       status.set(KEY_STATUS, frame.get(KEY_STATUS))
       status.set(KEY_IMAGE_ID, frame.get(KEY_IMAGE_ID))
       source.addFeature(status)
@@ -499,6 +523,7 @@ export default class PrimaryMap extends Component {
     const {imagery} = this.props
     const reader = new ol.format.GeoJSON()
     const source = this._imageryLayer.getSource()
+    console.debug('rendering imagery')
     source.setAttributions(undefined)
     source.clear()
     if (imagery) {
@@ -541,30 +566,34 @@ export default class PrimaryMap extends Component {
   }
 
   _renderProgressBars() {
-    const {datasets} = this.props
+    const {detections} = this.props
     const indexes = {}
-    datasets.forEach((dataset, index) => indexes[dataset.job.id] = index)
+    detections.forEach((d, index) => indexes[d.jobId] = index)
 
     // Updates & Removals
-    const rendered = {}
-    Object.keys(this._progressBars).forEach(id => {
-      const overlay = this._progressBars[id]
-      rendered[id] = true
-      const dataset = datasets[indexes[id]]
+    const alreadyRendered = {}
+    Object.keys(this._progressBars).forEach(jobId => {
+      const overlay = this._progressBars[jobId]
+      alreadyRendered[jobId] = true
+      const detection = detections[indexes[jobId]]
+
       // Update
-      if (dataset && dataset.progress && dataset.progress.loaded < dataset.progress.total) {
-        const percentage = Math.floor(((dataset.progress.loaded / dataset.progress.total) || 0) * 100)
+      if (detection && detection.progress && detection.progress.loaded < detection.progress.total) {
+        const percentage = Math.floor(((detection.progress.loaded / detection.progress.total) || 0) * 100)
         overlay.getElement().firstChild.setAttribute('style', `width: ${percentage}%`)
         return
       }
+
       // Remove
       this._map.removeOverlay(overlay)
-      delete this._progressBars[id]
+      delete this._progressBars[jobId]
     })
 
     // Additions
-    datasets.filter(d => d.progress && d.progress.loaded < d.progress.total && !rendered[d.job.id]).forEach(dataset => {
-      const overlay = generateProgressBarOverlay(dataset)
+    detections.filter(r => r.loading && r.progress && !alreadyRendered[r.jobId]).forEach(result => {
+      const job = this.props.jobs.find(j => j.id === result.jobId)
+      const point = ol.extent.getBottomLeft(bboxUtil.featureToBbox(job))
+      const overlay = generateProgressBarOverlay(result, point)
       this._progressBars[overlay.getId()] = overlay
       this._map.addOverlay(overlay)
     })
@@ -729,10 +758,10 @@ function generateDrawInteraction(drawLayer) {
 function generateFrameLayer() {
   return new ol.layer.Vector({
     source: new ol.source.Vector(),
-    style(feature, resolution) {
+    style(feature, resolution) {  // eslint-disable-line complexity
       const isClose = resolution < RESOLUTION_CLOSE
-      switch (feature.get(KEY_ROLE)) {
-      case ROLE_DIVOT_INBOARD:
+      switch (feature.get(KEY_TYPE)) {
+      case TYPE_DIVOT_INBOARD:
         return new ol.style.Style({
           image: new ol.style.RegularShape({
             angle: Math.PI / 4,
@@ -743,7 +772,7 @@ function generateFrameLayer() {
             })
           })
         })
-      case ROLE_DIVOT_OUTBOARD:
+      case TYPE_DIVOT_OUTBOARD:
         return new ol.style.Style({
           image: new ol.style.RegularShape({
             angle: Math.PI / 4,
@@ -758,14 +787,14 @@ function generateFrameLayer() {
             })
           })
         })
-      case ROLE_STEM:
+      case TYPE_STEM:
         return new ol.style.Style({
           stroke: new ol.style.Stroke({
             color: 'black',
             width: 1
           })
         })
-      case ROLE_LABEL_MAJOR:
+      case TYPE_LABEL_MAJOR:
         return new ol.style.Style({
           text: new ol.style.Text({
             fill: new ol.style.Fill({
@@ -779,7 +808,7 @@ function generateFrameLayer() {
             textBaseline: 'middle'
           })
         })
-      case ROLE_LABEL_MINOR:
+      case TYPE_LABEL_MINOR:
         return new ol.style.Style({
           text: new ol.style.Text({
             fill: new ol.style.Fill({
@@ -841,20 +870,20 @@ function generateImageSearchResultsOverlay(componentRef) {
   })
 }
 
-function generateProgressBarOverlay(dataset) {
+function generateProgressBarOverlay(result, position) {
   const element = document.createElement('div')
   element.classList.add(styles.progress)
 
-  const percentage = Math.floor(((dataset.progress.loaded / dataset.progress.total) || 0) * 100)
+  const percentage = Math.floor(((result.progress.loaded / result.progress.total) || 0) * 100)
   const puck = document.createElement('div')
   puck.classList.add(styles.progressPuck)
   puck.setAttribute('style', `width: ${percentage}%;`)
   element.appendChild(puck)
 
   return new ol.Overlay({
-    id: dataset.job.id,
     element,
-    position: ol.extent.getBottomLeft(bboxUtil.featureToBbox(dataset.job)),
+    position,
+    id: result.jobId,
     positioning: 'bottom-left'
   })
 }
