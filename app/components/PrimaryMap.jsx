@@ -144,9 +144,13 @@ export default class PrimaryMap extends Component {
       this._renderDetections()
       this._renderProgressBars()
     }
-    // TODO -- cleanup {frames, wms layers, thumbnails} when job gets removed
+    // TODO -- cleanup {thumbnails, selection box} when job gets removed
     if (this.props.jobs !== previousProps.jobs) {
       this._renderFrames()
+    }
+    if (!this.props.selectedFeature) {
+      this._selectInteraction.getFeatures().clear()
+      this._clearThumbnail()
     }
     if (this.props.imagery !== previousProps.imagery) {
       this._renderImagery()
@@ -398,63 +402,59 @@ export default class PrimaryMap extends Component {
 
   _renderCompositeImage() {
     const {detections, jobs} = this.props
+    const shouldRender = {}
+    const alreadyRendered = {}
+    detections.forEach(d => shouldRender[d.jobId] = true)
+
+    // Removals
+    Object.keys(this._wmsLayers).forEach(jobId => {
+      const layer = this._wmsLayers[jobId]
+      alreadyRendered[jobId] = true
+      if (!shouldRender[jobId]) {
+        this._map.removeLayer(layer)
+        delete this._wmsLayers[jobId]
+      }
+    })
+
+    // Additions
     const insertionIndex = this._basemapLayers.length
-    jobs.forEach(job => {
-      const detection = detections.find(d => d.jobId === job.id)
-      const shouldLoad = detection && job.properties[KEY_WMS_URL] && job.properties[KEY_WMS_LAYER_ID]
-      const existingLayer = this._wmsLayers[job.id]
-
-      // Ignore
-      if (shouldLoad && existingLayer) {
-        return
-      }
-
-      // Removals
-      if (!shouldLoad && existingLayer) {
-        this._map.removeLayer(existingLayer)
-        delete this._wmsLayers[job.id]
-        return
-      }
-
-      // Additions
-      if (shouldLoad && !existingLayer) {
-        const geometry = new ol.format.GeoJSON().readGeometry(job.geometry, {dataProjection: 'EPSG:4326', featureProjection: 'EPSG:3857'})
-        const newLayer = new ol.layer.Tile({
-          extent: geometry.getExtent(),
-          source: new ol.source.TileWMS({
-            crossOrigin: 'anonymous',
-            serverType:  'geoserver',
-            url:         job.properties[KEY_WMS_URL],
-            params:      {
-              layers: job.properties[KEY_WMS_LAYER_ID]
-            }
-          })
+    jobs.filter(j => shouldRender[j.id] && !alreadyRendered[j.id] && hasWmsPresence(j)).forEach(job => {
+      const layer = new ol.layer.Tile({
+        extent: bboxUtil.featureToBbox(job),
+        source: new ol.source.TileWMS({
+          crossOrigin: 'anonymous',
+          serverType:  'geoserver',
+          url:         job.properties[KEY_WMS_URL],
+          params:      {
+            layers: job.properties[KEY_WMS_LAYER_ID]
+          }
         })
-        this._wmsLayers[job.id] = newLayer
-        this._map.getLayers().insertAt(insertionIndex, newLayer)
-      }
+      })
+      this._wmsLayers[job.id] = layer
+      this._map.getLayers().insertAt(insertionIndex, layer)
     })
   }
 
   _renderDetections() {
     const {detections} = this.props
-    const incomingJobs = {}
-    detections.filter(d => d.geojson).forEach(d => incomingJobs[d.jobId] = true)
+    const shouldRender = {}
+    const alreadyRendered = {}
+    detections.filter(d => d.geojson).forEach(d => shouldRender[d.jobId] = true)
+
     const source = this._detectionsLayer.getSource()
-    const previous = {}
 
     // Removals (no updates)
     source.getFeatures().slice().forEach(feature => {
       const jobId = feature.get(KEY_OWNER_ID)
-      previous[jobId] = true
-      if (!incomingJobs[jobId]) {
+      alreadyRendered[jobId] = true
+      if (!shouldRender[jobId]) {
         source.removeFeature(feature)
       }
     })
 
     // Additions
     const reader = new ol.format.GeoJSON()
-    detections.filter(d => d.geojson && !previous[d.jobId]).forEach(({geojson, jobId}) => {
+    detections.filter(d => d.geojson && !alreadyRendered[d.jobId]).forEach(({geojson, jobId}) => {
       const features = reader.readFeatures(geojson, {featureProjection: 'EPSG:3857'})
       features.forEach(f => f.set(KEY_OWNER_ID, jobId))
       source.addFeatures(features)
