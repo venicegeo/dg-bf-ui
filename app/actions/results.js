@@ -40,7 +40,7 @@ export function changeLoadedResults(ids = []) {
     const state = getState()
     const promises = state.jobs.records.filter(job => job.properties[KEY_GEOJSON_DATA_ID]).map(job => {
       const shouldLoad = ids.indexOf(job.id) !== -1
-      const isLoadedOrLoading = state.results[job.id]
+      const isLoadedOrLoading = !!state.results.find(r => r.jobId === job.id)
 
       if (shouldLoad && isLoadedOrLoading) {
         return  // Nothing to do
@@ -74,7 +74,7 @@ function loadResult(jobId, resultId) {
     const state = getState()
     const client = new Client(GATEWAY, state.authentication.token)
 
-    if (state.results[jobId]) {
+    if (state.results.find(r => r.jobId === jobId)) {
       return  // Already loading or loaded
     }
 
@@ -84,7 +84,7 @@ function loadResult(jobId, resultId) {
     })
 
     return client.getFile(resultId, ({loaded, total, cancel}) => {
-      if (!getState().results[jobId]) {
+      if (!getState().results.find(r => r.jobId === jobId)) {
         cancel()  // Result was unloaded; abandon retrieval
         return
       }
