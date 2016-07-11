@@ -18,18 +18,25 @@ import React from 'react'
 import {mount, shallow} from 'enzyme'
 import expect, {spyOn} from 'expect'
 import TestUtils from 'react-addons-test-utils'
-import CreateJob from '../CreateJob.jsx'
 import ImagerySearch from '../ImagerySearch.jsx'
-import AlgorithmList from '../AlgorithmList.jsx'
-import NewJobDetails from '../NewJobDetails.jsx'
 
-describe.only('CreateJob', () => {
+describe.only('ImagerySearch', () => {
   it('should render correctly', () => {
     const store = generateStore()
+
+    ///   bbox:               React.PropTypes.array.isRequired,
+    ///   catalogApiKey:      React.PropTypes.string,
+    ///   cloudCover:         React.PropTypes.number.isRequired,
+    ///   dateFrom:           React.PropTypes.string.isRequired,
+    ///   dateTo:             React.PropTypes.string.isRequired,
+    ///   error:              React.PropTypes.object,
+    ///   isSearching:        React.PropTypes.bool.isRequired,
+    //   onApiKeyChange:     React.PropTypes.func.isRequired,
+    //   onDateChange:       React.PropTypes.func.isRequired,
+    //   onClearBbox:        React.PropTypes.func.isRequired,
+    //   onCloudCoverChange: React.PropTypes.func.isRequired,
+    //   onSubmit:           React.PropTypes.func.isRequired
     store.getState.andReturn({
-      algorithms: {
-        records: []
-      },
       search: {
         bbox: [0, 0, 0, 0],
         cloudCover: '20',
@@ -38,63 +45,28 @@ describe.only('CreateJob', () => {
         error: null,
         searching: false,
       },
-      jobs: {
-        creating: false,
-      },
       catalog: {
         apiKey: '',
       },
-      draftJob: {
-        name: 'JobName',
-        image: null,
-      }
+      onApiKeyChange: null,
+      onDateChange: null,
+      onClearBbox: null,
+      onCloudCoverChange: null,
+      onSubmit: null,
+
     })
 
     const renderer = TestUtils.createRenderer()
     //const output = renderer.getRenderOutput()
 
     expect(() => {
-      renderer.render(<CreateJob store={store} />)
+      renderer.render(<ImagerySearch store={store} />)
     }).toNotThrow()
 
     //let [ImagerySearch, AlgorithmList, NewJobDetails ] = output.state.children
     //const wrapper = shallow(<CreateJob />);
     //const imagerySearch = wrapper.find('ImagerySearch')
     //expect(imagerySearch.prop('bbox').toEqual(null))
-  })
-
-
-  it('requires image search before creating a job', () => {
-    const store = generateStore()
-    store.getState.andReturn({
-      algorithms: {
-        records: []
-      },
-      search: {
-        bbox: [0, 0, 0, 0],
-        dateFrom: '2016-01-01',
-        dateTo: '2016-02-01',
-        error: null,
-        searching: false,
-      },
-      catalog: {
-        apiKey: '',
-      },
-      draftJob: {
-        name: 'JobName',
-        image: null,
-      }
-    })
-
-    const renderer = TestUtils.createRenderer()
-    renderer.render(<CreateJob store={store} />)
-    //const output = renderer.getRenderOutput()
-
-    //let [ImagerySearch, AlgorithmList, NewJobDetails ] = output.state.children
-    const wrapper = mount(<CreateJob store={store} />)
-    const imagerySearch = wrapper.find(<li className='.CreateJob__placeholder'/>)
-    console.log(imagerySearch.length)
-    expect(imagerySearch.length).toEqual(1)
   })
 
   it('after selecting image, allows job detail changes')
