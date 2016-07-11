@@ -48,7 +48,7 @@ export class CreateJob extends Component {
     isCreating:    React.PropTypes.bool.isRequired,
     isSearching:   React.PropTypes.bool.isRequired,
     jobName:       React.PropTypes.string.isRequired,
-    location:      React.PropTypes.object.isRequired,
+    //location:      React.PropTypes.object.isRequired,
     selectedImage: React.PropTypes.object
   }
 
