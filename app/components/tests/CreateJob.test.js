@@ -45,7 +45,7 @@ describe.only('CreateJob', () => {
         apiKey: '',
       },
       draftJob: {
-        name: 'JobName',
+        name: 'JobName',        
         image: null,
       }
     })
