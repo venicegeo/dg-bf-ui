@@ -16,9 +16,9 @@
 
 import React, {Component} from 'react'
 import {connect} from 'react-redux'
-import AlgorithmList from './AlgorithmList'
-import ImagerySearch from './ImagerySearch'
-import NewJobDetails from './NewJobDetails'
+import AlgorithmList from './AlgorithmList.jsx'
+import ImagerySearch from './ImagerySearch.jsx'
+import NewJobDetails from './NewJobDetails.jsx'
 import styles from './CreateJob.css'
 import {
   createJob,

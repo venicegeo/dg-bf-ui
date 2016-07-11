@@ -15,8 +15,9 @@
  **/
 
 import React, {Component} from 'react'
-import LoadingAnimation from './LoadingAnimation'
-import StaticMinimap from './StaticMinimap'
+import LoadingAnimation from './LoadingAnimation.jsx'
+import StaticMinimap from './StaticMinimap.jsx'
+import Slider from './Slider.jsx'
 import styles from './ImagerySearch.css'
 
 export default class ImagerySearch extends Component {
