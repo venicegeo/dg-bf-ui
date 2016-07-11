@@ -31,7 +31,7 @@ import {
   updateSearchDates,
 } from '../actions'
 
-class CreateJob extends Component {
+export class CreateJob extends Component {
   static contextTypes = {
     router: React.PropTypes.object
   }
