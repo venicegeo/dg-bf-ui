@@ -21,6 +21,7 @@ import styles from './JobStatusList.css'
 import {
   dismissJobError,
   downloadResult,
+  removeJob,
   startJobsWorkerIfNeeded,
 } from '../actions'
 
@@ -34,13 +35,14 @@ class JobStatusList extends Component {
     error:    React.PropTypes.object,
     jobs:     React.PropTypes.array.isRequired,
     location: React.PropTypes.object,
-    results:  React.PropTypes.object.isRequired,
+    results:  React.PropTypes.array.isRequired,
   }
 
   constructor() {
     super()
     this._dismissError = this._dismissError.bind(this)
     this._handleDownload = this._handleDownload.bind(this)
+    this._handleForgetJob = this._handleForgetJob.bind(this)
   }
 
   render() {
@@ -67,8 +69,9 @@ class JobStatusList extends Component {
               key={job.id}
               isActive={this._isActive(job.id)}
               job={job}
-              result={this.props.results[job.id]}
+              result={this.props.results.find(r => r.jobId === job.id)}
               onDownload={this._handleDownload}
+              onForgetJob={this._handleForgetJob}
             />
           ))}
         </ul>
@@ -89,6 +92,15 @@ class JobStatusList extends Component {
       }
     })
     this.props.dispatch(downloadResult(job.id))
+  }
+
+  _handleForgetJob(jobId) {
+    if (this._isActive(jobId)) {
+      this.context.router.push({...this.props.location,
+        query: {}
+      })
+    }
+    this.props.dispatch(removeJob(jobId))
   }
 
   _isActive(jobId) {

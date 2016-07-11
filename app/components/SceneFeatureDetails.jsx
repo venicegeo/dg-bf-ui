@@ -46,7 +46,7 @@ export default class SceneFeatureDetails extends Component {
           <dt>Thumbnail</dt>
           <dd><a className={styles.thumbnailLink} href={feature.properties[KEY_THUMBNAIL]} target="_blank">Click here to open</a></dd>
           <dt>Date Captured</dt>
-          <dd>{moment(feature.properties[KEY_DATE]).format('llll')}</dd>
+          <dd>{moment(feature.properties[KEY_DATE]).utc().format('MM/DD/YYYY HH:mm z')}</dd>
 
           <dt>Bands</dt>
           <dd>{Object.keys(feature.properties[KEY_BANDS]).join(', ')}</dd>

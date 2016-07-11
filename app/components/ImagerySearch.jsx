@@ -39,6 +39,7 @@ export default class ImagerySearch extends Component {
   constructor() {
     super()
     this._emitApiKeyChange = this._emitApiKeyChange.bind(this)
+    this._emitCloudCoverChange = this._emitCloudCoverChange.bind(this)
     this._emitDateChange = this._emitDateChange.bind(this)
     this._handleSubmit = this._handleSubmit.bind(this)
   }
@@ -47,6 +48,7 @@ export default class ImagerySearch extends Component {
     this.refs.dateFrom.value = this.props.dateFrom
     this.refs.dateTo.value = this.props.dateTo
     this.refs.apiKey.value = this.props.catalogApiKey || ''
+    this.refs.cloudCover.value = this.props.cloudCover || ''
   }
 
   render() {
@@ -91,11 +93,11 @@ export default class ImagerySearch extends Component {
         </label>
 
         <h3>Cloud Cover</h3>
-        <Slider
-          className={styles.slider}
-          value={cloudCover}
-          onChange={this.props.onCloudCoverChange}
-        />
+        <label className={styles.cloudCover}>
+          <span>Less Than</span>
+          <input ref="cloudCover" type="range" min="0" max="100" onChange={this._emitCloudCoverChange}/>
+          <span className={styles.value}>{cloudCover}%</span>
+        </label>
 
         <div className={styles.controls}>
           <button disabled={!this._canSubmit}>Search for imagery</button>
@@ -121,6 +123,10 @@ export default class ImagerySearch extends Component {
 
   _emitApiKeyChange() {
     this.props.onApiKeyChange(this.refs.apiKey.value)
+  }
+
+  _emitCloudCoverChange() {
+    this.props.onCloudCoverChange(parseInt(this.refs.cloudCover.value, 10))
   }
 
   _emitDateChange() {

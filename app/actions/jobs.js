@@ -14,14 +14,17 @@
  * limitations under the License.
  **/
 
+import moment from 'moment'
 import {Client} from '../utils/piazza-client'
 import * as worker from './workers/jobs'
 import {GATEWAY, JOBS_WORKER, SCHEMA_VERSION} from '../config'
 
 import {
-  KEY_IMAGE_ID,
   KEY_ALGORITHM_NAME,
   KEY_CREATED_ON,
+  KEY_IMAGE_ID,
+  KEY_IMAGE_CAPTURED_ON,
+  KEY_IMAGE_SENSOR,
   KEY_NAME,
   KEY_STATUS,
   KEY_TYPE,
@@ -45,6 +48,7 @@ export const DISCOVER_EXECUTOR_ERROR = 'DISCOVER_EXECUTOR_ERROR'
 export const DISMISS_JOB_ERROR = 'DISMISS_JOB_ERROR'
 export const FETCH_JOBS = 'FETCH_JOBS'
 export const FETCH_JOBS_SUCCESS = 'FETCH_JOBS_SUCCESS'
+export const REMOVE_JOB = 'REMOVE_JOB'
 export const JOBS_WORKER_ERROR = 'JOBS_WORKER_ERROR'
 export const START_JOBS_WORKER = 'START_JOBS_WORKER'
 export const STOP_JOBS_WORKER = 'STOP_JOBS_WORKER'
@@ -66,13 +70,15 @@ export function createJob(catalogApiKey, name, algorithm, feature) {
       dataInputs: {
         body: {
           content: JSON.stringify({
-            algoType:     algorithm.type,
-            svcURL:       algorithm.url,
-            pzAuthToken:  client.authToken,
-            pzAddr:       client.gateway,
-            dbAuthToken:  catalogApiKey,
-            bands:        algorithm.requirements.find(a => a.name === REQUIREMENT_BANDS).literal.split(','),
-            metaDataJSON: feature
+            algoType:      algorithm.type,
+            bandMergeType: algorithm.type,
+            bandMergeURL:  algorithm.url,
+            svcURL:        algorithm.url,
+            pzAuthToken:   client.authToken,
+            pzAddr:        client.gateway,
+            dbAuthToken:   catalogApiKey,
+            bands:         algorithm.requirements.find(a => a.name === REQUIREMENT_BANDS).literal.split(','),
+            metaDataJSON:  feature
           }),
           type:     'body',
           mimeType: 'application/json'
@@ -112,6 +118,13 @@ export function dismissJobError() {
   }
 }
 
+export function removeJob(id) {
+  return {
+    type: REMOVE_JOB,
+    id
+  }
+}
+
 export function startJobsWorkerIfNeeded() {
   return (dispatch, getState) => {
     const state = getState()
@@ -140,14 +153,16 @@ function createJobSuccess(id, name, algorithm, feature) {
       id,
       geometry: feature.geometry,
       properties: {
-        [KEY_ALGORITHM_NAME]: algorithm.name,
-        [KEY_CREATED_ON]:     new Date().toISOString(),
-        [KEY_IMAGE_ID]:       feature.id,
-        [KEY_NAME]:           name,
-        [KEY_STATUS]:         STATUS_RUNNING,
-        [KEY_THUMBNAIL]:      feature.properties[KEY_THUMBNAIL],
-        [KEY_TYPE]:           TYPE_JOB,
-        [KEY_SCHEMA_VERSION]: SCHEMA_VERSION,
+        [KEY_ALGORITHM_NAME]:    algorithm.name,
+        [KEY_CREATED_ON]:        new Date().toISOString(),
+        [KEY_IMAGE_CAPTURED_ON]: moment(feature.properties[KEY_IMAGE_CAPTURED_ON]).toISOString(),
+        [KEY_IMAGE_ID]:          feature.id,
+        [KEY_IMAGE_SENSOR]:      feature.properties[KEY_IMAGE_SENSOR],
+        [KEY_NAME]:              name,
+        [KEY_STATUS]:            STATUS_RUNNING,
+        [KEY_THUMBNAIL]:         feature.properties[KEY_THUMBNAIL],
+        [KEY_TYPE]:              TYPE_JOB,
+        [KEY_SCHEMA_VERSION]:    SCHEMA_VERSION,
       },
       type: 'Feature',
     }

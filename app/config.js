@@ -14,7 +14,7 @@
  * limitations under the License.
  **/
 
-export const SCHEMA_VERSION = 2
+export const SCHEMA_VERSION = 3
 
 export const GATEWAY = process.env.GATEWAY
 

@@ -15,6 +15,9 @@
  **/
 
 import {
+  REMOVE_JOB,
+} from '../../actions/jobs'
+import {
   LOAD_RESULT,
   LOAD_RESULT_SUCCESS,
   LOAD_RESULT_ERROR,
@@ -22,50 +25,56 @@ import {
   UNLOAD_RESULT
 } from '../../actions/results'
 
-export function reducer(state = {}, action) {
+export function reducer(state = [], action) {
   const {jobId} = action
   switch (action.type) {
   case LOAD_RESULT:
-    return {
+    return [
       ...state,
-      [jobId]: {
+      {
+        jobId,
         loading: true
       }
-    }
+    ]
   case LOAD_RESULT_SUCCESS:
-    return {
-      ...state,
-      [jobId]: {
-        ...state[jobId],
-        loading: false,
-        geojson: action.geojson
+    return state.map(result => {
+      if (result.jobId !== jobId) {
+        return result
       }
-    }
+      return {
+        ...result,
+        loading: false,
+        geojson: action.geojson,
+      }
+    })
   case LOAD_RESULT_ERROR:
-    return {
-      ...state,
-      [jobId]: {
-        ...state[jobId],
-        loading: false,
-        error: action.err
+    return state.map(result => {
+      if (result.jobId !== jobId) {
+        return result
       }
-    }
+      return {
+        ...result,
+        loading: false,
+        error: action.err,
+      }
+    })
   case LOAD_RESULT_PROGRESSED:
-    return {
-      ...state,
-      [jobId]: {
-        ...state[jobId],
+    return state.map(result => {
+      if (result.jobId !== jobId) {
+        return result
+      }
+      return {
+        ...result,
         progress: {
           loaded: action.loaded,
           total: action.total
         }
       }
-    }
+    })
+  case REMOVE_JOB:
+    return state.filter(r => r.jobId !== action.id)
   case UNLOAD_RESULT:
-    return {
-      ...state,
-      [jobId]: undefined
-    }
+    return state.filter(r => r.jobId !== jobId)
   default:
     return state
   }
