@@ -28,11 +28,11 @@ describe.only('CreateJob', () => {
     const store = generateStore()
     store.getState.andReturn({
       algorithms: {
-        records: []
+        records: [],
       },
       search: {
         bbox: [0, 0, 0, 0],
-        cloudCover: '20',
+        cloudCover: 20,
         dateFrom: '2016-01-01',
         dateTo: '2016-02-01',
         error: null,
@@ -45,7 +45,7 @@ describe.only('CreateJob', () => {
         apiKey: '',
       },
       draftJob: {
-        name: 'JobName',
+        name: 'JobName',        
         image: null,
       }
     })
