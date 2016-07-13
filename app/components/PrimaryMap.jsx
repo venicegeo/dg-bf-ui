@@ -330,10 +330,15 @@ export default class PrimaryMap extends Component {
       return
     }
     const reader = new ol.format.GeoJSON()
-    this._thumbnailLayer.setSource(new ol.source.ImageStatic({
-      crossOrigin: 'Anonymous',
-      imageExtent: reader.readGeometry(feature.geometry, {dataProjection: 'EPSG:4326', featureProjection: 'EPSG:3857'}).getExtent(),
-      url:         image.src
+    //this._thumbnailLayer.setSource(new ol.source.ImageStatic({
+    //  crossOrigin: 'Anonymous',
+    //  imageExtent: reader.readGeometry(feature.geometry, {dataProjection: 'EPSG:4326', featureProjection: 'EPSG:3857'}).getExtent(),
+    //  url:         image.src
+    //}))
+
+    const strippedFeatureId = feature.id.substring(8)
+    this._thumbnailLayer.setSource(new ol.source.XYZ({
+      url: 'https://tiles0.planet.com/v0/scenes/landsat/'+strippedFeatureId+'/{z}/{x}/{y}.png?api_key=6a979589dd1e4a79ad238a13fefdce7a',
     }))
     this._thumbnailLayer.set(KEY_OWNER_ID, feature.id)
     this._thumbnailLayer.setOpacity(1)
@@ -346,6 +351,7 @@ export default class PrimaryMap extends Component {
     this._frameLayer = generateFrameLayer()
     this._imageryLayer = generateImageryLayer()
     this._thumbnailLayer = generateThumbnailLayer()
+    this._wmslayer = generateWmsLayer()
     this._wmsLayers = {}
 
     this._drawInteraction = generateDrawInteraction(this._drawLayer)
@@ -365,6 +371,7 @@ export default class PrimaryMap extends Component {
       layers: [
         // Order matters here
         ...this._basemapLayers,
+        this._wmslayer,
         this._frameLayer,
         this._drawLayer,
         this._imageryLayer,
@@ -439,6 +446,7 @@ export default class PrimaryMap extends Component {
           }
         })
       })
+
       this._wmsLayers[job.id] = layer
       this._map.getLayers().insertAt(insertionIndex, layer)
     })
@@ -874,6 +882,18 @@ function generateImageryLayer() {
   })
 }
 
+function generateWmsLayer() {
+   return new ol.layer.Image({})
+  //   extent: [-13884991, 2870341, -7455066, 6338219],
+  //   source: new ol.source.ImageWMS({
+  //     url: 'http://demo.boundlessgeo.com/geoserver/wms',
+  //     params: {'LAYERS': 'topp:states'},
+  //     serverType: 'geoserver'
+  //   })
+  //
+}
+
+
 function generateFeatureDetailsOverlay(componentRef) {
   return new ol.Overlay({
     autoPan: true,
@@ -983,7 +1003,7 @@ function generateStyleUnknownDetectionType() {
 }
 
 function generateThumbnailLayer() {
-  return new ol.layer.Image()
+  return new ol.layer.Tile()
 }
 
 function getColorForStatus(status) {
