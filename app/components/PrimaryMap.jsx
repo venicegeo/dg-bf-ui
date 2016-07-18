@@ -331,22 +331,23 @@ export default class PrimaryMap extends Component {
     if (!feature || hasWmsPresence(feature)) {
       return
     }
-    //const reader = new ol.format.GeoJSON()
-    //this._thumbnailLayer.setSource(new ol.source.ImageStatic({
-    //  crossOrigin: 'Anonymous',
-    //  imageExtent: reader.readGeometry(feature.geometry, {dataProjection: 'EPSG:4326', featureProjection: 'EPSG:3857'}).getExtent(),
-    //  url:         image.src
-    //}))
+    // don't borther trying to render tiles beyond the image footprint
+    const reader = new ol.format.GeoJSON()
+    this._thumbnailLayer.setExtent(reader.readGeometry(feature.geometry, {dataProjection: 'EPSG:4326', featureProjection: 'EPSG:3857'}).getExtent())
 
     let realFeatureId
-    const featureId = feature.id.slice(0,8)
-    if (featureId != 'landsat:')
-      realFeatureId = feature.properties['beachfront:imageId']
-    else
-      realFeatureId = feature.id
+    const featureId = feature.id.slice(0, 8)
+    if (featureId !== 'landsat:') { realFeatureId = feature.properties['beachfront:imageId'] }
+    else { realFeatureId = feature.id }
     const strippedFeatureId = realFeatureId.substring(8)
     this._thumbnailLayer.setSource(new ol.source.XYZ({
-      url: 'https://tiles0.planet.com/v0/scenes/landsat/'+strippedFeatureId+'/{z}/{x}/{y}.png?api_key='+this.props.catalogApiKey,
+      crossOrigin: 'anonymous',
+      urls: [
+        'https://tiles0.planet.com/v0/scenes/landsat/'+strippedFeatureId+'/{z}/{x}/{y}.png?api_key='+this.props.catalogApiKey,
+        'https://tiles1.planet.com/v0/scenes/landsat/'+strippedFeatureId+'/{z}/{x}/{y}.png?api_key='+this.props.catalogApiKey,
+        'https://tiles2.planet.com/v0/scenes/landsat/'+strippedFeatureId+'/{z}/{x}/{y}.png?api_key='+this.props.catalogApiKey,
+        'https://tiles3.planet.com/v0/scenes/landsat/'+strippedFeatureId+'/{z}/{x}/{y}.png?api_key='+this.props.catalogApiKey
+      ]
     }))
     this._thumbnailLayer.set(KEY_OWNER_ID, feature.id)
     this._thumbnailLayer.setOpacity(1)
@@ -443,15 +444,21 @@ export default class PrimaryMap extends Component {
         this._scheduleThumbnailExit()
       }
 
+      let realFeatureId
+      const featureId = job.id.slice(0, 8)
+      if (featureId !== 'landsat:') { realFeatureId = job.properties['beachfront:imageId'] }
+      else { realFeatureId = job.id }
+      const strippedFeatureId = realFeatureId.substring(8)
       const layer = new ol.layer.Tile({
         extent: bboxUtil.featureToBbox(job),
-        source: new ol.source.TileWMS({
+        source: new ol.source.XYZ({
           crossOrigin: 'anonymous',
-          serverType:  'geoserver',
-          url:         job.properties[KEY_WMS_URL],
-          params:      {
-            layers: job.properties[KEY_WMS_LAYER_ID]
-          }
+          urls: [
+            'https://tiles0.planet.com/v0/scenes/landsat/'+strippedFeatureId+'/{z}/{x}/{y}.png?api_key='+this.props.catalogApiKey,
+            'https://tiles1.planet.com/v0/scenes/landsat/'+strippedFeatureId+'/{z}/{x}/{y}.png?api_key='+this.props.catalogApiKey,
+            'https://tiles2.planet.com/v0/scenes/landsat/'+strippedFeatureId+'/{z}/{x}/{y}.png?api_key='+this.props.catalogApiKey,
+            'https://tiles3.planet.com/v0/scenes/landsat/'+strippedFeatureId+'/{z}/{x}/{y}.png?api_key='+this.props.catalogApiKey
+          ]
         })
       })
 
@@ -891,7 +898,7 @@ function generateImageryLayer() {
 }
 
 function generateWmsLayer() {
-   return new ol.layer.Image({})
+  return new ol.layer.Image({})
   //   extent: [-13884991, 2870341, -7455066, 6338219],
   //   source: new ol.source.ImageWMS({
   //     url: 'http://demo.boundlessgeo.com/geoserver/wms',
