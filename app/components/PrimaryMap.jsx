@@ -17,6 +17,7 @@
 import 'openlayers/dist/ol.css'
 import React, {Component} from 'react'
 import {findDOMNode} from 'react-dom'
+import {connect} from 'react-redux'
 import ol from 'openlayers'
 import ExportControl from '../utils/openlayers.ExportControl.js'
 import SearchControl from '../utils/openlayers.SearchControl.js'
@@ -67,6 +68,7 @@ export default class PrimaryMap extends Component {
   static propTypes = {
     anchor:              React.PropTypes.string,
     bbox:                React.PropTypes.arrayOf(React.PropTypes.number),
+    catalogApiKey:       React.PropTypes.string,
     detections:          React.PropTypes.arrayOf(React.PropTypes.shape({
       geojson:  React.PropTypes.string,
       jobId:    React.PropTypes.string.isRequired,
@@ -329,16 +331,22 @@ export default class PrimaryMap extends Component {
     if (!feature || hasWmsPresence(feature)) {
       return
     }
-    const reader = new ol.format.GeoJSON()
+    //const reader = new ol.format.GeoJSON()
     //this._thumbnailLayer.setSource(new ol.source.ImageStatic({
     //  crossOrigin: 'Anonymous',
     //  imageExtent: reader.readGeometry(feature.geometry, {dataProjection: 'EPSG:4326', featureProjection: 'EPSG:3857'}).getExtent(),
     //  url:         image.src
     //}))
 
-    const strippedFeatureId = feature.id.substring(8)
+    let realFeatureId
+    const featureId = feature.id.slice(0,8)
+    if (featureId != 'landsat:')
+      realFeatureId = feature.properties['beachfront:imageId']
+    else
+      realFeatureId = feature.id
+    const strippedFeatureId = realFeatureId.substring(8)
     this._thumbnailLayer.setSource(new ol.source.XYZ({
-      url: 'https://tiles0.planet.com/v0/scenes/landsat/'+strippedFeatureId+'/{z}/{x}/{y}.png?api_key=6a979589dd1e4a79ad238a13fefdce7a',
+      url: 'https://tiles0.planet.com/v0/scenes/landsat/'+strippedFeatureId+'/{z}/{x}/{y}.png?api_key='+this.props.catalogApiKey,
     }))
     this._thumbnailLayer.set(KEY_OWNER_ID, feature.id)
     this._thumbnailLayer.setOpacity(1)
@@ -1022,3 +1030,17 @@ function hasWmsPresence(feature) {
     && feature.properties[KEY_WMS_LAYER_ID]
     && feature.properties[KEY_WMS_URL]
 }
+
+export default connect(state => ({
+  //algorithms:    state.algorithms.records,
+  //bbox:          state.search.bbox,
+  catalogApiKey: state.catalog.apiKey,
+  //cloudCover:    state.search.cloudCover,
+  //dateFrom:      state.search.dateFrom,
+  //dateTo:        state.search.dateTo,
+  //error:         state.search.error,
+  //isCreating:    state.jobs.creating,
+  //isSearching:   state.search.searching,
+  //jobName:       state.draftJob.name,
+  //selectedImage: state.draftJob.image,
+}))(PrimaryMap)
