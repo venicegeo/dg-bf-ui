@@ -1039,15 +1039,5 @@ function hasWmsPresence(feature) {
 }
 
 export default connect(state => ({
-  //algorithms:    state.algorithms.records,
-  //bbox:          state.search.bbox,
   catalogApiKey: state.catalog.apiKey,
-  //cloudCover:    state.search.cloudCover,
-  //dateFrom:      state.search.dateFrom,
-  //dateTo:        state.search.dateTo,
-  //error:         state.search.error,
-  //isCreating:    state.jobs.creating,
-  //isSearching:   state.search.searching,
-  //jobName:       state.draftJob.name,
-  //selectedImage: state.draftJob.image,
 }))(PrimaryMap)
