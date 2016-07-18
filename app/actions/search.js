@@ -38,10 +38,11 @@ export function searchCatalog(startIndex = 0, count = 100) {
     })
 
     const state = getState()
-    const {bbox, cloudCover, dateFrom} = state.search
+    const {bbox, cloudCover, dateFrom, dateTo} = state.search
     const catalogUrl = state.catalog.url
     const acquiredDate = moment(dateFrom).toISOString()
-    return fetch(`${catalogUrl}/discover?acquiredDate=${acquiredDate}&bbox=${bbox}&cloudCover=${cloudCover}&count=${count}&startIndex=${startIndex}`)
+    const maxAcquiredDate = moment(dateTo).toISOString()
+    return fetch(`${catalogUrl}/discover?acquiredDate=${acquiredDate}&maxAcquiredDate=${maxAcquiredDate}&bbox=${bbox}&cloudCover=${cloudCover}&count=${count}&startIndex=${startIndex}`)
       .then(response => {
         if (response.ok) {
           return response.json()

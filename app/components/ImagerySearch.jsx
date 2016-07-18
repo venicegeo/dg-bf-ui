@@ -88,7 +88,7 @@ export default class ImagerySearch extends Component {
         </label>
         <label className={styles.field}>
           <span>To</span>
-          <input ref="dateTo" type="date" disabled={true} />
+          <input ref="dateTo" type="date" disabled={isSearching} onChange={this._emitDateChange} />
         </label>
 
         <h3>Cloud Cover</h3>
