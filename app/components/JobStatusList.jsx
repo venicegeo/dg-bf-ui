@@ -32,7 +32,7 @@ class JobStatusList extends Component {
 
   static propTypes = {
     dispatch: React.PropTypes.func.isRequired,
-    error:    React.PropTypes.object,
+    error:    React.PropTypes.string,
     jobs:     React.PropTypes.array.isRequired,
     location: React.PropTypes.object,
     results:  React.PropTypes.array.isRequired,
