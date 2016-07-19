@@ -103,7 +103,7 @@ export default class JobStatus extends Component {
               <dd>{algorithmName}</dd>
               <dt>Image ID</dt>
               <dd>{imageId || 'No ID?'}</dd>
-              <dt>Date of Capture</dt>
+              <dt>Captured On</dt>
               <dd>{moment(capturedOn).utc().format('MM/DD/YYYY HH:mm z')}</dd>
               <dt>Sensor</dt>
               <dd>{sensor}</dd>
