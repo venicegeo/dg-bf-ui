@@ -51,16 +51,11 @@ describe.only('CreateJob', () => {
     })
 
     const renderer = TestUtils.createRenderer()
-    //const output = renderer.getRenderOutput()
 
     expect(() => {
       renderer.render(<CreateJob store={store} />)
     }).toNotThrow()
 
-    //let [ImagerySearch, AlgorithmList, NewJobDetails ] = output.state.children
-    //const wrapper = shallow(<CreateJob />);
-    //const imagerySearch = wrapper.find('ImagerySearch')
-    //expect(imagerySearch.prop('bbox').toEqual(null))
   })
 
 
@@ -86,20 +81,24 @@ describe.only('CreateJob', () => {
       }
     })
 
-    const renderer = TestUtils.createRenderer()
-    renderer.render(<CreateJob store={store} />)
-    //const output = renderer.getRenderOutput()
+    //TODO: bbox should be null before a user draws a box. ImagerySearch NewJobDetails and AlgorithmList will not be displayed until bbox is not null
 
-    //let [ImagerySearch, AlgorithmList, NewJobDetails ] = output.state.children
-    const wrapper = mount(<CreateJob store={store} />)
-    const imagerySearch = wrapper.find(<li className='.CreateJob__placeholder'/>)
-    console.log(imagerySearch.length)
-    expect(imagerySearch.length).toEqual(1)
+
   })
 
   it('after selecting image, allows job detail changes')
 
   it('after selecting image, shows available algorithms')
+
+  it('updates job name after it changes')
+
+  it('updates cloud cover after it changes')
+
+  it('updates search dates after they change')
+
+  it('updates apiKey after it changes')
+
+  it('sets bbox to null after clear is clicked')
 
 
 
