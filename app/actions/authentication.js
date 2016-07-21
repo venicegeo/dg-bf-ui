@@ -35,12 +35,9 @@ export function authenticate(username, password) {
     })
 
     const encodedCreds = encode(username, password)
-    //return fetch(GATEWAY+ '/key', {
-    return fetch('https://pz-gateway.int.geointservices.io/key', {
-     // return fetch(GATEWAY.replace('pz-gateway.', 'pz-security.') + '/verification', {
+    return fetch(GATEWAY+ '/key', {
       method: 'GET',
       headers: {'Authorization' : 'Basic ' + encodedCreds},
-      //body: JSON.stringify({username, credential: password})
     })
       .then(response => {
         if (!response.ok) {
@@ -57,8 +54,7 @@ export function authenticate(username, password) {
           return
         }
         const encodedUuid = encode(uuid, '')
-        token = encodedUuid
-        //token = `Basic ${btoa(uuid + ':')}`
+        token = 'Basic '+encodedUuid + ':'
         // HACK HACK HACK HACK
 
         dispatch(authenticateSuccess(token))
