@@ -33,33 +33,54 @@ export function authenticate(username, password) {
     dispatch({
       type: AUTHENTICATE
     })
-    return fetch(GATEWAY.replace('pz-gateway.', 'pz-security.') + '/verification', {
-      method: 'POST',
-      headers: {'content-type': 'application/json'},
-      body: JSON.stringify({username, credential: password})
+
+    const encodedCreds = encode(username, password)
+    //return fetch(GATEWAY+ '/key', {
+    return fetch('https://pz-gateway.int.geointservices.io/key', {
+     // return fetch(GATEWAY.replace('pz-gateway.', 'pz-security.') + '/verification', {
+      method: 'GET',
+      headers: {'Authorization' : 'Basic ' + encodedCreds},
+      //body: JSON.stringify({username, credential: password})
     })
       .then(response => {
         if (!response.ok) {
           throw new Error(`HttpError (code=${response.status})`)
         }
-        return response.text()
+        return response.json()
       })
       .then(token => {
 
+        const uuid = token.uuid
         // HACK HACK HACK HACK
         if (token === 'false') {
           dispatch(authenticateError('Credentials rejected'))
           return
         }
-        token = `Basic ${btoa(username + ':' + password)}`
+        const encodedUuid = encode(uuid, '')
+        token = encodedUuid
+        //token = `Basic ${btoa(uuid + ':')}`
         // HACK HACK HACK HACK
 
         dispatch(authenticateSuccess(token))
+        console.log('success')
       })
       .catch(err => {
         dispatch(authenticateError(err))
       })
   }
+}
+
+function encode(username, password){
+  const decodedString = username + ":" + password;
+  const encodedValue = b64EncodeUnicode(decodedString);
+  return encodedValue
+
+}
+
+function b64EncodeUnicode(str) {
+  return btoa(encodeURIComponent(str).replace(/%([0-9A-F]{2})/g, function(match, p1) {
+    return String.fromCharCode('0x' + p1);
+  }));
 }
 
 function authenticateError(err) {
