@@ -85,7 +85,7 @@ export class Client {
   }
 
   post(type, data) {
-    return this._fetch('/v2/job', {
+    return this._fetch('/job', {
       body: JSON.stringify({type, data}),
       headers: {'content-type': 'application/json'},
       method: 'POST'
@@ -124,10 +124,10 @@ function normalizeDeployment(descriptor) {
 }
 
 function normalizePostMetadata(metadata) {
-  if (!metadata.jobId) {
+  if (!metadata.data.jobId) {
     throw new InvalidResponse(metadata, 'No job ID assigned')
   }
-  return metadata.jobId
+  return metadata.data.jobId
 }
 
 function normalizeServiceListing(page) {
@@ -135,8 +135,8 @@ function normalizeServiceListing(page) {
 }
 
 function normalizeStatus(status) {
-  if (!status.status || status.type === 'error') {
-    throw new InvalidResponse(status, status.message || 'Status is ambiguous')
+  if (!status.data.status || status.data.status === 'Error') {
+    throw new InvalidResponse(status, status.data.result.message || 'Status is ambiguous')
   }
   return Object.assign({
     message: null,
