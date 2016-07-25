@@ -34,10 +34,11 @@ export function authenticate(username, password) {
       type: AUTHENTICATE
     })
 
-    const encodedCreds = encode(username, password)
-    return fetch(GATEWAY+ '/key', {
-      method: 'GET',
-      headers: {'Authorization' : 'Basic ' + encodedCreds},
+    return fetch(GATEWAY + '/key', {
+      method:  'GET',
+      headers: {
+        'Authorization': `Basic ${btoa(username + ':' + password)}`
+      },
     })
       .then(response => {
         if (!response.ok) {
@@ -45,38 +46,19 @@ export function authenticate(username, password) {
         }
         return response.json()
       })
-      .then(token => {
-
-        const uuid = token.uuid
-        // HACK HACK HACK HACK
-        if (token === 'false') {
+      .then(auth => {
+        if (!auth.uuid) {
           dispatch(authenticateError('Credentials rejected'))
           return
         }
-        const encodedUuid = encode(uuid, '')
-        token = 'Basic '+encodedUuid + ':'
-        // HACK HACK HACK HACK
+        const token = `Basic ${btoa(auth.uuid + ':')}`
 
         dispatch(authenticateSuccess(token))
-        console.log('success')
       })
       .catch(err => {
         dispatch(authenticateError(err))
       })
   }
-}
-
-function encode(username, password){
-  const decodedString = username + ":" + password;
-  const encodedValue = b64EncodeUnicode(decodedString);
-  return encodedValue
-
-}
-
-function b64EncodeUnicode(str) {
-  return btoa(encodeURIComponent(str).replace(/%([0-9A-F]{2})/g, function(match, p1) {
-    return String.fromCharCode('0x' + p1);
-  }));
 }
 
 function authenticateError(err) {
