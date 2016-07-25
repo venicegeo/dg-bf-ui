@@ -10,13 +10,13 @@ export const ERROR_GENERIC = `{
 }`
 
 export const RESPONSE_DEPLOYMENT = `{
-"deployment": {
-  "capabilitiesUrl": "http://test-capabilities-url/arbitrary/context/path?service=wfs&version=2.0.0&request=GetCapabilities",
-  "dataId": "test-data-id",
-  "deploymentId": "test-deployment-id",
-  "host": "test-host",
-  "layer": "test-layer-id",
-  "port": "test-port"
+  "deployment": {
+    "capabilitiesUrl": "http://test-capabilities-url/arbitrary/context/path?service=wfs&version=2.0.0&request=GetCapabilities",
+    "dataId": "test-data-id",
+    "deploymentId": "test-deployment-id",
+    "host": "test-host",
+    "layer": "test-layer-id",
+    "port": "test-port"
   }
 }`
 
@@ -32,48 +32,56 @@ export const RESPONSE_FILE = `{
 
 export const RESPONSE_JOB_CREATED = `{
   "type": "job",
-  "jobId": "test-id"
+  "data": {
+    "jobId": "test-id"
+  }
 }`
 
 export const RESPONSE_JOB_RUNNING = `{
   "type": "status",
-  "jobId": "test-id",
-  "status": "Running",
-  "jobType": "execute-service",
-  "submittedBy": "test-user",
-  "progress": {}
+  "data": {
+    "result": null,
+    "status": "Running",
+    "jobType": "ExecuteServiceJob",
+    "createdBy": "test-created-by",
+    "progress": {},
+    "jobId": "test-id"
+  }
 }`
 
 export const RESPONSE_JOB_SUCCESS = `{
   "type": "status",
-  "jobId": "test-id",
-  "result": {
-    "type": "data",
-    "dataId": "test-data-id"
-  },
-  "status": "Success",
-  "jobType": "execute-service",
-  "submittedBy": "test-user",
-  "progress": {}
+  "data": {
+    "result": {
+      "type": "data",
+      "dataId": "test-data-id"
+    },
+    "status": "Success",
+    "jobType": "ExecuteServiceJob",
+    "createdBy": "test-created-by",
+    "progress": {},
+    "jobId": "test-id"
+  }
 }`
 
 export const RESPONSE_JOB_ERROR = `{
   "type": "status",
-  "jobId": "test-id",
-  "result": {
-    "type": "error",
-    "message": "Service not found."
-  },
-  "status": "Error",
-  "jobType": "execute-service",
-  "submittedBy": "test-user",
-  "progress": {}
+  "data": {
+    "result": {
+      "type": "error",
+      "message": "403 Forbidden"
+    },
+    "status": "Error",
+    "jobType": "ExecuteServiceJob",
+    "createdBy": "test-created-by",
+    "progress": {},
+    "jobId": "test-id"
+  }
 }`
 
 export const RESPONSE_JOB_NOT_FOUND = `{
   "type": "error",
-  "jobId": "test-id",
-  "message": "Job Not Found.",
+  "message": "Job not found: test-id",
   "origin": "Job Manager"
 }`
 
@@ -83,6 +91,7 @@ export const RESPONSE_SERVICE_LIST = `{
     {
       "serviceId": "test-id-1",
       "url": "test-url",
+      "contractUrl": "test-contract-url",
       "method": "POST",
       "resourceMetadata": {
         "name": "test-name",
@@ -96,6 +105,7 @@ export const RESPONSE_SERVICE_LIST = `{
     {
       "serviceId": "test-id-2",
       "url": "test-url",
+      "contractUrl": "test-contract-url",
       "method": "POST",
       "resourceMetadata": {
         "name": "test-name",

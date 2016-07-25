@@ -312,10 +312,11 @@ describe('Piazza Client', function () {
       client.getStatus('test-id')
         .then(() => done(new Error('Should have thrown')))
         .catch(error => {
-          expect(error instanceof Error).toEqual(true)
+          expect(error).toBeAn(Error)
           expect(error.message).toMatch(/^InvalidResponse: Job Not Found/i)
           done()
         })
+        .catch(done)
     })
 
     it('handles HTTP errors gracefully', (done) => {
@@ -337,7 +338,7 @@ describe('Piazza Client', function () {
       const client = new Client('http://m', 'test-auth-token')
       client.post('test-type', 'test-data')
         .then(() => {
-          expect(stub.calls[0].arguments[0]).toEqual('http://m/v2/job')
+          expect(stub.calls[0].arguments[0]).toEqual('http://m/job')
           done()
         })
         .catch(done)
