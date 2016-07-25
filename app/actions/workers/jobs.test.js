@@ -418,21 +418,21 @@ function generateJob(id = 'test-id', status = STATUS_RUNNING) {
 
 function generateStatusError(jobId = 'test-id') {
   return {
-    ...JSON.parse(RESPONSE_JOB_ERROR),
+    ...JSON.parse(RESPONSE_JOB_ERROR).data,
     jobId,
   }
 }
 
 function generateStatusRunning(jobId = 'test-id') {
   return {
-    ...JSON.parse(RESPONSE_JOB_RUNNING),
+    ...JSON.parse(RESPONSE_JOB_RUNNING).data,
     jobId,
   }
 }
 
 function generateStatusSuccess(jobId = 'test-id') {
   return {
-    ...JSON.parse(RESPONSE_JOB_SUCCESS),
+    ...JSON.parse(RESPONSE_JOB_SUCCESS).data,
     jobId,
   }
 }
