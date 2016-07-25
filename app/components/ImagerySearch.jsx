@@ -18,6 +18,7 @@ import React, {Component} from 'react'
 import LoadingAnimation from './LoadingAnimation.jsx'
 import StaticMinimap from './StaticMinimap.jsx'
 import styles from './ImagerySearch.css'
+import moment from 'moment'
 
 export default class ImagerySearch extends Component {
   static propTypes = {
@@ -45,7 +46,7 @@ export default class ImagerySearch extends Component {
 
   componentDidMount() {
     this.refs.dateFrom.value = this.props.dateFrom
-    this.refs.dateTo.value = this.props.dateTo
+    this.refs.dateTo.value = moment().format('YYYY-MM-DD')
     this.refs.apiKey.value = this.props.catalogApiKey || ''
     this.refs.cloudCover.value = this.props.cloudCover || ''
   }
