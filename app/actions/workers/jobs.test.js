@@ -121,7 +121,7 @@ describe('Jobs Worker', () => {
     it('yields appropriate status for successful jobs', (done) => {
       handlers.getRecords.andReturn([generateJob()])
       client.getStatus.andReturn(Promise.resolve(generateStatusSuccess()))
-      client.getFile.andReturn(Promise.resolve('{"shoreDataID":"test-vector-data-id","rgbLoc":"test-deployment-id","error":""}'))
+      client.getFile.andReturn(Promise.resolve('{"shoreDataID":"test-vector-data-id","shoreDeplID":"test-deployment-id","rgbLoc":"","error":""}'))
       client.getDeployment.andReturn(Promise.resolve(generateDeploymentDescriptor()))
       worker.start(client, 0, 1000, handlers)
       defer(() => {
