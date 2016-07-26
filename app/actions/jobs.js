@@ -71,8 +71,6 @@ export function createJob(catalogApiKey, name, algorithm, feature) {
         body: {
           content: JSON.stringify({
             algoType:      algorithm.type,
-            bandMergeType: algorithm.type,
-            bandMergeURL:  algorithm.url,
             svcURL:        algorithm.url,
             pzAuthToken:   client.authToken,
             pzAddr:        client.gateway,
