@@ -57,7 +57,6 @@ const DISPOSITION_UNDETECTED = 'Undetected'
 const DISPOSITION_NEW_DETECTION = 'New Detection'
 const KEY_OWNER_ID = 'OWNER_ID'
 const KEY_DETECTION = 'detection'
-const PREFIX_LANDSAT = 'landsat'
 const TYPE_DIVOT_INBOARD = 'DIVOT_INBOARD'
 const TYPE_DIVOT_OUTBOARD = 'DIVOT_OUTBOARD'
 const TYPE_LABEL_MAJOR = 'LABEL_MAJOR'
@@ -557,12 +556,11 @@ export default class PrimaryMap extends Component {
   }
 
   _renderSelectionPreview() {
-    const selectedFeatures = this.props.selectedFeature ? [this.props.selectedFeature] : []
+    const images = featuresToImages(this.props.selectedFeature)
     const shouldRender = {}
     const alreadyRendered = {}
-    const _id = f => f.properties[KEY_IMAGE_ID] || f.id
 
-    selectedFeatures.forEach(f => shouldRender[_id(f)] = true)
+    images.forEach(i => shouldRender[i.id] = true)
 
     // Removals
     Object.keys(this._previewLayers).forEach(imageId => {
@@ -578,33 +576,30 @@ export default class PrimaryMap extends Component {
 
     // Additions
     const insertionIndex = this._basemapLayers.length
-    selectedFeatures.filter(f => shouldRender[_id(f)] && !alreadyRendered[_id(f)]).forEach(feature => {
-      const internalImageId = _id(feature)
-      const [, prefix, externalImageId] = internalImageId.match(/^(\w+):(.*)$/)
-
-      let provider
-      if (prefix === PREFIX_LANDSAT) {
-        provider = SCENE_TILE_PROVIDERS.find(p => p.prefix === PREFIX_LANDSAT)
-      }
-      else {
-        console.warn('No provider available for image `%s`', internalImageId)
+    images.filter(i => shouldRender[i.id] && !alreadyRendered[i.id]).forEach(image => {
+      const chunks = image.id.match(/^(\w+):(.*)$/)
+      if (!chunks) {
+        console.warn('(@primaryMap._renderSelectionPreview) Invalid image ID: `%s`', image.id)
         return
       }
 
-      const url = provider.url
-        .replace('__IMAGE_ID__', externalImageId)
-        .replace('__API_KEY__', this.props.catalogApiKey)
+      const [, prefix, externalImageId] = chunks
+      const provider = SCENE_TILE_PROVIDERS.find(p => p.prefix === prefix)
+      if (!provider) {
+        console.warn('(@primaryMap._renderSelectionPreview) No provider available for image `%s`', image.id)
+        return
+      }
+
+      // HACK HACK HACK HACK
+      const apiKey = this.props.catalogApiKey
+      // HACK HACK HACK HACK
 
       const layer = new ol.layer.Tile({
-        extent: bboxUtil.featureToBbox(feature),
-        source: new ol.source.XYZ({
-          ...provider,
-                       url,
-          crossOrigin: 'anonymous',
-        })
+        extent: image.extent,
+        source: generateScenePreviewSource(provider, externalImageId, apiKey)
       })
 
-      this._previewLayers[internalImageId] = layer
+      this._previewLayers[image.id] = layer
       this._map.getLayers().insertAt(insertionIndex, layer)
     })
   }
@@ -658,6 +653,13 @@ function animateLayerExit(layer) {
     }
     requestAnimationFrame(tick)
   })
+}
+
+function featuresToImages(...features) {
+  return features.filter(Boolean).map(feature => ({
+    extent: bboxUtil.featureToBbox(feature),
+    id:     feature.properties[KEY_IMAGE_ID] || feature.id,
+  }))
 }
 
 function generateBasemapLayers(providers) {
@@ -900,6 +902,16 @@ function generateProgressBarOverlay(result, position) {
     position,
     id: result.jobId,
     positioning: 'bottom-left'
+  })
+}
+
+function generateScenePreviewSource(provider, imageId, apiKey) {
+  return new ol.source.XYZ({
+    ...provider,
+    crossOrigin: 'anonymous',
+    url: provider.url
+           .replace('__IMAGE_ID__', imageId)
+           .replace('__API_KEY__', apiKey),
   })
 }
 
