@@ -386,57 +386,6 @@ export default class PrimaryMap extends Component {
     }
   }
 
-  _renderSelectionPreview() {
-    const selectedFeatures = this.props.selectedFeature ? [this.props.selectedFeature] : []
-    const shouldRender = {}
-    const alreadyRendered = {}
-    const _id = f => f.properties[KEY_IMAGE_ID] || f.id
-
-    selectedFeatures.forEach(f => shouldRender[_id(f)] = true)
-
-    // Removals
-    for (const imageId in this._previewLayers) {
-      const layer = this._previewLayers[imageId]
-      alreadyRendered[imageId] = true
-      if (!shouldRender[imageId]) {
-        this._map.removeLayer(layer)
-        delete this._previewLayers[imageId]
-      }
-    }
-
-    // Additions
-    const insertionIndex = this._basemapLayers.length
-    selectedFeatures.filter(f => shouldRender[_id(f)] && !alreadyRendered[_id(f)]).forEach(feature => {
-      const internalImageId = _id(feature)
-      const [, prefix, externalImageId] = internalImageId.match(/^(\w+):(.*)$/)
-
-      let provider
-      if (prefix === PREFIX_LANDSAT) {
-        provider = SCENE_TILE_PROVIDERS.find(p => p.prefix === PREFIX_LANDSAT)
-      }
-      else {
-        console.warn('No provider available for image `%s`', internalImageId)
-        return
-      }
-
-      const url = provider.url
-        .replace('__IMAGE_ID__', externalImageId)
-        .replace('__API_KEY__', this.props.catalogApiKey)
-
-      const layer = new ol.layer.Tile({
-        extent: bboxUtil.featureToBbox(feature),
-        source: new ol.source.XYZ({
-          ...provider,
-          url,
-          crossOrigin: 'anonymous',
-        })
-      })
-
-      this._previewLayers[internalImageId] = layer
-      this._map.getLayers().insertAt(insertionIndex, layer)
-    })
-  }
-
   _renderDetections() {
     const {detections} = this.props
     const shouldRender = {}
@@ -605,6 +554,57 @@ export default class PrimaryMap extends Component {
       geometry: ol.geom.Polygon.fromExtent(bbox)
     })
     this._drawLayer.getSource().addFeature(feature)
+  }
+
+  _renderSelectionPreview() {
+    const selectedFeatures = this.props.selectedFeature ? [this.props.selectedFeature] : []
+    const shouldRender = {}
+    const alreadyRendered = {}
+    const _id = f => f.properties[KEY_IMAGE_ID] || f.id
+
+    selectedFeatures.forEach(f => shouldRender[_id(f)] = true)
+
+    // Removals
+    Object.keys(this._previewLayers).forEach(imageId => {
+      const layer = this._previewLayers[imageId]
+      alreadyRendered[imageId] = true
+      if (!shouldRender[imageId]) {
+        this._map.removeLayer(layer)
+        delete this._previewLayers[imageId]
+      }
+    })
+
+    // Additions
+    const insertionIndex = this._basemapLayers.length
+    selectedFeatures.filter(f => shouldRender[_id(f)] && !alreadyRendered[_id(f)]).forEach(feature => {
+      const internalImageId = _id(feature)
+      const [, prefix, externalImageId] = internalImageId.match(/^(\w+):(.*)$/)
+
+      let provider
+      if (prefix === PREFIX_LANDSAT) {
+        provider = SCENE_TILE_PROVIDERS.find(p => p.prefix === PREFIX_LANDSAT)
+      }
+      else {
+        console.warn('No provider available for image `%s`', internalImageId)
+        return
+      }
+
+      const url = provider.url
+        .replace('__IMAGE_ID__', externalImageId)
+        .replace('__API_KEY__', this.props.catalogApiKey)
+
+      const layer = new ol.layer.Tile({
+        extent: bboxUtil.featureToBbox(feature),
+        source: new ol.source.XYZ({
+          ...provider,
+                       url,
+          crossOrigin: 'anonymous',
+        })
+      })
+
+      this._previewLayers[internalImageId] = layer
+      this._map.getLayers().insertAt(insertionIndex, layer)
+    })
   }
 
   _scheduleThumbnailExit() {
