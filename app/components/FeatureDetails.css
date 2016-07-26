@@ -14,37 +14,10 @@
  * limitations under the License.
  **/
 
-:root {
-  --timing-function: cubic-bezier(0.18, 0.89, 0.32, 1.28);
-}
-
 .root {
   position: absolute;
 }
 
-.loadingAnimation {
-  position: absolute;
-  top: -30px;
-  left: -30px;
-  pointer-events: none;
-
-  transition:
-    opacity .4s linear,
-    transform .25s var(--timing-function);
-  opacity: 0;
-  transform: scale(0.75);
-}
-
-.isLoading .loadingAnimation {
-  opacity: 1;
-  transform: scale(1.0);
-}
-
 .sceneDetails {
   left: 20px;
-  transition: left .1s var(--timing-function);
-}
-
-.isLoading .sceneDetails {
-  left: 40px;
 }

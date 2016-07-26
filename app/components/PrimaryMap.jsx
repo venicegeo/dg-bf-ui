@@ -17,7 +17,6 @@
 import 'openlayers/dist/ol.css'
 import React, {Component} from 'react'
 import {findDOMNode} from 'react-dom'
-import {connect} from 'react-redux'
 import ol from 'openlayers'
 import ExportControl from '../utils/openlayers.ExportControl.js'
 import SearchControl from '../utils/openlayers.SearchControl.js'
@@ -28,8 +27,11 @@ import debounce from 'lodash/debounce'
 import throttle from 'lodash/throttle'
 import * as anchorUtil from '../utils/map-anchor'
 import * as bboxUtil from '../utils/bbox'
-import {TILE_PROVIDERS} from '../config'
 import styles from './PrimaryMap.css'
+import {
+  TILE_PROVIDERS,
+  SCENE_TILE_PROVIDERS,
+} from '../config'
 import {
   KEY_NAME,
   KEY_STATUS,
@@ -55,6 +57,7 @@ const DISPOSITION_UNDETECTED = 'Undetected'
 const DISPOSITION_NEW_DETECTION = 'New Detection'
 const KEY_OWNER_ID = 'OWNER_ID'
 const KEY_DETECTION = 'detection'
+const PREFIX_LANDSAT = 'landsat'
 const TYPE_DIVOT_INBOARD = 'DIVOT_INBOARD'
 const TYPE_DIVOT_OUTBOARD = 'DIVOT_OUTBOARD'
 const TYPE_LABEL_MAJOR = 'LABEL_MAJOR'
@@ -107,7 +110,6 @@ export default class PrimaryMap extends Component {
     this._handleDrawEnd = this._handleDrawEnd.bind(this)
     this._handleMouseMove = throttle(this._handleMouseMove.bind(this), 15)
     this._handleSelect = this._handleSelect.bind(this)
-    this._handleThumbnailLoaded = this._handleThumbnailLoaded.bind(this)
     this._recenter = debounce(this._recenter.bind(this), 100)
     this._renderImagerySearchBbox = debounce(this._renderImagerySearchBbox.bind(this))
   }
@@ -115,7 +117,7 @@ export default class PrimaryMap extends Component {
   componentDidMount() {
     this._initializeOpenLayers()
       .then(() => {
-        this._renderCompositeImage()
+        this._renderSelectionPreview()
         this._renderDetections()
         this._renderFrames()
         this._renderImagery()
@@ -143,10 +145,11 @@ export default class PrimaryMap extends Component {
   componentDidUpdate(previousProps, previousState) {  // eslint-disable-line complexity
     if (!this.props.selectedFeature) {
       this._clearSelection()
-      this._clearThumbnail()
+    }
+    if (this.props.selectedFeature !== previousProps.selectedFeature) {
+      this._renderSelectionPreview()
     }
     if (this.props.detections !== previousProps.detections) {
-      this._renderCompositeImage()
       this._renderDetections()
       this._renderProgressBars()
     }
@@ -158,7 +161,6 @@ export default class PrimaryMap extends Component {
     }
     if (this.props.isSearching !== previousProps.isSearching) {
       this._clearSelection()
-      this._clearThumbnail()
       this._renderImagerySearchResultsOverlay()
     }
     if (this.props.bbox !== previousProps.bbox) {
@@ -188,7 +190,6 @@ export default class PrimaryMap extends Component {
         <FeatureDetails
           ref="featureDetails"
           feature={this.props.selectedFeature}
-          onThumbnailLoaded={this._handleThumbnailLoaded}
         />
         <ImagerySearchResults
           ref="imageSearchResults"
@@ -218,10 +219,6 @@ export default class PrimaryMap extends Component {
 
   _clearSelection() {
     this._selectInteraction.getFeatures().clear()
-  }
-
-  _clearThumbnail() {
-    this._thumbnailLayer.setSource(null)
   }
 
   _deactivateDrawInteraction() {
@@ -294,7 +291,6 @@ export default class PrimaryMap extends Component {
       type = feature.get(KEY_TYPE)
     }
 
-    this._clearThumbnail()
     this._featureDetailsOverlay.setPosition(position)
 
     const selections = this._selectInteraction.getFeatures()
@@ -327,41 +323,13 @@ export default class PrimaryMap extends Component {
     }
   }
 
-  _handleThumbnailLoaded(image, feature) {
-    if (!feature || hasWmsPresence(feature)) {
-      return
-    }
-    // don't borther trying to render tiles beyond the image footprint
-    const reader = new ol.format.GeoJSON()
-    this._thumbnailLayer.setExtent(reader.readGeometry(feature.geometry, {dataProjection: 'EPSG:4326', featureProjection: 'EPSG:3857'}).getExtent())
-
-    let realFeatureId
-    const featureId = feature.id.slice(0, 8)
-    if (featureId !== 'landsat:') { realFeatureId = feature.properties['beachfront:imageId'] }
-    else { realFeatureId = feature.id }
-    const strippedFeatureId = realFeatureId.substring(8)
-    this._thumbnailLayer.setSource(new ol.source.XYZ({
-      crossOrigin: 'anonymous',
-      urls: [
-        'https://tiles0.planet.com/v0/scenes/landsat/'+strippedFeatureId+'/{z}/{x}/{y}.png?api_key='+this.props.catalogApiKey,
-        'https://tiles1.planet.com/v0/scenes/landsat/'+strippedFeatureId+'/{z}/{x}/{y}.png?api_key='+this.props.catalogApiKey,
-        'https://tiles2.planet.com/v0/scenes/landsat/'+strippedFeatureId+'/{z}/{x}/{y}.png?api_key='+this.props.catalogApiKey,
-        'https://tiles3.planet.com/v0/scenes/landsat/'+strippedFeatureId+'/{z}/{x}/{y}.png?api_key='+this.props.catalogApiKey
-      ]
-    }))
-    this._thumbnailLayer.set(KEY_OWNER_ID, feature.id)
-    this._thumbnailLayer.setOpacity(1)
-  }
-
   _initializeOpenLayers() {
     this._basemapLayers = generateBasemapLayers(TILE_PROVIDERS)
     this._detectionsLayer = generateDetectionsLayer()
     this._drawLayer = generateDrawLayer()
     this._frameLayer = generateFrameLayer()
     this._imageryLayer = generateImageryLayer()
-    this._thumbnailLayer = generateThumbnailLayer()
-    this._wmslayer = generateWmsLayer()
-    this._wmsLayers = {}
+    this._previewLayers = {}
 
     this._drawInteraction = generateDrawInteraction(this._drawLayer)
     this._drawInteraction.on('drawstart', this._handleDrawStart)
@@ -380,11 +348,9 @@ export default class PrimaryMap extends Component {
       layers: [
         // Order matters here
         ...this._basemapLayers,
-        this._wmslayer,
         this._frameLayer,
         this._drawLayer,
         this._imageryLayer,
-        this._thumbnailLayer,
         this._detectionsLayer
       ],
       overlays: [
@@ -420,49 +386,53 @@ export default class PrimaryMap extends Component {
     }
   }
 
-  _renderCompositeImage() {
-    const {detections, jobs} = this.props
+  _renderSelectionPreview() {
+    const selectedFeatures = this.props.selectedFeature ? [this.props.selectedFeature] : []
     const shouldRender = {}
     const alreadyRendered = {}
-    detections.forEach(d => shouldRender[d.jobId] = true)
+    const _id = f => f.properties[KEY_IMAGE_ID] || f.id
+
+    selectedFeatures.forEach(f => shouldRender[_id(f)] = true)
 
     // Removals
-    Object.keys(this._wmsLayers).forEach(jobId => {
-      const layer = this._wmsLayers[jobId]
-      alreadyRendered[jobId] = true
-      if (!shouldRender[jobId]) {
+    for (const imageId in this._previewLayers) {
+      const layer = this._previewLayers[imageId]
+      alreadyRendered[imageId] = true
+      if (!shouldRender[imageId]) {
         this._map.removeLayer(layer)
-        delete this._wmsLayers[jobId]
+        delete this._previewLayers[imageId]
       }
-    })
+    }
 
     // Additions
     const insertionIndex = this._basemapLayers.length
-    jobs.filter(j => shouldRender[j.id] && !alreadyRendered[j.id] && hasWmsPresence(j)).forEach(job => {
-      // Remove thumbnail if it belongs to this job
-      if (this._thumbnailLayer.get(KEY_OWNER_ID) === job.id) {
-        this._scheduleThumbnailExit()
+    selectedFeatures.filter(f => shouldRender[_id(f)] && !alreadyRendered[_id(f)]).forEach(feature => {
+      const internalImageId = _id(feature)
+      const [, prefix, externalImageId] = internalImageId.match(/^(\w+):(.*)$/)
+
+      let provider
+      if (prefix === PREFIX_LANDSAT) {
+        provider = SCENE_TILE_PROVIDERS.find(p => p.prefix === PREFIX_LANDSAT)
+      }
+      else {
+        console.warn('No provider available for image `%s`', internalImageId)
+        return
       }
 
-      let realFeatureId
-      const featureId = job.id.slice(0, 8)
-      if (featureId !== 'landsat:') { realFeatureId = job.properties['beachfront:imageId'] }
-      else { realFeatureId = job.id }
-      const strippedFeatureId = realFeatureId.substring(8)
+      const url = provider.url
+        .replace('__IMAGE_ID__', externalImageId)
+        .replace('__API_KEY__', this.props.catalogApiKey)
+
       const layer = new ol.layer.Tile({
-        extent: bboxUtil.featureToBbox(job),
+        extent: bboxUtil.featureToBbox(feature),
         source: new ol.source.XYZ({
+          ...provider,
+          url,
           crossOrigin: 'anonymous',
-          urls: [
-            'https://tiles0.planet.com/v0/scenes/landsat/'+strippedFeatureId+'/{z}/{x}/{y}.png?api_key='+this.props.catalogApiKey,
-            'https://tiles1.planet.com/v0/scenes/landsat/'+strippedFeatureId+'/{z}/{x}/{y}.png?api_key='+this.props.catalogApiKey,
-            'https://tiles2.planet.com/v0/scenes/landsat/'+strippedFeatureId+'/{z}/{x}/{y}.png?api_key='+this.props.catalogApiKey,
-            'https://tiles3.planet.com/v0/scenes/landsat/'+strippedFeatureId+'/{z}/{x}/{y}.png?api_key='+this.props.catalogApiKey
-          ]
         })
       })
 
-      this._wmsLayers[job.id] = layer
+      this._previewLayers[internalImageId] = layer
       this._map.getLayers().insertAt(insertionIndex, layer)
     })
   }
@@ -562,10 +532,6 @@ export default class PrimaryMap extends Component {
         features.forEach(feature => {
           feature.set(KEY_TYPE, TYPE_SCENE)
         })
-        source.setAttributions([
-          '<a href="https://www.planet.com" target="_blank" rel="noopener">Planet Labs</a>',
-          '<a href="https://landsat.usgs.gov" target="_blank" rel="noopener">LANDSAT (USGS)</a>',
-        ])  // HACK -- this should be dynamic, not hardcoded
         source.addFeatures(features)
       }
     }
@@ -897,18 +863,6 @@ function generateImageryLayer() {
   })
 }
 
-function generateWmsLayer() {
-  return new ol.layer.Image({})
-  //   extent: [-13884991, 2870341, -7455066, 6338219],
-  //   source: new ol.source.ImageWMS({
-  //     url: 'http://demo.boundlessgeo.com/geoserver/wms',
-  //     params: {'LAYERS': 'topp:states'},
-  //     serverType: 'geoserver'
-  //   })
-  //
-}
-
-
 function generateFeatureDetailsOverlay(componentRef) {
   return new ol.Overlay({
     autoPan: true,
@@ -1017,10 +971,6 @@ function generateStyleUnknownDetectionType() {
   })
 }
 
-function generateThumbnailLayer() {
-  return new ol.layer.Tile()
-}
-
 function getColorForStatus(status) {
   switch (status) {
   case STATUS_RUNNING: return 'hsl(48, 94%, 54%)'
@@ -1030,14 +980,3 @@ function getColorForStatus(status) {
   default: return 'magenta'
   }
 }
-
-function hasWmsPresence(feature) {
-  return feature
-    && feature.properties
-    && feature.properties[KEY_WMS_LAYER_ID]
-    && feature.properties[KEY_WMS_URL]
-}
-
-export default connect(state => ({
-  catalogApiKey: state.catalog.apiKey,
-}))(PrimaryMap)
