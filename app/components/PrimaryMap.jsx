@@ -569,8 +569,10 @@ export default class PrimaryMap extends Component {
       const layer = this._previewLayers[imageId]
       alreadyRendered[imageId] = true
       if (!shouldRender[imageId]) {
-        this._map.removeLayer(layer)
-        delete this._previewLayers[imageId]
+        animateLayerExit(layer).then(() => {
+          this._map.removeLayer(layer)
+          delete this._previewLayers[imageId]
+        })
       }
     })
 
@@ -607,21 +609,6 @@ export default class PrimaryMap extends Component {
     })
   }
 
-  _scheduleThumbnailExit() {
-    const step = 0.05
-    let opacity = 1
-    const tick = () => {
-      if (opacity > 0) {
-        opacity -= step
-        this._thumbnailLayer.setOpacity(opacity)
-        requestAnimationFrame(tick)
-      } else {
-        this._clearThumbnail()
-      }
-    }
-    requestAnimationFrame(tick)
-  }
-
   _updateBasemap() {
     this._basemapLayers.forEach((layer, i) => layer.setVisible(i === this.state.basemapIndex))
   }
@@ -654,6 +641,23 @@ export default class PrimaryMap extends Component {
     this._selectInteraction.getFeatures().push(feature)
     this._featureDetailsOverlay.setPosition(center)
   }
+}
+
+function animateLayerExit(layer) {
+  return new Promise(resolve => {
+    const step = 0.075
+    let opacity = 1
+    const tick = () => {
+      if (opacity > 0) {
+        opacity -= step
+        layer.setOpacity(opacity)
+        requestAnimationFrame(tick)
+      } else {
+        resolve(layer)
+      }
+    }
+    requestAnimationFrame(tick)
+  })
 }
 
 function generateBasemapLayers(providers) {
