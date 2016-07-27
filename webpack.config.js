@@ -21,14 +21,32 @@ const webpack = require('webpack')
 const HtmlWebpackPlugin = require('html-webpack-plugin')
 const cssnext = require('postcss-cssnext')
 
+const __environment__ = process.env.NODE_ENV || 'development'
+
 module.exports = {
-  context: path.join(__dirname, 'app'),
-  entry: './index.js',
-  devtool: 'cheap-module-eval-source-map',
+  devtool: 'source-map',
+
+  context: __dirname,
+  entry: {
+    'app': './app/index.js',
+    'vendor': [
+      'history',
+      'isomorphic-fetch',
+      'moment',
+      'openlayers',
+      'react',
+      'react-dom',
+      'react-redux',
+      'react-router',
+      'redux',
+      'redux-thunk',
+    ]
+  },
 
   resolve: {
-    alias: process.env.NODE_ENV === 'production' ? {} : {openlayers$: 'openlayers/dist/ol-debug.js'},
-    extensions: ['', '.js', '.jsx']
+    alias: __environment__ === 'production' ? {} : {openlayers$: 'openlayers/dist/ol-debug.js'},
+    extensions: ['', '.js', '.jsx'],
+    root: __dirname,
   },
 
   output: {
@@ -53,13 +71,15 @@ module.exports = {
   postcss: () => [cssnext({browsers: 'Firefox >= 38, Chrome >= 40'})],
 
   plugins: [
+    new webpack.IgnorePlugin(/^\.\/locale$/, /moment$/),
+    new webpack.optimize.CommonsChunkPlugin('vendor', 'vendor.bundle.js'),
     new webpack.DefinePlugin({
-      'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV || 'development'),
-      'process.env.GATEWAY': JSON.stringify(process.env.GATEWAY || 'http://localhost:3000')
+      'process.env.NODE_ENV': JSON.stringify(__environment__),
+      'process.env.GATEWAY': JSON.stringify(process.env.GATEWAY || 'http://localhost:3000'),
     }),
     new HtmlWebpackPlugin({
-      template: 'index.ejs',
-      favicon: process.env.NODE_ENV === 'production' ? 'images/favicon.png' : 'images/favicon-dev.png',
+      template: 'app/index.ejs',
+      favicon: __environment__ === 'production' ? 'app/images/favicon.png' : 'app/images/favicon-dev.png',
       hash: true,
       xhtml: true
     }),
@@ -67,7 +87,7 @@ module.exports = {
   ]
 }
 
-if (process.env.NODE_ENV === 'production') {
+if (__environment__ === 'production') {
   module.exports.devtool = 'source-map'
   module.exports.plugins.push(new webpack.optimize.UglifyJsPlugin())
 }
