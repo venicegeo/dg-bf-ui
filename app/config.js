@@ -61,7 +61,7 @@ export const SCENE_TILE_PROVIDERS = [
     name: 'PlanetLabs',
     prefix: 'landsat',
     url: 'https://tiles{0-3}.planet.com/v0/scenes/landsat/__IMAGE_ID__/{z}/{x}/{y}.png?api_key=__API_KEY__',
-    maxZoom:  30, // FIXME
+    maxZoom:  12,
     attributions: '&copy; <a href="https://www.planet.com" target="_blank" rel="noopener">Planet Labs</a> &copy; <a href="https://landsat.usgs.gov" target="_blank" rel="noopener">LANDSAT (USGS)</a>',
   }
 ]
