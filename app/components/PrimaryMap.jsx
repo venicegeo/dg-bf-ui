@@ -22,6 +22,7 @@ import ExportControl from '../utils/openlayers.ExportControl.js'
 import SearchControl from '../utils/openlayers.SearchControl.js'
 import BasemapSelect from './BasemapSelect'
 import FeatureDetails from './FeatureDetails'
+import LoadingAnimation from './LoadingAnimation'
 import ImagerySearchResults from './ImagerySearchResults'
 import debounce from 'lodash/debounce'
 import throttle from 'lodash/throttle'
@@ -102,11 +103,13 @@ export default class PrimaryMap extends Component {
 
   constructor() {
     super()
-    this.state = {basemapIndex: 0}
+    this.state = {basemapIndex: 0, loadingRefCount: 0}
     this._emitAnchorChange = debounce(this._emitAnchorChange.bind(this), 1000)
     this._handleBasemapChange = this._handleBasemapChange.bind(this)
     this._handleDrawStart = this._handleDrawStart.bind(this)
     this._handleDrawEnd = this._handleDrawEnd.bind(this)
+    this._handleLoadStart = this._handleLoadStart.bind(this)
+    this._handleLoadStop = this._handleLoadStop.bind(this)
     this._handleMouseMove = throttle(this._handleMouseMove.bind(this), 15)
     this._handleSelect = this._handleSelect.bind(this)
     this._recenter = debounce(this._recenter.bind(this), 100)
@@ -179,7 +182,7 @@ export default class PrimaryMap extends Component {
   render() {
     const basemapNames = TILE_PROVIDERS.map(b => b.name)
     return (
-      <main className={styles.root} ref="container" tabIndex="1">
+      <main className={`${styles.root} ${this.state.loadingRefCount > 0 ? styles.isLoading : ''}`} ref="container" tabIndex="1">
         <BasemapSelect
           className={styles.basemapSelect}
           index={this.state.basemapIndex}
@@ -195,6 +198,9 @@ export default class PrimaryMap extends Component {
           imagery={this.props.imagery}
           isSearching={this.props.isSearching}
           onPageChange={this.props.onSearchPageChange}
+        />
+        <LoadingAnimation
+          className={styles.loadingIndicator}
         />
       </main>
     )
@@ -263,19 +269,36 @@ export default class PrimaryMap extends Component {
     this.props.onBoundingBoxChange(null)
   }
 
+  _handleLoadStart() {
+    this.setState({
+      loadingRefCount: this.state.loadingRefCount + 1
+    })
+  }
+
+  _handleLoadStop() {
+    this.setState({
+      loadingRefCount: Math.max(0, this.state.loadingRefCount - 1)
+    })
+  }
+
   _handleMouseMove(event) {
     const layerFilter = l => l === this._frameLayer || l === this._imageryLayer
-    let cursor = 'default'
+    let foundFeature = false
     this._map.forEachFeatureAtPixel(event.pixel, (feature) => {
       switch (feature.get(KEY_TYPE)) {
       case TYPE_DIVOT_INBOARD:
       case TYPE_JOB:
       case TYPE_SCENE:
-        cursor = 'pointer'
+        foundFeature = true
         return true
       }
     }, null, layerFilter)
-    this.refs.container.style.cursor = cursor
+    if (foundFeature) {
+      this.refs.container.classList.add(styles.isHoveringFeature)
+    }
+    else {
+      this.refs.container.classList.remove(styles.isHoveringFeature)
+    }
   }
 
   _handleSelect(event) {  // eslint-disable-line complexity
@@ -567,6 +590,7 @@ export default class PrimaryMap extends Component {
       const layer = this._previewLayers[imageId]
       alreadyRendered[imageId] = true
       if (!shouldRender[imageId]) {
+        this._unsubscribeFromLoadEvents(layer)
         animateLayerExit(layer).then(() => {
           this._map.removeLayer(layer)
           delete this._previewLayers[imageId]
@@ -599,9 +623,22 @@ export default class PrimaryMap extends Component {
         source: generateScenePreviewSource(provider, externalImageId, apiKey)
       })
 
+      this._subscribeToLoadEvents(layer)
       this._previewLayers[image.id] = layer
       this._map.getLayers().insertAt(insertionIndex, layer)
     })
+  }
+
+  _subscribeToLoadEvents(layer) {
+    const source = layer.getSource()
+    source.on('tileloadstart', this._handleLoadStart)
+    source.on(['tileloadend', 'tileloaderror'], this._handleLoadStop)
+  }
+
+  _unsubscribeFromLoadEvents(layer) {
+    const source = layer.getSource()
+    source.un('tileloadstart', this._handleLoadStart)
+    source.un(['tileloadend', 'tileloaderror'], this._handleLoadStop)
   }
 
   _updateBasemap() {
