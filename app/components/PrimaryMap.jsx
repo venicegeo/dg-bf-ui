@@ -265,17 +265,22 @@ export default class PrimaryMap extends Component {
 
   _handleMouseMove(event) {
     const layerFilter = l => l === this._frameLayer || l === this._imageryLayer
-    let cursor = 'default'
+    let foundFeature = false
     this._map.forEachFeatureAtPixel(event.pixel, (feature) => {
       switch (feature.get(KEY_TYPE)) {
       case TYPE_DIVOT_INBOARD:
       case TYPE_JOB:
       case TYPE_SCENE:
-        cursor = 'pointer'
+        foundFeature = true
         return true
       }
     }, null, layerFilter)
-    this.refs.container.style.cursor = cursor
+    if (foundFeature) {
+      this.refs.container.classList.add(styles.isHoveringFeature)
+    }
+    else {
+      this.refs.container.classList.remove(styles.isHoveringFeature)
+    }
   }
 
   _handleSelect(event) {  // eslint-disable-line complexity
