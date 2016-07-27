@@ -24,6 +24,7 @@ import {
 const INITIAL_STATE = {
   apiKey:      null,
   discovering: false,
+  indices:     null,
   url:         null,
   error:       null,
 }
@@ -39,6 +40,7 @@ export function reducer(state = INITIAL_STATE, action) {
     return {
       ...state,
       discovering: false,
+      indices: action.indices,
       url: action.url
     }
   case DISCOVER_CATALOG_ERROR:
@@ -58,15 +60,16 @@ export function reducer(state = INITIAL_STATE, action) {
 }
 
 export function deserialize() {
-  // TODO -- register catalog with Piazza and do service lookup
   return {
     ...INITIAL_STATE,
-    apiKey: localStorage.getItem('catalog.apiKey') || INITIAL_STATE.apiKey,
-    url:    sessionStorage.getItem('catalog.url') || INITIAL_STATE.url
+    apiKey:  localStorage.getItem('catalog.apiKey') || INITIAL_STATE.apiKey,
+    url:     sessionStorage.getItem('catalog.url') || INITIAL_STATE.url,
+    indices: sessionStorage.getItem('catalog.indices') || INITIAL_STATE.indices,
   }
 }
 
 export function serialize(state) {
   localStorage.setItem('catalog.apiKey', state.apiKey || '')
+  sessionStorage.setItem('catalog.indices', JSON.stringify(state.indices))
   sessionStorage.setItem('catalog.url', state.url || '')
 }
