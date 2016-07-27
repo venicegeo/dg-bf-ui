@@ -75,7 +75,6 @@ module.exports = {
     new webpack.optimize.CommonsChunkPlugin('vendor', 'vendor.bundle.js'),
     new webpack.DefinePlugin({
       'process.env.NODE_ENV': JSON.stringify(__environment__),
-      'process.env.GATEWAY': JSON.stringify(process.env.GATEWAY || 'http://localhost:3000'),
       'process.env.GATEWAY': process.env.GATEWAY ? JSON.stringify(process.env.GATEWAY) : (__environment__ === 'development') ? JSON.stringify('http://localhost:3000') : "location.protocol + '//' + location.hostname.replace('.int.', '.stage.').replace(/beachfront.+\./, 'pz-gateway.')",
     }),
     new HtmlWebpackPlugin({
