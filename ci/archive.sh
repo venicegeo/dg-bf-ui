@@ -7,19 +7,12 @@ popd > /dev/null
 source $root/ci/vars.sh
 
 #
-# Resolve target service domain
-#
-
-# Ensure int points to stage
-resolvedDomain=$(echo $PCF_DOMAIN | sed 's/^int\./stage\./')
-
-#
 # Build
 #
 
 npm install
 xvfb-run npm run test:ci
-NODE_ENV=production GATEWAY="https://pz-gateway.${resolvedDomain}" npm run build
+NODE_ENV=production npm run build
 echo "pushstate: enabled" > dist/Staticfile
 
 #
