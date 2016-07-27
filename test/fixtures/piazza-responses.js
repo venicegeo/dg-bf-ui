@@ -10,13 +10,16 @@ export const ERROR_GENERIC = `{
 }`
 
 export const RESPONSE_DEPLOYMENT = `{
-  "deployment": {
-    "capabilitiesUrl": "http://test-capabilities-url/arbitrary/context/path?service=wfs&version=2.0.0&request=GetCapabilities",
-    "dataId": "test-data-id",
-    "deploymentId": "test-deployment-id",
-    "host": "test-host",
-    "layer": "test-layer-id",
-    "port": "test-port"
+  "data": {
+    "deployment": {
+      "capabilitiesUrl": "http://test-capabilities-url/arbitrary/context/path?service=wfs&version=2.0.0&request=GetCapabilities",
+      "dataId": "test-data-id",
+      "deploymentId": "test-deployment-id",
+      "host": "test-host",
+      "layer": "test-layer-id",
+      "port": "test-port"
+    },
+    "expiresOn": "test-expires-on"
   }
 }`
 

@@ -117,9 +117,9 @@ function asJson(response) {
 
 function normalizeDeployment(descriptor) {
   return {
-    dataId:   descriptor.deployment.dataId,
-    endpoint: descriptor.deployment.capabilitiesUrl.replace(/\?.*$/, ''),
-    layerId:  descriptor.deployment.layer,
+    dataId:   descriptor.data.deployment.dataId,
+    endpoint: descriptor.data.deployment.capabilitiesUrl.replace(/\?.*$/, ''),
+    layerId:  descriptor.data.deployment.layer,
   }
 }
 
