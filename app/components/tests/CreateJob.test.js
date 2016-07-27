@@ -16,19 +16,19 @@
 
 import React from 'react'
 import {mount, shallow} from 'enzyme'
-import expect, {spyOn} from 'expect'
-import TestUtils from 'react-addons-test-utils'
+import expect, {createSpy} from 'expect'
 import CreateJob from '../CreateJob.jsx'
 import ImagerySearch from '../ImagerySearch.jsx'
 import AlgorithmList from '../AlgorithmList.jsx'
 import NewJobDetails from '../NewJobDetails.jsx'
 
-describe.only('CreateJob', () => {
+
+describe('CreateJob', () => {
   it('should render correctly', () => {
     const store = generateStore()
     store.getState.andReturn({
       algorithms: {
-        records: [],
+        records: [1, 2]
       },
       search: {
         bbox: [0, 0, 0, 0],
@@ -36,30 +36,151 @@ describe.only('CreateJob', () => {
         dateFrom: '2016-01-01',
         dateTo: '2016-02-01',
         error: null,
-        searching: false,
+        searching: false
       },
       jobs: {
-        creating: false,
+        creating: false
       },
       catalog: {
-        apiKey: '',
+        apiKey: ''
       },
       draftJob: {
-        name: 'JobName',        
-        image: null,
+        name: 'JobName',
+        image: null
       }
     })
 
-    const renderer = TestUtils.createRenderer()
+    const algoTester =[1, 2]
 
-    expect(() => {
-      renderer.render(<CreateJob store={store} />)
-    }).toNotThrow()
+    const wrapper = shallow(<CreateJob store={store} algorithms={algoTester} />)
+    expect(wrapper.props().selectedImage).toBe(null)
+    expect(wrapper.props().algorithms).toEqual(algoTester)
+    expect(wrapper.props().jobName).toEqual('JobName')
 
   })
 
+  it('should render NewJobDetails correctly', () => {
+    const actions = {
+      onNameChange: createSpy()
+    }
+    const store = generateStore()
+    store.getState.andReturn({
+      algorithms: {
+        records: [1, 2]
+      },
+      search: {
+        bbox: [0, 0, 0, 0],
+        cloudCover: 20,
+        dateFrom: '2016-01-01',
+        dateTo: '2016-02-01',
+        error: null,
+        searching: false
+      },
+      jobs: {
+        creating: false
+      },
+      catalog: {
+        apiKey: ''
+      },
+      draftJob: {
+        name: 'JobName',
+        image: null
+      }
+    })
 
-  it('requires image search before creating a job', () => {
+    const algoTester =[1, 2]
+    const wrapper = mount(<CreateJob store={store} algorithms={[algoTester]}/>)
+    expect(wrapper.find(<NewJobDetails name='JobName' {...actions}/>)).toExist()
+  })
+
+  it('should render AlgorithmList correctly', () => {
+    const actions = {
+      onSubmit: createSpy()
+    }
+    const store = generateStore()
+    store.getState.andReturn({
+      algorithms: {
+        records: [1, 2]
+      },
+      search: {
+        bbox: [0, 0, 0, 0],
+        cloudCover: 20,
+        dateFrom: '2016-01-01',
+        dateTo: '2016-02-01',
+        error: null,
+        searching: false
+      },
+      jobs: {
+        creating: false
+      },
+      catalog: {
+        apiKey: ''
+      },
+      draftJob: {
+        name: 'JobName',
+        image: null
+      }
+    })
+    const imageProps = {
+      acquiredDate: Date.now(),
+      bands: {},
+      cloudCover: 1.53,
+      path: 'http://google.com',
+      resolution: 30,
+      sensorName: 'Landsat8',
+      thumb_large: 'http://large',
+      thumb_small: 'http://small'
+    }
+
+    const algoTester =[1, 2]
+    const wrapper = mount(<CreateJob store={store} algorithms={[algoTester]}/>)
+    expect(wrapper.find(<AlgorithmList imageProperties={imageProps} isSubmitting={false} algorithms={algoTester} store={store} {...actions}/>)).toExist()
+  })
+
+  it('should render ImagerySearch correctly', () => {
+    const store = generateStore()
+    store.getState.andReturn({
+      algorithms: {
+        records: [1, 2]
+      },
+      search: {
+        bbox: [0, 0, 0, 0],
+        cloudCover: 20,
+        dateFrom: '2016-01-01',
+        dateTo: '2016-02-01',
+        error: null,
+        searching: false
+      },
+      jobs: {
+        creating: false
+      },
+      catalog: {
+        apiKey: ''
+      },
+      draftJob: {
+        name: 'JobName',
+        image: null
+      }
+    })
+    const actions = {
+      onApiKeyChange: expect.createSpy(),
+      onDateChange: expect.createSpy(),
+      onClearBbox: expect.createSpy(),
+      onCloudCoverChange: expect.createSpy(),
+      onSubmit: expect.createSpy()
+    }
+
+    const algoTester =[1, 2]
+    const wrapper = shallow(<CreateJob store={store} algorithms={algoTester}/>)
+    expect(wrapper.find(<ImagerySearch bbox={[0, 0, 0, 0]} cloudCover={20} dateFrom={'2016-01-01'} dateTo={'2016-02-01'} isSearching={false} {...actions}/>)).toExist()
+  })
+
+
+  it('after selecting image, allows job detail changes', (done) => {
+    const actions = {
+      onNameChange: createSpy()
+    }
+
     const store = generateStore()
     store.getState.andReturn({
       algorithms: {
@@ -67,41 +188,139 @@ describe.only('CreateJob', () => {
       },
       search: {
         bbox: [0, 0, 0, 0],
+        cloudCover: 20,
         dateFrom: '2016-01-01',
         dateTo: '2016-02-01',
         error: null,
-        searching: false,
+        searching: false
+      },
+      jobs: {
+        creating: false
       },
       catalog: {
-        apiKey: '',
+        apiKey: ''
       },
       draftJob: {
         name: 'JobName',
-        image: null,
+        image: {
+          geometry: [[152.300, 61.185], [155.574, 60.644], [154.382, 58.983], [151.259, 59.509], [152.300, 61.187]],
+          id: 'landsad:LC8110919191919919',
+          properties: {
+            acquiredDate: Date.now(),
+            bands: { },
+            cloudCover: 1.53,
+            path: 'http://google.com',
+            resolution: 30,
+            sensorName: 'Landsat8',
+            thumb_large: 'http://large',
+            thumb_small: 'http://small'
+          },
+          type: 'Feature'
+        }
       }
     })
-
-    //TODO: bbox should be null before a user draws a box. ImagerySearch NewJobDetails and AlgorithmList will not be displayed until bbox is not null
-
+    const algoTester =[1, 2]
+    const spy = expect.spyOn(NewJobDetails.prototype, '_emitNameChange')
+    const wrapper = mount(<CreateJob store={store} algorithms={algoTester}/>)
+    expect(wrapper.find(<NewJobDetails name='JobName' {...actions}/>)).toExist()
+    const newJobDetails = wrapper.find(NewJobDetails)
+    expect(spy).toNotHaveBeenCalled()
+    newJobDetails.find('input').simulate('change', {target: {value: 'Changed me!'}})
+    expect(spy).toHaveBeenCalled()
+    expect(wrapper.props().selectedImage).toNotBe(null)
+    done()
 
   })
 
-  it('after selecting image, allows job detail changes')
+  it('after selecting image, shows available algorithms', (done) => {
+    const algorithms = [{
+      description: 'test description',
+      id: 'test-algo-id',
+      name: 'BF_Algo_Test_Name',
+      requirements: [],
+      type: 'test_type',
+      url: 'http://testurl'
+    }]
 
-  it('after selecting image, shows available algorithms')
+    const imageProps = {
+      acquiredDate: Date.now(),
+      bands: {},
+      cloudCover: 1.53,
+      path: 'http://google.com',
+      resolution: 30,
+      sensorName: 'Landsat8',
+      thumb_large: 'http://large',
+      thumb_small: 'http://small'
+    }
 
-  it('updates job name after it changes')
+    const store = generateStore()
+    store.getState.andReturn({
+      algorithms: {
+        records: [{
+          description: 'test description',
+          id: 'test-algo-id',
+          name: 'BF_Algo_Test_Name',
+          requirements: [],
+          type: 'test_type',
+          url: 'http://testurl'
+        }]
+      },
+      search: {
+        bbox: [0, 0, 0, 0],
+        cloudCover: 20,
+        dateFrom: '2016-01-01',
+        dateTo: '2016-02-01',
+        error: null,
+        searching: false
+      },
+      jobs: {
+        creating: false
+      },
+      catalog: {
+        apiKey: ''
+      },
+      draftJob: {
+        name: 'JobName',
+        image: {
+          geometry: [[152.300, 61.185], [155.574, 60.644], [154.382, 58.983], [151.259, 59.509], [152.300, 61.187]],
+          id: 'test-id',
+          properties: {
+            acquiredDate: Date.now(),
+            bands: {},
+            cloudCover: 1.53,
+            path: 'http://google.com',
+            resolution: 30,
+            sensorName: 'Landsat8',
+            thumb_large: 'http://large',
+            thumb_small: 'http://small'
+          },
+          type: 'Feature'
+        }
+      }
+    })
 
-  it('updates cloud cover after it changes')
+    const actions = {
+      onSubmit: createSpy()
+    }
 
-  it('updates search dates after they change')
+    const algorithmsTest = {
+      records: [{
+        description: 'test description',
+        id: 'test-algo-id',
+        name: 'BF_Algo_Test_Name',
+        requirements: [],
+        type: 'test_type',
+        url: 'http://testurl'
+      }]
+    }
 
-  it('updates apiKey after it changes')
-
-  it('sets bbox to null after clear is clicked')
-
-
-
+    const wrapper = shallow(<CreateJob store={store} algorithms={algorithmsTest}/>)
+    expect(wrapper.find(<AlgorithmList imageProperties={imageProps} isSubmitting={false} algorithms={algorithms} store={store} {...actions}/>)).toExist()
+    expect(wrapper.props().algorithms).toNotBe(null)
+    expect(wrapper.props().jobName).toEqual('JobName')
+    expect(wrapper.props().selectedImage).toNotBe(null)
+    done()
+  })
 })
 
 //

@@ -15,77 +15,34 @@
  **/
 
 import React from 'react'
-import {mount, shallow} from 'enzyme'
-import expect, {spyOn} from 'expect'
-import TestUtils from 'react-addons-test-utils'
+import {mount} from 'enzyme'
+import expect from 'expect'
 import ImagerySearch from '../ImagerySearch.jsx'
 
-describe.only('ImagerySearch', () => {
+
+describe('ImagerySearch', () => {
   it('should render correctly', () => {
-    const store = generateStore()
+    const actions = {
+      onApiKeyChange: expect.createSpy(),
+      onDateChange: expect.createSpy(),
+      onClearBbox: expect.createSpy(),
+      onCloudCoverChange: expect.createSpy(),
+      onSubmit: expect.createSpy()
+    }
 
-    ///   bbox:               React.PropTypes.array.isRequired,
-    ///   catalogApiKey:      React.PropTypes.string,
-    ///   cloudCover:         React.PropTypes.number.isRequired,
-    ///   dateFrom:           React.PropTypes.string.isRequired,
-    ///   dateTo:             React.PropTypes.string.isRequired,
-    ///   error:              React.PropTypes.object,
-    ///   isSearching:        React.PropTypes.bool.isRequired,
-    //   onApiKeyChange:     React.PropTypes.func.isRequired,
-    //   onDateChange:       React.PropTypes.func.isRequired,
-    //   onClearBbox:        React.PropTypes.func.isRequired,
-    //   onCloudCoverChange: React.PropTypes.func.isRequired,
-    //   onSubmit:           React.PropTypes.func.isRequired
-    store.getState.andReturn({
-      search: {
-        bbox: [0, 0, 0, 0],
-        cloudCover: '20',
-        dateFrom: '2016-01-01',
-        dateTo: '2016-02-01',
-        error: null,
-        searching: false,
-      },
-      catalog: {
-        apiKey: '',
-      },
-      onApiKeyChange: null,
-      onDateChange: null,
-      onClearBbox: null,
-      onCloudCoverChange: null,
-      onSubmit: null,
-
-    })
-
-    const renderer = TestUtils.createRenderer()
-    //const output = renderer.getRenderOutput()
-
-    expect(() => {
-      renderer.render(<ImagerySearch store={store} />)
-    }).toNotThrow()
-
-    //let [ImagerySearch, AlgorithmList, NewJobDetails ] = output.state.children
-    //const wrapper = shallow(<CreateJob />);
-    //const imagerySearch = wrapper.find('ImagerySearch')
-    //expect(imagerySearch.prop('bbox').toEqual(null))
+    const component = mount(<ImagerySearch bbox={[0, 0, 0, 0]} cloudCover={20} dateFrom={'2016-01-01'} dateTo={'2016-02-01'} isSearching={false} {...actions}/>)
+    expect(component.props().cloudCover).toEqual(20)
+    expect(component.props().bbox).toEqual([0, 0, 0, 0])
   })
 
-  it('after selecting image, allows job detail changes')
+  it('updates cloud cover after it changes')
 
-  it('after selecting image, shows available algorithms')
+  it('updates search dates after they change')
 
+  it('updates apiKey after it changes')
 
+  it('clears minimap and sets bbox to null after clear is clicked')
 
 })
 
-//
-// local helpers
-//
-
-function generateStore() {
-  return {
-    dispatch: expect.createSpy(),
-    getState: expect.createSpy(),
-    subscribe: expect.createSpy()
-  }
-}
 
