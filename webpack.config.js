@@ -57,14 +57,36 @@ module.exports = {
   module: {
     noParse: /\bol(-debug)?\.js$/,
     preLoaders: [
-      {test: /\.jsx?$/, loader: 'eslint', exclude: /node_modules/}
+      {
+        test: /\.jsx?$/,
+        loader: 'eslint',
+        exclude: /node_modules/
+      }
     ],
     loaders: [
-      {test: /\.jsx?$/, loader: 'babel', exclude: /node_modules/},
-      {test: /\.css$/, loader: 'style!css', include: /node_modules/},
-      {test: /\.css$/, loader: 'style!css?module&localIdentName=[name]__[local]&importLoaders=1!postcss', exclude: /node_modules/},
-      {test: /\.(png|jpg|gif)$/, loader: 'file'},
-      {test: /\.(otf|eot|svg|ttf|woff)[^/]*$/, loader: 'file'}
+      {
+        test: /\.jsx?$/,
+        loader: 'babel',
+        exclude: /node_modules/
+      },
+      {
+        test: /\.css$/,
+        loader: 'style!css',
+        include: /node_modules/
+      },
+      {
+        test: /\.css$/,
+        loader: 'style!css?module&localIdentName=[name]__[local]&importLoaders=1!postcss',
+        exclude: /node_modules/
+      },
+      {
+        test: /\.(png|jpg|gif)$/,
+        loader: 'file'
+      },
+      {
+        test: /\.(otf|eot|svg|ttf|woff)[^/]*$/,
+        loader: 'file'
+      },
     ]
   },
 
