@@ -64,7 +64,7 @@ export function deserialize() {
     ...INITIAL_STATE,
     apiKey:  localStorage.getItem('catalog.apiKey') || INITIAL_STATE.apiKey,
     url:     sessionStorage.getItem('catalog.url') || INITIAL_STATE.url,
-    indices: sessionStorage.getItem('catalog.indices') || INITIAL_STATE.indices,
+    indices: JSON.parse(sessionStorage.getItem('catalog.indices')) || INITIAL_STATE.indices,
   }
 }
 
