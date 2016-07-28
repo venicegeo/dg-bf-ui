@@ -3,7 +3,7 @@ import {mount} from 'enzyme'
 import expect from 'expect'
 import Algorithm from '../../app/components/Algorithm.jsx'
 
-describe('Algorithm', () => {
+describe('<Algorithm/>', () => {
   it('is a div element', (done) => {
     const actions = {
       onSubmit: expect.createSpy()

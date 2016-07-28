@@ -3,7 +3,7 @@ import {mount} from 'enzyme'
 import expect from 'expect'
 import NewJobDetails from 'app/components/NewJobDetails.jsx'
 
-describe('NewJobDetails', () => {
+describe('<NewJobDetails/>', () => {
   it('should change Job Name', () => {
     const actions = {
       onNameChange: expect.createSpy()

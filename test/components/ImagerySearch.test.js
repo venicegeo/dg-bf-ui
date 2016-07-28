@@ -20,7 +20,7 @@ import expect from 'expect'
 import ImagerySearch from 'app/components/ImagerySearch.jsx'
 
 
-describe('ImagerySearch', () => {
+describe('<ImagerySearch/>', () => {
   it('should render correctly', () => {
     const actions = {
       onApiKeyChange: expect.createSpy(),

@@ -20,7 +20,7 @@ import expect from 'expect'
 import moment from 'moment'
 import Timestamp from 'app/components/Timestamp.jsx'
 
-describe('Timestamp', () => {
+describe('<Timestamp/>', () => {
   it('should return todays date', () => {
     const currentTimestamp = moment().format('llll')
     const wrapper = shallow(<Timestamp timestamp={currentTimestamp}/>)
