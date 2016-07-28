@@ -33,8 +33,6 @@ module.exports = (config) => {
 
     frameworks: ['mocha'],
 
-    reporters: ['mocha'],
-
     //
     // Source Wrangling
     //
