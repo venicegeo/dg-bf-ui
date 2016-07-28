@@ -29,6 +29,7 @@ import {
   updateSearchBbox,
   updateSearchCloudCover,
   updateSearchDates,
+  updateSearchFilter,
 } from '../actions'
 
 class CreateJob extends Component {
@@ -45,6 +46,8 @@ class CreateJob extends Component {
     dateTo:        React.PropTypes.string.isRequired,
     dispatch:      React.PropTypes.func.isRequired,
     error:         React.PropTypes.object,
+    filter:        React.PropTypes.string,
+    filters:       React.PropTypes.arrayOf(React.PropTypes.object).isRequired,
     isCreating:    React.PropTypes.bool.isRequired,
     isSearching:   React.PropTypes.bool.isRequired,
     jobName:       React.PropTypes.string.isRequired,
@@ -61,6 +64,7 @@ class CreateJob extends Component {
     this._handleSearchSubmit = this._handleSearchSubmit.bind(this)
     this._handleSearchCloudCoverChange = this._handleSearchCloudCoverChange.bind(this)
     this._handleSearchDateChange = this._handleSearchDateChange.bind(this)
+    this._handleSearchFilterChange = this._handleSearchFilterChange.bind(this)
   }
 
   componentDidMount() {
@@ -83,11 +87,14 @@ class CreateJob extends Component {
                 dateFrom={this.props.dateFrom}
                 dateTo={this.props.dateTo}
                 error={this.props.error}
+                filter={this.props.filter}
+                filters={this.props.filters}
                 isSearching={this.props.isSearching}
                 onApiKeyChange={this._handleCatalogApiKeyChange}
                 onClearBbox={this._handleClearBbox}
                 onCloudCoverChange={this._handleSearchCloudCoverChange}
                 onDateChange={this._handleSearchDateChange}
+                onFilterChange={this._handleSearchFilterChange}
                 onSubmit={this._handleSearchSubmit}
               />
             </li>
@@ -162,6 +169,10 @@ class CreateJob extends Component {
     this.props.dispatch(updateSearchDates(dateFrom, dateTo))
   }
 
+  _handleSearchFilterChange(filter) {
+    this.props.dispatch(updateSearchFilter(filter))
+  }
+
   _handleSearchSubmit() {
     this.props.dispatch(searchCatalog())
   }
@@ -175,6 +186,8 @@ export default connect(state => ({
   dateFrom:      state.search.dateFrom,
   dateTo:        state.search.dateTo,
   error:         state.search.error,
+  filter:        state.search.filter,
+  filters:       state.catalog.filters,
   isCreating:    state.jobs.creating,
   isSearching:   state.search.searching,
   jobName:       state.draftJob.name,
