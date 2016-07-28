@@ -39,15 +39,29 @@ module.exports = (config) => {
     // Source Wrangling
     //
 
-    files: ['app/**/*test.js'],
+    files: ['test/**/*.test.js'],
 
     preprocessors: {
-      'app/**/*.js': ['webpack', 'sourcemap']
+      'test/**/*.{js,jsx}': ['webpack', 'sourcemap']
     },
 
     webpack: {
       devtool: 'inline-source-map',
+      resolve: {
+        /*
+         * 2016-07-27 -- Aliasing `openlayers` to its debug version throws `Error: Namespace "ol"
+         *     already declared.`, related in some way to the use of Closure Compiler in OL3.  Not
+         *     sure exactly _why_ and don't have the time to dive too deep into the rabbit hole.
+         *
+         *     Disabling for now.
+         */
+        // alias: {openlayers$: 'openlayers/dist/ol-debug.js'},
+
+        extensions: ['', '.js', '.jsx'],
+        root: __dirname,
+      },
       module: {
+        noParse: /\bol(-debug)?\.js$/,
         loaders: [
           {
             test: /\.jsx?$/,
@@ -62,17 +76,26 @@ module.exports = (config) => {
         ]
       },
       plugins: [
+        new webpack.IgnorePlugin(/^\.\/locale$/, /moment$/),
         new webpack.DefinePlugin({
           'process.env.NODE_ENV': JSON.stringify('test'),
           'process.env.GATEWAY': JSON.stringify('/test-gateway')
         })
       ],
+
+      /*
+       * The following is needed by enzyme
+       *
+       * Refer to:
+       *   https://github.com/airbnb/enzyme/blob/6cdaa068ccf204b3aef1b71afaeffaa769f5ebe0/docs/guides/webpack.md#react-15-compatability
+       */
       externals: {
         'cheerio' : 'window',
         'react/addons': true,
         'react/lib/ExecutionEnvironment': true,
         'react/lib/ReactContext': true
       }
+
     },
 
     webpackMiddleware: {
