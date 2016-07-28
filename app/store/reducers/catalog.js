@@ -24,7 +24,7 @@ import {
 const INITIAL_STATE = {
   apiKey:      null,
   discovering: false,
-  indices:     null,
+  filters:     null,
   url:         null,
   error:       null,
 }
@@ -40,7 +40,7 @@ export function reducer(state = INITIAL_STATE, action) {
     return {
       ...state,
       discovering: false,
-      indices: action.indices,
+      filters: action.filters,
       url: action.url
     }
   case DISCOVER_CATALOG_ERROR:
@@ -64,12 +64,12 @@ export function deserialize() {
     ...INITIAL_STATE,
     apiKey:  localStorage.getItem('catalog.apiKey') || INITIAL_STATE.apiKey,
     url:     sessionStorage.getItem('catalog.url') || INITIAL_STATE.url,
-    indices: JSON.parse(sessionStorage.getItem('catalog.indices')) || INITIAL_STATE.indices,
+    filters: JSON.parse(sessionStorage.getItem('catalog.filters')) || INITIAL_STATE.filters,
   }
 }
 
 export function serialize(state) {
   localStorage.setItem('catalog.apiKey', state.apiKey || '')
-  sessionStorage.setItem('catalog.indices', JSON.stringify(state.indices))
+  sessionStorage.setItem('catalog.filters', JSON.stringify(state.filters))
   sessionStorage.setItem('catalog.url', state.url || '')
 }

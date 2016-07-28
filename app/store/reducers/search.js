@@ -23,6 +23,7 @@ import {
   UPDATE_SEARCH_BBOX,
   UPDATE_SEARCH_CLOUDCOVER,
   UPDATE_SEARCH_DATES,
+  UPDATE_SEARCH_FILTER,
 } from '../../actions/search'
 
 const INITIAL_STATE = {
@@ -31,6 +32,7 @@ const INITIAL_STATE = {
   dateFrom:   moment().subtract(30, 'days').format('YYYY-MM-DD'),
   dateTo:     moment().format('YYYY-MM-DD'),
   searching:  false,
+  filter:     null,
   error:      null
 }
 
@@ -51,6 +53,11 @@ export function reducer(state = null, action) {
       ...state,
       dateFrom: action.dateFrom,
       dateTo:   action.dateTo,
+    }
+  case UPDATE_SEARCH_FILTER:
+    return {
+      ...state,
+      filter: action.filter,
     }
   case SEARCH_CATALOG:
     return {
@@ -87,5 +94,6 @@ export function serialize(state) {
     cloudCover: state.cloudCover,
     dateFrom:   state.dateFrom,
     dateTo:     state.dateTo,
+    filter:     state.filter,
   }))
 }

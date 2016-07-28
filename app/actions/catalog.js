@@ -60,9 +60,9 @@ function discoverCatalog() {
         }
         return catalog.url
       })
-      .then(lookupSubindices)
-      .then(({url, indices}) => {
-        dispatch(discoverCatalogSuccess(url, indices))
+      .then(lookupFilters)
+      .then(({url, filters}) => {
+        dispatch(discoverCatalogSuccess(url, filters))
       })
       .catch(err => {
         dispatch(discoverCatalogError(err))
@@ -70,11 +70,11 @@ function discoverCatalog() {
   }
 }
 
-function discoverCatalogSuccess(url, indices) {
+function discoverCatalogSuccess(url, filters) {
   return {
     type: DISCOVER_CATALOG_SUCCESS,
     url,
-    indices
+    filters
   }
 }
 
@@ -89,7 +89,7 @@ function discoverCatalogError(err) {
 // Internal Helpers
 //
 
-function lookupSubindices(url) {
+function lookupFilters(url) {
   return fetch(`${url}/subindex`)
     .then(response => {
       if (response.ok) {
@@ -99,6 +99,6 @@ function lookupSubindices(url) {
     })
     .then(hash => ({
       url,
-      indices: Object.keys(hash).map(id => ({id, name: hash[id].name}))
+      filters: Object.keys(hash).map(id => ({id, name: hash[id].name}))
     }))
 }
