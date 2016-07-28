@@ -147,7 +147,7 @@ function normalizeExecutionOutput(raw) {
   try {
     const parsed = JSON.parse(raw)
     return {
-      deploymentId:  parsed.rgbLoc || null,
+      deploymentId:  parsed.shoreDeplID || null,
       error:         parsed.error || null,
       geojsonDataId: parsed.shoreDataID || null,
     }

@@ -117,9 +117,9 @@ function asJson(response) {
 
 function normalizeDeployment(descriptor) {
   return {
-    dataId:   descriptor.deployment.dataId,
-    endpoint: descriptor.deployment.capabilitiesUrl.replace(/\?.*$/, ''),
-    layerId:  descriptor.deployment.layer,
+    dataId:   descriptor.data.deployment.dataId,
+    endpoint: descriptor.data.deployment.capabilitiesUrl.replace(/\?.*$/, ''),
+    layerId:  descriptor.data.deployment.layer,
   }
 }
 
@@ -135,13 +135,13 @@ function normalizeServiceListing(page) {
 }
 
 function normalizeStatus(status) {
-  if (!status.data.status || status.data.status === 'Error') {
-    throw new InvalidResponse(status, status.data.result.message || 'Status is ambiguous')
+  if (!status.data || !status.data.status || status.type === 'error') {
+    throw new InvalidResponse(status, status.message || 'Status is ambiguous')
   }
   return Object.assign({
     message: null,
     result: null
-  }, status)
+  }, status.data)
 }
 
 //

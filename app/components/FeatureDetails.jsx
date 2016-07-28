@@ -17,15 +17,9 @@
 import React, {Component} from 'react'
 import JobFeatureDetails from './JobFeatureDetails'
 import SceneFeatureDetails from './SceneFeatureDetails'
-import LoadingAnimation from './LoadingAnimation'
-import {fetchThumbnail} from '../utils/fetch-thumbnail'
-import errorPlaceholder from '../images/error-placeholder.png'
 import styles from './FeatureDetails.css'
 
 import {
-  KEY_THUMBNAIL,
-  KEY_WMS_LAYER_ID,
-  KEY_WMS_URL,
   TYPE_JOB,
   TYPE_SCENE,
   KEY_TYPE,
@@ -33,29 +27,11 @@ import {
 
 export default class FeatureDetails extends Component {
   static propTypes = {
-    className:         React.PropTypes.string,
-    feature:           React.PropTypes.shape({
+    className: React.PropTypes.string,
+    feature:   React.PropTypes.shape({
       id:         React.PropTypes.string,
       properties: React.PropTypes.object,
     }),
-    onThumbnailLoaded: React.PropTypes.func.isRequired,
-  }
-
-  constructor() {
-    super()
-    this.state = {loadRefCount: 0}
-  }
-
-  componentDidMount() {
-    if (shouldFetchThumbnail(this.props.feature)) {
-      this._updateThumbnail(this.props.feature)
-    }
-  }
-
-  componentWillReceiveProps(nextProps) {
-    if (shouldFetchThumbnail(nextProps.feature) && (!this.props.feature || this.props.feature.id !== nextProps.feature.id)) {
-      this._updateThumbnail(nextProps.feature)
-    }
   }
 
   render() {
@@ -64,9 +40,7 @@ export default class FeatureDetails extends Component {
       return <div role="nothing-selected"/>
     }
     return (
-      <div className={`${styles.root} ${this._classForLoading}`}>
-        <LoadingAnimation className={styles.loadingAnimation}/>
-
+      <div className={styles.root}>
         {feature.properties[KEY_TYPE] === TYPE_JOB && (
           <JobFeatureDetails
             className={styles.jobDetails}
@@ -83,59 +57,4 @@ export default class FeatureDetails extends Component {
       </div>
     )
   }
-
-  get _classForLoading() {
-    return this.state.loadRefCount ? styles.isLoading : ''
-  }
-
-  _decrementLoading() {
-    this.setState({
-      loadRefCount: Math.max(this.state.loadRefCount - 1, 0)
-    })
-  }
-
-  _fetchThumbnail(url) {
-    if (this._thumbnailPromise) {
-      this._thumbnailPromise.cancel()
-    }
-    this._thumbnailPromise = fetchThumbnail(url)
-    return this._thumbnailPromise.promise
-  }
-
-  _incrementLoading() {
-    this.setState({
-      loadRefCount: this.state.loadRefCount + 1
-    })
-  }
-
-  _updateThumbnail(feature) {
-    this._incrementLoading()
-    this._fetchThumbnail(feature.properties[KEY_THUMBNAIL])
-      .then(image => {
-        this._decrementLoading()
-        this.props.onThumbnailLoaded(image, feature)
-      })
-      .catch(err => {
-        this._decrementLoading()
-        if (err.isCancellation) {
-          return
-        }
-        console.error('Could not load thumbnail!', err)
-        const placeholder = generateErrorPlaceholder()
-        this.props.onThumbnailLoaded(placeholder, feature)
-      })
-  }
-}
-
-function generateErrorPlaceholder() {
-  const placeholder = new Image()
-  placeholder.src = errorPlaceholder
-  return placeholder
-}
-
-function shouldFetchThumbnail(feature) {
-  return feature
-    && feature.properties
-    && feature.properties[KEY_THUMBNAIL]
-    && (!feature.properties[KEY_WMS_LAYER_ID] && !feature.properties[KEY_WMS_URL])
 }

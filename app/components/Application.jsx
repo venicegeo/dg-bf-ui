@@ -38,6 +38,7 @@ class Application extends Component {
 
   static propTypes = {
     bbox:            React.PropTypes.arrayOf(React.PropTypes.number),
+    catalogApiKey:   React.PropTypes.string,
     children:        React.PropTypes.element,
     detections:      React.PropTypes.array.isRequired,
     dispatch:        React.PropTypes.func.isRequired,
@@ -97,6 +98,7 @@ class Application extends Component {
           imagery={this.props.imagery}
           isSearching={this.props.isSearching}
           anchor={this.props.location.hash}
+          catalogApiKey={this.props.catalogApiKey}
           bbox={this.props.bbox}
           mode={this._mapMode}
           selectedFeature={this.props.selectedFeature}
@@ -155,6 +157,7 @@ class Application extends Component {
 
 export default connect((state, ownProps) => ({
   bbox:            state.search.bbox,
+  catalogApiKey:   state.catalog.apiKey,
   detections:      state.results,
   imagery:         state.imagery,
   jobs:            state.jobs.records,

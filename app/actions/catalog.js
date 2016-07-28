@@ -55,12 +55,14 @@ function discoverCatalog() {
     const client = new Client(GATEWAY, getState().authentication.token)
     client.getServices({pattern: '^pzsvc-image-catalog'})
       .then(([catalog]) => {
-        if (catalog) {
-          dispatch(discoverCatalogSuccess(catalog.url))
+        if (!catalog) {
+          throw new Error('Could not find image catalog service')
         }
-        else {
-          dispatch(discoverCatalogError('Could not find image catalog service'))
-        }
+        return catalog.url
+      })
+      .then(lookupFilters)
+      .then(({url, filters}) => {
+        dispatch(discoverCatalogSuccess(url, filters))
       })
       .catch(err => {
         dispatch(discoverCatalogError(err))
@@ -68,10 +70,11 @@ function discoverCatalog() {
   }
 }
 
-function discoverCatalogSuccess(url) {
+function discoverCatalogSuccess(url, filters) {
   return {
     type: DISCOVER_CATALOG_SUCCESS,
-    url
+    url,
+    filters
   }
 }
 
@@ -80,4 +83,22 @@ function discoverCatalogError(err) {
     type: DISCOVER_CATALOG_ERROR,
     err
   }
+}
+
+//
+// Internal Helpers
+//
+
+function lookupFilters(url) {
+  return fetch(`${url}/subindex`)
+    .then(response => {
+      if (response.ok) {
+        return response.json()
+      }
+      throw new Error('HTTP Error ' + response.status)
+    })
+    .then(hash => ({
+      url,
+      filters: Object.keys(hash).map(id => ({id, name: hash[id].name}))
+    }))
 }
