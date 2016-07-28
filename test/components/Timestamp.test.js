@@ -18,7 +18,7 @@ import React from 'react'
 import {shallow} from 'enzyme'
 import expect from 'expect'
 import moment from 'moment'
-import Timestamp from '../Timestamp.jsx'
+import Timestamp from 'app/components/Timestamp.jsx'
 
 describe('Timestamp', () => {
   it('should return todays date', () => {

@@ -17,13 +17,13 @@
 import React from 'react'
 import {mount, shallow} from 'enzyme'
 import expect, {createSpy} from 'expect'
-import CreateJob from '../CreateJob.jsx'
-import ImagerySearch from '../ImagerySearch.jsx'
-import AlgorithmList from '../AlgorithmList.jsx'
-import NewJobDetails from '../NewJobDetails.jsx'
+import CreateJob from 'app/components/CreateJob.jsx'
+import ImagerySearch from 'app/components/ImagerySearch.jsx'
+import AlgorithmList from 'app/components/AlgorithmList.jsx'
+import NewJobDetails from 'app/components/NewJobDetails.jsx'
 
 
-describe('CreateJob', () => {
+describe('<CreateJob/>', () => {
   it('should render correctly', () => {
     const store = generateStore()
     store.getState.andReturn({

@@ -15,7 +15,7 @@
  **/
 
 import expect from 'expect'
-import * as config from './config'
+import * as config from 'app/config'
 
 describe('config', () => {
   it('reads gateway URL from environment', () => {

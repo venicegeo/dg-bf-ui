@@ -1,7 +1,7 @@
 import React from 'react'
 import {mount} from 'enzyme'
 import expect from 'expect'
-import NewJobDetails from '../NewJobDetails.jsx'
+import NewJobDetails from 'app/components/NewJobDetails.jsx'
 
 describe('NewJobDetails', () => {
   it('should change Job Name', () => {

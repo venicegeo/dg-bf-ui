@@ -15,8 +15,8 @@
  **/
 
 import expect, {spyOn, restoreSpies, createSpy} from 'expect'
-import {generateAlgorithmDescriptor} from '../../../test/fixtures/beachfront-service-descriptors'
-import * as worker from './algorithms'
+import {generateAlgorithmDescriptor} from '../../fixtures/beachfront-service-descriptors'
+import * as worker from 'app/actions/workers/algorithms'
 
 describe('Algorithms Worker', () => {
   let client, handlers

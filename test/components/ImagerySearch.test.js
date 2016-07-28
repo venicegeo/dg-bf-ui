@@ -17,7 +17,7 @@
 import React from 'react'
 import {mount} from 'enzyme'
 import expect from 'expect'
-import ImagerySearch from '../ImagerySearch.jsx'
+import ImagerySearch from 'app/components/ImagerySearch.jsx'
 
 
 describe('ImagerySearch', () => {

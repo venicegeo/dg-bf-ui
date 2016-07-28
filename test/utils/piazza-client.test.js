@@ -16,7 +16,7 @@
 
 import expect from 'expect'
 import sinon from 'sinon'
-import {Client, STATUS_ERROR, STATUS_RUNNING, STATUS_SUCCESS} from './piazza-client'
+import {Client, STATUS_ERROR, STATUS_RUNNING, STATUS_SUCCESS} from 'app/utils/piazza-client'
 import {
   ERROR_GENERIC,
   RESPONSE_DEPLOYMENT,
@@ -28,7 +28,7 @@ import {
   RESPONSE_JOB_ERROR,
   RESPONSE_JOB_NOT_FOUND,
   RESPONSE_SERVICE_LIST
-} from '../../test/fixtures/piazza-responses'
+} from '../fixtures/piazza-responses'
 
 describe('Piazza Client', function () {
   this.timeout(500)

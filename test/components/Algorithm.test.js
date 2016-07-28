@@ -1,7 +1,7 @@
 import React from 'react'
 import {mount} from 'enzyme'
 import expect from 'expect'
-import Algorithm from '../Algorithm.jsx'
+import Algorithm from '../../app/components/Algorithm.jsx'
 
 describe('Algorithm', () => {
   it('is a div element', (done) => {
