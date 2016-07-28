@@ -26,6 +26,7 @@ export const SEARCH_CATALOG_ERROR = 'SEARCH_CATALOG_ERROR'
 export const UPDATE_SEARCH_BBOX = 'UPDATE_SEARCH_BBOX'
 export const UPDATE_SEARCH_CLOUDCOVER = 'UPDATE_SEARCH_CLOUDCOVER'
 export const UPDATE_SEARCH_DATES = 'UPDATE_SEARCH_DATES'
+export const UPDATE_SEARCH_FILTER = 'UPDATE_SEARCH_FILTER'
 
 //
 // Action Creators
@@ -38,11 +39,11 @@ export function searchCatalog(startIndex = 0, count = 100) {
     })
 
     const state = getState()
-    const {bbox, cloudCover, dateFrom, dateTo} = state.search
+    const {bbox, cloudCover, dateFrom, dateTo, filter} = state.search
     const catalogUrl = state.catalog.url
     const acquiredDate = moment(dateFrom).toISOString()
     const maxAcquiredDate = moment(dateTo).toISOString()
-    return fetch(`${catalogUrl}/discover?acquiredDate=${acquiredDate}&maxAcquiredDate=${maxAcquiredDate}&bbox=${bbox}&cloudCover=${cloudCover}&count=${count}&startIndex=${startIndex}`)
+    return fetch(`${catalogUrl}/discover?acquiredDate=${acquiredDate}&maxAcquiredDate=${maxAcquiredDate}&bbox=${bbox}&cloudCover=${cloudCover}&count=${count}&startIndex=${startIndex}&subIndex=${filter || ''}`)
       .then(response => {
         if (response.ok) {
           return response.json()
@@ -77,6 +78,13 @@ export function updateSearchDates(dateFrom, dateTo) {
     type: UPDATE_SEARCH_DATES,
     dateFrom,
     dateTo
+  }
+}
+
+export function updateSearchFilter(filter) {
+  return {
+    type: UPDATE_SEARCH_FILTER,
+    filter
   }
 }
 

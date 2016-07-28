@@ -24,7 +24,7 @@ import {
 const INITIAL_STATE = {
   apiKey:      null,
   discovering: false,
-  filters:     null,
+  filters:     [],
   url:         null,
   error:       null,
 }

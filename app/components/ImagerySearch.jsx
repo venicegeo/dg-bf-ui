@@ -28,11 +28,17 @@ export default class ImagerySearch extends Component {
     dateFrom:           React.PropTypes.string.isRequired,
     dateTo:             React.PropTypes.string.isRequired,
     error:              React.PropTypes.object,
+    filter:             React.PropTypes.string,
+    filters:            React.PropTypes.arrayOf(React.PropTypes.shape({
+      id:   React.PropTypes.string,
+      name: React.PropTypes.string,
+    })).isRequired,
     isSearching:        React.PropTypes.bool.isRequired,
     onApiKeyChange:     React.PropTypes.func.isRequired,
-    onDateChange:       React.PropTypes.func.isRequired,
     onClearBbox:        React.PropTypes.func.isRequired,
     onCloudCoverChange: React.PropTypes.func.isRequired,
+    onDateChange:       React.PropTypes.func.isRequired,
+    onFilterChange:     React.PropTypes.func.isRequired,
     onSubmit:           React.PropTypes.func.isRequired
   }
 
@@ -41,6 +47,7 @@ export default class ImagerySearch extends Component {
     this._emitApiKeyChange = this._emitApiKeyChange.bind(this)
     this._emitCloudCoverChange = this._emitCloudCoverChange.bind(this)
     this._emitDateChange = this._emitDateChange.bind(this)
+    this._emitFilterChange = this._emitFilterChange.bind(this)
     this._handleSubmit = this._handleSubmit.bind(this)
   }
 
@@ -49,6 +56,13 @@ export default class ImagerySearch extends Component {
     this.refs.dateTo.value = moment().format('YYYY-MM-DD')
     this.refs.apiKey.value = this.props.catalogApiKey || ''
     this.refs.cloudCover.value = this.props.cloudCover || ''
+    this.refs.filter.value = this.props.filter || ''
+  }
+
+  componentDidUpdate(prevProps) {
+    if (prevProps.filter !== this.props.filter) {
+      this.refs.filter.value = this.props.filter || ''
+    }
   }
 
   render() {
@@ -82,7 +96,7 @@ export default class ImagerySearch extends Component {
           <input ref="apiKey" type="password" disabled={isSearching} onChange={this._emitApiKeyChange} />
         </label>
 
-        <h3>Date/Time</h3>
+        <h3>Date of Capture</h3>
         <label className={styles.field}>
           <span>From</span>
           <input ref="dateFrom" type="date" disabled={isSearching} onChange={this._emitDateChange} />
@@ -92,11 +106,20 @@ export default class ImagerySearch extends Component {
           <input ref="dateTo" type="date" disabled={isSearching} onChange={this._emitDateChange} />
         </label>
 
-        <h3>Cloud Cover</h3>
+        <h3>Filters</h3>
         <label className={styles.cloudCover}>
-          <span>Less Than</span>
+          <span>Cloud Cover</span>
           <input ref="cloudCover" type="range" min="0" max="100" onChange={this._emitCloudCoverChange}/>
-          <span className={styles.value}>{cloudCover}%</span>
+          <span className={styles.value}>{cloudCover > 0 && '< '}{cloudCover}%</span>
+        </label>
+        <label className={styles.field}>
+          <span>Spatial Filter</span>
+          <select ref="filter" onChange={this._emitFilterChange}>
+            <option value="">None</option>
+            {this.props.filters.map(({id, name}) => (
+              <option key={id} value={id}>{titleCase(name)}</option>
+            ))}
+          </select>
         </label>
 
         <div className={styles.controls}>
@@ -134,9 +157,21 @@ export default class ImagerySearch extends Component {
     this.props.onDateChange(dateFrom.value, dateTo.value)
   }
 
+  _emitFilterChange() {
+    this.props.onFilterChange(this.refs.filter.value || null)
+  }
+
   _handleSubmit(event) {
     event.preventDefault()
     event.stopPropagation()
     this.props.onSubmit()
   }
+}
+
+//
+// Helpers
+//
+
+function titleCase(s) {
+  return s.replace(/((?:^|\s)[a-z])/g, c => c.toUpperCase())
 }
