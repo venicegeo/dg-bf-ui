@@ -48,15 +48,7 @@ module.exports = (config) => {
     webpack: {
       devtool: 'inline-source-map',
       resolve: {
-        /*
-         * 2016-07-27 -- Aliasing `openlayers` to its debug version throws `Error: Namespace "ol"
-         *     already declared.`, related in some way to the use of Closure Compiler in OL3.  Not
-         *     sure exactly _why_ and don't have the time to dive too deep into the rabbit hole.
-         *
-         *     Disabling for now.
-         */
-        // alias: {openlayers$: 'openlayers/dist/ol-debug.js'},
-
+        alias: {openlayers$: 'openlayers/dist/ol-debug.js'},
         extensions: ['', '.js', '.jsx'],
         root: __dirname,
       },
