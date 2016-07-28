@@ -26,6 +26,10 @@ import {
   UPDATE_SEARCH_FILTER,
 } from '../../actions/search'
 
+import {
+  DISCOVER_CATALOG_SUCCESS,
+} from '../../actions/catalog'
+
 const INITIAL_STATE = {
   bbox:       null,
   cloudCover: 10,
@@ -53,6 +57,12 @@ export function reducer(state = null, action) {
       ...state,
       dateFrom: action.dateFrom,
       dateTo:   action.dateTo,
+    }
+  case DISCOVER_CATALOG_SUCCESS:
+    const coastlineFilter = action.filters.find(f => /(shore|coast)line/i.test(f.name))
+    return {
+      ...state,
+      filter: coastlineFilter ? coastlineFilter.id : INITIAL_STATE.filter,
     }
   case UPDATE_SEARCH_FILTER:
     return {
