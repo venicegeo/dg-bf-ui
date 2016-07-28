@@ -39,10 +39,10 @@ module.exports = (config) => {
     // Source Wrangling
     //
 
-    files: ['test/**/*.test.js'],
+    files: ['test/index.js'],
 
     preprocessors: {
-      'test/**/*.{js,jsx}': ['webpack', 'sourcemap']
+      'test/index.js': ['webpack', 'sourcemap']
     },
 
     webpack: {
