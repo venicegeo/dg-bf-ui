@@ -55,7 +55,7 @@ export default class ImagerySearch extends Component {
     this.refs.dateFrom.value = this.props.dateFrom
     this.refs.dateTo.value = moment().format('YYYY-MM-DD')
     this.refs.apiKey.value = this.props.catalogApiKey || ''
-    this.refs.cloudCover.value = this.props.cloudCover || ''
+    this.refs.cloudCover.value = this.props.cloudCover || '0'
     this.refs.filter.value = this.props.filter || ''
   }
 
