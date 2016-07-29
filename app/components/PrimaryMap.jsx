@@ -135,11 +135,9 @@ export default class PrimaryMap extends Component {
       })
     // DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG
     // DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG
-    if (process.env.NODE_ENV === 'development') {
-      window.ol = ol
-      window.map = this._map
-      window.primaryMap = this
-    }
+    window.ol = ol
+    window.map = this._map
+    window.primaryMap = this
     // DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG
     // DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG
   }
