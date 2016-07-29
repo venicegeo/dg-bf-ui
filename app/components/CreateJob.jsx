@@ -38,36 +38,37 @@ export class CreateJob extends Component {
   }
 
   static propTypes = {
-    algorithms:    React.PropTypes.array.isRequired,
-    bbox:          React.PropTypes.arrayOf(React.PropTypes.number),
-    catalogApiKey: React.PropTypes.string,
-    cloudCover:    React.PropTypes.number.isRequired,
-    dateFrom:      React.PropTypes.string.isRequired,
-    dateTo:        React.PropTypes.string.isRequired,
-    dispatch:      React.PropTypes.func.isRequired,
-    error:         React.PropTypes.object,
-    filter:        React.PropTypes.string,
-    filters:       React.PropTypes.arrayOf(React.PropTypes.object).isRequired,
-    isCreating:    React.PropTypes.bool.isRequired,
-    isSearching:   React.PropTypes.bool.isRequired,
-    jobName:       React.PropTypes.string.isRequired,
-    selectedImage: React.PropTypes.object,
+    algorithms:               React.PropTypes.array.isRequired,
+    bbox:                     React.PropTypes.arrayOf(React.PropTypes.number),
+    catalogApiKey:            React.PropTypes.string,
+    cloudCover:               React.PropTypes.number.isRequired,
+    dateFrom:                 React.PropTypes.string.isRequired,
+    dateTo:                   React.PropTypes.string.isRequired,
+    searchError:              React.PropTypes.object,
+    filter:                   React.PropTypes.string,
+    filters:                  React.PropTypes.arrayOf(React.PropTypes.object).isRequired,
+    isCreating:               React.PropTypes.bool.isRequired,
+    isSearching:              React.PropTypes.bool.isRequired,
+    jobName:                  React.PropTypes.string.isRequired,
+    onCatalogApiKeyChange:    React.PropTypes.func.isRequired,
+    onClearBbox:              React.PropTypes.func.isRequired,
+    onJobSubmit:              React.PropTypes.func.isRequired,
+    onNameChange:             React.PropTypes.func.isRequired,
+    onResetName:              React.PropTypes.func.isRequired,
+    onSearchCloudCoverChange: React.PropTypes.func.isRequired,
+    onSearchFilterChange:     React.PropTypes.func.isRequired,
+    onSearchDateChange:       React.PropTypes.func.isRequired,
+    onSearchSubmit:           React.PropTypes.func.isRequired,
+    selectedImage:            React.PropTypes.object,
   }
 
   constructor() {
     super()
-    this._handleJobSubmit = this._handleJobSubmit.bind(this)
-    this._handleCatalogApiKeyChange = this._handleCatalogApiKeyChange.bind(this)
-    this._handleClearBbox = this._handleClearBbox.bind(this)
-    this._handleNameChange = this._handleNameChange.bind(this)
-    this._handleSearchSubmit = this._handleSearchSubmit.bind(this)
-    this._handleSearchCloudCoverChange = this._handleSearchCloudCoverChange.bind(this)
-    this._handleSearchDateChange = this._handleSearchDateChange.bind(this)
-    this._handleSearchFilterChange = this._handleSearchFilterChange.bind(this)
+    this._emitJobSubmit = this._emitJobSubmit.bind(this)
   }
 
   componentDidMount() {
-    this.props.dispatch(resetJobName())
+    this.props.onResetName()
   }
 
   render() {
@@ -78,23 +79,23 @@ export class CreateJob extends Component {
         </header>
         <ul>
           {this.props.bbox && (
-            <li className={styles.imagery}>
+            <li className={styles.search}>
               <ImagerySearch
                 bbox={this.props.bbox}
                 catalogApiKey={this.props.catalogApiKey}
                 cloudCover={this.props.cloudCover}
                 dateFrom={this.props.dateFrom}
                 dateTo={this.props.dateTo}
-                error={this.props.error}
+                error={this.props.searchError}
                 filter={this.props.filter}
                 filters={this.props.filters}
                 isSearching={this.props.isSearching}
-                onApiKeyChange={this._handleCatalogApiKeyChange}
-                onClearBbox={this._handleClearBbox}
-                onCloudCoverChange={this._handleSearchCloudCoverChange}
-                onDateChange={this._handleSearchDateChange}
-                onFilterChange={this._handleSearchFilterChange}
-                onSubmit={this._handleSearchSubmit}
+                onApiKeyChange={this.props.onCatalogApiKeyChange}
+                onClearBbox={this.props.onClearBbox}
+                onCloudCoverChange={this.props.onSearchCloudCoverChange}
+                onDateChange={this.props.onSearchDateChange}
+                onFilterChange={this.props.onSearchFilterChange}
+                onSubmit={this.props.onSearchSubmit}
               />
             </li>
           )}
@@ -102,7 +103,7 @@ export class CreateJob extends Component {
             <li className={styles.details}>
               <NewJobDetails
                 name={this.props.jobName}
-                onNameChange={this._handleNameChange}
+                onNameChange={this.props.onNameChange}
               />
             </li>
           )}
@@ -112,7 +113,7 @@ export class CreateJob extends Component {
                 algorithms={this.props.algorithms}
                 imageProperties={this.props.selectedImage.properties}
                 isSubmitting={this.props.isCreating}
-                onSubmit={this._handleJobSubmit}
+                onSubmit={this._emitJobSubmit}
               />
             </li>
           )}
@@ -131,21 +132,9 @@ export class CreateJob extends Component {
     )
   }
 
-  //
-  // Internals
-  //
-
-  _handleCatalogApiKeyChange(apiKey) {
-    this.props.dispatch(updateCatalogApiKey(apiKey))
-  }
-
-  _handleClearBbox() {
-    this.props.dispatch(updateSearchBbox())
-  }
-
-  _handleJobSubmit(algorithm) {
+  _emitJobSubmit(algorithm) {
     const {jobName, selectedImage, catalogApiKey} = this.props
-    this.props.dispatch(createJob(catalogApiKey, jobName, algorithm, selectedImage))
+    this.props.onJobSubmit(catalogApiKey, jobName, algorithm, selectedImage)
       .then(jobId => {
         this.context.router.push({
           pathname: '/jobs',
@@ -154,26 +143,6 @@ export class CreateJob extends Component {
           }
         })
       })
-  }
-
-  _handleNameChange(name) {
-    this.props.dispatch(changeJobName(name))
-  }
-
-  _handleSearchCloudCoverChange(cloudCover) {
-    this.props.dispatch(updateSearchCloudCover(cloudCover))
-  }
-
-  _handleSearchDateChange(dateFrom, dateTo) {
-    this.props.dispatch(updateSearchDates(dateFrom, dateTo))
-  }
-
-  _handleSearchFilterChange(filter) {
-    this.props.dispatch(updateSearchFilter(filter))
-  }
-
-  _handleSearchSubmit() {
-    this.props.dispatch(searchCatalog())
   }
 }
 
@@ -184,11 +153,21 @@ export default connect(state => ({
   cloudCover:    state.search.cloudCover,
   dateFrom:      state.search.dateFrom,
   dateTo:        state.search.dateTo,
-  error:         state.search.error,
+  searchError:   state.search.error,
   filter:        state.search.filter,
   filters:       state.catalog.filters,
   isCreating:    state.jobs.creating,
   isSearching:   state.search.searching,
   jobName:       state.draftJob.name,
   selectedImage: state.draftJob.image,
+}), dispatch => ({
+  onJobSubmit:              (apiKey, name, algorithm, image) => dispatch(createJob(apiKey, name, algorithm, image)),
+  onCatalogApiKeyChange:    (apiKey) => dispatch(updateCatalogApiKey(apiKey)),
+  onClearBbox:              () => dispatch(updateSearchBbox()),
+  onNameChange:             (name) => dispatch(changeJobName(name)),
+  onResetName:              () => dispatch(resetJobName()),
+  onSearchCloudCoverChange: (cloudCover) => dispatch(updateSearchCloudCover(cloudCover)),
+  onSearchFilterChange:     (filter) => dispatch(updateSearchFilter(filter)),
+  onSearchDateChange:       (dateFrom, dateTo) => dispatch(updateSearchDates(dateFrom, dateTo)),
+  onSearchSubmit:           () => dispatch(searchCatalog()),
 }))(CreateJob)
