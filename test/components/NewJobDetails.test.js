@@ -16,23 +16,51 @@
 
 import React from 'react'
 import {mount} from 'enzyme'
-import expect from 'expect'
+import expect, {createSpy} from 'expect'
 import NewJobDetails from 'app/components/NewJobDetails.jsx'
 
 describe('<NewJobDetails/>', () => {
-  it('should change Job Name', () => {
-    const actions = {
-      onNameChange: expect.createSpy()
+  let _props
+
+  beforeEach(() => {
+    _props = {
+      name: 'test-name',
+      onNameChange: createSpy(),
     }
-    const spy = expect.spyOn(NewJobDetails.prototype, '_emitNameChange')
-    const component = mount(
-      <NewJobDetails name={'Test Job'} {...actions} />
+  })
+
+  it('renders with correct job name', () => {
+    const wrapper = mount(
+      <NewJobDetails
+        name={_props.name}
+        onNameChange={_props.onNameChange}
+      />
     )
-    expect(component.props().name).toEqual('Test Job')
-    component.update()
-    expect(spy).toNotHaveBeenCalled()
-    component.find('input').simulate('change', {target: {value: 'Changed me!'}})
-    expect(spy).toHaveBeenCalled()
+    expect(wrapper.find('input').get(0).value).toEqual('test-name')
+  })
+
+  it('emits change event', () => {
+    const wrapper = mount(
+      <NewJobDetails
+        name={_props.name}
+        onNameChange={_props.onNameChange}
+      />
+    )
+    const input = wrapper.find('input')
+    input.get(0).value = 'test-new-value'
+    input.simulate('change')
+    expect(_props.onNameChange).toHaveBeenCalledWith('test-new-value')
+  })
+
+  it('updates name when props change', () => {
+    const wrapper = mount(
+      <NewJobDetails
+        name={_props.name}
+        onNameChange={_props.onNameChange}
+      />
+    )
+    wrapper.setProps({name: 'test-new-value'})
+    expect(wrapper.find('input').get(0).value).toEqual('test-new-value')
   })
 })
 
