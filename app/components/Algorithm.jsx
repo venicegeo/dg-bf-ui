@@ -31,7 +31,7 @@ export default class Algorithm extends Component {
     }).isRequired,
     imageProperties: React.PropTypes.object.isRequired,
     isSubmitting:    React.PropTypes.bool.isRequired,
-    onSubmit:        React.PropTypes.func
+    onSubmit:        React.PropTypes.func.isRequired,
   }
 
   constructor() {
