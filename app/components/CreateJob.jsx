@@ -44,7 +44,6 @@ export class CreateJob extends Component {
     cloudCover:               React.PropTypes.number.isRequired,
     dateFrom:                 React.PropTypes.string.isRequired,
     dateTo:                   React.PropTypes.string.isRequired,
-    searchError:              React.PropTypes.object,
     filter:                   React.PropTypes.string,
     filters:                  React.PropTypes.arrayOf(React.PropTypes.object).isRequired,
     isCreating:               React.PropTypes.bool.isRequired,
@@ -59,6 +58,7 @@ export class CreateJob extends Component {
     onSearchFilterChange:     React.PropTypes.func.isRequired,
     onSearchDateChange:       React.PropTypes.func.isRequired,
     onSearchSubmit:           React.PropTypes.func.isRequired,
+    searchError:              React.PropTypes.object,
     selectedImage:            React.PropTypes.object,
   }
 
@@ -153,12 +153,12 @@ export default connect(state => ({
   cloudCover:    state.search.cloudCover,
   dateFrom:      state.search.dateFrom,
   dateTo:        state.search.dateTo,
-  searchError:   state.search.error,
   filter:        state.search.filter,
   filters:       state.catalog.filters,
   isCreating:    state.jobs.creating,
   isSearching:   state.search.searching,
   jobName:       state.draftJob.name,
+  searchError:   state.search.error,
   selectedImage: state.draftJob.image,
 }), dispatch => ({
   onJobSubmit:              (apiKey, name, algorithm, image) => dispatch(createJob(apiKey, name, algorithm, image)),
