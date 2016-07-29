@@ -39,26 +39,60 @@ module.exports = (config) => {
     // Source Wrangling
     //
 
-    files: ['app/**/*test.js'],
+    files: [
+      // Isolate "fat" libraries that might slow down each rebuild
+      require.resolve('openlayers/dist/ol-debug.js'),
+
+      'test/index.js'
+    ],
 
     preprocessors: {
-      'app/**/*.js': ['webpack', 'sourcemap']
+      'test/index.js': ['webpack', 'sourcemap']
     },
 
     webpack: {
       devtool: 'inline-source-map',
+      resolve: {
+        extensions: ['', '.js', '.jsx'],
+        root: __dirname,
+      },
       module: {
         loaders: [
-          {pattern: /\.jsx?$/, loader: 'babel', exclude: /node_modules/},
-          {test: /\.css$/, loader: 'style!css?module&localIdentName=[name]__[local]'}
+          {
+            test: /\.jsx?$/,
+            loader: 'babel',
+            exclude: /node_modules/
+          },
+          {
+            test: /\.css$/,
+            loader: 'style!css?module&localIdentName=[name]__[local]',
+            exclude: /node_modules/
+          },
         ]
       },
       plugins: [
+        new webpack.IgnorePlugin(/^\.\/locale$/, /moment$/),
         new webpack.DefinePlugin({
           'process.env.NODE_ENV': JSON.stringify('test'),
           'process.env.GATEWAY': JSON.stringify('/test-gateway')
         })
-      ]
+      ],
+
+      externals: {
+        'openlayers': 'ol',
+
+        /*
+         * The following is needed for enzyme to function properly
+         *
+         * Refer to:
+         *   https://github.com/airbnb/enzyme/blob/6cdaa068ccf204b3aef1b71afaeffaa769f5ebe0/docs/guides/webpack.md#react-15-compatability
+         */
+        'cheerio' : 'window',
+        'react/addons': true,
+        'react/lib/ExecutionEnvironment': true,
+        'react/lib/ReactContext': true
+      }
+
     },
 
     webpackMiddleware: {

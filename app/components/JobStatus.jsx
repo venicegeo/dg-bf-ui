@@ -17,7 +17,7 @@
 import React, {Component} from 'react'
 import moment from 'moment'
 import {Link} from 'react-router'
-import Timer from './Timestamp.jsx'
+import Timer from './Timestamp'
 import {featureToAnchor} from '../utils/map-anchor'
 import styles from './JobStatus.css'
 

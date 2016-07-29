@@ -38,8 +38,6 @@ import {
   KEY_STATUS,
   KEY_IMAGE_ID,
   KEY_TYPE,
-  KEY_WMS_LAYER_ID,
-  KEY_WMS_URL,
   STATUS_ERROR,
   STATUS_RUNNING,
   STATUS_SUCCESS,
@@ -135,11 +133,9 @@ export default class PrimaryMap extends Component {
       })
     // DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG
     // DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG
-    if (process.env.NODE_ENV === 'development') {
-      window.ol = ol
-      window.map = this._map
-      window.primaryMap = this
-    }
+    window.ol = ol
+    window.map = this._map
+    window.primaryMap = this
     // DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG
     // DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG
   }

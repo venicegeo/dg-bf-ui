@@ -15,15 +15,15 @@
  **/
 
 import expect, {spyOn, restoreSpies, createSpy} from 'expect'
-import * as worker from './jobs'
+import * as worker from 'app/actions/workers/jobs'
 import {
   SCHEMA_VERSION
-} from '../../config'
+} from 'app/config'
 import {
   RESPONSE_JOB_ERROR,
   RESPONSE_JOB_RUNNING,
   RESPONSE_JOB_SUCCESS,
-} from '../../../test/fixtures/piazza-responses'
+} from '../../fixtures/piazza-responses'
 import {
   KEY_IMAGE_ID,
   KEY_ALGORITHM_NAME,
@@ -38,7 +38,7 @@ import {
   STATUS_RUNNING,
   STATUS_SUCCESS,
   STATUS_TIMED_OUT,
-} from '../../constants'
+} from 'app/constants'
 
 describe('Jobs Worker', () => {
   let client, handlers
