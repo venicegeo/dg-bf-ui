@@ -17,14 +17,56 @@
 import React from 'react'
 import {shallow} from 'enzyme'
 import expect from 'expect'
-import moment from 'moment'
 import Timestamp from 'app/components/Timestamp.jsx'
 
+const MILLISECOND = 1
+const SECOND = 1000 * MILLISECOND
+const MINUTE = 60 * SECOND
+const HOUR = 60 * MINUTE
+
 describe('<Timestamp/>', () => {
-  it('should return todays date', () => {
-    const currentTimestamp = moment().format('llll')
-    const wrapper = shallow(<Timestamp timestamp={currentTimestamp}/>)
-    expect(wrapper.find('span').text()).toEqual('a few seconds ago' || 'a minute ago')
+  let _props
+
+  beforeEach(() => {
+    _props = {
+      timestamp: Date.now() - (3 * HOUR)
+    }
+  })
+
+  it('accepts UNIX timestamp', () => {
+    const wrapper = shallow(
+      <Timestamp
+        timestamp={_props.timestamp}
+      />
+    )
+    expect(wrapper.text()).toEqual('3 hours ago')
+  })
+
+  it('accepts ISO8601 timestamp', () => {
+    const wrapper = shallow(
+      <Timestamp
+        timestamp={new Date(_props.timestamp).toISOString()}
+      />
+    )
+    expect(wrapper.text()).toEqual('3 hours ago')
+  })
+
+  it('returns a relative timestamp by default', () => {
+    const wrapper = shallow(
+      <Timestamp
+        timestamp={Date.now() - (96 * HOUR)}
+      />
+    )
+    expect(wrapper.text()).toEqual('4 days ago')
+  })
+
+  it('can toggle relative and absolute timestamps', () => {
+    const wrapper = shallow(
+      <Timestamp
+        timestamp={'2016-01-15T12:34:00Z'}
+      />
+    )
+    wrapper.simulate('click', new Event('click'))
+    expect(wrapper.text()).toMatch(/Jan \d{2}, 2016 \d{1,2}:34 (AM|PM)$/)
   })
 })
-
