@@ -37,7 +37,12 @@ module.exports = (config) => {
     // Source Wrangling
     //
 
-    files: ['test/index.js'],
+    files: [
+      // Isolate "fat" libraries that might slow down each rebuild
+      require.resolve('openlayers/dist/ol-debug.js'),
+
+      'test/index.js'
+    ],
 
     preprocessors: {
       'test/index.js': ['webpack', 'sourcemap']
@@ -46,12 +51,10 @@ module.exports = (config) => {
     webpack: {
       devtool: 'inline-source-map',
       resolve: {
-        alias: {openlayers$: 'openlayers/dist/ol-debug.js'},
         extensions: ['', '.js', '.jsx'],
         root: __dirname,
       },
       module: {
-        noParse: /\bol(-debug)?\.js$/,
         loaders: [
           {
             test: /\.jsx?$/,
@@ -73,13 +76,15 @@ module.exports = (config) => {
         })
       ],
 
-      /*
-       * The following is needed by enzyme
-       *
-       * Refer to:
-       *   https://github.com/airbnb/enzyme/blob/6cdaa068ccf204b3aef1b71afaeffaa769f5ebe0/docs/guides/webpack.md#react-15-compatability
-       */
       externals: {
+        'openlayers': 'ol',
+
+        /*
+         * The following is needed for enzyme to function properly
+         *
+         * Refer to:
+         *   https://github.com/airbnb/enzyme/blob/6cdaa068ccf204b3aef1b71afaeffaa769f5ebe0/docs/guides/webpack.md#react-15-compatability
+         */
         'cheerio' : 'window',
         'react/addons': true,
         'react/lib/ExecutionEnvironment': true,
