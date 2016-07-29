@@ -49,17 +49,6 @@
   text-align: center;
 }
 
-.field,
-.cloudCover {
-  composes: field-normal from '../styles/forms.css';
-}
-
-.cloudCover .value {
-  margin: 0 0 0 .5em;
-  width: auto;
-  opacity: .5;
-}
-
 .errorMessage {
   padding: 15px;
   background-color: hsl(349, 100%, 60%);
@@ -103,4 +92,23 @@
 .loadingAnimation {
   width: 100px;
   height: 100px;
+}
+
+/* =========================================================================
+   Fields
+   ========================================================================= */
+
+.captureDateFrom,
+.captureDateTo,
+.catalogApiKey,
+.cloudCover,
+.provider,
+.spatialFilter {
+  composes: field-normal from '../styles/forms.css';
+}
+
+.cloudCover .value {
+  margin: 0 0 0 .5em;
+  width: auto;
+  opacity: .5;
 }

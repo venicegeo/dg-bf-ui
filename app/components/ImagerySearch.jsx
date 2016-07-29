@@ -53,13 +53,25 @@ export default class ImagerySearch extends Component {
 
   componentDidMount() {
     this.refs.dateFrom.value = this.props.dateFrom
-    this.refs.dateTo.value = moment().format('YYYY-MM-DD')
+    this.refs.dateTo.value = this.props.dateTo
     this.refs.apiKey.value = this.props.catalogApiKey || ''
     this.refs.cloudCover.value = this.props.cloudCover || '0'
     this.refs.filter.value = this.props.filter || ''
   }
 
-  componentDidUpdate(prevProps) {
+  componentDidUpdate(prevProps) {  // eslint-disable-line complexity
+    if (prevProps.catalogApiKey !== this.props.catalogApiKey) {
+      this.refs.apiKey.value = this.props.catalogApiKey
+    }
+    if (prevProps.cloudCover !== this.props.cloudCover) {
+      this.refs.cloudCover.value = this.props.cloudCover
+    }
+    if (prevProps.dateFrom !== this.props.dateFrom) {
+      this.refs.dateFrom.value = this.props.dateFrom
+    }
+    if (prevProps.dateTo !== this.props.dateTo) {
+      this.refs.dateTo.value = this.props.dateTo
+    }
     if (prevProps.filter !== this.props.filter) {
       this.refs.filter.value = this.props.filter || ''
     }
@@ -85,23 +97,23 @@ export default class ImagerySearch extends Component {
           </div>
         )}
         <h3>Catalog</h3>
-        <label className={styles.field}>
+        <label className={styles.provider}>
           <span>Provider</span>
           <select disabled={true}>
             <option>Planet Labs (LANDSAT)</option>
           </select>
         </label>
-        <label className={styles.field}>
+        <label className={styles.catalogApiKey}>
           <span>API Key</span>
           <input ref="apiKey" type="password" disabled={isSearching} onChange={this._emitApiKeyChange} />
         </label>
 
         <h3>Date of Capture</h3>
-        <label className={styles.field}>
+        <label className={styles.captureDateFrom}>
           <span>From</span>
           <input ref="dateFrom" type="date" disabled={isSearching} onChange={this._emitDateChange} />
         </label>
-        <label className={styles.field}>
+        <label className={styles.captureDateTo}>
           <span>To</span>
           <input ref="dateTo" type="date" disabled={isSearching} onChange={this._emitDateChange} />
         </label>
@@ -112,7 +124,7 @@ export default class ImagerySearch extends Component {
           <input ref="cloudCover" type="range" min="0" max="100" onChange={this._emitCloudCoverChange}/>
           <span className={styles.value}>{cloudCover > 0 && '< '}{cloudCover}%</span>
         </label>
-        <label className={styles.field}>
+        <label className={styles.spatialFilter}>
           <span>Spatial Filter</span>
           <select ref="filter" onChange={this._emitFilterChange}>
             <option value="">None</option>

@@ -16,33 +16,432 @@
 
 import React from 'react'
 import {mount} from 'enzyme'
-import expect from 'expect'
+import expect, {createSpy} from 'expect'
 import ImagerySearch from 'app/components/ImagerySearch.jsx'
 
-
 describe('<ImagerySearch/>', () => {
-  it('should render correctly', () => {
-    const actions = {
-      onApiKeyChange: expect.createSpy(),
-      onDateChange: expect.createSpy(),
-      onClearBbox: expect.createSpy(),
-      onCloudCoverChange: expect.createSpy(),
-      onSubmit: expect.createSpy()
-    }
+  let _props
 
-    const component = mount(<ImagerySearch bbox={[0, 0, 0, 0]} cloudCover={20} dateFrom={'2016-01-01'} dateTo={'2016-02-01'} isSearching={false} {...actions}/>)
-    expect(component.props().cloudCover).toEqual(20)
-    expect(component.props().bbox).toEqual([0, 0, 0, 0])
+  beforeEach(() => {
+    _props = {
+      bbox:               [0, 0, 0, 0],
+      catalogApiKey:      'test-catalog-api-key',
+      cloudCover:         19,
+      dateFrom:           '2016-01-01',
+      dateTo:             '2016-02-01',
+      filter:             '',
+      filters:            [],
+      isSearching:        false,
+      onApiKeyChange:     createSpy(),
+      onClearBbox:        createSpy(),
+      onCloudCoverChange: createSpy(),
+      onDateChange:       createSpy(),
+      onFilterChange:     createSpy(),
+      onSubmit:           createSpy(),
+    }
   })
 
-  it('updates cloud cover after it changes')
+  it('renders correctly', () => {
+    const wrapper = mount(
+      <ImagerySearch
+        bbox={_props.bbox}
+        catalogApiKey={_props.catalogApiKey}
+        cloudCover={_props.cloudCover}
+        dateFrom={_props.dateFrom}
+        dateTo={_props.dateTo}
+        filter={_props.filter}
+        filters={_props.filters}
+        isSearching={_props.isSearching}
+        onApiKeyChange={_props.onApiKeyChange}
+        onClearBbox={_props.onClearBbox}
+        onCloudCoverChange={_props.onCloudCoverChange}
+        onDateChange={_props.onDateChange}
+        onFilterChange={_props.onFilterChange}
+        onSubmit={_props.onSubmit}
+      />
+    )
+    expect(wrapper.find('.ImagerySearch__catalogApiKey input').get(0).value).toEqual('test-catalog-api-key')
+    expect(wrapper.find('.ImagerySearch__cloudCover input').get(0).value).toEqual('19')
+    expect(wrapper.find('.ImagerySearch__captureDateFrom input').get(0).value).toEqual('2016-01-01')
+    expect(wrapper.find('.ImagerySearch__captureDateTo input').get(0).value).toEqual('2016-02-01')
+    expect(wrapper.find('.ImagerySearch__spatialFilter select').get(0).value).toEqual('')
+  })
 
-  it('updates search dates after they change')
+  it('renders spatial filter options', () => {
+    const wrapper = mount(
+      <ImagerySearch
+        bbox={_props.bbox}
+        catalogApiKey={_props.catalogApiKey}
+        cloudCover={_props.cloudCover}
+        dateFrom={_props.dateFrom}
+        dateTo={_props.dateTo}
+        filter={'test-id'}
+        filters={[
+          {id: 'test-id', name: 'Testing'},
+        ]}
+        isSearching={_props.isSearching}
+        onApiKeyChange={_props.onApiKeyChange}
+        onClearBbox={_props.onClearBbox}
+        onCloudCoverChange={_props.onCloudCoverChange}
+        onDateChange={_props.onDateChange}
+        onFilterChange={_props.onFilterChange}
+        onSubmit={_props.onSubmit}
+      />
+    )
+    const options = wrapper.find('.ImagerySearch__spatialFilter option')
+    expect(wrapper.find('.ImagerySearch__spatialFilter select').get(0).value).toEqual('test-id')
+    expect(options.get(0).value).toEqual('')
+    expect(options.at(0).text()).toEqual('None')
+    expect(options.get(1).value).toEqual('test-id')
+    expect(options.at(1).text()).toEqual('Testing')
+  })
 
-  it('updates apiKey after it changes')
+  it('normalizes spatial filter names', () => {
+    const wrapper = mount(
+      <ImagerySearch
+        bbox={_props.bbox}
+        catalogApiKey={_props.catalogApiKey}
+        cloudCover={_props.cloudCover}
+        dateFrom={_props.dateFrom}
+        dateTo={_props.dateTo}
+        filter={_props.filter}
+        filters={[
+          {id: 'test-filter-1', name: 'lorem ipsum'},
+          {id: 'test-filter-2', name: 'dolor sit amet'},
+        ]}
+        isSearching={_props.isSearching}
+        onApiKeyChange={_props.onApiKeyChange}
+        onClearBbox={_props.onClearBbox}
+        onCloudCoverChange={_props.onCloudCoverChange}
+        onDateChange={_props.onDateChange}
+        onFilterChange={_props.onFilterChange}
+        onSubmit={_props.onSubmit}
+      />
+    )
+    expect(wrapper.find('.ImagerySearch__spatialFilter option').at(1).text()).toEqual('Lorem Ipsum')
+    expect(wrapper.find('.ImagerySearch__spatialFilter option').at(2).text()).toEqual('Dolor Sit Amet')
+  })
 
-  it('clears minimap and sets bbox to null after clear is clicked')
+  it('renders with correct initial spatial filter selection', () => {
+    const wrapper = mount(
+      <ImagerySearch
+        bbox={_props.bbox}
+        catalogApiKey={_props.catalogApiKey}
+        cloudCover={_props.cloudCover}
+        dateFrom={_props.dateFrom}
+        dateTo={_props.dateTo}
+        filter={'test-filter-1'}
+        filters={[
+          {id: 'test-filter-1', name: 'test-name'},
+          {id: 'test-filter-2', name: 'dolor sit amet'},
+        ]}
+        isSearching={_props.isSearching}
+        onApiKeyChange={_props.onApiKeyChange}
+        onClearBbox={_props.onClearBbox}
+        onCloudCoverChange={_props.onCloudCoverChange}
+        onDateChange={_props.onDateChange}
+        onFilterChange={_props.onFilterChange}
+        onSubmit={_props.onSubmit}
+      />
+    )
+    expect(wrapper.find('.ImagerySearch__spatialFilter select').get(0).value).toEqual('test-filter-1')
+  })
 
+  it('emits api key change event', () => {
+    const wrapper = mount(
+      <ImagerySearch
+        bbox={_props.bbox}
+        catalogApiKey={_props.catalogApiKey}
+        cloudCover={_props.cloudCover}
+        dateFrom={_props.dateFrom}
+        dateTo={_props.dateTo}
+        filter={_props.filter}
+        filters={_props.filters}
+        isSearching={_props.isSearching}
+        onApiKeyChange={_props.onApiKeyChange}
+        onClearBbox={_props.onClearBbox}
+        onCloudCoverChange={_props.onCloudCoverChange}
+        onDateChange={_props.onDateChange}
+        onFilterChange={_props.onFilterChange}
+        onSubmit={_props.onSubmit}
+      />
+    )
+    const input = wrapper.find('.ImagerySearch__catalogApiKey input')
+    input.get(0).value = 'test-new-catalog-api-key'
+    input.simulate('change')
+    expect(_props.onApiKeyChange).toHaveBeenCalledWith('test-new-catalog-api-key')
+  })
+
+  it('emits bbox clear event', () => {
+    const wrapper = mount(
+      <ImagerySearch
+        bbox={_props.bbox}
+        catalogApiKey={_props.catalogApiKey}
+        cloudCover={_props.cloudCover}
+        dateFrom={_props.dateFrom}
+        dateTo={_props.dateTo}
+        filter={_props.filter}
+        filters={_props.filters}
+        isSearching={_props.isSearching}
+        onApiKeyChange={_props.onApiKeyChange}
+        onClearBbox={_props.onClearBbox}
+        onCloudCoverChange={_props.onCloudCoverChange}
+        onDateChange={_props.onDateChange}
+        onFilterChange={_props.onFilterChange}
+        onSubmit={_props.onSubmit}
+      />
+    )
+    wrapper.find('.ImagerySearch__clearBbox').simulate('click')
+    expect(_props.onClearBbox).toHaveBeenCalled()
+  })
+
+  it('emits cloud cover change event', () => {
+    const wrapper = mount(
+      <ImagerySearch
+        bbox={_props.bbox}
+        catalogApiKey={_props.catalogApiKey}
+        cloudCover={_props.cloudCover}
+        dateFrom={_props.dateFrom}
+        dateTo={_props.dateTo}
+        filter={_props.filter}
+        filters={_props.filters}
+        isSearching={_props.isSearching}
+        onApiKeyChange={_props.onApiKeyChange}
+        onClearBbox={_props.onClearBbox}
+        onCloudCoverChange={_props.onCloudCoverChange}
+        onDateChange={_props.onDateChange}
+        onFilterChange={_props.onFilterChange}
+        onSubmit={_props.onSubmit}
+      />
+    )
+    const input = wrapper.find('.ImagerySearch__cloudCover input')
+    input.get(0).value = 42
+    input.simulate('change')
+    expect(_props.onCloudCoverChange).toHaveBeenCalledWith(42)
+  })
+
+  it('emits date change event (via "from" date)', () => {
+    const wrapper = mount(
+      <ImagerySearch
+        bbox={_props.bbox}
+        catalogApiKey={_props.catalogApiKey}
+        cloudCover={_props.cloudCover}
+        dateFrom={_props.dateFrom}
+        dateTo={_props.dateTo}
+        filter={_props.filter}
+        filters={_props.filters}
+        isSearching={_props.isSearching}
+        onApiKeyChange={_props.onApiKeyChange}
+        onClearBbox={_props.onClearBbox}
+        onCloudCoverChange={_props.onCloudCoverChange}
+        onDateChange={_props.onDateChange}
+        onFilterChange={_props.onFilterChange}
+        onSubmit={_props.onSubmit}
+      />
+    )
+    const input = wrapper.find('.ImagerySearch__captureDateFrom input')
+    input.get(0).value = '1999-12-31'
+    input.simulate('change')
+    expect(_props.onDateChange).toHaveBeenCalledWith('1999-12-31', _props.dateTo)
+  })
+
+  it('emits date change event (via "to" date)', () => {
+    const wrapper = mount(
+      <ImagerySearch
+        bbox={_props.bbox}
+        catalogApiKey={_props.catalogApiKey}
+        cloudCover={_props.cloudCover}
+        dateFrom={_props.dateFrom}
+        dateTo={_props.dateTo}
+        filter={_props.filter}
+        filters={_props.filters}
+        isSearching={_props.isSearching}
+        onApiKeyChange={_props.onApiKeyChange}
+        onClearBbox={_props.onClearBbox}
+        onCloudCoverChange={_props.onCloudCoverChange}
+        onDateChange={_props.onDateChange}
+        onFilterChange={_props.onFilterChange}
+        onSubmit={_props.onSubmit}
+      />
+    )
+    const input = wrapper.find('.ImagerySearch__captureDateTo input')
+    input.get(0).value = '1999-12-31'
+    input.simulate('change')
+    expect(_props.onDateChange).toHaveBeenCalledWith(_props.dateFrom, '1999-12-31')
+  })
+
+  it('emits spatial filter change event', () => {
+    const wrapper = mount(
+      <ImagerySearch
+        bbox={_props.bbox}
+        catalogApiKey={_props.catalogApiKey}
+        cloudCover={_props.cloudCover}
+        dateFrom={_props.dateFrom}
+        dateTo={_props.dateTo}
+        filter={''}
+        filters={[
+          {id: 'test-id', name: 'Testing'},
+        ]}
+        isSearching={_props.isSearching}
+        onApiKeyChange={_props.onApiKeyChange}
+        onClearBbox={_props.onClearBbox}
+        onCloudCoverChange={_props.onCloudCoverChange}
+        onDateChange={_props.onDateChange}
+        onFilterChange={_props.onFilterChange}
+        onSubmit={_props.onSubmit}
+      />
+    )
+    const dropdown = wrapper.find('.ImagerySearch__spatialFilter select')
+    dropdown.get(0).value = 'test-id'
+    dropdown.simulate('change')
+    expect(_props.onFilterChange).toHaveBeenCalledWith('test-id')
+  })
+
+  it('emits spatial filter change event (to empty)', () => {
+    const wrapper = mount(
+      <ImagerySearch
+        bbox={_props.bbox}
+        catalogApiKey={_props.catalogApiKey}
+        cloudCover={_props.cloudCover}
+        dateFrom={_props.dateFrom}
+        dateTo={_props.dateTo}
+        filter={'test-id'}
+        filters={[
+          {id: 'test-id', name: 'Testing'},
+        ]}
+        isSearching={_props.isSearching}
+        onApiKeyChange={_props.onApiKeyChange}
+        onClearBbox={_props.onClearBbox}
+        onCloudCoverChange={_props.onCloudCoverChange}
+        onDateChange={_props.onDateChange}
+        onFilterChange={_props.onFilterChange}
+        onSubmit={_props.onSubmit}
+      />
+    )
+    const dropdown = wrapper.find('.ImagerySearch__spatialFilter select')
+    dropdown.get(0).value = ''
+    dropdown.simulate('change')
+    expect(_props.onFilterChange).toHaveBeenCalledWith(null)
+  })
+
+  it('updates api key when props change', () => {
+    const wrapper = mount(
+      <ImagerySearch
+        bbox={_props.bbox}
+        catalogApiKey={_props.catalogApiKey}
+        cloudCover={_props.cloudCover}
+        dateFrom={_props.dateFrom}
+        dateTo={_props.dateTo}
+        filter={_props.filter}
+        filters={_props.filters}
+        isSearching={_props.isSearching}
+        onApiKeyChange={_props.onApiKeyChange}
+        onClearBbox={_props.onClearBbox}
+        onCloudCoverChange={_props.onCloudCoverChange}
+        onDateChange={_props.onDateChange}
+        onFilterChange={_props.onFilterChange}
+        onSubmit={_props.onSubmit}
+      />
+    )
+    wrapper.setProps({catalogApiKey: 'test-new-catalog-api-key'})
+    expect(wrapper.find('.ImagerySearch__catalogApiKey input').get(0).value).toEqual('test-new-catalog-api-key')
+  })
+
+  it('updates cloud cover when props change', () => {
+    const wrapper = mount(
+      <ImagerySearch
+        bbox={_props.bbox}
+        catalogApiKey={_props.catalogApiKey}
+        cloudCover={_props.cloudCover}
+        dateFrom={_props.dateFrom}
+        dateTo={_props.dateTo}
+        filter={_props.filter}
+        filters={_props.filters}
+        isSearching={_props.isSearching}
+        onApiKeyChange={_props.onApiKeyChange}
+        onClearBbox={_props.onClearBbox}
+        onCloudCoverChange={_props.onCloudCoverChange}
+        onDateChange={_props.onDateChange}
+        onFilterChange={_props.onFilterChange}
+        onSubmit={_props.onSubmit}
+      />
+    )
+    wrapper.setProps({cloudCover: 42})
+    expect(wrapper.find('.ImagerySearch__cloudCover input').get(0).value).toEqual('42')
+  })
+
+  it('updates date when props change (via "from" date)', () => {
+    const wrapper = mount(
+      <ImagerySearch
+        bbox={_props.bbox}
+        catalogApiKey={_props.catalogApiKey}
+        cloudCover={_props.cloudCover}
+        dateFrom={_props.dateFrom}
+        dateTo={_props.dateTo}
+        filter={_props.filter}
+        filters={_props.filters}
+        isSearching={_props.isSearching}
+        onApiKeyChange={_props.onApiKeyChange}
+        onClearBbox={_props.onClearBbox}
+        onCloudCoverChange={_props.onCloudCoverChange}
+        onDateChange={_props.onDateChange}
+        onFilterChange={_props.onFilterChange}
+        onSubmit={_props.onSubmit}
+      />
+    )
+    wrapper.setProps({dateFrom: '1999-12-31'})
+    expect(wrapper.find('.ImagerySearch__captureDateFrom input').get(0).value).toEqual('1999-12-31')
+    expect(wrapper.find('.ImagerySearch__captureDateTo input').get(0).value).toEqual(_props.dateTo)
+  })
+
+  it('updates date when props change (via "to" date)', () => {
+    const wrapper = mount(
+      <ImagerySearch
+        bbox={_props.bbox}
+        catalogApiKey={_props.catalogApiKey}
+        cloudCover={_props.cloudCover}
+        dateFrom={_props.dateFrom}
+        dateTo={_props.dateTo}
+        filter={_props.filter}
+        filters={_props.filters}
+        isSearching={_props.isSearching}
+        onApiKeyChange={_props.onApiKeyChange}
+        onClearBbox={_props.onClearBbox}
+        onCloudCoverChange={_props.onCloudCoverChange}
+        onDateChange={_props.onDateChange}
+        onFilterChange={_props.onFilterChange}
+        onSubmit={_props.onSubmit}
+      />
+    )
+    wrapper.setProps({dateTo: '1999-12-31'})
+    expect(wrapper.find('.ImagerySearch__captureDateFrom input').get(0).value).toEqual(_props.dateFrom)
+    expect(wrapper.find('.ImagerySearch__captureDateTo input').get(0).value).toEqual('1999-12-31')
+  })
+
+  it('updates spatial filter when props change', () => {
+    const wrapper = mount(
+      <ImagerySearch
+        bbox={_props.bbox}
+        catalogApiKey={_props.catalogApiKey}
+        cloudCover={_props.cloudCover}
+        dateFrom={_props.dateFrom}
+        dateTo={_props.dateTo}
+        filter={''}
+        filters={[
+          {id: 'test-id', name: 'Testing'},
+        ]}
+        isSearching={_props.isSearching}
+        onApiKeyChange={_props.onApiKeyChange}
+        onClearBbox={_props.onClearBbox}
+        onCloudCoverChange={_props.onCloudCoverChange}
+        onDateChange={_props.onDateChange}
+        onFilterChange={_props.onFilterChange}
+        onSubmit={_props.onSubmit}
+      />
+    )
+    wrapper.setProps({filter: 'test-id'})
+    expect(wrapper.find('.ImagerySearch__spatialFilter select').get(0).value).toEqual('test-id')
+  })
 })
 
 
