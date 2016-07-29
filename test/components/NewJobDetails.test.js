@@ -29,7 +29,7 @@ describe('<NewJobDetails/>', () => {
     }
   })
 
-  it('renders with correct job name', () => {
+  it('renders', () => {
     const wrapper = mount(
       <NewJobDetails
         name={_props.name}

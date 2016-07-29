@@ -33,7 +33,7 @@ describe('<Timestamp/>', () => {
     }
   })
 
-  it('accepts UNIX timestamp', () => {
+  it('renders', () => {
     const wrapper = shallow(
       <Timestamp
         timestamp={_props.timestamp}
@@ -45,16 +45,7 @@ describe('<Timestamp/>', () => {
   it('accepts ISO8601 timestamp', () => {
     const wrapper = shallow(
       <Timestamp
-        timestamp={new Date(_props.timestamp).toISOString()}
-      />
-    )
-    expect(wrapper.text()).toEqual('3 hours ago')
-  })
-
-  it('returns a relative timestamp by default', () => {
-    const wrapper = shallow(
-      <Timestamp
-        timestamp={Date.now() - (96 * HOUR)}
+        timestamp={new Date(Date.now() - (96 * HOUR)).toISOString()}
       />
     )
     expect(wrapper.text()).toEqual('4 days ago')

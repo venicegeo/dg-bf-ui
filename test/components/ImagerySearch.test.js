@@ -41,7 +41,7 @@ describe('<ImagerySearch/>', () => {
     }
   })
 
-  it('renders correctly', () => {
+  it('renders', () => {
     const wrapper = mount(
       <ImagerySearch
         bbox={_props.bbox}
