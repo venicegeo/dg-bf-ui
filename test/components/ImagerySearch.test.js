@@ -324,6 +324,29 @@ describe('<ImagerySearch/>', () => {
     expect(_props.onFilterChange).toHaveBeenCalledWith(null)
   })
 
+  it('emits submission event', () => {
+    const wrapper = mount(
+      <ImagerySearch
+        bbox={_props.bbox}
+        catalogApiKey={_props.catalogApiKey}
+        cloudCover={_props.cloudCover}
+        dateFrom={_props.dateFrom}
+        dateTo={_props.dateTo}
+        filter={_props.filter}
+        filters={_props.filters}
+        isSearching={_props.isSearching}
+        onApiKeyChange={_props.onApiKeyChange}
+        onClearBbox={_props.onClearBbox}
+        onCloudCoverChange={_props.onCloudCoverChange}
+        onDateChange={_props.onDateChange}
+        onFilterChange={_props.onFilterChange}
+        onSubmit={_props.onSubmit}
+      />
+    )
+    wrapper.find('form').simulate('submit')
+    expect(_props.onSubmit).toHaveBeenCalled()
+  })
+
   it('updates api key when props change', () => {
     const wrapper = mount(
       <ImagerySearch
@@ -442,6 +465,7 @@ describe('<ImagerySearch/>', () => {
     wrapper.setProps({filter: 'test-id'})
     expect(wrapper.find('.ImagerySearch__spatialFilter select').get(0).value).toEqual('test-id')
   })
+
+  it('shows loading indicator while search is in flight')
+  it('prevents button hammering while search is in flight')
 })
-
-
