@@ -17,7 +17,7 @@
 import React from 'react'
 import {shallow} from 'enzyme'
 import expect, {createSpy} from 'expect'
-import Algorithm from '../../app/components/Algorithm.jsx'
+import Algorithm from 'app/components/Algorithm'
 
 describe('<Algorithm/>', () => {
   let _props

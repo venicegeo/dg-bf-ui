@@ -16,9 +16,9 @@
 
 import React, {Component} from 'react'
 import {connect} from 'react-redux'
-import AlgorithmList from './AlgorithmList.jsx'
-import ImagerySearch from './ImagerySearch.jsx'
-import NewJobDetails from './NewJobDetails.jsx'
+import AlgorithmList from './AlgorithmList'
+import ImagerySearch from './ImagerySearch'
+import NewJobDetails from './NewJobDetails'
 import styles from './CreateJob.css'
 import {
   createJob,
@@ -51,8 +51,7 @@ export class CreateJob extends Component {
     isCreating:    React.PropTypes.bool.isRequired,
     isSearching:   React.PropTypes.bool.isRequired,
     jobName:       React.PropTypes.string.isRequired,
-    //location:      React.PropTypes.object.isRequired,
-    selectedImage: React.PropTypes.object
+    selectedImage: React.PropTypes.object,
   }
 
   constructor() {

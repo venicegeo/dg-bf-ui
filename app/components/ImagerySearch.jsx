@@ -15,10 +15,9 @@
  **/
 
 import React, {Component} from 'react'
-import LoadingAnimation from './LoadingAnimation.jsx'
-import StaticMinimap from './StaticMinimap.jsx'
+import LoadingAnimation from './LoadingAnimation'
+import StaticMinimap from './StaticMinimap'
 import styles from './ImagerySearch.css'
-import moment from 'moment'
 
 export default class ImagerySearch extends Component {
   static propTypes = {
@@ -135,7 +134,7 @@ export default class ImagerySearch extends Component {
         </label>
 
         <div className={styles.controls}>
-          <button disabled={!this._canSubmit}>Search for imagery</button>
+          <button type="submit" disabled={!this._canSubmit}>Search for imagery</button>
         </div>
 
         <div className={styles.loadingMask}>

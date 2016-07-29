@@ -17,7 +17,7 @@
 import React from 'react'
 import {shallow} from 'enzyme'
 import expect from 'expect'
-import Timestamp from 'app/components/Timestamp.jsx'
+import Timestamp from 'app/components/Timestamp'
 
 const MILLISECOND = 1
 const SECOND = 1000 * MILLISECOND

@@ -17,7 +17,7 @@
 import React from 'react'
 import {mount} from 'enzyme'
 import expect, {createSpy} from 'expect'
-import NewJobDetails from 'app/components/NewJobDetails.jsx'
+import NewJobDetails from 'app/components/NewJobDetails'
 
 describe('<NewJobDetails/>', () => {
   let _props
@@ -63,5 +63,3 @@ describe('<NewJobDetails/>', () => {
     expect(wrapper.find('input').get(0).value).toEqual('test-new-value')
   })
 })
-
-

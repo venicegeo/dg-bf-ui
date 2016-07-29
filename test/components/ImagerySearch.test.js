@@ -17,7 +17,7 @@
 import React from 'react'
 import {mount} from 'enzyme'
 import expect, {createSpy} from 'expect'
-import ImagerySearch from 'app/components/ImagerySearch.jsx'
+import ImagerySearch from 'app/components/ImagerySearch'
 
 describe('<ImagerySearch/>', () => {
   let _props
