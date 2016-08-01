@@ -587,9 +587,9 @@ export default class PrimaryMap extends Component {
       alreadyRendered[imageId] = true
       if (!shouldRender[imageId]) {
         this._unsubscribeFromLoadEvents(layer)
+        delete this._previewLayers[imageId]
         animateLayerExit(layer).then(() => {
           this._map.removeLayer(layer)
-          delete this._previewLayers[imageId]
         })
       }
     })
