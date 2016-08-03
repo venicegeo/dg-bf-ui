@@ -1,0 +1,24 @@
+{
+  "name": "bf-ui",
+  "dependencies": {},
+  "globalDevDependencies": {
+    "chai": "registry:dt/chai#3.4.0+20160601211834",
+    "mocha": "registry:dt/mocha#2.2.5+20160720003353",
+    "node": "registry:dt/node#6.0.0+20160728152422",
+    "sinon": "registry:dt/sinon#1.16.0+20160517064723"
+  },
+  "globalDependencies": {
+    "core-js": "registry:dt/core-js#0.0.0+20160602141332",
+    "geojson": "registry:dt/geojson#0.0.0+20160619034323",
+    "lodash": "registry:dt/lodash#4.14.0+20160802150749",
+    "openlayers-3.14.2": "github:dbazile/DefinitelyTyped/openlayers/openlayers-3.14.2.d.ts#6c7741bf3503d86d44065915cc33e0209c591bdc",
+    "react": "registry:dt/react#0.14.0+20160801203155",
+    "react-dom": "registry:dt/react-dom#0.14.0+20160412154040",
+    "react-redux": "registry:dt/react-redux#4.4.0+20160724070751",
+    "react-router": "registry:dt/react-router#2.0.0+20160621215300",
+    "react-router/history": "registry:dt/react-router/history#2.0.0+20160608102730",
+    "redux": "registry:dt/redux#3.5.2+20160703092728",
+    "redux-thunk": "registry:dt/redux-thunk#2.1.0+20160703120921",
+    "whatwg-fetch": "registry:dt/whatwg-fetch#0.0.0+20160728142841"
+  }
+}

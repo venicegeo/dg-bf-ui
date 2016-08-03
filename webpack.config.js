@@ -28,7 +28,7 @@ module.exports = {
 
   context: __dirname,
   entry: {
-    'app': './app/index.js',
+    'app': './app/index.ts',
     'vendor': [
       'history',
       'isomorphic-fetch',
@@ -45,7 +45,7 @@ module.exports = {
 
   resolve: {
     alias: __environment__ === 'production' ? {} : {openlayers$: 'openlayers/dist/ol-debug.js'},
-    extensions: ['', '.js', '.jsx'],
+    extensions: ['', '.tsx', '.ts', '.js'],
     root: __dirname,
   },
 
@@ -58,15 +58,20 @@ module.exports = {
     noParse: /\bol(-debug)?\.js$/,
     preLoaders: [
       {
-        test: /\.jsx?$/,
-        loader: 'eslint',
+        test: /\.js$/,
+        loader: 'source-map',
         exclude: /node_modules/
-      }
+      },
+      {
+        test: /\.tsx?$/,
+        loader: 'tslint',
+        exclude: /node_modules/
+      },
     ],
     loaders: [
       {
-        test: /\.jsx?$/,
-        loader: 'babel',
+        test: /\.tsx?$/,
+        loader: 'ts',
         exclude: /node_modules/
       },
       {
