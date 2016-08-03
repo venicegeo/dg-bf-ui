@@ -22,7 +22,7 @@ import * as moment from 'moment'
 const INTERVAL = 15000
 
 interface Props {
-  className: string
+  className?: string
   timestamp: Date|string|number
 }
 

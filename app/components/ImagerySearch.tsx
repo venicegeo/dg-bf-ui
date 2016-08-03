@@ -21,15 +21,15 @@ import LoadingAnimation from './LoadingAnimation'
 import StaticMinimap from './StaticMinimap'
 
 interface Props {
-  bbox
-  catalogApiKey
-  cloudCover
-  dateFrom
-  dateTo
-  error
-  filter
-  filters
-  isSearching
+  bbox: number[]
+  catalogApiKey: string
+  cloudCover: number
+  dateFrom: string
+  dateTo: string
+  error?: any
+  filter: string
+  filters: {id: string, name: string}[]
+  isSearching: boolean
   onApiKeyChange(value: string)
   onClearBbox()
   onCloudCoverChange(value: number)

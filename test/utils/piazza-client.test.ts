@@ -14,8 +14,8 @@
  * limitations under the License.
  **/
 
-import expect from 'expect'
-import sinon from 'sinon'
+import {assert} from 'chai'
+import * as sinon from 'sinon'
 import {Client, STATUS_ERROR, STATUS_RUNNING, STATUS_SUCCESS} from 'app/utils/piazza-client'
 import {
   ERROR_GENERIC,
@@ -27,62 +27,72 @@ import {
   RESPONSE_JOB_SUCCESS,
   RESPONSE_JOB_ERROR,
   RESPONSE_JOB_NOT_FOUND,
-  RESPONSE_SERVICE_LIST
+  RESPONSE_SERVICE_LIST,
 } from '../fixtures/piazza-responses'
 
 describe('Piazza Client', function () {
+  let fetchStub: Sinon.SinonStub
+
   this.timeout(500)
 
-  afterEach(() => expect.restoreSpies())
+  beforeEach(() => {
+    fetchStub = sinon.stub(window, 'fetch')
+  })
+
+  afterEach(() => {
+    fetchStub.restore()
+  })
 
   describe('constructor()', () => {
     it('can instantiate', () => {
-      expect(() => new Client('http://test-gateway')).toNotThrow()
+      assert.doesNotThrow(() => {
+        new Client('http://test-gateway', 'test-auth-token')
+      })
     })
 
     it('normalizes gateway', () => {
-      const client = new Client('http://test-gateway//////')
-      expect(client.gateway).toEqual('http://test-gateway')
+      const client = new Client('http://test-gateway//////', 'test-auth-token')
+      assert.equal(client.gateway, 'http://test-gateway')
     })
 
     it('normalizes auth token', () => {
       const client = new Client('http://test-gateway', 'test-auth-token')
-      expect(client.authToken).toEqual('test-auth-token')
+      assert.equal(client.authToken, 'test-auth-token')
     })
   })
 
   describe('getDeployment()', () => {
     it('calls correct URL', (done) => {
-      const stub = expect.spyOn(window, 'fetch').andReturn(resolveJson(RESPONSE_DEPLOYMENT))
+      const stub = fetchStub.returns(resolveJson(RESPONSE_DEPLOYMENT))
       const client = new Client('http://m', 'test-auth-token')
       client.getDeployment('test-deployment-id')
         .then(() => {
-          expect(stub.calls[0].arguments[0]).toEqual('http://m/deployment/test-deployment-id')
+          assert.equal(stub.firstCall.args[0], 'http://m/deployment/test-deployment-id')
           done()
         })
         .catch(done)
     })
 
     it('properly deserializes GeoServer deployment descriptor', (done) => {
-      expect.spyOn(window, 'fetch').andReturn(resolveJson(RESPONSE_DEPLOYMENT))
+      fetchStub.returns(resolveJson(RESPONSE_DEPLOYMENT))
       const client = new Client('http://m', 'test-auth-token')
       client.getDeployment('test-deployment-id')
         .then(descriptor => {
-          expect(descriptor.dataId).toEqual('test-data-id')
-          expect(descriptor.endpoint).toEqual('http://test-capabilities-url/arbitrary/context/path')
-          expect(descriptor.layerId).toEqual('test-layer-id')
+          assert.equal(descriptor.dataId, 'test-data-id')
+          assert.equal(descriptor.endpoint, 'http://test-capabilities-url/arbitrary/context/path')
+          assert.equal(descriptor.layerId, 'test-layer-id')
           done()
         })
         .catch(done)
     })
 
     it('handles HTTP errors gracefully', (done) => {
-      expect.spyOn(window, 'fetch').andReturn(resolveJson(RESPONSE_DEPLOYMENT_NOT_FOUND, 500))
+      fetchStub.returns(resolveJson(RESPONSE_DEPLOYMENT_NOT_FOUND, 500))
       const client = new Client('http://m', 'test-auth-token')
       client.getDeployment('nopenope')
         .then(() => done(new Error('Should have thrown')))
         .catch(err => {
-          expect(err.status).toEqual(500)
+          assert.equal(err.status, 500)
           done()
         })
         .catch(done)
@@ -92,16 +102,22 @@ describe('Piazza Client', function () {
   describe('getFile()', () => {
     let server
 
-    beforeEach(() => server = sinon.fakeServer.create({autoRespond: true}))
-    afterEach(() => server.restore())
+    beforeEach(() => {
+      server = sinon.fakeServer.create()
+      server.autoRespond = true
+    })
+
+    afterEach(() => {
+      server.restore()
+    })
 
     it('calls correct URL', (done) => {
       server.respondWith([200, {}, RESPONSE_FILE])
       const client = new Client('http://m', 'test-auth-token')
       client.getFile('test-id')
         .then(() => {
-          expect(server.requests[0].method).toEqual('GET')
-          expect(server.requests[0].url).toEqual('http://m/file/test-id')
+          assert.equal(server.requests[0].method, 'GET')
+          assert.equal(server.requests[0].url, 'http://m/file/test-id')
           done()
         })
         .catch(done)
@@ -112,7 +128,7 @@ describe('Piazza Client', function () {
       const client = new Client('http://m', 'test-auth-token')
       client.getFile('test-id')
         .then(content => {
-          expect(content).toBeTruthy()
+          assert.ok(content)
           done()
         })
         .catch(done)
@@ -123,7 +139,7 @@ describe('Piazza Client', function () {
       const client = new Client('http://m', 'test-auth-token')
       client.getFile('test-id')
         .then(actual => {
-          expect(actual).toEqual(RESPONSE_FILE)
+          assert.equal(actual, RESPONSE_FILE)
           done()
         })
         .catch(done)
@@ -141,7 +157,7 @@ describe('Piazza Client', function () {
       client.getFile('test-id')
         .then(() => done(new Error('Should have thrown')))
         .catch(error => {
-          expect(error.status).toEqual(500)
+          assert.equal(error.status, 500)
           done()
         })
         .catch(done)
@@ -153,11 +169,11 @@ describe('Piazza Client', function () {
       const stub = sinon.stub()
       client.getFile('test-id', stub)
         .then(() => {
-          expect(stub.called).toBeTruthy()
-          expect(stub.alwaysCalledWithMatch(sinon.match({
+          assert.isTrue(stub.called)
+          assert.isTrue(stub.alwaysCalledWithMatch(sinon.match({
             loaded: sinon.match.number,
             total: sinon.match.number,
-          }))).toBeTruthy()
+          })))
           done()
         })
         .catch(done)
@@ -169,9 +185,9 @@ describe('Piazza Client', function () {
       const client = new Client('http://m', 'test-auth-token')
       client.getFile('test-id', stub)
         .then(() => {
-          expect(stub.alwaysCalledWithMatch({
-            cancel: sinon.match.func
-          })).toBeTruthy()
+          assert.isTrue(stub.alwaysCalledWithMatch({
+            cancel: sinon.match.func,
+          }))
           done()
         })
         .catch(done)
@@ -184,7 +200,7 @@ describe('Piazza Client', function () {
       client.getFile('test-id', onProgress)
         .then(() => done(new Error('Should have rejected')))
         .catch(err => {
-          expect(err).toEqual({isCancellation: true})
+          assert.deepEqual(err, {isCancellation: true})
           done()
         })
         .catch(done)
@@ -196,7 +212,7 @@ describe('Piazza Client', function () {
       const client = new Client('http://m', 'test-auth-token')
       client.getFile('test-id', onProgress)
         .catch(() => {
-          expect(server.requests[0].aborted).toBe(true)
+          assert.isTrue(server.requests[0].aborted)
           done()
         })
         .catch(done)
@@ -205,50 +221,50 @@ describe('Piazza Client', function () {
 
   describe('getServices()', () => {
     it('calls correct URL', (done) => {
-      const stub = expect.spyOn(window, 'fetch').andReturn(resolve(RESPONSE_SERVICE_LIST))
+      const stub = fetchStub.returns(resolve(RESPONSE_SERVICE_LIST))
       const client = new Client('http://m', 'test-auth-token')
       client.getServices({pattern: 'test-pattern'})
         .then(() => {
-          expect(stub.calls[0].arguments[0]).toEqual('http://m/service?keyword=test-pattern&per_page=100')
+          assert.equal(stub.firstCall.args[0], 'http://m/service?keyword=test-pattern&per_page=100')
           done()
         })
         .catch(done)
     })
 
     it('can list services', (done) => {
-      expect.spyOn(window, 'fetch').andReturn(resolveJson(RESPONSE_SERVICE_LIST))
+      fetchStub.returns(resolveJson(RESPONSE_SERVICE_LIST))
       const client = new Client('http://m', 'test-auth-token')
       client.getServices({pattern: 'test-pattern'})
         .then(services => {
-          expect(services instanceof Array).toEqual(true)
-          expect(services.length).toEqual(2)
+          assert.instanceOf(services, Array)
+          assert.equal(services.length, 2)
           done()
         })
         .catch(done)
     })
 
     it('deserializes metadata', (done) => {
-      expect.spyOn(window, 'fetch').andReturn(resolveJson(RESPONSE_SERVICE_LIST))
+      fetchStub.returns(resolveJson(RESPONSE_SERVICE_LIST))
       const client = new Client('http://m', 'test-auth-token')
       client.getServices({pattern: 'test-pattern'})
         .then(([firstService]) => {
-          expect(firstService.serviceId).toEqual('test-id-1')
-          expect(firstService.resourceMetadata.classType).toEqual({classification: 'UNCLASSIFIED'})
-          expect(firstService.resourceMetadata.description).toEqual('test-description')
-          expect(firstService.resourceMetadata.name).toEqual('test-name')
-          expect(firstService.resourceMetadata.version).toEqual('test-version')
+          assert.equal(firstService.serviceId, 'test-id-1')
+          assert.deepEqual(firstService.resourceMetadata.classType, {classification: 'UNCLASSIFIED'})
+          assert.equal(firstService.resourceMetadata.description, 'test-description')
+          assert.equal(firstService.resourceMetadata.name, 'test-name')
+          assert.equal(firstService.resourceMetadata.version, 'test-version')
           done()
         })
         .catch(done)
     })
 
     it('handles HTTP errors gracefully', (done) => {
-      expect.spyOn(window, 'fetch').andReturn(resolve(ERROR_GENERIC, 500))
+      fetchStub.returns(resolve(ERROR_GENERIC, 500))
       const client = new Client('http://m', 'test-auth-token')
       client.getServices({pattern: 'test-pattern'})
         .then(() => done(new Error('Should have thrown')))
         .catch(error => {
-          expect(error.status).toEqual(500)
+          assert.equal(error.status, 500)
           done()
         })
         .catch(done)
@@ -257,75 +273,75 @@ describe('Piazza Client', function () {
 
   describe('getStatus()', () => {
     it('calls correct URL', (done) => {
-      const stub = expect.spyOn(window, 'fetch').andReturn(resolve(RESPONSE_JOB_RUNNING))
+      const stub = fetchStub.returns(resolve(RESPONSE_JOB_RUNNING))
       const client = new Client('http://m', 'test-auth-token')
       client.getStatus('test-id')
         .then(() => {
-          expect(stub.calls[0].arguments[0]).toEqual('http://m/job/test-id')
+          assert.equal(stub.firstCall.args[0], 'http://m/job/test-id')
           done()
         })
         .catch(done)
     })
 
     it('properly deserializes running job', (done) => {
-      expect.spyOn(window, 'fetch').andReturn(resolve(RESPONSE_JOB_RUNNING))
+      fetchStub.returns(resolve(RESPONSE_JOB_RUNNING))
       const client = new Client('http://m', 'test-auth-token')
       client.getStatus('test-id')
         .then(status => {
-          expect(status.jobId).toEqual('test-id')
-          expect(status.status).toEqual(STATUS_RUNNING)
-          expect(status.result).toEqual(null)
+          assert.equal(status.jobId, 'test-id')
+          assert.equal(status.status, STATUS_RUNNING)
+          assert.equal(status.result, null)
           done()
         })
         .catch(done)
     })
 
     it('properly deserializes successful job', (done) => {
-      expect.spyOn(window, 'fetch').andReturn(resolve(RESPONSE_JOB_SUCCESS))
+      fetchStub.returns(resolve(RESPONSE_JOB_SUCCESS))
       const client = new Client('http://m', 'test-auth-token')
       client.getStatus('test-id')
         .then(status => {
-          expect(status.jobId).toEqual('test-id')
-          expect(status.status).toEqual(STATUS_SUCCESS)
-          expect(status.result.dataId).toEqual('test-data-id')
+          assert.equal(status.jobId, 'test-id')
+          assert.equal(status.status, STATUS_SUCCESS)
+          assert.equal(status.result.dataId, 'test-data-id')
           done()
         })
         .catch(done)
     })
 
     it('properly deserializes failed job', (done) => {
-      expect.spyOn(window, 'fetch').andReturn(resolve(RESPONSE_JOB_ERROR))
+      fetchStub.returns(resolve(RESPONSE_JOB_ERROR))
       const client = new Client('http://m', 'test-auth-token')
       client.getStatus('test-id')
         .then(status => {
-          expect(status.jobId).toEqual('test-id')
-          expect(status.status).toEqual(STATUS_ERROR)
-          expect(status.result.dataId).toNotExist()
+          assert.equal(status.jobId, 'test-id')
+          assert.equal(status.status, STATUS_ERROR)
+          assert.isUndefined(status.result.dataId)
           done()
         })
         .catch(done)
     })
 
     it('properly handles non-existent job', (done) => {
-      expect.spyOn(window, 'fetch').andReturn(resolve(RESPONSE_JOB_NOT_FOUND))
+      fetchStub.returns(resolve(RESPONSE_JOB_NOT_FOUND))
       const client = new Client('http://m', 'test-auth-token')
       client.getStatus('test-id')
         .then(() => done(new Error('Should have thrown')))
         .catch(error => {
-          expect(error).toBeAn(Error)
-          expect(error.message).toMatch(/^InvalidResponse: Job Not Found/i)
+          assert.instanceOf(error, Error)
+          assert.match(error.message, /^InvalidResponse: Job Not Found/i)
           done()
         })
         .catch(done)
     })
 
     it('handles HTTP errors gracefully', (done) => {
-      expect.spyOn(window, 'fetch').andReturn(resolve(ERROR_GENERIC, 500))
+      fetchStub.returns(resolve(ERROR_GENERIC, 500))
       const client = new Client('http://m', 'test-auth-token')
       client.getStatus('test-id')
         .then(() => done(new Error('Should have thrown')))
         .catch(error => {
-          expect(error.status).toEqual(500)
+          assert.equal(error.status, 500)
           done()
         })
         .catch(done)
@@ -334,48 +350,48 @@ describe('Piazza Client', function () {
 
   describe('post()', () => {
     it('calls correct URL', (done) => {
-      const stub = expect.spyOn(window, 'fetch').andReturn(resolve(RESPONSE_JOB_CREATED))
+      const stub = fetchStub.returns(resolve(RESPONSE_JOB_CREATED))
       const client = new Client('http://m', 'test-auth-token')
       client.post('test-type', 'test-data')
         .then(() => {
-          expect(stub.calls[0].arguments[0]).toEqual('http://m/job')
+          assert.equal(stub.firstCall.args[0], 'http://m/job')
           done()
         })
         .catch(done)
     })
 
     it('returns new job ID', (done) => {
-      expect.spyOn(window, 'fetch').andReturn(resolve(RESPONSE_JOB_CREATED))
+      fetchStub.returns(resolve(RESPONSE_JOB_CREATED))
       const client = new Client('http://m', 'test-auth-token')
       client.post('test-type', 'test-data')
         .then(id => {
-          expect(id).toEqual('test-id')
+          assert.equal(id, 'test-id')
           done()
         })
         .catch(done)
     })
 
     it('properly serializes message', (done) => {
-      const stub = expect.spyOn(window, 'fetch').andReturn(resolve(RESPONSE_JOB_CREATED))
+      const stub = fetchStub.returns(resolve(RESPONSE_JOB_CREATED))
       const client = new Client('http://m', 'test-auth-token')
       client.post('test-type', 'test-data')
         .then(() => {
-          const [, options] = stub.calls[0].arguments
-          expect(options.method).toEqual('POST')
-          expect(options.headers['content-type']).toEqual('application/json')
-          expect(options.body).toEqual('{"type":"test-type","data":"test-data"}')
+          const [, options] = stub.firstCall.args
+          assert.equal(options.method, 'POST')
+          assert.equal(options.headers['content-type'], 'application/json')
+          assert.equal(options.body, '{"type":"test-type","data":"test-data"}')
           done()
         })
         .catch(done)
     })
 
     it('handles HTTP errors gracefully', (done) => {
-      expect.spyOn(window, 'fetch').andReturn(resolve(ERROR_GENERIC, 500))
+      fetchStub.returns(resolve(ERROR_GENERIC, 500))
       const client = new Client('http://m', 'test-auth-token')
       client.post('test-type', 'test-data')
         .then(() => done(new Error('Should have thrown')))
         .catch(error => {
-          expect(error.status).toEqual(500)
+          assert.equal(error.status, 500)
           done()
         })
         .catch(done)
@@ -390,12 +406,12 @@ describe('Piazza Client', function () {
 function resolve(content, status = 200, type = 'text/plain') {
   return Promise.resolve(new Response(content, {
     status,
-    headers: {
-      'content-type': type
-    }
+    headers: new Headers({
+      'content-type': type,
+    }),
   }))
 }
 
-function resolveJson(string, status = 200) {
-  return resolve(string, status, 'application/json')
+function resolveJson(serialized: string, status = 200) {
+  return resolve(serialized, status, 'application/json')
 }

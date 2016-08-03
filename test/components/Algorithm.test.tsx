@@ -16,7 +16,8 @@
 
 import * as React from 'react'
 import {shallow} from 'enzyme'
-import expect, {createSpy} from 'expect'
+import {assert} from 'chai'
+import * as sinon from 'sinon'
 import Algorithm from 'app/components/Algorithm'
 
 describe('<Algorithm/>', () => {
@@ -27,14 +28,14 @@ describe('<Algorithm/>', () => {
       algorithm: {
         description:  'test-description',
         name:         'test-name',
-        requirements: []
+        requirements: [],
       },
       imageProperties: {
-        bands: {},
+        bands:      {},
         cloudCover: 5,
       },
       isSubmitting: false,
-      onSubmit:  createSpy(),
+      onSubmit:     sinon.stub(),
     }
   })
 
@@ -47,9 +48,9 @@ describe('<Algorithm/>', () => {
         onSubmit={_props.onSubmit}
       />
     )
-    expect(wrapper.find('.Algorithm__name').text()).toEqual('test-name')
-    expect(wrapper.find('.Algorithm__description').text()).toEqual('test-description')
-    expect(wrapper.find('.Algorithm__startButton').length).toEqual(1)
+    assert.equal(wrapper.find('.Algorithm__name').text(), 'test-name')
+    assert.equal(wrapper.find('.Algorithm__description').text(), 'test-description')
+    assert.equal(wrapper.find('.Algorithm__startButton').length, 1)
   })
 
   it('prevents new submissions while submission in flight', () => {
@@ -61,7 +62,7 @@ describe('<Algorithm/>', () => {
         onSubmit={_props.onSubmit}
       />
     )
-    expect(wrapper.find('.Algorithm__startButton').prop('disabled')).toEqual(true)
+    assert.isTrue(wrapper.find('.Algorithm__startButton').prop('disabled'))
   })
 
   // FIXME -- the following cases require a component refactor to do this in a sane way

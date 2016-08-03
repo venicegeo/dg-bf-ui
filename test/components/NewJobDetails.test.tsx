@@ -16,7 +16,8 @@
 
 import * as React from 'react'
 import {mount} from 'enzyme'
-import expect, {createSpy} from 'expect'
+import {assert} from 'chai'
+import * as sinon from 'sinon'
 import NewJobDetails from 'app/components/NewJobDetails'
 
 describe('<NewJobDetails/>', () => {
@@ -25,7 +26,7 @@ describe('<NewJobDetails/>', () => {
   beforeEach(() => {
     _props = {
       name: 'test-name',
-      onNameChange: createSpy(),
+      onNameChange: sinon.stub(),
     }
   })
 
@@ -36,7 +37,7 @@ describe('<NewJobDetails/>', () => {
         onNameChange={_props.onNameChange}
       />
     )
-    expect(wrapper.find('input').get(0).value).toEqual('test-name')
+    assert.equal(wrapper.find('input').get(0).value, 'test-name')
   })
 
   it('emits change event', () => {
@@ -49,7 +50,7 @@ describe('<NewJobDetails/>', () => {
     const input = wrapper.find('input')
     input.get(0).value = 'test-new-value'
     input.simulate('change')
-    expect(_props.onNameChange).toHaveBeenCalledWith('test-new-value')
+    assert.isTrue(_props.onNameChange.calledWithExactly('test-new-value'))
   })
 
   it('updates name when props change', () => {
@@ -60,6 +61,6 @@ describe('<NewJobDetails/>', () => {
       />
     )
     wrapper.setProps({name: 'test-new-value'})
-    expect(wrapper.find('input').get(0).value).toEqual('test-new-value')
+    assert.equal(wrapper.find('input').get(0).value, 'test-new-value')
   })
 })

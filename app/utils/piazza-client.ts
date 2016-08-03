@@ -18,9 +18,13 @@ export const STATUS_RUNNING = 'Running'
 export const STATUS_SUCCESS = 'Success'
 export const STATUS_ERROR   = 'Error'
 
+interface ProgressNotifier {
+  (notification: {cancel(), loaded: number, total: number}): void
+}
+
 export class Client {
-  gateway: string
-  authToken: string
+  readonly gateway: string
+  readonly authToken: string
 
   constructor(gateway, authToken) {
     this.gateway   = gateway.replace(/\/+$/g, '')
@@ -28,12 +32,12 @@ export class Client {
   }
 
   getDeployment(id) {
-    return this._fetch(`/deployment/${id}`)
+    return this.fetch(`/deployment/${id}`)
       .then(asJson)
       .then(normalizeDeployment)
   }
 
-  getFile(id, onProgress) {
+  getFile(id, onProgress?: ProgressNotifier) {
     return new Promise((resolve, reject) => {
       const xhr = new XMLHttpRequest()
       xhr.open('GET', encodeURI(`${this.gateway}/file/${id}`))
@@ -65,7 +69,7 @@ export class Client {
         }
 
         if (xhr.status !== 200) {
-          reject(new HttpError({status: xhr.status}))
+          reject(httpError({status: xhr.status}))
           return
         }
 
@@ -76,19 +80,19 @@ export class Client {
   }
 
   getServices({pattern}) {
-    return this._fetch(`/service?keyword=${pattern}&per_page=100`)
+    return this.fetch(`/service?keyword=${pattern}&per_page=100`)
       .then(asJson)
       .then(normalizeServiceListing)
   }
 
   getStatus(jobId) {
-    return this._fetch(`/job/${jobId}`)
+    return this.fetch(`/job/${jobId}`)
       .then(asJson)
       .then(normalizeStatus)
   }
 
   post(type, data) {
-    return this._fetch('/job', {
+    return this.fetch('/job', {
       body: JSON.stringify({type, data}),
       headers: {'content-type': 'application/json'},
       method: 'POST',
@@ -97,7 +101,7 @@ export class Client {
       .then(normalizePostMetadata)
   }
 
-  _fetch(endpoint, overrides: any = {}) {
+  private fetch(endpoint, overrides: any = {}) {
     const options = Object.assign({}, overrides, {
       headers: Object.assign({}, overrides.headers, {
         'authorization': this.authToken,
@@ -113,7 +117,7 @@ export class Client {
 
 function asJson(response) {
   if (!response.ok) {
-    throw new HttpError(response)
+    throw httpError(response)
   }
   return response.json()
 }
@@ -128,7 +132,7 @@ function normalizeDeployment(descriptor) {
 
 function normalizePostMetadata(metadata) {
   if (!metadata.data.jobId) {
-    throw new InvalidResponse(metadata, 'No job ID assigned')
+    throw invalidResponse(metadata, 'No job ID assigned')
   }
   return metadata.data.jobId
 }
@@ -139,7 +143,7 @@ function normalizeServiceListing(page) {
 
 function normalizeStatus(status) {
   if (!status.data || !status.data.status || status.type === 'error') {
-    throw new InvalidResponse(status, status.message || 'Status is ambiguous')
+    throw invalidResponse(status, status.message || 'Status is ambiguous')
   }
   return Object.assign({
     message: null,
@@ -151,20 +155,19 @@ function normalizeStatus(status) {
 // Errors
 //
 
-class HttpError extends Error {
-  status: number
-
-  constructor(response) {
-    super(`HttpError: (code=${response.status})`)
-    this.status = response.status
-  }
+interface Error {
+  contents?: any
+  status?: number
 }
 
-class InvalidResponse extends Error {
-  contents: string
+function invalidResponse(contents, message) {
+  const err = new Error(`InvalidResponse: ${message} (${JSON.stringify(contents)})`)
+  err.contents = contents
+  return err
+}
 
-  constructor(contents, message) {
-    super(`InvalidResponse: ${message} (${JSON.stringify(contents)})`)
-    this.contents = contents
-  }
+function httpError(response) {
+  const err = new Error(`HttpError: (code=${response.status})`)
+  err.status = response.status
+  return err
 }

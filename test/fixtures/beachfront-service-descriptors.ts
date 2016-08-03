@@ -1,3 +1,5 @@
+/* tslint:disable */
+
 export function generateAlgorithmDescriptor(serviceId = 'test-service-id') {
   return {
     serviceId,

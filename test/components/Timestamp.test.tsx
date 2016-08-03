@@ -16,7 +16,7 @@
 
 import * as React from 'react'
 import {shallow} from 'enzyme'
-import expect from 'expect'
+import {assert} from 'chai'
 import Timestamp from 'app/components/Timestamp'
 
 const MILLISECOND = 1
@@ -29,7 +29,7 @@ describe('<Timestamp/>', () => {
 
   beforeEach(() => {
     _props = {
-      timestamp: Date.now() - (3 * HOUR)
+      timestamp: Date.now() - (3 * HOUR),
     }
   })
 
@@ -39,7 +39,7 @@ describe('<Timestamp/>', () => {
         timestamp={_props.timestamp}
       />
     )
-    expect(wrapper.text()).toEqual('3 hours ago')
+    assert.equal(wrapper.text(), '3 hours ago')
   })
 
   it('accepts ISO8601 timestamp', () => {
@@ -48,7 +48,7 @@ describe('<Timestamp/>', () => {
         timestamp={new Date(Date.now() - (96 * HOUR)).toISOString()}
       />
     )
-    expect(wrapper.text()).toEqual('4 days ago')
+    assert.equal(wrapper.text(), '4 days ago')
   })
 
   it('can toggle relative and absolute timestamps', () => {
@@ -58,6 +58,6 @@ describe('<Timestamp/>', () => {
       />
     )
     wrapper.simulate('click', new Event('click'))
-    expect(wrapper.text()).toMatch(/Jan \d{2}, 2016 \d{1,2}:34 (AM|PM)$/)
+    assert.match(wrapper.text(), /Jan \d{2}, 2016 \d{1,2}:34 (AM|PM)$/)
   })
 })

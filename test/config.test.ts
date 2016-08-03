@@ -14,20 +14,24 @@
  * limitations under the License.
  **/
 
-import expect from 'expect'
+import {assert} from 'chai'
 import * as config from 'app/config'
 
 describe('config', () => {
   it('reads gateway URL from environment', () => {
-    expect(config.GATEWAY).toEqual('/test-gateway')
+    assert.equal(config.GATEWAY, '/test-gateway')
   })
 
   it('defines jobs worker timing properties', () => {
-    expect(config.JOBS_WORKER.INTERVAL).toBeA('number')
-    expect(config.JOBS_WORKER.JOB_TTL).toBeA('number')
+    assert.isNumber(config.JOBS_WORKER.INTERVAL)
+    assert.isNumber(config.JOBS_WORKER.JOB_TTL)
   })
 
-  it('defines at least one tile provider', () => {
-    expect(config.TILE_PROVIDERS.length).toBeGreaterThan(0)
+  it('defines at least one basemap tile provider', () => {
+    assert.isAbove(config.TILE_PROVIDERS.length, 0)
+  })
+
+  it('defines at least one scene preview tile provider', () => {
+    assert.isAbove(config.SCENE_TILE_PROVIDERS.length, 0)
   })
 })

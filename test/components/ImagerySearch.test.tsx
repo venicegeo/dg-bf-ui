@@ -16,7 +16,8 @@
 
 import * as React from 'react'
 import {mount} from 'enzyme'
-import expect, {createSpy} from 'expect'
+import {assert} from 'chai'
+import * as sinon from 'sinon'
 import ImagerySearch from 'app/components/ImagerySearch'
 
 describe('<ImagerySearch/>', () => {
@@ -32,12 +33,12 @@ describe('<ImagerySearch/>', () => {
       filter:             '',
       filters:            [],
       isSearching:        false,
-      onApiKeyChange:     createSpy(),
-      onClearBbox:        createSpy(),
-      onCloudCoverChange: createSpy(),
-      onDateChange:       createSpy(),
-      onFilterChange:     createSpy(),
-      onSubmit:           createSpy(),
+      onApiKeyChange:     sinon.stub(),
+      onClearBbox:        sinon.stub(),
+      onCloudCoverChange: sinon.stub(),
+      onDateChange:       sinon.stub(),
+      onFilterChange:     sinon.stub(),
+      onSubmit:           sinon.stub(),
     }
   })
 
@@ -60,11 +61,11 @@ describe('<ImagerySearch/>', () => {
         onSubmit={_props.onSubmit}
       />
     )
-    expect(wrapper.find('.ImagerySearch__catalogApiKey input').get(0).value).toEqual('test-catalog-api-key')
-    expect(wrapper.find('.ImagerySearch__cloudCover input').get(0).value).toEqual('19')
-    expect(wrapper.find('.ImagerySearch__captureDateFrom input').get(0).value).toEqual('2016-01-01')
-    expect(wrapper.find('.ImagerySearch__captureDateTo input').get(0).value).toEqual('2016-02-01')
-    expect(wrapper.find('.ImagerySearch__spatialFilter select').get(0).value).toEqual('')
+    assert.equal(wrapper.find('.ImagerySearch__catalogApiKey input').get(0).value, 'test-catalog-api-key')
+    assert.equal(wrapper.find('.ImagerySearch__cloudCover input').get(0).value, '19')
+    assert.equal(wrapper.find('.ImagerySearch__captureDateFrom input').get(0).value, '2016-01-01')
+    assert.equal(wrapper.find('.ImagerySearch__captureDateTo input').get(0).value, '2016-02-01')
+    assert.equal(wrapper.find('.ImagerySearch__spatialFilter select').get(0).value, '')
   })
 
   it('renders spatial filter options', () => {
@@ -89,11 +90,11 @@ describe('<ImagerySearch/>', () => {
       />
     )
     const options = wrapper.find('.ImagerySearch__spatialFilter option')
-    expect(wrapper.find('.ImagerySearch__spatialFilter select').get(0).value).toEqual('test-id')
-    expect(options.get(0).value).toEqual('')
-    expect(options.at(0).text()).toEqual('None')
-    expect(options.get(1).value).toEqual('test-id')
-    expect(options.at(1).text()).toEqual('Testing')
+    assert.equal(wrapper.find('.ImagerySearch__spatialFilter select').get(0).value, 'test-id')
+    assert.equal(options.get(0).value, '')
+    assert.equal(options.at(0).text(), 'None')
+    assert.equal(options.get(1).value, 'test-id')
+    assert.equal(options.at(1).text(), 'Testing')
   })
 
   it('normalizes spatial filter names', () => {
@@ -118,8 +119,8 @@ describe('<ImagerySearch/>', () => {
         onSubmit={_props.onSubmit}
       />
     )
-    expect(wrapper.find('.ImagerySearch__spatialFilter option').at(1).text()).toEqual('Lorem Ipsum')
-    expect(wrapper.find('.ImagerySearch__spatialFilter option').at(2).text()).toEqual('Dolor Sit Amet')
+    assert.equal(wrapper.find('.ImagerySearch__spatialFilter option').at(1).text(), 'Lorem Ipsum')
+    assert.equal(wrapper.find('.ImagerySearch__spatialFilter option').at(2).text(), 'Dolor Sit Amet')
   })
 
   it('renders with correct initial spatial filter selection', () => {
@@ -144,7 +145,7 @@ describe('<ImagerySearch/>', () => {
         onSubmit={_props.onSubmit}
       />
     )
-    expect(wrapper.find('.ImagerySearch__spatialFilter select').get(0).value).toEqual('test-filter-1')
+    assert.equal(wrapper.find('.ImagerySearch__spatialFilter select').get(0).value, 'test-filter-1')
   })
 
   it('emits api key change event', () => {
@@ -169,7 +170,7 @@ describe('<ImagerySearch/>', () => {
     const input = wrapper.find('.ImagerySearch__catalogApiKey input')
     input.get(0).value = 'test-new-catalog-api-key'
     input.simulate('change')
-    expect(_props.onApiKeyChange).toHaveBeenCalledWith('test-new-catalog-api-key')
+    assert.isTrue(_props.onApiKeyChange.calledWithExactly('test-new-catalog-api-key'))
   })
 
   it('emits bbox clear event', () => {
@@ -192,7 +193,7 @@ describe('<ImagerySearch/>', () => {
       />
     )
     wrapper.find('.ImagerySearch__clearBbox').simulate('click')
-    expect(_props.onClearBbox).toHaveBeenCalled()
+    assert.equal(_props.onClearBbox.callCount, 1)
   })
 
   it('emits cloud cover change event', () => {
@@ -217,7 +218,7 @@ describe('<ImagerySearch/>', () => {
     const input = wrapper.find('.ImagerySearch__cloudCover input')
     input.get(0).value = 42
     input.simulate('change')
-    expect(_props.onCloudCoverChange).toHaveBeenCalledWith(42)
+    assert.isTrue(_props.onCloudCoverChange.calledWithExactly(42))
   })
 
   it('emits date change event (via "from" date)', () => {
@@ -242,7 +243,7 @@ describe('<ImagerySearch/>', () => {
     const input = wrapper.find('.ImagerySearch__captureDateFrom input')
     input.get(0).value = '1999-12-31'
     input.simulate('change')
-    expect(_props.onDateChange).toHaveBeenCalledWith('1999-12-31', _props.dateTo)
+    assert.isTrue(_props.onDateChange.calledWithExactly('1999-12-31', _props.dateTo))
   })
 
   it('emits date change event (via "to" date)', () => {
@@ -267,7 +268,7 @@ describe('<ImagerySearch/>', () => {
     const input = wrapper.find('.ImagerySearch__captureDateTo input')
     input.get(0).value = '1999-12-31'
     input.simulate('change')
-    expect(_props.onDateChange).toHaveBeenCalledWith(_props.dateFrom, '1999-12-31')
+    assert.isTrue(_props.onDateChange.calledWithExactly(_props.dateFrom, '1999-12-31'))
   })
 
   it('emits spatial filter change event', () => {
@@ -294,7 +295,7 @@ describe('<ImagerySearch/>', () => {
     const dropdown = wrapper.find('.ImagerySearch__spatialFilter select')
     dropdown.get(0).value = 'test-id'
     dropdown.simulate('change')
-    expect(_props.onFilterChange).toHaveBeenCalledWith('test-id')
+    assert.isTrue(_props.onFilterChange.calledWithExactly('test-id'))
   })
 
   it('emits spatial filter change event (to empty)', () => {
@@ -321,7 +322,7 @@ describe('<ImagerySearch/>', () => {
     const dropdown = wrapper.find('.ImagerySearch__spatialFilter select')
     dropdown.get(0).value = ''
     dropdown.simulate('change')
-    expect(_props.onFilterChange).toHaveBeenCalledWith(null)
+    assert.isTrue(_props.onFilterChange.calledWithExactly(null))
   })
 
   it('emits submission event', () => {
@@ -344,7 +345,7 @@ describe('<ImagerySearch/>', () => {
       />
     )
     wrapper.find('form').simulate('submit')
-    expect(_props.onSubmit).toHaveBeenCalled()
+    assert.equal(_props.onSubmit.callCount, 1)
   })
 
   it('updates api key when props change', () => {
@@ -367,7 +368,7 @@ describe('<ImagerySearch/>', () => {
       />
     )
     wrapper.setProps({catalogApiKey: 'test-new-catalog-api-key'})
-    expect(wrapper.find('.ImagerySearch__catalogApiKey input').get(0).value).toEqual('test-new-catalog-api-key')
+    assert.equal(wrapper.find('.ImagerySearch__catalogApiKey input').get(0).value, 'test-new-catalog-api-key')
   })
 
   it('updates cloud cover when props change', () => {
@@ -390,7 +391,7 @@ describe('<ImagerySearch/>', () => {
       />
     )
     wrapper.setProps({cloudCover: 42})
-    expect(wrapper.find('.ImagerySearch__cloudCover input').get(0).value).toEqual('42')
+    assert.equal(wrapper.find('.ImagerySearch__cloudCover input').get(0).value, '42')
   })
 
   it('updates date when props change (via "from" date)', () => {
@@ -413,8 +414,8 @@ describe('<ImagerySearch/>', () => {
       />
     )
     wrapper.setProps({dateFrom: '1999-12-31'})
-    expect(wrapper.find('.ImagerySearch__captureDateFrom input').get(0).value).toEqual('1999-12-31')
-    expect(wrapper.find('.ImagerySearch__captureDateTo input').get(0).value).toEqual(_props.dateTo)
+    assert.equal(wrapper.find('.ImagerySearch__captureDateFrom input').get(0).value, '1999-12-31')
+    assert.equal(wrapper.find('.ImagerySearch__captureDateTo input').get(0).value, _props.dateTo)
   })
 
   it('updates date when props change (via "to" date)', () => {
@@ -437,8 +438,8 @@ describe('<ImagerySearch/>', () => {
       />
     )
     wrapper.setProps({dateTo: '1999-12-31'})
-    expect(wrapper.find('.ImagerySearch__captureDateFrom input').get(0).value).toEqual(_props.dateFrom)
-    expect(wrapper.find('.ImagerySearch__captureDateTo input').get(0).value).toEqual('1999-12-31')
+    assert.equal(wrapper.find('.ImagerySearch__captureDateFrom input').get(0).value, _props.dateFrom)
+    assert.equal(wrapper.find('.ImagerySearch__captureDateTo input').get(0).value, '1999-12-31')
   })
 
   it('updates spatial filter when props change', () => {
@@ -463,7 +464,7 @@ describe('<ImagerySearch/>', () => {
       />
     )
     wrapper.setProps({filter: 'test-id'})
-    expect(wrapper.find('.ImagerySearch__spatialFilter select').get(0).value).toEqual('test-id')
+    assert.equal(wrapper.find('.ImagerySearch__spatialFilter select').get(0).value, 'test-id')
   })
 
   it('shows loading indicator while search is in flight')

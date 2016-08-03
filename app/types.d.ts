@@ -50,4 +50,7 @@ declare const process: {
   env: BuildEnvironment
 }
 
-declare function require(path: string)
+declare var require: {
+  (path: string)
+  context(path: string, recursive: boolean, pattern: RegExp): any
+}

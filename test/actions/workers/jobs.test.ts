@@ -14,10 +14,11 @@
  * limitations under the License.
  **/
 
-import expect, {spyOn, restoreSpies, createSpy} from 'expect'
+import {assert} from 'chai'
+import * as sinon from 'sinon'
 import * as worker from 'app/actions/workers/jobs'
 import {
-  SCHEMA_VERSION
+  SCHEMA_VERSION,
 } from 'app/config'
 import {
   RESPONSE_JOB_ERROR,
@@ -41,59 +42,67 @@ import {
 } from 'app/constants'
 
 describe('Jobs Worker', () => {
-  let client, handlers
+  let client,
+      handlers,
+      globalStubs
 
   beforeEach(() => {
     client = generateClientSpy()
     handlers = generateHandlerSpies()
 
-    // Short circuit async operations by default
-    spyOn(window, 'setInterval').andReturn(-1)
-    spyOn(window, 'clearInterval')
+    globalStubs = {
+      // Short circuit async operations by default
+      setInterval:   sinon.stub(window, 'setInterval').returns(-1),
+      clearInterval: sinon.stub(window, 'clearInterval'),
 
-    // Silence the console logging
-    spyOn(console, 'debug')
-    spyOn(console, 'error')
-    spyOn(console, 'warn')
+      // Silence the console logging
+      consoleDebug:  sinon.stub(console, 'debug'),
+      consoleError:  sinon.stub(console, 'error'),
+      consoleWarn:   sinon.stub(console, 'warn'),
+    }
   })
 
   afterEach(() => {
     worker.terminate()
-    restoreSpies()
+    sinon.restore(globalStubs.clearInterval)
+    sinon.restore(globalStubs.setInterval)
+    sinon.restore(globalStubs.consoleDebug)
+    sinon.restore(globalStubs.consoleError)
+    sinon.restore(globalStubs.consoleWarn)
   })
 
   describe('start()', () => {
     it('can start worker instance', () => {
-      expect(() => {
+      assert.doesNotThrow(() => {
         worker.start(client, 0, 1000, handlers)
-      }).toNotThrow()
+      })
     })
 
     it('honors `interval` configuration', () => {
       worker.start(client, 1234, 1000, handlers)
-      expect(window.setInterval.calls[0].arguments[1]).toEqual(1234)
+      assert.isTrue(globalStubs.setInterval.calledWithMatch(sinon.match.func, 1234))
     })
 
     it('throws if started twice', () => {
       worker.start(client, 0, 1000, handlers)
-      expect(() => {
+      assert.throws(() => {
         worker.start(client, 0, 1000, handlers)
-      }).toThrow(/already running/)
+      }, /already running/)
     })
 
     it('starts cycle immediately', () => {
       worker.start(client, 0, 1000, handlers)
-      expect(handlers.getRecords).toHaveBeenCalled()
+      assert.isTrue(handlers.getRecords.calledOnce)
     })
   })
 
   describe('work cycle', () => {
     it('yields appropriate status for running jobs', (done) => {
-      handlers.getRecords.andReturn([generateJob()])
-      client.getStatus.andReturn(Promise.resolve(generateStatusRunning()))
+      handlers.getRecords.returns([generateJob()])
+      client.getStatus.returns(Promise.resolve(generateStatusRunning()))
       worker.start(client, 0, 1000, handlers)
       defer(() => {
-        expect(handlers.onUpdate.calls[0].arguments).toEqual(['test-id', STATUS_RUNNING, null, null, null, null])
+        assert.deepEqual(handlers.onUpdate.firstCall.args, ['test-id', STATUS_RUNNING, null, null, null, null])
       }, done)
     })
 
@@ -101,107 +110,102 @@ describe('Jobs Worker', () => {
       const job = generateJob('test-stalled', STATUS_RUNNING)
       job.properties[KEY_CREATED_ON] -= 1000
 
-      handlers.getRecords.andReturn([job])
-      client.getStatus.andReturn(Promise.resolve(generateStatusRunning('test-stalled')))
+      handlers.getRecords.returns([job])
+      client.getStatus.returns(Promise.resolve(generateStatusRunning('test-stalled')))
       worker.start(client, 0, 0, handlers)
       defer(() => {
-        expect(handlers.onUpdate.calls[0].arguments).toEqual(['test-stalled', STATUS_TIMED_OUT, null, null, null, null])
+        assert.deepEqual(handlers.onUpdate.firstCall.args, ['test-stalled', STATUS_TIMED_OUT, null, null, null, null])
       }, done)
     })
 
     it('yields appropriate status for failed jobs', (done) => {
-      handlers.getRecords.andReturn([generateJob()])
-      client.getStatus.andReturn(Promise.resolve(generateStatusError()))
+      handlers.getRecords.returns([generateJob()])
+      client.getStatus.returns(Promise.resolve(generateStatusError()))
       worker.start(client, 0, 1000, handlers)
       defer(() => {
-        expect(handlers.onUpdate.calls[0].arguments).toEqual(['test-id', STATUS_ERROR, null, null, null, null])
+        assert.deepEqual(handlers.onUpdate.firstCall.args, ['test-id', STATUS_ERROR, null, null, null, null])
       }, done)
     })
 
     it('yields appropriate status for successful jobs', (done) => {
-      handlers.getRecords.andReturn([generateJob()])
-      client.getStatus.andReturn(Promise.resolve(generateStatusSuccess()))
-      client.getFile.andReturn(Promise.resolve('{"shoreDataID":"test-vector-data-id","shoreDeplID":"test-deployment-id","rgbLoc":"","error":""}'))
-      client.getDeployment.andReturn(Promise.resolve(generateDeploymentDescriptor()))
+      handlers.getRecords.returns([generateJob()])
+      client.getStatus.returns(Promise.resolve(generateStatusSuccess()))
+      client.getFile.returns(Promise.resolve('{"shoreDataID":"test-vector-data-id","shoreDeplID":"test-deployment-id","rgbLoc":"","error":""}'))
+      client.getDeployment.returns(Promise.resolve(generateDeploymentDescriptor()))
       worker.start(client, 0, 1000, handlers)
       defer(() => {
-        expect(handlers.onUpdate.calls[0].arguments).toEqual(['test-id', STATUS_SUCCESS, 'test-vector-data-id', 'test-raster-data-id', 'test-layer-id', 'test-endpoint'])
+        assert.deepEqual(handlers.onUpdate.firstCall.args, ['test-id', STATUS_SUCCESS, 'test-vector-data-id', 'test-raster-data-id', 'test-layer-id', 'test-endpoint'])
       }, done)
     })
 
     it('yields appropriate status for ambiguous execution metadata', (done) => {
-      handlers.getRecords.andReturn([generateJob()])
-      client.getStatus.andReturn(Promise.resolve(generateStatusSuccess()))
-      client.getFile.andReturn(Promise.resolve('clearly invalid execution metadata'))
+      handlers.getRecords.returns([generateJob()])
+      client.getStatus.returns(Promise.resolve(generateStatusSuccess()))
+      client.getFile.returns(Promise.resolve('clearly invalid execution metadata'))
       worker.start(client, 0, 1000, handlers)
       defer(() => {
-        expect(handlers.onUpdate.calls[0].arguments).toEqual(['test-id', STATUS_ERROR, null, null, null, null])
+        assert.deepEqual(handlers.onUpdate.firstCall.args, ['test-id', STATUS_ERROR, null, null, null, null])
       }, done)
     })
 
     it('does not trainwreck on server error (getStatus)', (done) => {
-      handlers.getRecords.andReturn([
-        generateJob('test-will-explode'),
-        generateJob('test-everything-is-okay')
+      handlers.getRecords.returns([
+        generateJob('explode'),
+        generateJob('okidoki'),
       ])
-      client.getStatus.andCall(jobId => (jobId === 'test-will-explode') ?
-        Promise.reject(new Error('test-error')) :
-        Promise.resolve(generateStatusRunning(jobId))
-      )
+      client.getStatus.withArgs('explode').returns(Promise.reject(new Error('test-error')))
+      client.getStatus.withArgs('okidoki').returns(Promise.resolve(generateStatusRunning('okidoki')))
       worker.start(client, 0, 1000, handlers)
       defer(() => {
-        expect(handlers.onUpdate.calls[0].arguments).toEqual(['test-will-explode', STATUS_ERROR, null, null, null, null])
-        expect(handlers.onUpdate.calls[1].arguments).toEqual(['test-everything-is-okay', STATUS_RUNNING, null, null, null, null])
+        assert.isTrue(handlers.onUpdate.calledWithExactly('explode', STATUS_ERROR, null, null, null, null))
+        assert.isTrue(handlers.onUpdate.calledWithExactly('okidoki', STATUS_RUNNING, null, null, null, null))
       }, done)
     })
 
     it('does not trainwreck on server error (getFile)', (done) => {
-      handlers.getRecords.andReturn([
-        generateJob('test-will-explode'),
-        generateJob('test-everything-is-okay')
+      handlers.getRecords.returns([
+        generateJob('explode'),
+        generateJob('okidoki'),
       ])
-      client.getStatus.andCall(jobId => (jobId === 'test-will-explode') ?
-        Promise.resolve(generateStatusSuccess(jobId)) :
-        Promise.resolve(generateStatusRunning(jobId))
-      )
-      client.getFile.andReturn(jobId => (jobId === 'test-will-explode') ?
-        Promise.reject(new Error('test-error')) :
-        Promise.resolve('{"shoreDataID":"0123456789abcdef"}')
-      )
+      client.getStatus.withArgs('explode').returns(Promise.resolve(generateStatusSuccess('explode')))
+      client.getStatus.withArgs('okidoki').returns(Promise.resolve(generateStatusRunning('okidoki')))
+      client.getFile.withArgs('explode').returns(Promise.reject(new Error('test-error')))
+      client.getFile.withArgs('okidoki').returns(Promise.resolve('{"shoreDataID":"0123456789abcdef"}'))
       worker.start(client, 0, 1000, handlers)
       defer(() => {
-        expect(handlers.onUpdate.calls[0].arguments).toEqual(['test-will-explode', STATUS_ERROR, null, null, null, null])
-        expect(handlers.onUpdate.calls[1].arguments).toEqual(['test-everything-is-okay', STATUS_RUNNING, null, null, null, null])
+        assert.isTrue(handlers.onUpdate.calledWithExactly('explode', STATUS_ERROR, null, null, null, null))
+        assert.isTrue(handlers.onUpdate.calledWithExactly('okidoki', STATUS_RUNNING, null, null, null, null))
       }, done)
     })
 
     it('halts on javascript error', (done) => {
-      handlers.getRecords.andReturn([generateJob('test-id-1'), generateJob('test-id-2')])
-      handlers.onUpdate.andThrow(new Error('test-error'))
-      client.getStatus.andCall(jobId => Promise.resolve(generateStatusRunning(jobId)))
+      handlers.getRecords.returns([generateJob('test-id-1'), generateJob('test-id-2')])
+      handlers.onUpdate.throws(new Error('test-error'))
+      client.getStatus.withArgs('test-id-1').returns(Promise.resolve(generateStatusRunning('test-id-1')))
+      client.getStatus.withArgs('test-id-2').returns(Promise.resolve(generateStatusRunning('test-id-2')))
       worker.start(client, 0, 1000, handlers)
       defer(() => {
-        expect(handlers.onUpdate.calls.length).toEqual(1)
+        assert.equal(handlers.onUpdate.callCount, 1)
       }, done)
     })
 
     it('emits cycle info via console', (done) => {
-      handlers.getRecords.andReturn([generateJob()])
-      client.getStatus.andReturn(Promise.resolve(generateStatusRunning()))
+      handlers.getRecords.returns([generateJob()])
+      client.getStatus.returns(Promise.resolve(generateStatusRunning()))
       worker.start(client, 0, 1000, handlers)
       defer(() => {
-        expect(console.debug).toHaveBeenCalledWith('(jobs:worker) cycle started')
+        assert.isTrue(globalStubs.consoleDebug.calledWithExactly('(jobs:worker) cycle started'))
       }, done)
     })
 
     it('emits errors via console', (done) => {
       const err = new Error('test-error')
-      handlers.getRecords.andReturn([generateJob()])
-      handlers.onUpdate.andThrow(err)
-      client.getStatus.andReturn(Promise.resolve(generateStatusRunning()))
+      handlers.getRecords.returns([generateJob()])
+      handlers.onUpdate.throws(err)
+      client.getStatus.returns(Promise.resolve(generateStatusRunning()))
       worker.start(client, 0, 1000, handlers)
       defer(() => {
-        expect(console.error).toHaveBeenCalledWith('(jobs:worker) cycle failed; terminating.', err)
+        assert.isTrue(globalStubs.consoleError.calledWithExactly('(jobs:worker) cycle failed; terminating.', err))
       }, done)
     })
 
@@ -209,162 +213,162 @@ describe('Jobs Worker', () => {
       const job = generateJob('test-stalled', STATUS_RUNNING)
       job.properties[KEY_CREATED_ON] -= 1000
 
-      handlers.getRecords.andReturn([job])
-      client.getStatus.andReturn(Promise.resolve(generateStatusRunning('test-stalled')))
+      handlers.getRecords.returns([job])
+      client.getStatus.returns(Promise.resolve(generateStatusRunning('test-stalled')))
       worker.start(client, 0, 0, handlers)
       defer(() => {
-        expect(console.warn).toHaveBeenCalledWith('(jobs:worker) <%s> appears to have stalled and will no longer be tracked', 'test-stalled')
+        assert.isTrue(globalStubs.consoleWarn.calledWithExactly('(jobs:worker) <%s> appears to have stalled and will no longer be tracked', 'test-stalled'))
       }, done)
     })
 
     it('only processes running jobs', (done) => {
-      handlers.getRecords.andReturn([
+      handlers.getRecords.returns([
         generateJob('test-failed', STATUS_ERROR),
         generateJob('test-still-running', STATUS_RUNNING),
         generateJob('test-succeeded', STATUS_SUCCESS),
         generateJob('test-stalled', STATUS_TIMED_OUT),
       ])
-      client.getStatus.andReturn(Promise.resolve(generateStatusRunning('test-still-running')))
+      client.getStatus.returns(Promise.resolve(generateStatusRunning('test-still-running')))
       worker.start(client, 0, 1000, handlers)
       defer(() => {
-        expect(handlers.onUpdate.calls.length).toEqual(1)
-        expect(handlers.onUpdate.calls[0].arguments).toEqual(['test-still-running', STATUS_RUNNING, null, null, null, null])
+        assert.equal(handlers.onUpdate.callCount, 1)
+        assert.deepEqual(handlers.onUpdate.firstCall.args, ['test-still-running', STATUS_RUNNING, null, null, null, null])
       }, done)
     })
 
     it('skips cycle if no running jobs', (done) => {
-      handlers.getRecords.andReturn([
+      handlers.getRecords.returns([
         generateJob('test-failed', STATUS_ERROR),
         generateJob('test-succeeded', STATUS_SUCCESS),
         generateJob('test-stalled', STATUS_TIMED_OUT),
       ])
       worker.start(client, 0, 1000, handlers)
       defer(() => {
-        expect(handlers.onUpdate).toNotHaveBeenCalled()
+        assert.equal(handlers.onUpdate.callCount, 0)
       }, done)
     })
 
     it('skips cycle if no running jobs (records empty)', (done) => {
-      handlers.getRecords.andReturn([])
+      handlers.getRecords.returns([])
       worker.start(client, 0, 1000, handlers)
       defer(() => {
-        expect(handlers.onUpdate).toNotHaveBeenCalled()
+        assert.equal(handlers.onUpdate.callCount, 0)
       }, done)
     })
   })
 
   describe('event hooks', () => {
     it('fire on normal cycle', (done) => {
-      handlers.getRecords.andReturn([generateJob()])
-      client.getStatus.andReturn(Promise.resolve(generateStatusRunning()))
+      handlers.getRecords.returns([generateJob()])
+      client.getStatus.returns(Promise.resolve(generateStatusRunning()))
       worker.start(client, 0, 1000, handlers)
       defer(() => {
-        expect(handlers.getRecords).toHaveBeenCalled()
-        expect(handlers.onUpdate).toHaveBeenCalled()
-        expect(handlers.onFailure).toNotHaveBeenCalled()
-        expect(handlers.onTerminate).toNotHaveBeenCalled()
+        assert.equal(handlers.getRecords.callCount, 1)
+        assert.equal(handlers.onUpdate.callCount, 1)
+        assert.equal(handlers.onFailure.callCount, 0)
+        assert.equal(handlers.onTerminate.callCount, 0)
       }, done)
     })
 
     it('fire on skipped cycle', (done) => {
-      handlers.getRecords.andReturn([
+      handlers.getRecords.returns([
         generateJob('test-failed', STATUS_ERROR),
         generateJob('test-succeeded', STATUS_SUCCESS),
         generateJob('test-stalled', STATUS_TIMED_OUT),
       ])
       worker.start(client, 0, 1000, handlers)
       defer(() => {
-        expect(handlers.getRecords).toHaveBeenCalled()
-        expect(handlers.onFailure).toNotHaveBeenCalled()
-        expect(handlers.onTerminate).toNotHaveBeenCalled()
-        expect(handlers.onUpdate).toNotHaveBeenCalled()
+        assert.equal(handlers.getRecords.callCount, 1)
+        assert.equal(handlers.onFailure.callCount, 0)
+        assert.equal(handlers.onTerminate.callCount, 0)
+        assert.equal(handlers.onUpdate.callCount, 0)
       }, done)
     })
 
     it('fire on skipped cycle (records empty)', (done) => {
-      handlers.getRecords.andReturn([])
+      handlers.getRecords.returns([])
       worker.start(client, 0, 1000, handlers)
       defer(() => {
-        expect(handlers.getRecords).toHaveBeenCalled()
-        expect(handlers.onFailure).toNotHaveBeenCalled()
-        expect(handlers.onTerminate).toNotHaveBeenCalled()
-        expect(handlers.onUpdate).toNotHaveBeenCalled()
+        assert.equal(handlers.getRecords.callCount, 1)
+        assert.equal(handlers.onFailure.callCount, 0)
+        assert.equal(handlers.onTerminate.callCount, 0)
+        assert.equal(handlers.onUpdate.callCount, 0)
       }, done)
     })
 
     it('fire on service call failure', (done) => {
-      handlers.getRecords.andReturn([generateJob()])
-      client.getStatus.andReturn(Promise.reject(new Error('test-error')))
+      handlers.getRecords.returns([generateJob()])
+      client.getStatus.returns(Promise.reject(new Error('test-error')))
       worker.start(client, 0, 1000, handlers)
       defer(() => {
-        expect(handlers.getRecords).toHaveBeenCalled()
-        expect(handlers.onUpdate).toHaveBeenCalled()
-        expect(handlers.onFailure).toNotHaveBeenCalled()
-        expect(handlers.onTerminate).toNotHaveBeenCalled()
+        assert.equal(handlers.getRecords.callCount, 1)
+        assert.equal(handlers.onUpdate.callCount, 1)
+        assert.equal(handlers.onFailure.callCount, 0)
+        assert.equal(handlers.onTerminate.callCount, 0)
       }, done)
     })
 
     it('fire on javascript error', (done) => {
-      handlers.getRecords.andReturn([generateJob()])
-      client.getStatus.andReturn(Promise.resolve(generateStatusRunning()))
-      handlers.onUpdate.andThrow(new Error('test-error'))
+      handlers.getRecords.returns([generateJob()])
+      client.getStatus.returns(Promise.resolve(generateStatusRunning()))
+      handlers.onUpdate.throws(new Error('test-error'))
       worker.start(client, 0, 1000, handlers)
       defer(() => {
-        expect(handlers.getRecords).toHaveBeenCalled()
-        expect(handlers.onUpdate).toHaveBeenCalled()
-        expect(handlers.onFailure).toHaveBeenCalled()
-        expect(handlers.onTerminate).toHaveBeenCalled()
+        assert.equal(handlers.getRecords.callCount, 1)
+        assert.equal(handlers.onUpdate.callCount, 1)
+        assert.equal(handlers.onFailure.callCount, 1)
+        assert.equal(handlers.onTerminate.callCount, 1)
       }, done)
     })
 
     it('fire on resolution failure', (done) => {
-      handlers.getRecords.andReturn([generateJob()])
-      client.getStatus.andReturn(Promise.resolve(generateStatusSuccess()))
-      client.getFile.andReturn(Promise.resolve('clearly invalid execution metadata'))
+      handlers.getRecords.returns([generateJob()])
+      client.getStatus.returns(Promise.resolve(generateStatusSuccess()))
+      client.getFile.returns(Promise.resolve('clearly invalid execution metadata'))
       worker.start(client, 0, 1000, handlers)
       defer(() => {
-        expect(handlers.getRecords).toHaveBeenCalled()
-        expect(handlers.onUpdate).toHaveBeenCalled()
-        expect(handlers.onFailure).toNotHaveBeenCalled()
-        expect(handlers.onTerminate).toNotHaveBeenCalled()
+        assert.equal(handlers.getRecords.callCount, 1)
+        assert.equal(handlers.onUpdate.callCount, 1)
+        assert.equal(handlers.onFailure.callCount, 0)
+        assert.equal(handlers.onTerminate.callCount, 0)
       }, done)
     })
 
     it('fire on termination', (done) => {
-      handlers.getRecords.andReturn([])
+      handlers.getRecords.returns([])
       worker.start(client, 0, 1000, handlers)
       worker.terminate()
       defer(() => {
-        expect(handlers.getRecords).toHaveBeenCalled()
-        expect(handlers.onTerminate).toHaveBeenCalled()
-        expect(handlers.onFailure).toNotHaveBeenCalled()
-        expect(handlers.onUpdate).toNotHaveBeenCalled()
+        assert.equal(handlers.getRecords.callCount, 1)
+        assert.equal(handlers.onTerminate.callCount, 1)
+        assert.equal(handlers.onFailure.callCount, 0)
+        assert.equal(handlers.onUpdate.callCount, 0)
       }, done)
     })
   })
 
   describe('terminate()', function () {
     it('stops worker', () => {
-      window.setInterval.andReturn(-1234)
+      globalStubs.setInterval.returns(-1234)
       worker.start(client, 0, 1000, handlers)
       worker.terminate()
-      expect(clearInterval).toHaveBeenCalledWith(-1234)
+      assert(globalStubs.clearInterval.calledWithExactly(-1234))
     })
 
     it('does not throw if called when worker is not started', () => {
-      expect(() => {
+      assert.doesNotThrow(() => {
         worker.terminate()
-      }).toNotThrow()
+      })
     })
 
     it('can handle gratuitous invocations', () => {
-      expect(() => {
+      assert.doesNotThrow(() => {
         worker.terminate()
         worker.terminate()
         worker.terminate()
         worker.terminate()
         worker.terminate()
-      }).toNotThrow()
+      })
     })
   })
 })
@@ -375,9 +379,9 @@ describe('Jobs Worker', () => {
 
 function generateClientSpy() {
   return {
-    getDeployment: createSpy(),
-    getFile: createSpy(),
-    getStatus: createSpy(),
+    getDeployment: sinon.stub(),
+    getFile: sinon.stub(),
+    getStatus: sinon.stub(),
   }
 }
 
@@ -391,10 +395,10 @@ function generateDeploymentDescriptor() {
 
 function generateHandlerSpies() {
   return {
-    getRecords:  createSpy().andReturn([]),
-    onFailure:   createSpy(),
-    onTerminate: createSpy(),
-    onUpdate:    createSpy(),
+    getRecords:  sinon.stub().returns([]),
+    onFailure:   sinon.stub(),
+    onTerminate: sinon.stub(),
+    onUpdate:    sinon.stub(),
   }
 }
 

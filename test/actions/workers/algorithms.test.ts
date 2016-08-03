@@ -14,212 +14,218 @@
  * limitations under the License.
  **/
 
-import expect, {spyOn, restoreSpies, createSpy} from 'expect'
+import {assert} from 'chai'
+import * as sinon from 'sinon'
 import {generateAlgorithmDescriptor} from '../../fixtures/beachfront-service-descriptors'
 import * as worker from 'app/actions/workers/algorithms'
 
 describe('Algorithms Worker', () => {
-  let client, handlers
+  let client, handlers, globalStubs
 
   beforeEach(() => {
     client = generateClientSpy()
     handlers = generateHandlerSpies()
 
-    // Short circuit async operations by default
-    spyOn(window, 'setInterval').andReturn(-1)
-    spyOn(window, 'clearInterval')
+    globalStubs = {
+      // Short circuit async operations by default
+      setInterval:   sinon.stub(window, 'setInterval').returns(-1),
+      clearInterval: sinon.stub(window, 'clearInterval'),
 
-    // Silence the console logging
-    spyOn(console, 'debug')
-    spyOn(console, 'error')
+      // Silence the console logging
+      consoleDebug:  sinon.stub(console, 'debug'),
+      consoleError:  sinon.stub(console, 'error'),
+    }
   })
 
   afterEach(() => {
     worker.terminate()
-    restoreSpies()
+    sinon.restore(globalStubs.clearInterval)
+    sinon.restore(globalStubs.setInterval)
+    sinon.restore(globalStubs.consoleDebug)
+    sinon.restore(globalStubs.consoleError)
   })
 
   describe('start()', () => {
     it('can start worker instance', () => {
-      expect(() => {
+      assert.doesNotThrow(() => {
         worker.start(client, 0, handlers)
-      }).toNotThrow()
+      })
     })
 
     it('honors `interval` configuration', () => {
       worker.start(client, 1234, handlers)
-      expect(window.setInterval.calls[0].arguments[1]).toEqual(1234)
+      assert.equal(globalStubs.setInterval.firstCall.args[1], 1234)
     })
 
     it('throws if started twice', () => {
       worker.start(client, 0, handlers)
-      expect(() => {
+      assert.throws(() => {
         worker.start(client, 0, handlers)
-      }).toThrow(/already running/)
+      }, /already running/)
     })
 
     it('starts cycle immediately', () => {
       worker.start(client, 0, handlers)
-      expect(handlers.shouldRun).toHaveBeenCalled()
+      assert.isTrue(handlers.shouldRun.called)
     })
   })
 
   describe('work cycle', () => {
     beforeEach(() => {
-      handlers.shouldRun.andReturn(true)
+      handlers.shouldRun.returns(true)
     })
 
     it('yields valid algorithm records', (done) => {
-      client.getServices.andReturn(Promise.resolve([generateAlgorithmDescriptor()]))
+      client.getServices.returns(Promise.resolve([generateAlgorithmDescriptor()]))
       worker.start(client, 0, handlers)
       defer(() => {
-        const [[algorithm]] = handlers.onUpdate.getLastCall().arguments
-        expect(algorithm.id).toEqual('test-service-id')
-        expect(algorithm.name).toEqual('test-name')
-        expect(algorithm.description).toEqual('test-description')
-        expect(algorithm.requirements).toBeAn(Array)
-        expect(algorithm.requirements.length).toEqual(3)
+        const [[algorithm]] = handlers.onUpdate.lastCall.args
+        assert.equal(algorithm.id, 'test-service-id')
+        assert.equal(algorithm.name, 'test-name')
+        assert.equal(algorithm.description, 'test-description')
+        assert.isArray(algorithm.requirements)
+        assert.equal(algorithm.requirements.length, 3)
       }, done)
     })
 
     it('normalizes algorithm requirements', (done) => {
-      client.getServices.andReturn(Promise.resolve([generateAlgorithmDescriptor()]))
+      client.getServices.returns(Promise.resolve([generateAlgorithmDescriptor()]))
       worker.start(client, 0, handlers)
       defer(() => {
-        const [[algorithm]] = handlers.onUpdate.getLastCall().arguments
+        const [[algorithm]] = handlers.onUpdate.lastCall.args
         algorithm.requirements.forEach(r => {
-          expect(r.name).toBeA('string')
-          expect(r.description).toBeA('string')
-          expect(r.literal).toExist()
+          assert.isString(r.name)
+          assert.isString(r.description)
+          assert.isDefined(r.literal)
         })
       }, done)
     })
 
     it('halts on error', (done) => {
       const err = new Error('test-error')
-      client.getServices.andReturn(Promise.reject(err))
+      client.getServices.returns(Promise.reject(err))
       worker.start(client, 0, handlers)
       defer(() => {
-        expect(client.getServices.calls.length).toEqual(1)
+        assert.equal(client.getServices.callCount, 1)
       }, done, 5)
     })
 
     it('emits errors via console', (done) => {
       const err = new Error('test-error')
-      client.getServices.andReturn(Promise.reject(err))
+      client.getServices.returns(Promise.reject(err))
       worker.start(client, 0, handlers)
       defer(() => {
-        expect(console.error.calls[0].arguments).toEqual(['(algorithms:worker) cycle failed; terminating.', err])
+        assert.deepEqual(globalStubs.consoleError.firstCall.args, ['(algorithms:worker) cycle failed; terminating.', err])
       }, done)
     })
 
     it('emits cycle info via console', (done) => {
-      client.getServices.andReturn(Promise.resolve([]))
+      client.getServices.returns(Promise.resolve([]))
       worker.start(client, 0, handlers)
       defer(() => {
-        expect(console.debug.calls[0].arguments[0]).toEqual('(algorithms:worker) updating')
+        assert.equal(globalStubs.consoleDebug.firstCall.args[0], '(algorithms:worker) updating')
       }, done)
     })
 
     it('skips if `shouldRun()` returns false', (done) => {
-      handlers.shouldRun.andReturn(false)
+      handlers.shouldRun.returns(false)
       worker.start(client, 0, handlers)
       defer(() => {
-        expect(client.getServices).toNotHaveBeenCalled()
+        assert.equal(client.getServices.callCount, 0)
       }, done)
     })
   })
 
   describe('event hooks', () => {
     beforeEach(() => {
-      handlers.shouldRun.andReturn(true)
+      handlers.shouldRun.returns(true)
     })
 
     it('fire on normal cycle', (done) => {
-      client.getServices.andReturn(Promise.resolve([]))
-      handlers.shouldRun.andReturn(true)
+      client.getServices.returns(Promise.resolve([]))
+      handlers.shouldRun.returns(true)
       worker.start(client, 0, handlers)
       defer(() => {
-        expect(handlers.shouldRun).toHaveBeenCalled()
-        expect(handlers.beforeFetch).toHaveBeenCalled()
-        expect(handlers.onUpdate).toHaveBeenCalled()
-        expect(handlers.onFailure).toNotHaveBeenCalled()
-        expect(handlers.onTerminate).toNotHaveBeenCalled()
+        assert.equal(handlers.shouldRun.callCount, 1)
+        assert.equal(handlers.beforeFetch.callCount, 1)
+        assert.equal(handlers.onUpdate.callCount, 1)
+        assert.equal(handlers.onFailure.callCount, 0)
+        assert.equal(handlers.onTerminate.callCount, 0)
       }, done)
     })
 
     it('fire on skipped cycle', (done) => {
-      handlers.shouldRun.andReturn(false)
+      handlers.shouldRun.returns(false)
       worker.start(client, 0, handlers)
       defer(() => {
-        expect(handlers.shouldRun).toHaveBeenCalled()
-        expect(handlers.beforeFetch).toNotHaveBeenCalled()
-        expect(handlers.onUpdate).toNotHaveBeenCalled()
-        expect(handlers.onFailure).toNotHaveBeenCalled()
-        expect(handlers.onTerminate).toNotHaveBeenCalled()
+        assert.equal(handlers.shouldRun.callCount, 1)
+        assert.equal(handlers.beforeFetch.callCount, 0)
+        assert.equal(handlers.onUpdate.callCount, 0)
+        assert.equal(handlers.onFailure.callCount, 0)
+        assert.equal(handlers.onTerminate.callCount, 0)
       }, done)
     })
 
     it('fire on network failure', (done) => {
-      client.getServices.andReturn(Promise.reject(new Error('test-error')))
+      client.getServices.returns(Promise.reject(new Error('test-error')))
       worker.start(client, 0, handlers)
       defer(() => {
-        expect(handlers.shouldRun).toHaveBeenCalled()
-        expect(handlers.beforeFetch).toHaveBeenCalled()
-        expect(handlers.onUpdate).toNotHaveBeenCalled()
-        expect(handlers.onFailure).toHaveBeenCalled()
-        expect(handlers.onTerminate).toHaveBeenCalled()
+        assert.equal(handlers.shouldRun.callCount, 1)
+        assert.equal(handlers.beforeFetch.callCount, 1)
+        assert.equal(handlers.onUpdate.callCount, 0)
+        assert.equal(handlers.onFailure.callCount, 1)
+        assert.equal(handlers.onTerminate.callCount, 1)
       }, done)
     })
 
     it('fire on translation failure', (done) => {
-      client.getServices.andReturn(Promise.resolve(['not a service descriptor']))
+      client.getServices.returns(Promise.resolve(['not a service descriptor']))
       worker.start(client, 0, handlers)
       defer(() => {
-        expect(handlers.shouldRun).toHaveBeenCalled()
-        expect(handlers.beforeFetch).toHaveBeenCalled()
-        expect(handlers.onUpdate).toNotHaveBeenCalled()
-        expect(handlers.onFailure).toHaveBeenCalled()
-        expect(handlers.onTerminate).toHaveBeenCalled()
+        assert.equal(handlers.shouldRun.callCount, 1)
+        assert.equal(handlers.beforeFetch.callCount, 1)
+        assert.equal(handlers.onUpdate.callCount, 0)
+        assert.equal(handlers.onFailure.callCount, 1)
+        assert.equal(handlers.onTerminate.callCount, 1)
       }, done)
     })
 
     it('fire on termination', (done) => {
-      handlers.shouldRun.andReturn(false)
+      handlers.shouldRun.returns(false)
       worker.start(client, 0, handlers)
       worker.terminate()
       defer(() => {
-        expect(handlers.shouldRun).toHaveBeenCalled()
-        expect(handlers.onUpdate).toNotHaveBeenCalled()
-        expect(handlers.beforeFetch).toNotHaveBeenCalled()
-        expect(handlers.onFailure).toNotHaveBeenCalled()
-        expect(handlers.onTerminate).toHaveBeenCalled()
+        assert.equal(handlers.shouldRun.callCount, 1)
+        assert.equal(handlers.onUpdate.callCount, 0)
+        assert.equal(handlers.beforeFetch.callCount, 0)
+        assert.equal(handlers.onFailure.callCount, 0)
+        assert.equal(handlers.onTerminate.callCount, 1)
       }, done)
     })
   })
 
   describe('terminate()', function () {
     it('stops worker', () => {
-      window.setInterval.andReturn(-1234)
+      globalStubs.setInterval.returns(-1234)
       worker.start(client, 0, handlers)
       worker.terminate()
-      expect(window.clearInterval).toHaveBeenCalledWith(-1234)
+      assert.isTrue(globalStubs.clearInterval.calledWithExactly(-1234))
     })
 
     it('does not throw if called when worker is not started', () => {
-      expect(() => {
+      assert.doesNotThrow(() => {
         worker.terminate()
-      }).toNotThrow()
+      })
     })
 
     it('can handle gratuitous invocations', () => {
-      expect(() => {
+      assert.doesNotThrow(() => {
         worker.terminate()
         worker.terminate()
         worker.terminate()
         worker.terminate()
         worker.terminate()
-      }).toNotThrow()
+      })
     })
   })
 })
@@ -230,17 +236,17 @@ describe('Algorithms Worker', () => {
 
 function generateClientSpy() {
   return {
-    getServices: createSpy()
+    getServices: sinon.stub()
   }
 }
 
 function generateHandlerSpies() {
   return {
-    beforeFetch: createSpy(),
-    onFailure:   createSpy(),
-    onTerminate: createSpy(),
-    onUpdate:    createSpy(),
-    shouldRun:   createSpy().andReturn(false)
+    beforeFetch: sinon.stub(),
+    onFailure:   sinon.stub(),
+    onTerminate: sinon.stub(),
+    onUpdate:    sinon.stub(),
+    shouldRun:   sinon.stub().returns(false)
   }
 }
 
