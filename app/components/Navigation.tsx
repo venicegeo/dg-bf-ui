@@ -19,7 +19,7 @@ const brand: any = require('../images/brand-experiment2.svg')
 const brandSmall: any = require('../images/brand-small.svg')
 
 import * as React from 'react'
-import Link from 'react-router/lib/Link'
+import {Link} from 'react-router'
 
 interface Props {
   currentLocation: any
@@ -27,9 +27,7 @@ interface Props {
 
 export default class Navigation extends React.Component<Props, {}> {
   render() {
-    // const {hash, query} = this.props.currentLocation
-    const hash = 'lolwut'
-    const query = 'ohai'
+    const {hash, query} = this.props.currentLocation
     return (
       <nav className={`${styles.root} ${this._classForAtHome}`}>
         <Link to={{hash, query, pathname: '/about'}}>

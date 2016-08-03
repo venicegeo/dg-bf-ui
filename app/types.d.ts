@@ -51,12 +51,3 @@ declare const process: {
 }
 
 declare function require(path: string)
-
-//
-// Miscellaneous
-//
-
-// HACK -- Submit change to
-interface HTMLAnchorElement {
-  download?: string
-}
