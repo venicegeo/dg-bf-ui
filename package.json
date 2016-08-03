@@ -5,7 +5,7 @@
   "scripts": {
     "build": "webpack --colors --progress",
     "clean": "rimraf dist",
-    "lint": "tslint",
+    "lint": "tslint '{app,test}/**/*.{ts,tsx}'",
     "test": "karma start",
     "test:ci": "karma start --single-run --browsers gs_firefox_38",
     "watch": "webpack-dev-server --inline --colors --history-api-fallback"
@@ -37,7 +37,7 @@
     "source-map-loader": "0.1.5",
     "style-loader": "0.13.1",
     "ts-loader": "0.8.2",
-    "tslint": "3.14.0-dev.1",
+    "tslint": "3.14.0",
     "tslint-loader": "2.1.5",
     "typescript": "2.0.0",
     "typings": "1.3.2",
