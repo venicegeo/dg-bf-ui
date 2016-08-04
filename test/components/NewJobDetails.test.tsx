@@ -37,7 +37,7 @@ describe('<NewJobDetails/>', () => {
         onNameChange={_props.onNameChange}
       />
     )
-    assert.equal(wrapper.find('input').get(0).value, 'test-name')
+    assert.equal((wrapper.find('input') as any).node.value, 'test-name')
   })
 
   it('emits change event', () => {
@@ -47,8 +47,8 @@ describe('<NewJobDetails/>', () => {
         onNameChange={_props.onNameChange}
       />
     )
-    const input = wrapper.find('input')
-    input.get(0).value = 'test-new-value'
+    const input: any = wrapper.find('input')
+    input.node.value = 'test-new-value'
     input.simulate('change')
     assert.isTrue(_props.onNameChange.calledWithExactly('test-new-value'))
   })
@@ -61,6 +61,6 @@ describe('<NewJobDetails/>', () => {
       />
     )
     wrapper.setProps({name: 'test-new-value'})
-    assert.equal(wrapper.find('input').get(0).value, 'test-new-value')
+    assert.equal((wrapper.find('input') as any).node.value, 'test-new-value')
   })
 })

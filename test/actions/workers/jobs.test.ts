@@ -402,7 +402,7 @@ function generateHandlerSpies() {
   }
 }
 
-function generateJob(id = 'test-id', status = STATUS_RUNNING) {
+function generateJob(id = 'test-id', status = STATUS_RUNNING): beachfront.Job {
   return {
     id,
     properties: {
@@ -415,7 +415,10 @@ function generateJob(id = 'test-id', status = STATUS_RUNNING) {
       [KEY_SCHEMA_VERSION]: SCHEMA_VERSION,
       [KEY_THUMBNAIL]:      'test-thumbnail',
     },
-    geometry: {},
+    geometry: {
+      type: 'Polygon',
+      coordinates: [],
+    },
     type: 'Feature',
   }
 }

@@ -155,19 +155,14 @@ function normalizeStatus(status) {
 // Errors
 //
 
-interface Error {
-  contents?: any
-  status?: number
-}
-
 function invalidResponse(contents, message) {
-  const err = new Error(`InvalidResponse: ${message} (${JSON.stringify(contents)})`)
+  const err: any = new Error(`InvalidResponse: ${message} (${JSON.stringify(contents)})`)
   err.contents = contents
   return err
 }
 
 function httpError(response) {
-  const err = new Error(`HttpError: (code=${response.status})`)
+  const err: any = new Error(`HttpError: (code=${response.status})`)
   err.status = response.status
   return err
 }
