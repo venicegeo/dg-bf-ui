@@ -236,7 +236,7 @@ describe('Algorithms Worker', () => {
 
 function generateClientSpy() {
   return {
-    getServices: sinon.stub()
+    getServices: sinon.stub(),
   }
 }
 
@@ -246,7 +246,7 @@ function generateHandlerSpies() {
     onFailure:   sinon.stub(),
     onTerminate: sinon.stub(),
     onUpdate:    sinon.stub(),
-    shouldRun:   sinon.stub().returns(false)
+    shouldRun:   sinon.stub().returns(false),
   }
 }
 
