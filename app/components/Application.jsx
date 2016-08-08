@@ -118,7 +118,7 @@ class Application extends Component {
   //
 
   get _mapMode() {
-    if (this.props.location.pathname === 'create-job') {
+    if (this.props.location.pathname === 'create-job' || this.props.location.pathname === 'create-product-line') {
       return (this.props.bbox && this.props.imagery) ? MODE_SELECT_IMAGERY : MODE_DRAW_BBOX
     }
     return MODE_NORMAL
