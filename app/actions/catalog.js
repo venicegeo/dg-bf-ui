@@ -32,7 +32,8 @@ export const UPDATE_CATALOG_API_KEY = 'UPDATE_CATALOG_API_KEY'
 
 export function discoverCatalogIfNeeded() {
   return (dispatch, getState) => {
-    if (getState().catalog.url) {
+    const state = getState()
+    if (state.catalog.url || state.catalog.discovering) {
       return
     }
     dispatch(discoverCatalog())
@@ -45,6 +46,17 @@ export function updateCatalogApiKey(apiKey) {
     apiKey
   }
 }
+
+const discoverCatalogSuccess = (url, filters) => ({
+  type: DISCOVER_CATALOG_SUCCESS,
+  url,
+  filters
+})
+
+const discoverCatalogError = (err) => ({
+  type: DISCOVER_CATALOG_ERROR,
+  err
+})
 
 function discoverCatalog() {
   return (dispatch, getState) => {
@@ -70,23 +82,8 @@ function discoverCatalog() {
   }
 }
 
-function discoverCatalogSuccess(url, filters) {
-  return {
-    type: DISCOVER_CATALOG_SUCCESS,
-    url,
-    filters
-  }
-}
-
-function discoverCatalogError(err) {
-  return {
-    type: DISCOVER_CATALOG_ERROR,
-    err
-  }
-}
-
 //
-// Internal Helpers
+// Helpers
 //
 
 function lookupFilters(url) {
