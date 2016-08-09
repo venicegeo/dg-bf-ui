@@ -138,10 +138,10 @@ export function reducer(state = INITIAL_STATE, action) {
 export function deserialize() {
   return {
     ...INITIAL_STATE,
-    records: (JSON.parse(localStorage.getItem('jobs.records')) || INITIAL_STATE.records).map(upgradeIfNeeded).filter(Boolean),
+    records: (JSON.parse(localStorage.getItem('jobs_records')) || INITIAL_STATE.records).map(upgradeIfNeeded).filter(Boolean),
   }
 }
 
 export function serialize(state) {
-  localStorage.setItem('jobs.records', JSON.stringify(state.records))
+  localStorage.setItem('jobs_records', JSON.stringify(state.records))
 }

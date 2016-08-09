@@ -52,12 +52,10 @@ export function reducer(state = INITIAL_STATE, action) {
 export function deserialize() {
   return {
     ...INITIAL_STATE,
-    ...JSON.parse(sessionStorage.getItem('draftJob'))
+    name: sessionStorage.getItem('draftJob_name') || INITIAL_STATE.name,
   }
 }
 
 export function serialize(state) {
-  sessionStorage.setItem('draftJob', JSON.stringify({
-    name: state.name
-  }))
+  sessionStorage.setItem('draftJob_name', state.name)
 }
