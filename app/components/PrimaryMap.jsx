@@ -144,33 +144,33 @@ export default class PrimaryMap extends Component {
     if (!this.props.selectedFeature) {
       this._clearSelection()
     }
-    if (this.props.selectedFeature !== previousProps.selectedFeature) {
+    if (previousProps.selectedFeature !== this.props.selectedFeature) {
       this._renderSelectionPreview()
     }
-    if (this.props.detections !== previousProps.detections) {
+    if (previousProps.detections !== this.props.detections) {
       this._renderDetections()
       this._renderProgressBars()
     }
-    if (this.props.jobs !== previousProps.jobs) {
+    if (previousProps.jobs !== this.props.jobs) {
       this._renderFrames()
     }
-    if (this.props.imagery !== previousProps.imagery) {
+    if (previousProps.imagery !== this.props.imagery) {
       this._renderImagery()
     }
-    if (this.props.isSearching !== previousProps.isSearching) {
+    if (previousProps.isSearching !== this.props.isSearching) {
       this._clearSelection()
       this._renderImagerySearchResultsOverlay()
     }
-    if (this.props.bbox !== previousProps.bbox) {
+    if (previousProps.bbox !== this.props.bbox) {
       this._renderImagerySearchBbox()
     }
     if (this.state.basemapIndex !== previousState.basemapIndex) {
       this._updateBasemap()
     }
-    if (this.props.anchor && this.props.anchor !== previousProps.anchor) {
+    if (previousProps.anchor !== this.props.anchor && this.props.anchor) {
       this._recenter(this.props.anchor)
     }
-    if (this.props.mode !== previousProps.mode) {
+    if (previousProps.mode !== this.props.mode) {
       this._updateInteractions()
     }
   }
