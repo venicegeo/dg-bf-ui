@@ -22,6 +22,7 @@ import * as authentication from './reducers/authentication'
 import * as catalog from './reducers/catalog'
 import * as draftJob from './reducers/draftJob'
 import * as executor from './reducers/executor'
+import * as geoserver from './reducers/geoserver'
 import * as imagery from './reducers/imagery'
 import * as jobs from './reducers/jobs'
 import * as results from './reducers/results'
@@ -34,6 +35,7 @@ const beachfrontApp = combineReducers({
   catalog:        catalog.reducer,
   draftJob:       draftJob.reducer,
   executor:       executor.reducer,
+  geoserver:      geoserver.reducer,
   imagery:        imagery.reducer,
   jobs:           jobs.reducer,
   results:        results.reducer,
@@ -70,6 +72,7 @@ function deserializeState() {
       catalog: catalog.deserialize(),
       draftJob: draftJob.deserialize(),
       executor: executor.deserialize(),
+      geoserver: geoserver.deserialize(),
       imagery: imagery.deserialize(),
       jobs: jobs.deserialize(),
       search: search.deserialize(),
@@ -86,6 +89,7 @@ function serializeState(state) {
     catalog.serialize(state.catalog)
     draftJob.serialize(state.draftJob)
     executor.serialize(state.executor)
+    geoserver.serialize(state.geoserver)
     imagery.serialize(state.imagery)
     jobs.serialize(state.jobs)
     search.serialize(state.search)

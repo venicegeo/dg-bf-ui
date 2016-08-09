@@ -24,6 +24,7 @@ import {
   changeLoadedResults,
   discoverCatalogIfNeeded,
   discoverExecutorIfNeeded,
+  discoverGeoserverIfNeeded,
   searchCatalog,
   selectImage,
   startAlgorithmsWorkerIfNeeded,
@@ -65,6 +66,7 @@ class Application extends Component {
     if (isLoggedIn) {
       dispatch(discoverCatalogIfNeeded())
       dispatch(discoverExecutorIfNeeded())
+      dispatch(discoverGeoserverIfNeeded())
       dispatch(startAlgorithmsWorkerIfNeeded())
       dispatch(startJobsWorkerIfNeeded())
     }
@@ -76,6 +78,7 @@ class Application extends Component {
     if (!this.props.isLoggedIn && nextProps.isLoggedIn) {
       dispatch(discoverCatalogIfNeeded())
       dispatch(discoverExecutorIfNeeded())
+      dispatch(discoverGeoserverIfNeeded())
       dispatch(startAlgorithmsWorkerIfNeeded())
       dispatch(startJobsWorkerIfNeeded())
     }
