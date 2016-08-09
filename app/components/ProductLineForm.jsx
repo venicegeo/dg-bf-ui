@@ -51,7 +51,7 @@ export default class ProductLineForm extends Component {
   }
 
   componentDidMount() {
-    //const date = new Date(new Date() + 1)
+    const date = new Date(new Date() + 1)
     this.refs.dateFrom.value = new Date(new Date() + 1).toISOString().split('T')[0]
     this.refs.dateTo.value = new Date(date.setDate(date.getDate() + 30)).toISOString().split('T')[0]
     this.refs.apiKey.value = this.props.catalogApiKey || ''
