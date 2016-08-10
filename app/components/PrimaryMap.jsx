@@ -704,6 +704,7 @@ function generateDetectionsLayer() {
 
 function generateDetectionsSource() {
   return new ol.source.TileWMS({
+    crossOrigin: 'anonymous',
     params: {
       [KEY_LAYERS]: '',
     }
