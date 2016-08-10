@@ -35,7 +35,7 @@ export function loadDetections(idsToLoad = []) {
     const completedJobs = getState().jobs.records.filter(j => j.properties[KEY_GEOJSON_DATA_ID])
     dispatch({
       type:       LOAD_DETECTIONS,
-      detections: completedJobs.filter(j => idsToLoad.includes(j.id)).map(toResult),
+      detections: completedJobs.filter(j => idsToLoad.includes(j.id)).map(toDetection),
     })
   }
 }
@@ -50,7 +50,7 @@ export function unloadDetections() {
 // Helpers
 //
 
-function toResult(job) {
+function toDetection(job) {
   return {
     bbox:    featureToBbox(job),
     jobId:   job.id,
