@@ -21,13 +21,16 @@ import PrimaryMap, {MODE_DRAW_BBOX, MODE_NORMAL, MODE_SELECT_IMAGERY} from './Pr
 import styles from './Application.css'
 import {
   clearImagery,
-  changeLoadedResults,
+  clearSelectedImage,
   discoverCatalogIfNeeded,
   discoverExecutorIfNeeded,
+  discoverGeoserverIfNeeded,
+  loadDetections,
   searchCatalog,
   selectImage,
   startAlgorithmsWorkerIfNeeded,
   startJobsWorkerIfNeeded,
+  unloadDetections,
   updateSearchBbox
 } from '../actions'
 
@@ -42,6 +45,7 @@ class Application extends Component {
     children:        React.PropTypes.element,
     detections:      React.PropTypes.array.isRequired,
     dispatch:        React.PropTypes.func.isRequired,
+    geoserverUrl:    React.PropTypes.string,
     imagery:         React.PropTypes.object,
     isLoggedIn:      React.PropTypes.bool.isRequired,
     isSearching:     React.PropTypes.bool.isRequired,
@@ -65,10 +69,13 @@ class Application extends Component {
     if (isLoggedIn) {
       dispatch(discoverCatalogIfNeeded())
       dispatch(discoverExecutorIfNeeded())
+      dispatch(discoverGeoserverIfNeeded())
       dispatch(startAlgorithmsWorkerIfNeeded())
       dispatch(startJobsWorkerIfNeeded())
+      if (location.query.jobId) {
+        dispatch(loadDetections(asArray(location.query.jobId)))
+      }
     }
-    dispatch(changeLoadedResults(asArray(location.query.jobId)))
   }
 
   componentWillReceiveProps(nextProps) {
@@ -76,6 +83,7 @@ class Application extends Component {
     if (!this.props.isLoggedIn && nextProps.isLoggedIn) {
       dispatch(discoverCatalogIfNeeded())
       dispatch(discoverExecutorIfNeeded())
+      dispatch(discoverGeoserverIfNeeded())
       dispatch(startAlgorithmsWorkerIfNeeded())
       dispatch(startJobsWorkerIfNeeded())
     }
@@ -85,7 +93,14 @@ class Application extends Component {
     if (nextProps.bbox !== this.props.bbox) {
       dispatch(clearImagery())
     }
-    dispatch(changeLoadedResults(asArray(nextProps.location.query.jobId)))
+    if (!isSameQuery(nextProps.location.query.jobId, this.props.location.query.jobId)) {
+      if (nextProps.location.query.jobId) {
+        dispatch(loadDetections(asArray(nextProps.location.query.jobId)))
+      }
+      else {
+        dispatch(unloadDetections())
+      }
+    }
   }
 
   render() {
@@ -93,6 +108,7 @@ class Application extends Component {
       <div className={styles.root}>
         <Navigation currentLocation={this.props.location}/>
         <PrimaryMap
+          geoserverUrl={this.props.geoserverUrl}
           jobs={this.props.jobs}
           detections={this.props.detections}
           imagery={this.props.imagery}
@@ -138,7 +154,12 @@ class Application extends Component {
   }
 
   _handleSelectImage(feature) {
-    this.props.dispatch(selectImage(feature))
+    if (feature) {
+      this.props.dispatch(selectImage(feature))
+    }
+    else {
+      this.props.dispatch(clearSelectedImage())
+    }
   }
 
   _handleSelectJob(jobId) {
@@ -158,7 +179,8 @@ class Application extends Component {
 export default connect((state, ownProps) => ({
   bbox:            state.search.bbox,
   catalogApiKey:   state.catalog.apiKey,
-  detections:      state.results,
+  detections:      state.detections,
+  geoserverUrl:    state.geoserver.url,
   imagery:         state.imagery,
   jobs:            state.jobs.records,
   isLoggedIn:      !!state.authentication.token,
@@ -175,4 +197,8 @@ function asArray(value) {
   if (value) {
     return [].concat(value)
   }
+}
+
+function isSameQuery(a, b) {
+  return String(a) === String(b)
 }

@@ -20,10 +20,12 @@ import debounce from 'lodash/debounce'
 import * as algorithms from './reducers/algorithms'
 import * as authentication from './reducers/authentication'
 import * as catalog from './reducers/catalog'
+import * as detections from './reducers/detections'
 import * as draftJob from './reducers/draftJob'
+import * as executor from './reducers/executor'
+import * as geoserver from './reducers/geoserver'
 import * as imagery from './reducers/imagery'
 import * as jobs from './reducers/jobs'
-import * as results from './reducers/results'
 import * as search from './reducers/search'
 import * as workers from './reducers/workers'
 
@@ -31,10 +33,12 @@ const beachfrontApp = combineReducers({
   algorithms:     algorithms.reducer,
   authentication: authentication.reducer,
   catalog:        catalog.reducer,
+  detections:     detections.reducer,
   draftJob:       draftJob.reducer,
+  executor:       executor.reducer,
+  geoserver:      geoserver.reducer,
   imagery:        imagery.reducer,
   jobs:           jobs.reducer,
-  results:        results.reducer,
   search:         search.reducer,
   workers:        workers.reducer,
 })
@@ -67,6 +71,8 @@ function deserializeState() {
       authentication: authentication.deserialize(),
       catalog: catalog.deserialize(),
       draftJob: draftJob.deserialize(),
+      executor: executor.deserialize(),
+      geoserver: geoserver.deserialize(),
       imagery: imagery.deserialize(),
       jobs: jobs.deserialize(),
       search: search.deserialize(),
@@ -82,6 +88,8 @@ function serializeState(state) {
     authentication.serialize(state.authentication)
     catalog.serialize(state.catalog)
     draftJob.serialize(state.draftJob)
+    executor.serialize(state.executor)
+    geoserver.serialize(state.geoserver)
     imagery.serialize(state.imagery)
     jobs.serialize(state.jobs)
     search.serialize(state.search)

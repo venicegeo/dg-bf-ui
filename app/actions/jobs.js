@@ -42,9 +42,6 @@ import {
 export const CREATE_JOB = 'CREATE_JOB'
 export const CREATE_JOB_SUCCESS = 'CREATE_JOB_SUCCESS'
 export const CREATE_JOB_ERROR = 'CREATE_JOB_ERROR'
-export const DISCOVER_EXECUTOR = 'DISCOVER_EXECUTOR'
-export const DISCOVER_EXECUTOR_SUCCESS = 'DISCOVER_EXECUTOR_SUCCESS'
-export const DISCOVER_EXECUTOR_ERROR = 'DISCOVER_EXECUTOR_ERROR'
 export const DISMISS_JOB_ERROR = 'DISMISS_JOB_ERROR'
 export const FETCH_JOBS = 'FETCH_JOBS'
 export const FETCH_JOBS_SUCCESS = 'FETCH_JOBS_SUCCESS'
@@ -88,7 +85,7 @@ export function createJob(catalogApiKey, name, algorithm, feature) {
           type:     'text'
         }
       ],
-      serviceId: state.jobs.serviceId
+      serviceId: state.executor.serviceId
     })
       .then(id => {
         dispatch(createJobSuccess(id, name, algorithm, feature))
@@ -97,16 +94,6 @@ export function createJob(catalogApiKey, name, algorithm, feature) {
       .catch(err => {
         dispatch(createJobError(err))
       })
-  }
-}
-
-export function discoverExecutorIfNeeded() {
-  return (dispatch, getState) => {
-    const state = getState()
-    if (state.jobs.serviceId || state.jobs.discovering || state.jobs.error) {
-      return
-    }
-    dispatch(discoverExecutor())
   }
 }
 
@@ -164,42 +151,6 @@ function createJobSuccess(id, name, algorithm, feature) {
       },
       type: 'Feature',
     }
-  }
-}
-
-function discoverExecutor() {
-  return (dispatch, getState) => {
-    dispatch({
-      type: DISCOVER_EXECUTOR
-    })
-
-    const client = new Client(GATEWAY, getState().authentication.token)
-    client.getServices({pattern: '^bf-handle'})
-      .then(([executor]) => {
-        if (executor) {
-          dispatch(discoverExecutorSuccess(executor.serviceId))
-        }
-        else {
-          dispatch(discoverExecutorError('Could not find Beachfront API service'))
-        }
-      })
-      .catch(err => {
-        dispatch(discoverExecutorError(err))
-      })
-  }
-}
-
-function discoverExecutorError(err) {
-  return {
-    type: DISCOVER_EXECUTOR_ERROR,
-    err
-  }
-}
-
-function discoverExecutorSuccess(serviceId) {
-  return {
-    type: DISCOVER_EXECUTOR_SUCCESS,
-    serviceId
   }
 }
 

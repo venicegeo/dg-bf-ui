@@ -20,9 +20,6 @@ import {
   CREATE_JOB,
   CREATE_JOB_SUCCESS,
   CREATE_JOB_ERROR,
-  DISCOVER_EXECUTOR,
-  DISCOVER_EXECUTOR_ERROR,
-  DISCOVER_EXECUTOR_SUCCESS,
   DISMISS_JOB_ERROR,
   FETCH_JOBS,
   FETCH_JOBS_SUCCESS,
@@ -40,9 +37,7 @@ import {
 } from '../../constants'
 
 const INITIAL_STATE = {
-  serviceId:   null,
   creating:    false,
-  discovering: false,
   fetching:    false,
   records:     [],
   error:       null
@@ -50,23 +45,6 @@ const INITIAL_STATE = {
 
 export function reducer(state = INITIAL_STATE, action) {
   switch (action.type) {
-  case DISCOVER_EXECUTOR:
-    return {
-      ...state,
-      discovering: true
-    }
-  case DISCOVER_EXECUTOR_SUCCESS:
-    return {
-      ...state,
-      discovering: false,
-      serviceId: action.serviceId
-    }
-  case DISCOVER_EXECUTOR_ERROR:
-    return {
-      ...state,
-      discovering: false,
-      error: action.err
-    }
   case FETCH_JOBS:
     return {
       ...state,
