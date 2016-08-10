@@ -102,6 +102,9 @@ export class FileDownloadLink extends React.Component {
   }
 
   _handleError(err) {
+    if (err.isCancellation) {
+      return
+    }
     this.props.onError(err)
     this.setState({
       isDownloading: false
