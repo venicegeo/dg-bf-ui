@@ -46,16 +46,13 @@ import {
   TYPE_JOB,
 } from '../constants'
 
-const INITIAL_CENTER = [110, 0]
+const DEFAULT_CENTER = [110, 0]
 const MIN_ZOOM = 2.5
 const MAX_ZOOM = 22
 const RESOLUTION_CLOSE = 1000
 const STEM_OFFSET = 10000
-const DISPOSITION_DETECTED = 'Detected'
-const DISPOSITION_UNDETECTED = 'Undetected'
-const DISPOSITION_NEW_DETECTION = 'New Detection'
 const KEY_OWNER_ID = 'OWNER_ID'
-const KEY_DETECTION = 'detection'
+const KEY_LAYERS = 'LAYERS'
 const TYPE_DIVOT_INBOARD = 'DIVOT_INBOARD'
 const TYPE_DIVOT_OUTBOARD = 'DIVOT_OUTBOARD'
 const TYPE_LABEL_MAJOR = 'LABEL_MAJOR'
@@ -71,12 +68,9 @@ export default class PrimaryMap extends Component {
     bbox:                React.PropTypes.arrayOf(React.PropTypes.number),
     catalogApiKey:       React.PropTypes.string,
     detections:          React.PropTypes.arrayOf(React.PropTypes.shape({
-      geojson:  React.PropTypes.string,
+      bbox:     React.PropTypes.arrayOf(React.PropTypes.number).isRequired,
       jobId:    React.PropTypes.string.isRequired,
-      progress: React.PropTypes.shape({
-        loaded: React.PropTypes.number,
-        total:  React.PropTypes.number,
-      }),
+      layerId:  React.PropTypes.string.isRequired,
     })).isRequired,
     imagery:             React.PropTypes.shape({
       count:      React.PropTypes.number.isRequired,
@@ -90,6 +84,7 @@ export default class PrimaryMap extends Component {
       properties: React.PropTypes.object.isRequired,
       type:       React.PropTypes.string.isRequired,
     })).isRequired,
+    geoserverUrl:        React.PropTypes.string,
     mode:                React.PropTypes.string.isRequired,
     onAnchorChange:      React.PropTypes.func.isRequired,
     onBoundingBoxChange: React.PropTypes.func.isRequired,
@@ -149,7 +144,6 @@ export default class PrimaryMap extends Component {
     }
     if (previousProps.detections !== this.props.detections) {
       this._renderDetections()
-      this._renderProgressBars()
     }
     if (previousProps.jobs !== this.props.jobs) {
       this._renderFrames()
@@ -164,7 +158,7 @@ export default class PrimaryMap extends Component {
     if (previousProps.bbox !== this.props.bbox) {
       this._renderImagerySearchBbox()
     }
-    if (this.state.basemapIndex !== previousState.basemapIndex) {
+    if (previousState.basemapIndex !== this.state.basemapIndex) {
       this._updateBasemap()
     }
     if (previousProps.anchor !== this.props.anchor && this.props.anchor) {
@@ -348,6 +342,7 @@ export default class PrimaryMap extends Component {
     this._frameLayer = generateFrameLayer()
     this._imageryLayer = generateImageryLayer()
     this._previewLayers = {}
+    this._subscribeToLoadEvents(this._detectionsLayer)
 
     this._drawInteraction = generateDrawInteraction(this._drawLayer)
     this._drawInteraction.on('drawstart', this._handleDrawStart)
@@ -356,7 +351,6 @@ export default class PrimaryMap extends Component {
     this._selectInteraction = generateSelectInteraction(this._frameLayer, this._imageryLayer)
     this._selectInteraction.on('select', this._handleSelect)
 
-    this._progressBars = {}
     this._featureDetailsOverlay = generateFeatureDetailsOverlay(this.refs.featureDetails)
     this._imageSearchResultsOverlay = generateImageSearchResultsOverlay(this.refs.imageSearchResults)
 
@@ -377,7 +371,7 @@ export default class PrimaryMap extends Component {
       ],
       target: this.refs.container,
       view: new ol.View({
-        center: ol.proj.fromLonLat(INITIAL_CENTER),
+        center: ol.proj.fromLonLat(DEFAULT_CENTER),
         minZoom: MIN_ZOOM,
         maxZoom: MAX_ZOOM,
         zoom: MIN_ZOOM
@@ -405,29 +399,34 @@ export default class PrimaryMap extends Component {
   }
 
   _renderDetections() {
-    const {detections} = this.props
-    const shouldRender = {}
-    const alreadyRendered = {}
-    detections.filter(d => d.geojson).forEach(d => shouldRender[d.jobId] = true)
+    const {detections, geoserverUrl} = this.props
+    const layer = this._detectionsLayer
+    const source = layer.getSource()
+    const currentLayerIds = source.getParams()[KEY_LAYERS]
+    const incomingLayerIds = detections.map(d => d.layerId).sort().join(',')
 
-    const source = this._detectionsLayer.getSource()
+    if (!geoserverUrl) {
+      return  // No server to point to
+    }
+    if (currentLayerIds === incomingLayerIds) {
+      return  // Nothing to do
+    }
 
-    // Removals (no updates)
-    source.getFeatures().slice().forEach(feature => {
-      const jobId = feature.get(KEY_OWNER_ID)
-      alreadyRendered[jobId] = true
-      if (!shouldRender[jobId]) {
-        source.removeFeature(feature)
-      }
+    // Removals
+    if (!incomingLayerIds && currentLayerIds) {
+      layer.setExtent([0, 0, 0, 0])
+      layer.setSource(generateDetectionsSource())
+      return
+    }
+
+    // Additions/Updates
+    const extent = ol.extent.createEmpty()
+    detections.forEach(d => ol.extent.extend(extent, d.bbox))
+    layer.setExtent(extent)
+    source.updateParams({
+      [KEY_LAYERS]: incomingLayerIds,
     })
-
-    // Additions
-    const reader = new ol.format.GeoJSON()
-    detections.filter(d => d.geojson && !alreadyRendered[d.jobId]).forEach(({geojson, jobId}) => {
-      const features = reader.readFeatures(geojson, {featureProjection: 'EPSG:3857'})
-      features.forEach(f => f.set(KEY_OWNER_ID, jobId))
-      source.addFeatures(features)
-    })
+    source.setUrl(`${geoserverUrl}/wms`)
   }
 
   _renderFrames() {
@@ -526,40 +525,6 @@ export default class PrimaryMap extends Component {
       this._imageSearchResultsOverlay.setPositioning('center-center')
     }
     // HACK HACK HACK HACK HACK HACK HACK HACK
-  }
-
-  _renderProgressBars() {
-    const {detections} = this.props
-    const indexes = {}
-    detections.forEach((d, index) => indexes[d.jobId] = index)
-
-    // Updates & Removals
-    const alreadyRendered = {}
-    Object.keys(this._progressBars).forEach(jobId => {
-      const overlay = this._progressBars[jobId]
-      alreadyRendered[jobId] = true
-      const detection = detections[indexes[jobId]]
-
-      // Update
-      if (detection && detection.progress && detection.progress.loaded < detection.progress.total) {
-        const percentage = Math.floor(((detection.progress.loaded / detection.progress.total) || 0) * 100)
-        overlay.getElement().firstChild.setAttribute('style', `width: ${percentage}%`)
-        return
-      }
-
-      // Remove
-      this._map.removeOverlay(overlay)
-      delete this._progressBars[jobId]
-    })
-
-    // Additions
-    detections.filter(r => r.loading && r.progress && !alreadyRendered[r.jobId]).forEach(result => {
-      const job = this.props.jobs.find(j => j.id === result.jobId)
-      const point = ol.extent.getBottomLeft(bboxUtil.featureToBbox(job))
-      const overlay = generateProgressBarOverlay(result, point)
-      this._progressBars[overlay.getId()] = overlay
-      this._map.addOverlay(overlay)
-    })
   }
 
   _renderImagerySearchBbox() {
@@ -732,21 +697,15 @@ function generateControls() {
 }
 
 function generateDetectionsLayer() {
-  return new ol.layer.Vector({
-    source: new ol.source.Vector(),
-    style(feature) {
-      switch (feature.get(KEY_DETECTION)) {
-      case DISPOSITION_DETECTED:
-        const geometry = feature.getGeometry()
-        const [baseline, detection] = geometry.getGeometries()
-        return [generateStyleDetectionBaseline(baseline), generateStyleDetection(detection)]
-      case DISPOSITION_UNDETECTED:
-        return generateStyleUndetected()
-      case DISPOSITION_NEW_DETECTION:
-        return generateStyleNewDetection()
-      default:
-        return generateStyleUnknownDetectionType()
-      }
+  return new ol.layer.Tile({
+    source: generateDetectionsSource(),
+  })
+}
+
+function generateDetectionsSource() {
+  return new ol.source.TileWMS({
+    params: {
+      [KEY_LAYERS]: '',
     }
   })
 }
@@ -920,24 +879,6 @@ function generateImageSearchResultsOverlay(componentRef) {
   })
 }
 
-function generateProgressBarOverlay(result, position) {
-  const element = document.createElement('div')
-  element.classList.add(styles.progress)
-
-  const percentage = Math.floor(((result.progress.loaded / result.progress.total) || 0) * 100)
-  const puck = document.createElement('div')
-  puck.classList.add(styles.progressPuck)
-  puck.setAttribute('style', `width: ${percentage}%;`)
-  element.appendChild(puck)
-
-  return new ol.Overlay({
-    element,
-    position,
-    id: result.jobId,
-    positioning: 'bottom-left'
-  })
-}
-
 function generateScenePreviewSource(provider, imageId, apiKey) {
   return new ol.source.XYZ({
     ...provider,
@@ -957,65 +898,6 @@ function generateSelectInteraction(...layers) {
         color: 'black',
         width: 3
       }),
-    })
-  })
-}
-
-function generateStyleDetectionBaseline(baseline) {
-  return new ol.style.Style({
-    geometry: baseline,
-    stroke: new ol.style.Stroke({
-      color: 'hsla(160, 100%, 30%, .5)',
-      width: 2,
-      lineDash: [5, 5],
-      lineCap: 'miter',
-      lineJoin: 'miter'
-    })
-  })
-}
-
-function generateStyleDetection(detection) {
-  return new ol.style.Style({
-    geometry: detection,
-    fill: new ol.style.Fill({
-      color: 'hsla(160, 100%, 30%, .2)'
-    }),
-    stroke: new ol.style.Stroke({
-      color: 'hsla(160, 100%, 30%, .75)',
-      width: 2
-    })
-  })
-}
-
-function generateStyleNewDetection() {
-  return new ol.style.Style({
-    stroke: new ol.style.Stroke({
-      width: 2,
-      color: 'hsl(205, 100%, 50%)'
-    })
-  })
-}
-
-function generateStyleUndetected() {
-  return new ol.style.Style({
-    fill: new ol.style.Fill({
-      color: 'hsla(0, 100%, 75%, .2)'
-    }),
-    stroke: new ol.style.Stroke({
-      color: 'red',
-      width: 2,
-      lineDash: [5, 5],
-      lineCap: 'miter',
-      lineJoin: 'miter'
-    })
-  })
-}
-
-function generateStyleUnknownDetectionType() {
-  return new ol.style.Style({
-    stroke: new ol.style.Stroke({
-      color: 'magenta',
-      width: 2
     })
   })
 }
