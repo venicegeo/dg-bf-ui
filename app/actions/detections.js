@@ -30,19 +30,38 @@ export const UNLOAD_DETECTIONS = 'UNLOAD_DETECTIONS'
 // Action Creators
 //
 
-export function loadDetections(idsToLoad = []) {
-  return (dispatch, getState) => {
-    const completedJobs = getState().jobs.records.filter(j => j.properties[KEY_GEOJSON_DATA_ID])
-    dispatch({
-      type:       LOAD_DETECTIONS,
-      detections: completedJobs.filter(j => idsToLoad.includes(j.id)).map(toDetection),
-    })
-  }
-}
+const loadDetections = (detections) => ({
+  type: LOAD_DETECTIONS,
+  detections,
+})
 
-export function unloadDetections() {
-  return {
-    type: UNLOAD_DETECTIONS,
+const unloadDetections = () => ({
+  type: UNLOAD_DETECTIONS,
+})
+
+export function changeLoadedDetections(jobIds = []) {
+  return (dispatch, getState) => {
+    const state = getState()
+    const alreadyLoadedIds = simplify(state.detections.map(d => d.jobId))
+    const incomingIds = simplify(jobIds)
+
+    if (alreadyLoadedIds === incomingIds) {
+      return  // Nothing to do
+    }
+
+    // Removals
+    if (alreadyLoadedIds && !incomingIds) {
+      dispatch(unloadDetections())
+      return
+    }
+
+    // Additions/Updates
+    const loadableJobs = state.jobs.records.filter(j => jobIds.includes(j.id) && j.properties[KEY_GEOJSON_DATA_ID])
+    const loadableIds = simplify(loadableJobs.map(j => j.id))
+    if (alreadyLoadedIds === loadableIds) {
+      return  // Avoid thrashing the reducer with spurious updates
+    }
+    dispatch(loadDetections(loadableJobs.map(toDetection)))
   }
 }
 
@@ -56,4 +75,8 @@ function toDetection(job) {
     jobId:   job.id,
     layerId: job.properties[KEY_GEOJSON_DATA_ID],
   }
+}
+
+function simplify(items) {
+  return items.slice().sort().join(',')
 }

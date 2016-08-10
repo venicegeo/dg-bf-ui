@@ -25,12 +25,11 @@ import {
   discoverCatalogIfNeeded,
   discoverExecutorIfNeeded,
   discoverGeoserverIfNeeded,
-  loadDetections,
+  changeLoadedDetections,
   searchCatalog,
   selectImage,
   startAlgorithmsWorkerIfNeeded,
   startJobsWorkerIfNeeded,
-  unloadDetections,
   updateSearchBbox
 } from '../actions'
 
@@ -72,15 +71,13 @@ class Application extends Component {
       dispatch(discoverGeoserverIfNeeded())
       dispatch(startAlgorithmsWorkerIfNeeded())
       dispatch(startJobsWorkerIfNeeded())
-      if (location.query.jobId) {
-        dispatch(loadDetections(asArray(location.query.jobId)))
-      }
+      dispatch(changeLoadedDetections(enumerate(location.query.jobId)))
     }
   }
 
   componentWillReceiveProps(nextProps) {
     const {dispatch} = this.props
-    if (!this.props.isLoggedIn && nextProps.isLoggedIn) {
+    if (!nextProps.isLoggedIn && this.props.isLoggedIn) {
       dispatch(discoverCatalogIfNeeded())
       dispatch(discoverExecutorIfNeeded())
       dispatch(discoverGeoserverIfNeeded())
@@ -93,14 +90,7 @@ class Application extends Component {
     if (nextProps.bbox !== this.props.bbox) {
       dispatch(clearImagery())
     }
-    if (!isSameQuery(nextProps.location.query.jobId, this.props.location.query.jobId)) {
-      if (nextProps.location.query.jobId) {
-        dispatch(loadDetections(asArray(nextProps.location.query.jobId)))
-      }
-      else {
-        dispatch(unloadDetections())
-      }
-    }
+    dispatch(changeLoadedDetections(enumerate(nextProps.location.query.jobId)))
   }
 
   render() {
@@ -193,12 +183,6 @@ export default connect((state, ownProps) => ({
 // Internals
 //
 
-function asArray(value) {
-  if (value) {
-    return [].concat(value)
-  }
-}
-
-function isSameQuery(a, b) {
-  return String(a) === String(b)
+function enumerate(value) {
+  return value ? [].concat(value) : []
 }
