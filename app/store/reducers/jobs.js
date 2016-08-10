@@ -23,6 +23,7 @@ import {
   DISMISS_JOB_ERROR,
   FETCH_JOBS,
   FETCH_JOBS_SUCCESS,
+  IMPORT_JOB_SUCCESS,
   JOBS_WORKER_ERROR,
   REMOVE_JOB,
   UPDATE_JOB,
@@ -72,6 +73,10 @@ export function reducer(state = INITIAL_STATE, action) {
       creating: false,
       records: [...state.records, action.record]
     }
+  case IMPORT_JOB_SUCCESS:
+    return Object.assign({}, state, {
+      records: [...state.records, action.record],
+    })
   case CREATE_JOB_ERROR:
     return {
       ...state,
