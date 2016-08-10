@@ -21,7 +21,7 @@ import PrimaryMap, {MODE_DRAW_BBOX, MODE_NORMAL, MODE_SELECT_IMAGERY} from './Pr
 import styles from './Application.css'
 import {
   clearImagery,
-  changeLoadedResults,
+  clearSelectedImage,
   discoverCatalogIfNeeded,
   discoverExecutorIfNeeded,
   discoverGeoserverIfNeeded,
@@ -154,7 +154,12 @@ class Application extends Component {
   }
 
   _handleSelectImage(feature) {
-    this.props.dispatch(selectImage(feature))
+    if (feature) {
+      this.props.dispatch(selectImage(feature))
+    }
+    else {
+      this.props.dispatch(clearSelectedImage())
+    }
   }
 
   _handleSelectJob(jobId) {
