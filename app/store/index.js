@@ -68,6 +68,7 @@ export function configureStore(initialState) {
 function deserializeState() {
   try {
     return {
+      algorithms: algorithms.deserialize(),
       authentication: authentication.deserialize(),
       catalog: catalog.deserialize(),
       draftJob: draftJob.deserialize(),
@@ -85,6 +86,7 @@ function deserializeState() {
 
 function serializeState(state) {
   try {
+    algorithms.serialize(state.algorithms)
     authentication.serialize(state.authentication)
     catalog.serialize(state.catalog)
     draftJob.serialize(state.draftJob)
