@@ -26,6 +26,7 @@ import * as executor from './reducers/executor'
 import * as geoserver from './reducers/geoserver'
 import * as imagery from './reducers/imagery'
 import * as jobs from './reducers/jobs'
+import * as productLines from './reducers/productLines'
 import * as search from './reducers/search'
 import * as workers from './reducers/workers'
 
@@ -39,6 +40,7 @@ const beachfrontApp = combineReducers({
   geoserver:      geoserver.reducer,
   imagery:        imagery.reducer,
   jobs:           jobs.reducer,
+  productLines:   productLines.reducer,
   search:         search.reducer,
   workers:        workers.reducer,
 })
@@ -76,6 +78,7 @@ function deserializeState() {
       geoserver: geoserver.deserialize(),
       imagery: imagery.deserialize(),
       jobs: jobs.deserialize(),
+      productLines: productLines.deserialize(),
       search: search.deserialize(),
     }
   } catch (err) {
@@ -94,6 +97,7 @@ function serializeState(state) {
     geoserver.serialize(state.geoserver)
     imagery.serialize(state.imagery)
     jobs.serialize(state.jobs)
+    productLines.serialize(state.productLines)
     search.serialize(state.search)
   } catch (err) {
     console.error('(store:serializeState) Could not serialize state tree', err)
