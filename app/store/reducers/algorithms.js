@@ -19,10 +19,12 @@ import {
   FETCH_ALGORITHMS_SUCCESS,
 } from '../../actions/algorithms'
 
-export function reducer(state = {
+const INITIAL_STATE = {
   fetching: false,
   records: []
-}, action) {
+}
+
+export function reducer(state = INITIAL_STATE, action) {
   switch (action.type) {
   case FETCH_ALGORITHMS:
     return {
@@ -38,4 +40,14 @@ export function reducer(state = {
   default:
     return state
   }
+}
+
+export function deserialize() {
+  return Object.assign({}, INITIAL_STATE, {
+    records: JSON.parse(localStorage.getItem('algorithms_records')) || INITIAL_STATE.records,
+  })
+}
+
+export function serialize(state) {
+  localStorage.setItem('algorithms_records', JSON.stringify(state.records))
 }

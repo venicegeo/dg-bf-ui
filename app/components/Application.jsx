@@ -20,6 +20,9 @@ import Navigation from './Navigation'
 import PrimaryMap, {MODE_DRAW_BBOX, MODE_NORMAL, MODE_SELECT_IMAGERY} from './PrimaryMap'
 import styles from './Application.css'
 import {
+  // DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG
+  importJob,
+  // DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG
   clearImagery,
   clearSelectedImage,
   discoverCatalogIfNeeded,
@@ -72,6 +75,14 @@ class Application extends Component {
       dispatch(startAlgorithmsWorkerIfNeeded())
       dispatch(startJobsWorkerIfNeeded())
       dispatch(changeLoadedDetections(enumerate(location.query.jobId)))
+      // DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG
+      for (const jobId of enumerate(this.props.location.query.jobId)) {
+        if (!this.props.jobs.find(j => j.id === jobId)) {
+          dispatch(importJob(jobId))
+            .catch(console.log.bind(console))
+        }
+      }
+      // DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG
     }
   }
 
