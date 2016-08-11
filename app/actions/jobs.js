@@ -16,24 +16,27 @@
 
 import moment from 'moment'
 import {Client} from '../utils/piazza-client'
+import {importRecordById} from '../utils/import-job-record'
 import * as worker from './workers/jobs'
-import {GATEWAY, JOBS_WORKER, SCHEMA_VERSION} from '../config'
+import {
+  GATEWAY,
+  JOBS_WORKER,
+  SCHEMA_VERSION,
+} from '../config'
 
 import {
   KEY_ALGORITHM_NAME,
   KEY_CREATED_ON,
-  KEY_GEOJSON_DATA_ID,
   KEY_IMAGE_ID,
   KEY_IMAGE_CAPTURED_ON,
   KEY_IMAGE_SENSOR,
   KEY_NAME,
+  KEY_SCHEMA_VERSION,
   KEY_STATUS,
   KEY_TYPE,
-  KEY_SCHEMA_VERSION,
   KEY_THUMBNAIL,
   REQUIREMENT_BANDS,
   STATUS_RUNNING,
-  STATUS_SUCCESS,
   TYPE_JOB,
 } from '../constants'
 
@@ -109,35 +112,9 @@ export function dismissJobError() {
   }
 }
 
-const importJobSuccess = (
-  id,
-  algorithmName,
-  dateCreated,
-  geometry,
-  geojsonDataId,
-  imageCaptureDate,
-  imageId,
-  name,
-  sensorName
-) => ({
+const importJobSuccess = (record) => ({
   type: IMPORT_JOB_SUCCESS,
-  record: {
-    id,
-    geometry,
-    properties: {
-      [KEY_ALGORITHM_NAME]:    algorithmName,
-      [KEY_CREATED_ON]:        dateCreated,
-      [KEY_IMAGE_CAPTURED_ON]: imageCaptureDate,
-      [KEY_GEOJSON_DATA_ID]:   geojsonDataId,
-      [KEY_IMAGE_ID]:          imageId,
-      [KEY_IMAGE_SENSOR]:      sensorName,
-      [KEY_NAME]:              name,
-      [KEY_STATUS]:            STATUS_SUCCESS,
-      [KEY_TYPE]:              TYPE_JOB,
-      [KEY_SCHEMA_VERSION]:    SCHEMA_VERSION,
-    },
-    type: 'Feature',
-  },
+  record,
 })
 
 const importJobError = (err) => ({
@@ -145,67 +122,18 @@ const importJobError = (err) => ({
   err,
 })
 
-export function importJob(jobId) {
+export function importJob(id) {
   return (dispatch, getState) => {
     dispatch({
       type: IMPORT_JOB,
+      id,
     })
-    const client = new Client(GATEWAY, getState().authentication.token)
-    return client.getStatus(jobId)
-      .then(status => {
-        if (status.status !== STATUS_SUCCESS) {
-          throw importError(`invalid status (job=${jobId}, status=${status.status})`)
-        }
-        return client.getFile(status.result.dataId)
-      })
-      .then(executionOutput => JSON.parse(executionOutput))
-      .then(metadata => {
-
-        // Required fields
-        const geometry = metadata.geometry
-        if (!geometry || !geometry.type || !Array.isArray(geometry.coordinates)) {
-          throw importError(`invalid geometry (job=${jobId})`)
-        }
-
-        const imageCaptureDate = metadata.imageCaptureDate
-        if (!imageCaptureDate) {
-          throw importError(`invalid image capture date '${imageCaptureDate}' (job=${jobId})`)
-        }
-
-        const imageId = metadata.imageId
-        if (!imageId) {
-          throw importError(`invalid image ID '${imageId}' (job=${jobId})`)
-        }
-
-        const sensorName = metadata.sensorName
-        if (!sensorName) {
-          throw importError(`invalid sensor name '${sensorName}' (job=${jobId})`)
-        }
-
-        const geojsonDataId = metadata.shoreDataID
-        if (!geojsonDataId) {
-          throw importError(`invalid geojson data ID '${geojsonDataId}' (job=${jobId})`)
-        }
-
-        // Optional fields
-        const algorithm = getState().algorithms.records.find(a => a.url === metadata.algorithmUrl)
-        const algorithmName = algorithm ? algorithm.name : 'Unknown Algorithm'
-        const name = metadata.name || 'IMPORTED_' + jobId.substr()
-        const dateCreated = metadata.dateCreated || new Date().toISOString()
-
-        dispatch(
-          importJobSuccess(
-            jobId,
-            algorithmName,
-            dateCreated,
-            geometry,
-            geojsonDataId,
-            imageCaptureDate,
-            imageId,
-            name,
-            sensorName
-          )
-        )
+    const state = getState()
+    const client = new Client(GATEWAY, state.authentication.token)
+    const algorithmNames = generateAlgorithmNamesHash(state.algorithms.records)
+    return importRecordById(client, id, algorithmNames)
+      .then(record => {
+        dispatch(importJobSuccess(record))
       })
       .catch(err => {
         dispatch(importJobError(err))
@@ -325,9 +253,10 @@ function updateJob(
 // Helpers
 //
 
-function importError(message, extras) {
-  const err = new Error(message)
-  Object.assign(err, extras, {message})
-  err.message = message
-  return err
+function generateAlgorithmNamesHash(algorithms) {
+  const hash = {}
+  for (const algorithm of algorithms) {
+    hash[algorithm.url] = algorithm.name
+  }
+  return hash
 }
