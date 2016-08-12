@@ -23,6 +23,7 @@ import {
   KEY_EXPIRES_ON,
   KEY_IMAGE_CLOUDCOVER,
   KEY_IMAGE_SENSOR,
+  KEY_JOB_IDS,
   KEY_EVENT_TYPE_ID,
   KEY_NAME,
 } from '../constants'
@@ -30,6 +31,9 @@ import {
 export const FETCH_PRODUCT_LINES = 'FETCH_PRODUCT_LINES'
 export const FETCH_PRODUCT_LINES_SUCCESS = 'FETCH_PRODUCT_LINES_SUCCESS'
 export const FETCH_PRODUCT_LINES_ERROR = 'FETCH_PRODUCT_LINES_ERROR'
+export const FETCH_PRODUCT_LINE_JOBS = 'FETCH_PRODUCT_LINE_JOBS'
+export const FETCH_PRODUCT_LINE_JOBS_SUCCESS = 'FETCH_PRODUCT_LINE_JOBS_SUCCESS'
+export const FETCH_PRODUCT_LINE_JOBS_ERROR = 'FETCH_PRODUCT_LINE_JOBS_ERROR'
 export const LOOKUP_PRODUCT_LINE_JOB = 'LOOKUP_PRODUCT_LINE_JOB'
 export const LOOKUP_PRODUCT_LINE_JOB_SUCCESS = 'LOOKUP_PRODUCT_LINE_JOB_SUCCESS'
 export const LOOKUP_PRODUCT_LINE_JOB_ERROR = 'LOOKUP_PRODUCT_LINE_JOB_ERROR'
@@ -69,6 +73,45 @@ export function fetchProductLines() {
   }
 }
 
+const fetchProductLineJobsSuccess = (productLineId, jobIds) => ({
+  type: FETCH_PRODUCT_LINE_JOBS_SUCCESS,
+  productLineId,
+  jobIds,
+})
+
+const fetchProductLineJobsError = (productLineId, err) => ({
+  type: FETCH_PRODUCT_LINE_JOBS_ERROR,
+  productLineId,
+  err,
+})
+
+export function fetchProductLineJobs(productLineId, sinceDate, pageNumber) {
+  return (dispatch, getState) => {
+    const state = getState()
+    return fetch(`${state.executor.url}/listProdLineJobs`, {
+      body: JSON.stringify({
+
+        // FIXME -- I can has property name consistency, bfhandle?
+        TriggerId:   productLineId,
+        PzAuthToken: state.authentication.token,
+        PzAddr:      GATEWAY,
+        PerPage:     20,
+        PageNo:      pageNumber,
+      }),
+      headers: {'content-type': 'application/json'},
+      method: 'POST'
+    })
+      .then(checkResponse)
+      .then(jobIds => {
+        dispatch(fetchProductLineJobsSuccess(productLineId, jobIds))
+        return Promise.all(jobIds.map(jobId => dispatch(lookupProductLineJob(productLineId, jobId))))
+      })
+      .catch(err => {
+        dispatch(fetchProductLineJobsError(productLineId, err))
+      })
+  }
+}
+
 const lookupProductLineJobSuccess = (productLineId, job) => ({
   type: LOOKUP_PRODUCT_LINE_JOB_SUCCESS,
   productLineId,
@@ -82,7 +125,7 @@ const lookupProductLineJobError = (productLineId, jobId, err) => ({
   jobId,
 })
 
-function lookupProductLineJob(productLineId, jobId) {
+export function lookupProductLineJob(productLineId, jobId) {
   return (dispatch, getState) => {
     const state = getState()
     if (state.productLines.jobs[productLineId] && jobId in state.productLines.jobs[productLineId]) {
@@ -102,37 +145,7 @@ function lookupProductLineJob(productLineId, jobId) {
         dispatch(lookupProductLineJobSuccess(productLineId, job))
       })
       .catch(err => {
-        console.error(err)
         dispatch(lookupProductLineJobError(productLineId, jobId, err))
-      })
-  }
-}
-
-export function fetchProductLineJobs(productLineId) {
-  return (dispatch, getState) => {
-    const state = getState()
-    return fetch(`${state.executor.url}/listProdLineJobs`, {
-      body: JSON.stringify({
-
-        // FIXME -- I can has property name consistency, bfhandle?
-        TriggerId:   productLineId,
-        PzAuthToken: state.authentication.token,
-        PzAddr:      GATEWAY,
-        PerPage:     2,
-
-      }),
-      headers: {'content-type': 'application/json'},
-      method: 'POST'
-    })
-      .then(checkResponse)
-      .then(jobIds => {
-        for (const jobId of jobIds) {
-          dispatch(lookupProductLineJob(productLineId, jobId))
-        }
-      })
-      .catch(err => {
-        // TODO -- this needs to do something better
-        console.error('Could not fetch product line jobs', err)
       })
   }
 }
@@ -163,10 +176,11 @@ function extractRecords(data) {
     },
     properties: {
       [KEY_CREATED_ON]:       datum.minDate,
+      [KEY_EVENT_TYPE_ID]:    datum.eventTypeId.pop(),
       [KEY_EXPIRES_ON]:       datum.maxDate,
       [KEY_IMAGE_CLOUDCOVER]: datum.cloudCover,
       [KEY_IMAGE_SENSOR]:     datum.sensorName,
-      [KEY_EVENT_TYPE_ID]:    datum.eventTypeId.pop(),
+      [KEY_JOB_IDS]:          [],
       [KEY_NAME]:             datum.name,
     },
     type: 'Feature',

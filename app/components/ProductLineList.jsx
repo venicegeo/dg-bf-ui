@@ -19,23 +19,35 @@ import {connect} from 'react-redux'
 import {
   fetchProductLines,
   fetchProductLineJobs,
+  lookupProductLineJob,
 } from '../actions'
 
 const styles = require('./ProductLineList.css')
 
 import {
+  KEY_JOB_IDS,
   KEY_NAME,
 } from '../constants'
 
 export class ProductLineList extends React.Component {
   static propTypes = {
-    isFetching: React.PropTypes.bool,
-    productLines: React.PropTypes.array,
-    fetchProductLines: React.PropTypes.func,
+    isFetching:              React.PropTypes.bool,
+    productLines:            React.PropTypes.array,
+    productLineJobs:         React.PropTypes.object,
+    fetchJobsForProductLine: React.PropTypes.func,
+    fetchProductLines:       React.PropTypes.func,
   }
 
   componentDidMount() {
     this.props.fetchProductLines()
+
+    // DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG
+    window.productLineList = this
+    // DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG
+
+    // DEBUG
+    setTimeout(() => this.props.fetchJobsForProductLine('MALAYSIA', '2016-08-01T00:00:00Z', 1), 300)
+    // DEBUG
   }
 
   render() {
@@ -49,6 +61,16 @@ export class ProductLineList extends React.Component {
           {productLines.map(p => (
             <li key={p.id} className={styles.productLine}>
               {p.properties[KEY_NAME]}
+              <ul>
+                {p.properties[KEY_JOB_IDS].map(jobId => (
+                  <li>
+                    {this.props.productLineJobs[p.id] && this.props.productLineJobs[p.id][jobId]
+                      ? this.props.productLineJobs[p.id][jobId].properties[KEY_NAME]
+                      : 'ZZZ'
+                    }
+                  </li>
+                ))}
+              </ul>
             </li>
           ))}
           {isFetching && (
@@ -67,6 +89,7 @@ export default connect(state => ({
   productLines:    state.productLines.records,
   productLineJobs: state.productLines.jobs,
 }), dispatch => ({
+  fetchJobsForProductLine: (id, sinceDate, pageNumber) => dispatch(fetchProductLineJobs(id, sinceDate, pageNumber)),
   fetchProductLines:       () => dispatch(fetchProductLines()),
-  fetchJobsForProductLine: (id) => dispatch(fetchProductLineJobs(id)),
+  lookupProductLineJob:    (productLineId, jobId) => dispatch(lookupProductLineJob(productLineId, jobId)),
 }))(ProductLineList)
