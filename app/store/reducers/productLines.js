@@ -18,14 +18,10 @@ import {
   FETCH_PRODUCT_LINES,
   FETCH_PRODUCT_LINES_SUCCESS,
   FETCH_PRODUCT_LINES_ERROR,
-  FETCH_JOBS_FOR_PRODUCT_LINE,
-  FETCH_JOBS_FOR_PRODUCT_LINE_SUCCESS,
-  FETCH_JOBS_FOR_PRODUCT_LINE_ERROR,
+  LOOKUP_PRODUCT_LINE_JOB,
+  LOOKUP_PRODUCT_LINE_JOB_SUCCESS,
+  LOOKUP_PRODUCT_LINE_JOB_ERROR,
 } from '../../actions/productLines'
-
-import {
-  KEY_CREATED_ON,
-} from '../../constants'
 
 export function reducer(state = {
   error: null,
@@ -48,30 +44,25 @@ export function reducer(state = {
       fetching: false,
       error:    action.err,
     })
-  case FETCH_JOBS_FOR_PRODUCT_LINE:
+  case LOOKUP_PRODUCT_LINE_JOB:
     return Object.assign({}, state, {
       jobs: Object.assign({}, state.jobs, {
-        [action.productLineId]: {
-          loading: true,
-          records: [],
-        },
+        [action.productLineId]: Object.assign({}, state.jobs[action.productLineId], {
+          [action.jobId]: null,  // HACK -- Sloppy way to track "is loading" status
+        }),
       }),
     })
-  case FETCH_JOBS_FOR_PRODUCT_LINE_SUCCESS:
+  case LOOKUP_PRODUCT_LINE_JOB_SUCCESS:
     return Object.assign({}, state, {
       jobs: Object.assign({}, state.jobs, {
-        [action.productLineId]: {
-          loading: false,
-          records: [
-            ...state.jobs.records,
-            ...action.jobs,
-          ].sort(j => j.properties[KEY_CREATED_ON]),
-        },
+        [action.productLineId]: Object.assign({}, state.jobs[action.productLineId], {
+          [action.job.id]: action.job,
+        }),
       }),
     })
-  case FETCH_JOBS_FOR_PRODUCT_LINE_ERROR:
+  case LOOKUP_PRODUCT_LINE_JOB_ERROR:
     return Object.assign({}, state, {
-      error:    action.err,
+      error: action.err,
     })
   default:
     return state

@@ -14,8 +14,9 @@
  * limitations under the License.
  **/
 
-import {GATEWAY} from '../config'
+import {importRecordById as importJobRecordById} from '../utils/import-job-record'
 import {Client} from '../utils/piazza-client'
+import {GATEWAY} from '../config'
 
 import {
   KEY_CREATED_ON,
@@ -29,6 +30,9 @@ import {
 export const FETCH_PRODUCT_LINES = 'FETCH_PRODUCT_LINES'
 export const FETCH_PRODUCT_LINES_SUCCESS = 'FETCH_PRODUCT_LINES_SUCCESS'
 export const FETCH_PRODUCT_LINES_ERROR = 'FETCH_PRODUCT_LINES_ERROR'
+export const LOOKUP_PRODUCT_LINE_JOB = 'LOOKUP_PRODUCT_LINE_JOB'
+export const LOOKUP_PRODUCT_LINE_JOB_SUCCESS = 'LOOKUP_PRODUCT_LINE_JOB_SUCCESS'
+export const LOOKUP_PRODUCT_LINE_JOB_ERROR = 'LOOKUP_PRODUCT_LINE_JOB_ERROR'
 
 const fetchProductLinesSuccess = (records) => ({
   type: FETCH_PRODUCT_LINES_SUCCESS,
@@ -65,6 +69,74 @@ export function fetchProductLines() {
   }
 }
 
+const lookupProductLineJobSuccess = (productLineId, job) => ({
+  type: LOOKUP_PRODUCT_LINE_JOB_SUCCESS,
+  productLineId,
+  job,
+})
+
+const lookupProductLineJobError = (productLineId, jobId, err) => ({
+  type: LOOKUP_PRODUCT_LINE_JOB_ERROR,
+  err,
+  productLineId,
+  jobId,
+})
+
+function lookupProductLineJob(productLineId, jobId) {
+  return (dispatch, getState) => {
+    const state = getState()
+    if (state.productLines.jobs[productLineId] && jobId in state.productLines.jobs[productLineId]) {
+      return  // Nothing to do; is loading or already loaded
+    }
+
+    dispatch({
+      type: LOOKUP_PRODUCT_LINE_JOB,
+      productLineId,
+      jobId,
+    })
+
+    const algorithmNames = generateAlgorithmNamesHash(state.algorithms.records)
+    const client = new Client(GATEWAY, state.authentication.token)
+    return importJobRecordById(client, jobId, algorithmNames)
+      .then(job => {
+        dispatch(lookupProductLineJobSuccess(productLineId, job))
+      })
+      .catch(err => {
+        console.error(err)
+        dispatch(lookupProductLineJobError(productLineId, jobId, err))
+      })
+  }
+}
+
+export function fetchProductLineJobs(productLineId) {
+  return (dispatch, getState) => {
+    const state = getState()
+    return fetch(`${state.executor.url}/listProdLineJobs`, {
+      body: JSON.stringify({
+
+        // FIXME -- I can has property name consistency, bfhandle?
+        TriggerId:   productLineId,
+        PzAuthToken: state.authentication.token,
+        PzAddr:      GATEWAY,
+        PerPage:     2,
+
+      }),
+      headers: {'content-type': 'application/json'},
+      method: 'POST'
+    })
+      .then(checkResponse)
+      .then(jobIds => {
+        for (const jobId of jobIds) {
+          dispatch(lookupProductLineJob(productLineId, jobId))
+        }
+      })
+      .catch(err => {
+        // TODO -- this needs to do something better
+        console.error('Could not fetch product line jobs', err)
+      })
+  }
+}
+
 //
 // Helpers
 //
@@ -74,12 +146,6 @@ function checkResponse(response) {
     return response.json()
   }
   throw httpError(response)
-}
-
-function httpError(response) {
-  const err = new Error(`HttpError: (code=${response.status})`)
-  err.code = response.status
-  return err
 }
 
 function extractRecords(data) {
@@ -105,4 +171,18 @@ function extractRecords(data) {
     },
     type: 'Feature',
   }))
+}
+
+function generateAlgorithmNamesHash(algorithms) {
+  const hash = {}
+  for (const algorithm of algorithms) {
+    hash[algorithm.url] = algorithm.name
+  }
+  return hash
+}
+
+function httpError(response) {
+  const err = new Error(`HttpError: (code=${response.status})`)
+  err.code = response.status
+  return err
 }

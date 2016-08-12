@@ -18,6 +18,7 @@ import React from 'react'
 import {connect} from 'react-redux'
 import {
   fetchProductLines,
+  fetchProductLineJobs,
 } from '../actions'
 
 const styles = require('./ProductLineList.css')
@@ -46,7 +47,7 @@ export class ProductLineList extends React.Component {
         </header>
         <ul>
           {productLines.map(p => (
-            <li className={styles.productLine}>
+            <li key={p.id} className={styles.productLine}>
               {p.properties[KEY_NAME]}
             </li>
           ))}
@@ -66,6 +67,6 @@ export default connect(state => ({
   productLines:    state.productLines.records,
   productLineJobs: state.productLines.jobs,
 }), dispatch => ({
-  fetchProductLines: () => dispatch(fetchProductLines()),
-  // loadProductLine: (id) => dispatch(loadProductLine(id)),
+  fetchProductLines:       () => dispatch(fetchProductLines()),
+  fetchJobsForProductLine: (id) => dispatch(fetchProductLineJobs(id)),
 }))(ProductLineList)
