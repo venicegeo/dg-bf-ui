@@ -18,23 +18,12 @@ import {
   FETCH_PRODUCT_LINES,
   FETCH_PRODUCT_LINES_SUCCESS,
   FETCH_PRODUCT_LINES_ERROR,
-  FETCH_PRODUCT_LINE_JOBS,
-  FETCH_PRODUCT_LINE_JOBS_SUCCESS,
-  FETCH_PRODUCT_LINE_JOBS_ERROR,
-  LOOKUP_PRODUCT_LINE_JOB,
-  LOOKUP_PRODUCT_LINE_JOB_SUCCESS,
-  LOOKUP_PRODUCT_LINE_JOB_ERROR,
 } from '../../actions/productLines'
 
-import {
-  KEY_JOB_IDS,
-} from '../../constants'
-
 export function reducer(state = {
-  error: null,
+  error:    null,
   fetching: false,
-  records: [],
-  jobs: {},
+  records:  [],
 }, action) {
   switch (action.type) {
   case FETCH_PRODUCT_LINES:
@@ -49,48 +38,10 @@ export function reducer(state = {
   case FETCH_PRODUCT_LINES_ERROR:
     return Object.assign({}, state, {
       fetching: false,
-      error:    action.err,
-    })
-
-  case FETCH_PRODUCT_LINE_JOBS:
-    return state  // TODO -- this should probably do something eventually
-  case FETCH_PRODUCT_LINE_JOBS_SUCCESS:
-    return Object.assign({}, state, {
-      records: state.records.map(record => {
-        if (record.id !== action.productLineId) {
-          return record
-        }
-        return Object.assign({}, record, {
-          properties: Object.assign({}, record.properties, {
-            [KEY_JOB_IDS]: action.jobIds,
-          })
-        })
-      }),
-    })
-  case FETCH_PRODUCT_LINE_JOBS_ERROR:
-    return Object.assign({}, state, {
-      error: action.err,
-    })
-
-  case LOOKUP_PRODUCT_LINE_JOB:
-    return Object.assign({}, state, {
-      jobs: Object.assign({}, state.jobs, {
-        [action.productLineId]: Object.assign({}, state.jobs[action.productLineId], {
-          [action.jobId]: null,  // HACK -- Sloppy way to track "is loading" status
-        }),
-      }),
-    })
-  case LOOKUP_PRODUCT_LINE_JOB_SUCCESS:
-    return Object.assign({}, state, {
-      jobs: Object.assign({}, state.jobs, {
-        [action.productLineId]: Object.assign({}, state.jobs[action.productLineId], {
-          [action.job.id]: action.job,
-        }),
-      }),
-    })
-  case LOOKUP_PRODUCT_LINE_JOB_ERROR:
-    return Object.assign({}, state, {
-      error: action.err,
+      error: {
+        message: action.err.message,
+        stack:   action.err.stack,
+      },
     })
   default:
     return state

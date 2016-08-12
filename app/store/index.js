@@ -27,22 +27,24 @@ import * as geoserver from './reducers/geoserver'
 import * as imagery from './reducers/imagery'
 import * as jobs from './reducers/jobs'
 import * as productLines from './reducers/productLines'
+import * as productLineJobs from './reducers/productLineJobs'
 import * as search from './reducers/search'
 import * as workers from './reducers/workers'
 
 const beachfrontApp = combineReducers({
-  algorithms:     algorithms.reducer,
-  authentication: authentication.reducer,
-  catalog:        catalog.reducer,
-  detections:     detections.reducer,
-  draftJob:       draftJob.reducer,
-  executor:       executor.reducer,
-  geoserver:      geoserver.reducer,
-  imagery:        imagery.reducer,
-  jobs:           jobs.reducer,
-  productLines:   productLines.reducer,
-  search:         search.reducer,
-  workers:        workers.reducer,
+  algorithms:      algorithms.reducer,
+  authentication:  authentication.reducer,
+  catalog:         catalog.reducer,
+  detections:      detections.reducer,
+  draftJob:        draftJob.reducer,
+  executor:        executor.reducer,
+  geoserver:       geoserver.reducer,
+  imagery:         imagery.reducer,
+  jobs:            jobs.reducer,
+  productLines:    productLines.reducer,
+  productLineJobs: productLineJobs.reducer,
+  search:          search.reducer,
+  workers:         workers.reducer,
 })
 
 let devtoolsExtension = f => f

@@ -14,8 +14,6 @@
  * limitations under the License.
  **/
 
-import {importRecordById as importJobRecordById} from '../utils/import-job-record'
-import {Client} from '../utils/piazza-client'
 import {GATEWAY} from '../config'
 
 import {
@@ -23,7 +21,6 @@ import {
   KEY_EXPIRES_ON,
   KEY_IMAGE_CLOUDCOVER,
   KEY_IMAGE_SENSOR,
-  KEY_JOB_IDS,
   KEY_EVENT_TYPE_ID,
   KEY_NAME,
 } from '../constants'
@@ -31,12 +28,6 @@ import {
 export const FETCH_PRODUCT_LINES = 'FETCH_PRODUCT_LINES'
 export const FETCH_PRODUCT_LINES_SUCCESS = 'FETCH_PRODUCT_LINES_SUCCESS'
 export const FETCH_PRODUCT_LINES_ERROR = 'FETCH_PRODUCT_LINES_ERROR'
-export const FETCH_PRODUCT_LINE_JOBS = 'FETCH_PRODUCT_LINE_JOBS'
-export const FETCH_PRODUCT_LINE_JOBS_SUCCESS = 'FETCH_PRODUCT_LINE_JOBS_SUCCESS'
-export const FETCH_PRODUCT_LINE_JOBS_ERROR = 'FETCH_PRODUCT_LINE_JOBS_ERROR'
-export const LOOKUP_PRODUCT_LINE_JOB = 'LOOKUP_PRODUCT_LINE_JOB'
-export const LOOKUP_PRODUCT_LINE_JOB_SUCCESS = 'LOOKUP_PRODUCT_LINE_JOB_SUCCESS'
-export const LOOKUP_PRODUCT_LINE_JOB_ERROR = 'LOOKUP_PRODUCT_LINE_JOB_ERROR'
 
 const fetchProductLinesSuccess = (records) => ({
   type: FETCH_PRODUCT_LINES_SUCCESS,
@@ -64,88 +55,11 @@ export function fetchProductLines() {
     })
       .then(checkResponse)
       .then(extractRecords)
-      .then((productLines => {
-        dispatch(fetchProductLinesSuccess(productLines))
-      }))
+      .then(records => {
+        dispatch(fetchProductLinesSuccess(records))
+      })
       .catch(err => {
         dispatch(fetchProductLinesError(err))
-      })
-  }
-}
-
-const fetchProductLineJobsSuccess = (productLineId, jobIds) => ({
-  type: FETCH_PRODUCT_LINE_JOBS_SUCCESS,
-  productLineId,
-  jobIds,
-})
-
-const fetchProductLineJobsError = (productLineId, err) => ({
-  type: FETCH_PRODUCT_LINE_JOBS_ERROR,
-  productLineId,
-  err,
-})
-
-export function fetchProductLineJobs(productLineId, sinceDate, pageNumber) {
-  return (dispatch, getState) => {
-    const state = getState()
-    return fetch(`${state.executor.url}/listProdLineJobs`, {
-      body: JSON.stringify({
-
-        // FIXME -- I can has property name consistency, bfhandle?
-        TriggerId:   productLineId,
-        PzAuthToken: state.authentication.token,
-        PzAddr:      GATEWAY,
-        PerPage:     20,
-        PageNo:      pageNumber,
-      }),
-      headers: {'content-type': 'application/json'},
-      method: 'POST'
-    })
-      .then(checkResponse)
-      .then(jobIds => {
-        dispatch(fetchProductLineJobsSuccess(productLineId, jobIds))
-        return Promise.all(jobIds.map(jobId => dispatch(lookupProductLineJob(productLineId, jobId))))
-      })
-      .catch(err => {
-        dispatch(fetchProductLineJobsError(productLineId, err))
-      })
-  }
-}
-
-const lookupProductLineJobSuccess = (productLineId, job) => ({
-  type: LOOKUP_PRODUCT_LINE_JOB_SUCCESS,
-  productLineId,
-  job,
-})
-
-const lookupProductLineJobError = (productLineId, jobId, err) => ({
-  type: LOOKUP_PRODUCT_LINE_JOB_ERROR,
-  err,
-  productLineId,
-  jobId,
-})
-
-export function lookupProductLineJob(productLineId, jobId) {
-  return (dispatch, getState) => {
-    const state = getState()
-    if (state.productLines.jobs[productLineId] && jobId in state.productLines.jobs[productLineId]) {
-      return  // Nothing to do; is loading or already loaded
-    }
-
-    dispatch({
-      type: LOOKUP_PRODUCT_LINE_JOB,
-      productLineId,
-      jobId,
-    })
-
-    const algorithmNames = generateAlgorithmNamesHash(state.algorithms.records)
-    const client = new Client(GATEWAY, state.authentication.token)
-    return importJobRecordById(client, jobId, algorithmNames)
-      .then(job => {
-        dispatch(lookupProductLineJobSuccess(productLineId, job))
-      })
-      .catch(err => {
-        dispatch(lookupProductLineJobError(productLineId, jobId, err))
       })
   }
 }
@@ -158,7 +72,7 @@ function checkResponse(response) {
   if (response.ok) {
     return response.json()
   }
-  throw httpError(response)
+  throw new Error(`HttpError: (code=${response.status})`)
 }
 
 function extractRecords(data) {
@@ -180,23 +94,8 @@ function extractRecords(data) {
       [KEY_EXPIRES_ON]:       datum.maxDate,
       [KEY_IMAGE_CLOUDCOVER]: datum.cloudCover,
       [KEY_IMAGE_SENSOR]:     datum.sensorName,
-      [KEY_JOB_IDS]:          [],
       [KEY_NAME]:             datum.name,
     },
     type: 'Feature',
   }))
-}
-
-function generateAlgorithmNamesHash(algorithms) {
-  const hash = {}
-  for (const algorithm of algorithms) {
-    hash[algorithm.url] = algorithm.name
-  }
-  return hash
-}
-
-function httpError(response) {
-  const err = new Error(`HttpError: (code=${response.status})`)
-  err.code = response.status
-  return err
 }

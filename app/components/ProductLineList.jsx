@@ -19,39 +19,31 @@ import {connect} from 'react-redux'
 import {
   fetchProductLines,
   fetchProductLineJobs,
-  lookupProductLineJob,
 } from '../actions'
 
 const styles = require('./ProductLineList.css')
 
 import {
-  KEY_JOB_IDS,
+  KEY_CREATED_ON,
   KEY_NAME,
 } from '../constants'
 
 export class ProductLineList extends React.Component {
   static propTypes = {
-    isFetching:              React.PropTypes.bool,
-    productLines:            React.PropTypes.array,
-    productLineJobs:         React.PropTypes.object,
-    fetchJobsForProductLine: React.PropTypes.func,
-    fetchProductLines:       React.PropTypes.func,
+    isFetching:        React.PropTypes.bool,
+    jobs:              React.PropTypes.object,
+    productLines:      React.PropTypes.array,
+    fetchJobs:         React.PropTypes.func,
+    fetchProductLines: React.PropTypes.func,
   }
 
   componentDidMount() {
     this.props.fetchProductLines()
-
-    // DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG
-    window.productLineList = this
-    // DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG
-
-    // DEBUG
-    setTimeout(() => this.props.fetchJobsForProductLine('MALAYSIA', '2016-08-01T00:00:00Z', 1), 300)
-    // DEBUG
   }
 
   render() {
-    const {isFetching, productLines} = this.props
+    const {isFetching, productLines, jobs} = this.props
+    const ____sincedate____ = '2016-08-01T00:00:00Z'
     return (
       <div className={styles.root}>
         <header>
@@ -60,13 +52,22 @@ export class ProductLineList extends React.Component {
         <ul>
           {productLines.map(p => (
             <li key={p.id} className={styles.productLine}>
-              {p.properties[KEY_NAME]}
+              <h3>{p.properties[KEY_NAME]}</h3>
+              <button onClick={() => this.props.fetchJobs(p.id, ____sincedate____)}>
+                Fetch since Aug 1
+              </button>
               <ul>
-                {p.properties[KEY_JOB_IDS].map(jobId => (
-                  <li>
-                    {this.props.productLineJobs[p.id] && this.props.productLineJobs[p.id][jobId]
-                      ? this.props.productLineJobs[p.id][jobId].properties[KEY_NAME]
-                      : 'ZZZ'
+                {(jobs[p.id] && jobs[p.id].error) && (
+                  <li>Error fetching stuff</li>
+                )}
+                {jobs[p.id] && jobs[p.id].records.filter(jobFilter(____sincedate____)).map((job, index) => (
+                  <li key={index}>
+                    {job.properties
+                      ? <div>
+                        {job.properties[KEY_NAME].replace('landsat:', '')}{' '}
+                        ({job.properties[KEY_CREATED_ON].substr(0, 11)})
+                      </div>
+                      : <div style={{backgroundColor: '#888', color: 'transparent'}}>loading</div>
                     }
                   </li>
                 ))}
@@ -85,11 +86,18 @@ export class ProductLineList extends React.Component {
 }
 
 export default connect(state => ({
-  isFetching:      state.productLines.fetching,
-  productLines:    state.productLines.records,
-  productLineJobs: state.productLines.jobs,
+  isFetching:   state.productLines.fetching,
+  jobs:         state.productLineJobs,
+  productLines: state.productLines.records,
 }), dispatch => ({
-  fetchJobsForProductLine: (id, sinceDate, pageNumber) => dispatch(fetchProductLineJobs(id, sinceDate, pageNumber)),
-  fetchProductLines:       () => dispatch(fetchProductLines()),
-  lookupProductLineJob:    (productLineId, jobId) => dispatch(lookupProductLineJob(productLineId, jobId)),
+  fetchJobs:         (id, sinceDate) => dispatch(fetchProductLineJobs(id, sinceDate)),
+  fetchProductLines: () => dispatch(fetchProductLines()),
 }))(ProductLineList)
+
+//
+// Helpers
+//
+
+function jobFilter(sinceDate) {
+  return job => job.loading || (job.properties && job.properties[KEY_CREATED_ON] > sinceDate)
+}
