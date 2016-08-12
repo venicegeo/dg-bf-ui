@@ -61,6 +61,9 @@ export function configureStore(initialState) {
       devtoolsExtension
     )
   )
+  if (process.env.NODE_ENV === 'development') {
+    window.store = store
+  }
   store.subscribe(debounce(() => serializeState(store.getState()), 1000))
   return store
 }
