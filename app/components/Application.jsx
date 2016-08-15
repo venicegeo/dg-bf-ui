@@ -88,7 +88,7 @@ class Application extends Component {
 
   componentWillReceiveProps(nextProps) {
     const {dispatch} = this.props
-    if (!nextProps.isLoggedIn && this.props.isLoggedIn) {
+    if (nextProps.isLoggedIn && !this.props.isLoggedIn) {
       dispatch(discoverCatalogIfNeeded())
       dispatch(discoverExecutorIfNeeded())
       dispatch(discoverGeoserverIfNeeded())
