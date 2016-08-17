@@ -30,6 +30,22 @@ export default class SinceDateSelect extends React.Component {
     super()
     this.state = {isOpen: false}
     this._handleToggleOpen = this._handleToggleOpen.bind(this)
+    this._handleExternalClick = this._handleExternalClick.bind(this)
+  }
+
+  componentDidUpdate(prevProps, prevState) {
+    if (this.state.isOpen !== prevState.isOpen) {
+      if (this.state.isOpen) {
+        this._attachClickInterceptor()
+      }
+      else {
+        this._detachClickInterceptor()
+      }
+    }
+  }
+
+  componentWillUnmount() {
+    this._detachClickInterceptor()
   }
 
   render() {
@@ -51,9 +67,22 @@ export default class SinceDateSelect extends React.Component {
     )
   }
 
+  _attachClickInterceptor() {
+    document.addEventListener('click', this._handleExternalClick)
+  }
+
+  _detachClickInterceptor() {
+    document.removeEventListener('click', this._handleExternalClick)
+  }
+
   _handleChange(index) {
     this.props.onChange(index)
     this.setState({index, isOpen: false})
+  }
+
+  _handleExternalClick() {
+    this.setState({ isOpen: false })
+    this._detachClickInterceptor()
   }
 
   _handleToggleOpen() {
