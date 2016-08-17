@@ -41,7 +41,7 @@ const ActivityTable = ({
   <div className={styles.root}>
 
     <div className={styles.filter}>
-      Activity: Last 24 Hours <i className="fa fa-chevron-down"/>
+      Activity: <span className={styles.filterValue}>Last 24 Hours</span> <i className="fa fa-chevron-down"/>
     </div>
     <div className={styles.loadingIndicator}>
       <div className={styles.puck}/>

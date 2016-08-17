@@ -24,9 +24,14 @@
 }
 
 .filter {
+  padding: .25em var(--padding-size);
   text-align: right;
-  background-color: #555;
+  background-color: #456273;
   color: #eee;
+}
+
+.filterValue {
+  font-weight: bold;
 }
 
 /* =========================================================================
@@ -34,14 +39,14 @@
    ========================================================================= */
 
 .tableContainer {
-  font-size: 15px;
-  padding: 3px 0 1px;
-  background-color: #444;
+  font-size: 14px;
 }
 
 .tableContainer table {
   width: 100%;
   border-collapse: collapse;
+  background-color: #354852;
+  color: #b2c5d0;
 }
 
 .tableContainer tr > * {
@@ -61,10 +66,12 @@
    ========================================================================= */
 
 .tableContainer thead {
-  /*font-size: .9em;*/
-  background-color: #444;
-  color: #aaa;
+  color: #728e9e;
   -webkit-font-smoothing: antialiased;
+}
+
+.tableContainer thead th {
+  padding-top: .5em;
 }
 
 /* =========================================================================
@@ -74,17 +81,15 @@
 .tableContainer tbody tr {
   cursor: pointer;
   line-height: 2em;
-  transition: background-color .1s linear;
-  background-color: #555;
-  color: #ddd;
+  transition: background-color .1s ease-in;
 }
 
 .tableContainer tbody tr:nth-child(even) {
-  background-color: #505050;
+  background-color: rgba(0,0,0,.04);
 }
 
 .tableContainer tbody tr:hover {
-  background-color: #516977;
+  background-color: hsla(202,100%,85%,0.1);
   color: #d9f1ff;
 }
 
@@ -95,7 +100,8 @@
 
 .placeholder {
   display: inline-block;
-  height: 8px;
-  width: 50px;
-  background-color: rgba(0,0,0, .1);
+  height: 6px;
+  width: 60%;
+  background-color: currentColor;
+  opacity: .3;
 }
