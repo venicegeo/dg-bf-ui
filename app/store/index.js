@@ -26,21 +26,25 @@ import * as executor from './reducers/executor'
 import * as geoserver from './reducers/geoserver'
 import * as imagery from './reducers/imagery'
 import * as jobs from './reducers/jobs'
+import * as productLines from './reducers/productLines'
+import * as productLineJobs from './reducers/productLineJobs'
 import * as search from './reducers/search'
 import * as workers from './reducers/workers'
 
 const beachfrontApp = combineReducers({
-  algorithms:     algorithms.reducer,
-  authentication: authentication.reducer,
-  catalog:        catalog.reducer,
-  detections:     detections.reducer,
-  draftJob:       draftJob.reducer,
-  executor:       executor.reducer,
-  geoserver:      geoserver.reducer,
-  imagery:        imagery.reducer,
-  jobs:           jobs.reducer,
-  search:         search.reducer,
-  workers:        workers.reducer,
+  algorithms:      algorithms.reducer,
+  authentication:  authentication.reducer,
+  catalog:         catalog.reducer,
+  detections:      detections.reducer,
+  draftJob:        draftJob.reducer,
+  executor:        executor.reducer,
+  geoserver:       geoserver.reducer,
+  imagery:         imagery.reducer,
+  jobs:            jobs.reducer,
+  productLines:    productLines.reducer,
+  productLineJobs: productLineJobs.reducer,
+  search:          search.reducer,
+  workers:         workers.reducer,
 })
 
 let devtoolsExtension = f => f
@@ -57,6 +61,9 @@ export function configureStore(initialState) {
       devtoolsExtension
     )
   )
+  if (process.env.NODE_ENV === 'development') {
+    window.store = store
+  }
   store.subscribe(debounce(() => serializeState(store.getState()), 1000))
   return store
 }
@@ -76,6 +83,7 @@ function deserializeState() {
       geoserver: geoserver.deserialize(),
       imagery: imagery.deserialize(),
       jobs: jobs.deserialize(),
+      productLines: productLines.deserialize(),
       search: search.deserialize(),
     }
   } catch (err) {
@@ -94,6 +102,7 @@ function serializeState(state) {
     geoserver.serialize(state.geoserver)
     imagery.serialize(state.imagery)
     jobs.serialize(state.jobs)
+    productLines.serialize(state.productLines)
     search.serialize(state.search)
   } catch (err) {
     console.error('(store:serializeState) Could not serialize state tree', err)

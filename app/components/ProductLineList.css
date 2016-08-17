@@ -14,15 +14,7 @@
  * limitations under the License.
  **/
 
-export * from './algorithms'
-export * from './authentication'
-export * from './catalog'
-export * from './detections'
-export * from './draftJob'
-export * from './executor'
-export * from './geoserver'
-export * from './imagery'
-export * from './jobs'
-export * from './productLines'
-export * from './productLineJobs'
-export * from './search'
+.root {
+  composes: submenu from '../styles/menus.css';
+  background-color: hsl(202, 30%, 90%);
+}
