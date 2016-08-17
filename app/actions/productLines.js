@@ -17,12 +17,17 @@
 import {GATEWAY} from '../config'
 
 import {
+  KEY_ALGORITHM_NAME,
   KEY_CREATED_ON,
   KEY_EXPIRES_ON,
   KEY_IMAGE_CLOUDCOVER,
   KEY_IMAGE_SENSOR,
   KEY_EVENT_TYPE_ID,
   KEY_NAME,
+  KEY_OWNER,
+  KEY_SPATIAL_FILTER_NAME,
+  KEY_STARTS_ON,
+  KEY_WMS_LAYER_ID,
 } from '../constants'
 
 export const FETCH_PRODUCT_LINES = 'FETCH_PRODUCT_LINES'
@@ -45,6 +50,8 @@ export function fetchProductLines() {
       type: FETCH_PRODUCT_LINES,
     })
     const state = getState()
+    const algorithmNames = generateAlgorithmNamesHash(state.algorithms.records)
+    const filterNames = generateFilterNamesHash(state.catalog.filters)
     return fetch(`${state.executor.url}/getProductLines`, {
       body: JSON.stringify({
         pzAuthToken: state.authentication.token,
@@ -54,7 +61,7 @@ export function fetchProductLines() {
       method: 'POST'
     })
       .then(checkResponse)
-      .then(extractRecords)
+      .then(extractRecords(algorithmNames, filterNames))
       .then(records => {
         dispatch(fetchProductLinesSuccess(records))
       })
@@ -75,8 +82,8 @@ function checkResponse(response) {
   throw new Error(`HttpError: (code=${response.status})`)
 }
 
-function extractRecords(data) {
-  return data.map(datum => ({
+function extractRecords(algorithmNames, filterNames) {
+  return data => data.map(datum => ({
     id: datum.triggerId,
     geometry: {
       type: 'Polygon',
@@ -89,13 +96,34 @@ function extractRecords(data) {
       ]]
     },
     properties: {
-      [KEY_CREATED_ON]:       datum.minDate,
-      [KEY_EVENT_TYPE_ID]:    datum.eventTypeId.pop(),
-      [KEY_EXPIRES_ON]:       datum.maxDate,
-      [KEY_IMAGE_CLOUDCOVER]: datum.cloudCover,
-      [KEY_IMAGE_SENSOR]:     datum.sensorName,
-      [KEY_NAME]:             datum.name,
+      [KEY_OWNER]:               datum.owner,
+      [KEY_ALGORITHM_NAME]:      algorithmNames[datum.bfInputJSON.svcURL] || 'Unknown',
+      [KEY_CREATED_ON]:          datum.minDate,
+      [KEY_EVENT_TYPE_ID]:       datum.eventTypeId.pop(),
+      [KEY_EXPIRES_ON]:          datum.maxDate,
+      [KEY_IMAGE_CLOUDCOVER]:    datum.cloudCover,
+      [KEY_IMAGE_SENSOR]:        datum.sensorName,
+      [KEY_NAME]:                datum.name,
+      [KEY_SPATIAL_FILTER_NAME]: filterNames[datum.subindexId],
+      [KEY_STARTS_ON]:           datum.minDate,
+      [KEY_WMS_LAYER_ID]:        datum.bfInputJSON.lGroupId,
     },
     type: 'Feature',
   }))
+}
+
+function generateAlgorithmNamesHash(algorithms) {
+  const hash = {}
+  for (const algorithm of algorithms) {
+    hash[algorithm.url] = algorithm.name
+  }
+  return hash
+}
+
+function generateFilterNamesHash(filters) {
+  const hash = {}
+  for (const filter of filters) {
+    hash[filter.id] = filter.name
+  }
+  return hash
 }

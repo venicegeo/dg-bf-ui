@@ -48,6 +48,11 @@ const fetchProductLineJobsError = (productLineId, err) => ({
 export function fetchProductLineJobs(productLineId, sinceDate) {
   return (dispatch, getState) => {
     const state = getState()
+    dispatch({
+      type: FETCH_PRODUCT_LINE_JOBS,
+      productLineId,
+      sinceDate,
+    })
     return fetch(`${state.executor.url}/listProdLineJobs`, {
       body: JSON.stringify({
 
