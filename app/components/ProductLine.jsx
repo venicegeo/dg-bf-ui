@@ -17,6 +17,8 @@
 const styles = require('./ProductLine.css')
 
 import React from 'react'
+import {Link} from 'react-router'
+import {featureToAnchor} from '../utils/map-anchor'
 import moment from 'moment'
 import ActivityTable from './ActivityTable'
 
@@ -57,8 +59,8 @@ export default class ProductLine extends React.Component {
   }
 
   render() {
-    const {properties} = this.props.productLine
-    const {jobs} = this.props
+    const {jobs, productLine} = this.props
+    const {properties} = productLine
     const {isExpanded, selectedJobId, sinceDate} = this.state
     return (
       <li className={`${styles.root} ${isExpanded ? styles.isExpanded : ''}`}>
@@ -67,9 +69,9 @@ export default class ProductLine extends React.Component {
             <i className={`fa fa-chevron-right ${styles.caret}`}/>
             <span>{properties[KEY_NAME]}</span>
           </h3>
-          <div className={styles.viewButton}>
+          <Link to={{pathname: '/product-lines', hash: featureToAnchor(productLine)}} className={styles.viewButton} onClick={this._handleJumpTo}>
             <i className="fa fa-globe"/>
-          </div>
+          </Link>
         </section>
         <section className={styles.details}>
           <div className={styles.metadata}>
