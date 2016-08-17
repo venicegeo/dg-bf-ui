@@ -17,7 +17,6 @@
 .root {
   display: inline-block;
   position: relative;
-  height: 1.5em;
 }
 
 /* =========================================================================
@@ -35,7 +34,7 @@
 }
 
 .button i {
-  margin-left: .4em;
+  /*margin-left: .4em;*/
 }
 
 .isOpen .button {
