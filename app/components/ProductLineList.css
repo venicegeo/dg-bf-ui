@@ -16,4 +16,5 @@
 
 .root {
   composes: submenu from '../styles/menus.css';
+  background-color: hsl(202, 30%, 90%);
 }
