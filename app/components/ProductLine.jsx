@@ -47,6 +47,7 @@ export default class ProductLine extends React.Component {
     }
     this._handleExpansionToggle = this._handleExpansionToggle.bind(this)
     this._handleJobSelect = this._handleJobSelect.bind(this)
+    this._handleSinceDateChange = this._handleSinceDateChange.bind(this)
   }
 
   componentDidUpdate(prevProps, prevState) {
@@ -97,9 +98,16 @@ export default class ProductLine extends React.Component {
             selectedJobId={selectedJobId}
             error={jobs.error}
             sinceDate={sinceDate}
-            onRowClick={this._handleJobSelect}
+            sinceDates={[
+              {value: last24Hours(), label: 'Last 24 Hours'},
+              {value: last7Days(), label: 'Last 7 Days'},
+              {value: last30Days(), label: 'Last 30 Days'},
+              {value: properties[KEY_CREATED_ON], label: 'All'},
+            ]}
             onHoverIn={job => console.debug('onHoverIn ->', job)}
             onHoverOut={job => console.debug('onHoverOut ->', job)}
+            onRowClick={this._handleJobSelect}
+            onSinceDateChange={this._handleSinceDateChange}
           />
         </section>
       </li>
@@ -115,6 +123,10 @@ export default class ProductLine extends React.Component {
     this.setState({
       selectedJobId: job ? job.id : null,
     })
+  }
+
+  _handleSinceDateChange(sinceDate) {
+    this.setState({ sinceDate })
   }
 }
 
@@ -135,15 +147,15 @@ function jobFilter(sinceDate) {
 }
 
 function last24Hours() {
-  return moment().subtract(24, 'hours').toISOString()
+  return moment().subtract(24, 'hours').startOf('hour').toISOString()
 }
 
 function last7Days() {
-  return moment().subtract(7, 'days').toISOString()
+  return moment().subtract(7, 'days').startOf('hour').toISOString()
 }
 
 function last30Days() {
-  return moment().subtract(30, 'days').toISOString()
+  return moment().subtract(30, 'days').startOf('hour').toISOString()
 }
 
 function titleCase(s) {

@@ -32,10 +32,6 @@
   color: #eee;
 }
 
-.filterValue {
-  font-weight: bold;
-}
-
 .loadingIndicator {
   transition: height .1s liinear;
   height: 0;

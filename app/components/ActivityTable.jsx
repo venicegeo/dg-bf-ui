@@ -16,6 +16,7 @@
 
 import React from 'react'
 import moment from 'moment'
+import SinceDateSelect from './SinceDateSelect'
 
 const styles = require('./ActivityTable.css')
 
@@ -35,14 +36,21 @@ const ActivityTable = ({
   jobs,
   selectedJobId,
   sinceDate,
-  onRowClick,
+  sinceDates,
   onHoverIn,
   onHoverOut,
+  onRowClick,
+  onSinceDateChange,
 }) => (
   <div className={`${styles.root} ${className}`}>
 
     <div className={styles.filter}>
-      Activity: <span className={styles.filterValue}>Last 24 Hours</span> <i className="fa fa-chevron-down"/>
+      Activity:{' '}
+      <SinceDateSelect
+        options={sinceDates}
+        value={sinceDate}
+        onChange={onSinceDateChange}
+      />
     </div>
 
     <div className={styles.loadingIndicator}>
@@ -99,9 +107,11 @@ ActivityTable.propTypes = {
   jobs: React.PropTypes.array.isRequired,
   selectedJobId: React.PropTypes.string,
   sinceDate: React.PropTypes.string.isRequired,
-  onRowClick: React.PropTypes.func.isRequired,
+  sinceDates: React.PropTypes.array.isRequired,
   onHoverIn: React.PropTypes.func.isRequired,
   onHoverOut: React.PropTypes.func.isRequired,
+  onRowClick: React.PropTypes.func.isRequired,
+  onSinceDateChange: React.PropTypes.func.isRequired,
 }
 
 export default ActivityTable
