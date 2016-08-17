@@ -55,7 +55,7 @@ export function fetchProductLineJobs(productLineId, sinceDate) {
         TriggerId:   productLineId,
         PzAuthToken: state.authentication.token,
         PzAddr:      GATEWAY,
-        PerPage:     200,  // HACK -- see explanation below
+        PerPage:     '200',  // HACK -- see explanation below
       }),
       headers: {'content-type': 'application/json'},
       method: 'POST'
