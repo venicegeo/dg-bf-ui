@@ -234,7 +234,7 @@
   left: 0;
   bottom: 0;
   background-color: var(--bgcolor-progressbar-puck);
-  transition: width .5s ease;
+  transition: width .5s linear;
 }
 
 .isLoading .progressBar {
