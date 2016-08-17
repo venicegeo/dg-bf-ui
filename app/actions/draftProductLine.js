@@ -14,12 +14,28 @@
  * limitations under the License.
  **/
 
-export * from './algorithms'
-export * from './authentication'
-export * from './catalog'
-export * from './draftJob'
-export * from './draftProductLine'
-export * from './imagery'
-export * from './jobs'
-export * from './results'
-export * from './search'
+import moment from 'moment'
+
+//
+// Action Types
+//
+
+export const CHANGE_PRODUCT_LINE_NAME = 'CHANGE_PRODUCT_LINE_NAME'
+
+//
+// Action Creators
+//
+
+export function resetProductLineName() {
+  return {
+    type: CHANGE_PRODUCT_LINE_NAME,
+    name: 'BF_' + moment().format('DDMMMYYYY').toUpperCase()
+  }
+}
+
+export function changeProductLineName(name) {
+  return {
+    type: CHANGE_PRODUCT_LINE_NAME,
+    name
+  }
+}

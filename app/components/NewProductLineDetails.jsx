@@ -31,6 +31,10 @@ export default class NewProductLineDetails extends Component {
 
   componentDidMount() {
     this.refs.name.value = this.props.name
+
+    const date = new Date(new Date() + 1)
+    this.refs.dateToBegin.value = new Date(new Date() + 1).toISOString().split('T')[0]
+    this.refs.dateToEnd.value = new Date(date.setDate(date.getDate() + 30)).toISOString().split('T')[0]
   }
 
   componentWillReceiveProps(nextProps) {
@@ -43,9 +47,19 @@ export default class NewProductLineDetails extends Component {
     return (
       <div className={styles.root}>
         <h2>Product Line Details</h2>
+        <h3>Name</h3>
         <label className={styles.field}>
-          <span>Name</span>
           <input ref="name" onChange={this._emitNameChange}/>
+        </label>
+
+        <h3>Scheduling</h3>
+        <label className={styles.captureDateToBegin}>
+          <span>Date To Begin</span>
+          <input ref="dateToBegin" type="date" onChange={this._emitDateChange} />
+        </label>
+        <label className={styles.captureDateToEnd}>
+          <span>Date To End</span>
+          <input ref="dateToEnd" type="date" onChange={this._emitDateChange} />
         </label>
       </div>
     )

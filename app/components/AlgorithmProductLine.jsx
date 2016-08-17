@@ -87,6 +87,7 @@ export default class AlgorithmProductLine extends Component {
     if (!this._canSubmit) {
       return
     }
-    this.props.onSubmit(this.props.algorithm)
+console.dir(this)
+    //this.props.onSubmit(this.props.algorithm)
   }
 }

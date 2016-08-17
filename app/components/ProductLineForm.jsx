@@ -24,8 +24,6 @@ export default class ProductLineForm extends Component {
     bbox:               React.PropTypes.array.isRequired,
     catalogApiKey:      React.PropTypes.string,
     cloudCover:         React.PropTypes.number.isRequired,
-    dateFrom:           React.PropTypes.string.isRequired,
-    dateTo:             React.PropTypes.string.isRequired,
     error:              React.PropTypes.object,
     filter:             React.PropTypes.string,
     filters:            React.PropTypes.arrayOf(React.PropTypes.shape({
@@ -45,15 +43,11 @@ export default class ProductLineForm extends Component {
     super()
     this._emitApiKeyChange = this._emitApiKeyChange.bind(this)
     this._emitCloudCoverChange = this._emitCloudCoverChange.bind(this)
-    this._emitDateChange = this._emitDateChange.bind(this)
     this._emitFilterChange = this._emitFilterChange.bind(this)
     this._handleSubmit = this._handleSubmit.bind(this)
   }
 
   componentDidMount() {
-    const date = new Date(new Date() + 1)
-    this.refs.dateFrom.value = new Date(new Date() + 1).toISOString().split('T')[0]
-    this.refs.dateTo.value = new Date(date.setDate(date.getDate() + 30)).toISOString().split('T')[0]
     this.refs.apiKey.value = this.props.catalogApiKey || ''
     this.refs.cloudCover.value = this.props.cloudCover || '0'
     this.refs.filter.value = this.props.filter || ''
@@ -65,12 +59,6 @@ export default class ProductLineForm extends Component {
     }
     if (prevProps.cloudCover !== this.props.cloudCover) {
       this.refs.cloudCover.value = this.props.cloudCover
-    }
-    if (prevProps.dateFrom !== this.props.dateFrom) {
-      this.refs.dateFrom.value = this.props.dateFrom
-    }
-    if (prevProps.dateTo !== this.props.dateTo) {
-      this.refs.dateTo.value = this.props.dateTo
     }
     if (prevProps.filter !== this.props.filter) {
       this.refs.filter.value = this.props.filter || ''
@@ -108,16 +96,6 @@ export default class ProductLineForm extends Component {
           <input ref="apiKey" type="password" disabled={isSearching} onChange={this._emitApiKeyChange} />
         </label>
 
-        <h3>Date of Capture</h3>
-        <label className={styles.captureDateFrom}>
-          <span>From</span>
-          <input ref="dateFrom" type="date" disabled='disabled' onChange={this._emitDateChange} />
-        </label>
-        <label className={styles.captureDateTo}>
-          <span>To</span>
-          <input ref="dateTo" type="date" disabled={isSearching} onChange={this._emitDateChange} />
-        </label>
-
         <h3>Filters</h3>
         <label className={styles.cloudCover}>
           <span>Cloud Cover</span>
@@ -148,8 +126,6 @@ export default class ProductLineForm extends Component {
   get _canSubmit() {
     return this.props.isSearching === false
         && this.props.catalogApiKey
-        && this.props.dateFrom
-        && this.props.dateTo
   }
 
   _emitApiKeyChange() {
@@ -158,11 +134,6 @@ export default class ProductLineForm extends Component {
 
   _emitCloudCoverChange() {
     this.props.onCloudCoverChange(parseInt(this.refs.cloudCover.value, 10))
-  }
-
-  _emitDateChange() {
-    const {dateFrom, dateTo} = this.refs
-    this.props.onDateChange(dateFrom.value, dateTo.value)
   }
 
   _emitFilterChange() {

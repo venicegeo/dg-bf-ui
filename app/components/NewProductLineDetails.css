@@ -14,6 +14,11 @@
  * limitations under the License.
  **/
 
+.captureDateToBegin,
+.captureDateToEnd {
+  composes: field-normal from '../styles/forms.css';
+}
+
 .field {
   composes: field-normal from '../styles/forms.css';
   margin-top: 1em;

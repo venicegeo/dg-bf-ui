@@ -19,11 +19,12 @@ import {connect} from 'react-redux'
 import AlgorithmListProductLine from './AlgorithmListProductLine'
 import ProductLineForm from './ProductLineForm'
 import NewProductLineDetails from './NewProductLineDetails'
+import ComputeMasking from './ComputeMasking'
 import styles from './CreateProductLine.css'
 import {
-  createJob,
-  changeJobName,
-  resetJobName,
+  createProductLine,
+  changeProductLineName,
+  resetProductLineName,
   searchCatalog,
   updateCatalogApiKey,
   updateSearchBbox,
@@ -42,29 +43,25 @@ export class CreateProductLine extends Component {
     bbox:                     React.PropTypes.arrayOf(React.PropTypes.number),
     catalogApiKey:            React.PropTypes.string,
     cloudCover:               React.PropTypes.number.isRequired,
-    dateFrom:                 React.PropTypes.string.isRequired,
-    dateTo:                   React.PropTypes.string.isRequired,
     filter:                   React.PropTypes.string,
     filters:                  React.PropTypes.arrayOf(React.PropTypes.object).isRequired,
     isCreating:               React.PropTypes.bool.isRequired,
     isSearching:              React.PropTypes.bool.isRequired,
-    jobName:                  React.PropTypes.string.isRequired,
+    productLineName:          React.PropTypes.string.isRequired,
     onCatalogApiKeyChange:    React.PropTypes.func.isRequired,
     onClearBbox:              React.PropTypes.func.isRequired,
-    onJobSubmit:              React.PropTypes.func.isRequired,
+    onProductLineSubmit:              React.PropTypes.func.isRequired,
     onNameChange:             React.PropTypes.func.isRequired,
     onResetName:              React.PropTypes.func.isRequired,
     onSearchCloudCoverChange: React.PropTypes.func.isRequired,
     onSearchFilterChange:     React.PropTypes.func.isRequired,
     onSearchDateChange:       React.PropTypes.func.isRequired,
-    onSearchSubmit:           React.PropTypes.func.isRequired,
-    searchError:              React.PropTypes.object,
-    selectedImage:            React.PropTypes.object,
+    onSearchSubmit:           React.PropTypes.func.isRequired
   }
 
   constructor() {
     super()
-    this._emitJobSubmit = this._emitJobSubmit.bind(this)
+    this._emitProductLineSubmit = this._emitProductLineSubmit.bind(this)
   }
 
   componentDidMount() {
@@ -84,9 +81,6 @@ export class CreateProductLine extends Component {
                 bbox={this.props.bbox}
                 catalogApiKey={this.props.catalogApiKey}
                 cloudCover={this.props.cloudCover}
-                dateFrom={this.props.dateFrom}
-                dateTo={this.props.dateTo}
-                error={this.props.searchError}
                 filter={this.props.filter}
                 filters={this.props.filters}
                 isSearching={this.props.isSearching}
@@ -100,15 +94,18 @@ export class CreateProductLine extends Component {
             </li>,
             <li className={styles.details}>
               <NewProductLineDetails
-                name={this.props.jobName}
+                name={this.props.productLineName}
                 onNameChange={this.props.onNameChange}
               />
+            </li>,
+            <li className={styles.details}>
+              <ComputeMasking/>
             </li>,
             <li className={styles.algorithms}>
               <AlgorithmListProductLine
                 algorithms={this.props.algorithms}
                 isSubmitting={this.props.isCreating}
-                onSubmit={this._emitJobSubmit}
+                onSubmit={this._emitProductLineSubmit}
               />
             </li>
           ])}
@@ -122,14 +119,14 @@ export class CreateProductLine extends Component {
     )
   }
 
-  _emitJobSubmit(algorithm) {
-    const {jobName, selectedImage, catalogApiKey} = this.props
-    this.props.onJobSubmit(catalogApiKey, jobName, algorithm, selectedImage)
-      .then(jobId => {
+  _emitProductLineSubmit(algorithm) {
+    const {productLineName, catalogApiKey} = this.props
+    this.props.onProductLineSubmit(catalogApiKey, productLineName, algorithm)
+      .then(productLineId => {
         this.context.router.push({
-          pathname: '/jobs',
+          pathname: '/product-lines',
           query: {
-            jobId
+            productLineId
           }
         })
       })
@@ -137,25 +134,23 @@ export class CreateProductLine extends Component {
 }
 
 export default connect(state => ({
-  algorithms:    state.algorithms.records,
-  bbox:          state.search.bbox,
-  catalogApiKey: state.catalog.apiKey,
-  cloudCover:    state.search.cloudCover,
-  dateFrom:      state.search.dateFrom,
-  dateTo:        state.search.dateTo,
-  filter:        state.search.filter,
-  filters:       state.catalog.filters,
-  isCreating:    state.jobs.creating,
-  isSearching:   state.search.searching,
-  jobName:       state.draftJob.name,
-  searchError:   state.search.error,
-  selectedImage: state.draftJob.image,
+  algorithms:      state.algorithms.records,
+  bbox:            state.search.bbox,
+  catalogApiKey:   state.catalog.apiKey,
+  cloudCover:      state.search.cloudCover,
+  dateToBegin:     state.search.dateToBegin,
+  dateToEnd:       state.search.dateToEnd,
+  filter:          state.search.filter,
+  filters:         state.catalog.filters,
+  isCreating:      state.jobs.creating,
+  isSearching:     state.search.searching,
+  productLineName: state.draftProductLine.name,
 }), dispatch => ({
-  onJobSubmit:              (apiKey, name, algorithm, image) => dispatch(createJob(apiKey, name, algorithm, image)),
+  onProductLineSubmit:      (apiKey, name, algorithm) => dispatch(createProductLine(apiKey, name, algorithm)),
   onCatalogApiKeyChange:    (apiKey) => dispatch(updateCatalogApiKey(apiKey)),
   onClearBbox:              () => dispatch(updateSearchBbox()),
-  onNameChange:             (name) => dispatch(changeJobName(name)),
-  onResetName:              () => dispatch(resetJobName()),
+  onNameChange:             (name) => dispatch(changeProductLineName(name)),
+  onResetName:              () => dispatch(resetProductLineName()),
   onSearchCloudCoverChange: (cloudCover) => dispatch(updateSearchCloudCover(cloudCover)),
   onSearchFilterChange:     (filter) => dispatch(updateSearchFilter(filter)),
   onSearchDateChange:       (dateFrom, dateTo) => dispatch(updateSearchDates(dateFrom, dateTo)),
