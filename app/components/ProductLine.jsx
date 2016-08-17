@@ -14,11 +14,11 @@
  * limitations under the License.
  **/
 
+const styles = require('./ProductLine.css')
+
 import React from 'react'
 import moment from 'moment'
 import ActivityTable from './ActivityTable'
-
-const styles = require('./ProductLine.css')
 
 import {
   KEY_ALGORITHM_NAME,
@@ -71,30 +71,28 @@ export default class ProductLine extends React.Component {
           </div>
         </section>
         <section className={styles.details}>
-          {isExpanded && (
-            <div className={styles.metadata}>
-              <dl>
-                <dt>Scheduling</dt>
-                <dd>{formatDate(properties[KEY_STARTS_ON])} &mdash; {formatDate(properties[KEY_EXPIRES_ON]) || 'Forever'}</dd>
-                <dt>Algorithm</dt>
-                <dd>{properties[KEY_ALGORITHM_NAME]}</dd>
-                <dt>Cloud Cover</dt>
-                <dd>{properties[KEY_IMAGE_CLOUDCOVER]}</dd>
-                {/*
-                <dt>Compute Mask</dt>
-                <dd>{computeMask}</dd>
-                */}
-                <dt>Spatial Filter</dt>
-                <dd>{titleCase(properties[KEY_SPATIAL_FILTER_NAME])}</dd>
-                <dt>Owner</dt>
-                <dd>{properties[KEY_OWNER]}</dd>
-                <dt>Date Created</dt>
-                <dd>{formatDate(properties[KEY_CREATED_ON])}</dd>
-              </dl>
-            </div>
-          )}
-
+          <div className={styles.metadata}>
+            <dl>
+              <dt>Scheduling</dt>
+              <dd>{formatDate(properties[KEY_STARTS_ON])} &mdash; {formatDate(properties[KEY_EXPIRES_ON]) || 'Forever'}</dd>
+              <dt>Algorithm</dt>
+              <dd>{properties[KEY_ALGORITHM_NAME]}</dd>
+              <dt>Cloud Cover</dt>
+              <dd>{properties[KEY_IMAGE_CLOUDCOVER]}</dd>
+              {/*
+              <dt>Compute Mask</dt>
+              <dd>{computeMask}</dd>
+              */}
+              <dt>Spatial Filter</dt>
+              <dd>{titleCase(properties[KEY_SPATIAL_FILTER_NAME])}</dd>
+              <dt>Owner</dt>
+              <dd>{properties[KEY_OWNER]}</dd>
+              <dt>Date Created</dt>
+              <dd>{formatDate(properties[KEY_CREATED_ON])}</dd>
+            </dl>
+          </div>
           <ActivityTable
+            className={styles.activityTable}
             jobs={jobs.records.filter(jobFilter(sinceDate))}
             selectedJobId={selectedJobId}
             error={jobs.error}

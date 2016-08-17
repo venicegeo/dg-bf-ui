@@ -78,15 +78,14 @@
 .details {
   height: 0;
   overflow: hidden;
-  transition: height .15s ease-in-out;
+  transition: height .2s ease-in-out;
   display: flex;
   flex-direction: column;
   background-color: #f5f5f5;
 }
 
 .isExpanded .details {
-  position: relative;
-  height: calc(100% - 100px);
+  height: 600px;
 }
 
 /* =========================================================================
@@ -114,4 +113,13 @@
 .metadata dd {
   flex: 1 200px;
   word-break: break-all;
+}
+
+/* =========================================================================
+   Jobs
+   ========================================================================= */
+
+.activityTable {
+  flex: 1;
+  overflow-y: scroll;
 }

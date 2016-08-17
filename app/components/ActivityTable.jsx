@@ -30,19 +30,21 @@ import {
 const PLACEHOLDER = <span className={styles.placeholder}/>
 
 const ActivityTable = ({
-  selectedJobId,
+  className,
   error,
   jobs,
+  selectedJobId,
   sinceDate,
   onRowClick,
   onHoverIn,
   onHoverOut,
 }) => (
-  <div className={styles.root}>
+  <div className={`${styles.root} ${className}`}>
 
     <div className={styles.filter}>
       Activity: <span className={styles.filterValue}>Last 24 Hours</span> <i className="fa fa-chevron-down"/>
     </div>
+
     <div className={styles.loadingIndicator}>
       <div className={styles.puck}/>
     </div>
@@ -92,6 +94,7 @@ const ActivityTable = ({
 )
 
 ActivityTable.propTypes = {
+  className: React.PropTypes.string,
   error: React.PropTypes.object,
   jobs: React.PropTypes.array.isRequired,
   selectedJobId: React.PropTypes.string,
