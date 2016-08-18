@@ -206,7 +206,7 @@ export default connect((state, ownProps) => ({
   isSearching:     state.search.searching,
   productLines:    state.productLines.records,
   productLineJobs: state.productLineJobs,
-  selectedFeature: state.draftJob.image || state.jobs.records.find(j => j.id === ownProps.location.query.jobId) || null,
+  selectedFeature: state.productLineJobs.selection[0] || state.draftJob.image || state.jobs.records.find(j => j.id === ownProps.location.query.jobId) || null,
   workers:         state.workers,
 }))(Application)
 
