@@ -30,16 +30,16 @@ const styles = require('./ProductLineList.css')
 
 export class ProductLineList extends React.Component {
   static propTypes = {
-    isFetching:        React.PropTypes.bool,
-    jobs:              React.PropTypes.object,
-    productLines:      React.PropTypes.array,
-    selectedJobs:      React.PropTypes.array,
-    fetchProductLines: React.PropTypes.func,
-    onFetchJobs:       React.PropTypes.func,
-    onJobHoverIn:      React.PropTypes.func,
-    onJobHoverOut:     React.PropTypes.func,
-    onJobSelect:       React.PropTypes.func,
-    onJobDeselect:     React.PropTypes.func,
+    isFetching:        React.PropTypes.bool.isRequired,
+    jobs:              React.PropTypes.object.isRequired,
+    productLines:      React.PropTypes.array.isRequired,
+    selectedJobIds:    React.PropTypes.array.isRequired,
+    fetchProductLines: React.PropTypes.func.isRequired,
+    onFetchJobs:       React.PropTypes.func.isRequired,
+    onJobHoverIn:      React.PropTypes.func.isRequired,
+    onJobHoverOut:     React.PropTypes.func.isRequired,
+    onJobSelect:       React.PropTypes.func.isRequired,
+    onJobDeselect:     React.PropTypes.func.isRequired,
   }
 
   componentDidMount() {
@@ -58,7 +58,7 @@ export class ProductLineList extends React.Component {
               key={productLine.id}
               productLine={productLine}
               jobs={this.props.jobs[productLine.id]}
-              selectedJob={this.props.selectedJobs[0]}
+              selectedJobIds={this.props.selectedJobIds}
               fetchJobs={sinceDate => this.props.onFetchJobs(productLine.id, sinceDate)}
               onJobHoverIn={this.props.onJobHoverIn}
               onJobHoverOut={this.props.onJobHoverOut}
@@ -78,10 +78,10 @@ export class ProductLineList extends React.Component {
 }
 
 export default connect(state => ({
-  isFetching:   state.productLines.fetching,
-  jobs:         state.productLineJobs,
-  productLines: state.productLines.records,
-  selectedJobs:  state.productLineJobs.selection,
+  isFetching:     state.productLines.fetching,
+  jobs:           state.productLineJobs,
+  productLines:   state.productLines.records,
+  selectedJobIds: state.productLineJobs.selection.map(j => j.id),
 }), dispatch => ({
   fetchProductLines: () => dispatch(fetchProductLines()),
   onFetchJobs:       (id, sinceDate) => dispatch(fetchProductLineJobs(id, sinceDate)),

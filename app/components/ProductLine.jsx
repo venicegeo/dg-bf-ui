@@ -37,7 +37,7 @@ export default class ProductLine extends React.Component {
   static propTypes = {
     jobs:          React.PropTypes.object.isRequired,
     productLine:   React.PropTypes.object.isRequired,
-    selectedJob:   React.PropTypes.object,
+    selectedJobIds: React.PropTypes.array.isRequired,
     fetchJobs:     React.PropTypes.func.isRequired,
     onJobHoverIn:  React.PropTypes.func.isRequired,
     onJobHoverOut: React.PropTypes.func.isRequired,
@@ -52,6 +52,7 @@ export default class ProductLine extends React.Component {
       sinceDate: last24Hours(),
     }
     this._handleExpansionToggle = this._handleExpansionToggle.bind(this)
+    this._handleJobRowClick = this._handleJobRowClick.bind(this)
     this._handleSinceDateChange = this._handleSinceDateChange.bind(this)
   }
 
@@ -65,7 +66,6 @@ export default class ProductLine extends React.Component {
     const {jobs, productLine} = this.props
     const {properties} = productLine
     const {isExpanded, sinceDate} = this.state
-    const {onJobDeselect} = this.props
     return (
       <li className={`${styles.root} ${isExpanded ? styles.isExpanded : ''}`}>
         <section className={styles.header} onClick={this._handleExpansionToggle}>
@@ -101,7 +101,7 @@ export default class ProductLine extends React.Component {
           <ActivityTable
             className={styles.activityTable}
             jobs={jobs.records.filter(jobFilter(sinceDate))}
-            selectedJobId={this.props.selectedJob && this.props.selectedJob.id}
+            selectedJobIds={this.props.selectedJobIds}
             error={jobs.error}
             sinceDate={sinceDate}
             sinceDates={[
@@ -112,7 +112,7 @@ export default class ProductLine extends React.Component {
             ]}
             onHoverIn={this.props.onJobHoverIn}
             onHoverOut={this.props.onJobHoverOut}
-            onRowClick={this.props.onJobSelect}
+            onRowClick={this._handleJobRowClick}
             onSinceDateChange={this._handleSinceDateChange}
           />
         </section>
@@ -123,6 +123,15 @@ export default class ProductLine extends React.Component {
   _handleExpansionToggle() {
     this.setState({ isExpanded: !this.state.isExpanded })
     // TODO -- scroll to positioning
+  }
+
+  _handleJobRowClick(job) {
+    if (this.props.selectedJobIds.includes(job.id)) {
+      this.props.onJobDeselect()
+    }
+    else {
+      this.props.onJobSelect(job)
+    }
   }
 
   _handleSinceDateChange(sinceDate) {
