@@ -503,6 +503,21 @@ export default class PrimaryMap extends Component {
     })
   }
 
+  _renderHighlight() {
+    const source = this._highlightLayer.getSource()
+    source.clear()
+
+    const geojson = this.props.highlightedFeature
+    if (!geojson) {
+      return
+    }
+
+    const reader = new ol.format.GeoJSON()
+    const feature = reader.readFeature(geojson, {featureProjection: 'EPSG:3857'})
+
+    source.addFeature(feature)
+  }
+
   _renderImagery() {
     const {imagery} = this.props
     const reader = new ol.format.GeoJSON()
@@ -554,21 +569,6 @@ export default class PrimaryMap extends Component {
       geometry: ol.geom.Polygon.fromExtent(bbox)
     })
     this._drawLayer.getSource().addFeature(feature)
-  }
-
-  _renderHighlight() {
-    const source = this._highlightLayer.getSource()
-    source.clear()
-
-    const geojson = this.props.highlightedFeature
-    if (!geojson) {
-      return
-    }
-
-    const reader = new ol.format.GeoJSON()
-    const feature = reader.readFeature(geojson, {featureProjection: 'EPSG:3857'})
-
-    source.addFeature(feature)
   }
 
   _renderSelectionPreview() {
