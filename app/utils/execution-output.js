@@ -67,11 +67,11 @@ export function extractImageCaptureDate({ imageCaptureDate }) {
   return imageCaptureDate
 }
 
-export function extractImageId({ imageId }) {
-  if (!imageId) {
+export function extractImageId({ dbImageId }) {
+  if (!dbImageId) {
     throw new Error('missing image ID')
   }
-  return imageId
+  return dbImageId
 }
 
 export function extractSensorName({ sensorName }) {
@@ -81,8 +81,8 @@ export function extractSensorName({ sensorName }) {
   return sensorName
 }
 
-export function extractName({ name }) {
-  return name || `Imported(${Math.random().toString(16).substr(2, 5)})`
+export function extractName({ resultName }) {
+  return resultName || `Imported(${Math.random().toString(16).substr(2, 5)})`
 }
 
 export function parseString(outputString) {

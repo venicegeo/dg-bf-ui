@@ -82,7 +82,7 @@ export function createJob(catalogApiKey, name, algorithm, feature) {
             dbAuthToken:   catalogApiKey,
             bands:         algorithm.requirements.find(a => a.name === REQUIREMENT_BANDS).literal.split(','),
             metaDataJSON:  feature,
-            name:          name,
+            resultName:    name,
           }),
           type:     'body',
           mimeType: 'application/json'
