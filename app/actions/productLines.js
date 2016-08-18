@@ -27,7 +27,10 @@ import {
   KEY_OWNER,
   KEY_SPATIAL_FILTER_NAME,
   KEY_STARTS_ON,
+  KEY_STATUS,
   KEY_WMS_LAYER_ID,
+  STATUS_ACTIVE,
+  STATUS_INACTIVE,
 } from '../constants'
 
 export const FETCH_PRODUCT_LINES = 'FETCH_PRODUCT_LINES'
@@ -104,6 +107,7 @@ function extractRecords(algorithmNames, filterNames) {
       [KEY_IMAGE_CLOUDCOVER]:    datum.cloudCover,
       [KEY_IMAGE_SENSOR]:        datum.sensorName,
       [KEY_NAME]:                datum.name,
+      [KEY_STATUS]:              isActive(datum.maxDate) ? STATUS_ACTIVE : STATUS_INACTIVE,
       [KEY_SPATIAL_FILTER_NAME]: filterNames[datum.subindexId],
       [KEY_STARTS_ON]:           datum.minDate,
       [KEY_WMS_LAYER_ID]:        datum.bfInputJSON.lGroupId,
@@ -126,4 +130,8 @@ function generateFilterNamesHash(filters) {
     hash[filter.id] = filter.name
   }
   return hash
+}
+
+function isActive(maxDate) {
+  return !maxDate || new Date(maxDate).getTime() < Date.now().getTime()
 }
