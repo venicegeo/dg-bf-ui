@@ -72,8 +72,8 @@ const ActivityTable = ({
               key={job.id}
               className={selectedJobId === job.id ? styles.isActive : ''}
               onClick={() => onRowClick(job)}
-              onMouseEnter={() => onHoverIn(job)}
-              onMouseLeave={() => onHoverOut(job)}
+              onMouseEnter={() => job.properties && onHoverIn(job)}
+              onMouseLeave={() => job.properties && onHoverOut(job)}
               >
               <td>
                 {job.properties

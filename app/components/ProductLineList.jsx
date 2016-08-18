@@ -18,8 +18,12 @@ import React from 'react'
 import {connect} from 'react-redux'
 import ProductLine from './ProductLine'
 import {
+  clearHoveredProductLineJob,
+  clearSelectedProductLineJob,
   fetchProductLines,
   fetchProductLineJobs,
+  hoverProductLineJob,
+  selectProductLineJob,
 } from '../actions'
 
 const styles = require('./ProductLineList.css')
@@ -29,8 +33,13 @@ export class ProductLineList extends React.Component {
     isFetching:        React.PropTypes.bool,
     jobs:              React.PropTypes.object,
     productLines:      React.PropTypes.array,
+    selectedJob:       React.PropTypes.object,
     fetchProductLines: React.PropTypes.func,
     onFetchJobs:       React.PropTypes.func,
+    onJobHoverIn:      React.PropTypes.func,
+    onJobHoverOut:     React.PropTypes.func,
+    onJobSelect:       React.PropTypes.func,
+    onJobDeselect:     React.PropTypes.func,
   }
 
   componentDidMount() {
@@ -49,7 +58,12 @@ export class ProductLineList extends React.Component {
               key={productLine.id}
               productLine={productLine}
               jobs={this.props.jobs[productLine.id]}
+              selectedJob={this.props.selectedJob}
               fetchJobs={sinceDate => this.props.onFetchJobs(productLine.id, sinceDate)}
+              onJobHoverIn={this.props.onJobHoverIn}
+              onJobHoverOut={this.props.onJobHoverOut}
+              onJobSelect={this.props.onJobSelect}
+              onJobDeselect={this.props.onJobDeselect}
             />
           ))}
           {this.props.isFetching && (
@@ -67,7 +81,12 @@ export default connect(state => ({
   isFetching:   state.productLines.fetching,
   jobs:         state.productLineJobs,
   productLines: state.productLines.records,
+  selectedJob:  state.productLineJobs.selection,
 }), dispatch => ({
   fetchProductLines: () => dispatch(fetchProductLines()),
   onFetchJobs:       (id, sinceDate) => dispatch(fetchProductLineJobs(id, sinceDate)),
+  onJobHoverIn:      (job) => dispatch(hoverProductLineJob(job)),
+  onJobHoverOut:     () => dispatch(clearHoveredProductLineJob()),
+  onJobSelect:       (job) => dispatch(selectProductLineJob(job)),
+  onJobDeselect:     () => dispatch(clearSelectedProductLineJob()),
 }))(ProductLineList)

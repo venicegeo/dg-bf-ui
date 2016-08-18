@@ -17,7 +17,7 @@
 import React, {Component} from 'react'
 import {connect} from 'react-redux'
 import Navigation from './Navigation'
-import PrimaryMap, {MODE_DRAW_BBOX, MODE_NORMAL, MODE_SELECT_IMAGERY} from './PrimaryMap'
+import PrimaryMap, {MODE_DRAW_BBOX, MODE_NORMAL, MODE_SELECT_IMAGERY, MODE_PRODUCT_LINES} from './PrimaryMap'
 import styles from './Application.css'
 import {
   // DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG
@@ -53,6 +53,8 @@ class Application extends Component {
     isSearching:     React.PropTypes.bool.isRequired,
     jobs:            React.PropTypes.array.isRequired,
     location:        React.PropTypes.object.isRequired,
+    productLines:    React.PropTypes.array.isRequired,
+    productLineJobs: React.PropTypes.object.isRequired,
     selectedFeature: React.PropTypes.object,
     workers:         React.PropTypes.object.isRequired
   }
@@ -110,6 +112,9 @@ class Application extends Component {
         <Navigation currentLocation={this.props.location}/>
         <PrimaryMap
           geoserverUrl={this.props.geoserverUrl}
+          productLines={this.props.productLines}
+          hoveredProductLineJob={this.props.productLineJobs.hovered}
+          selectedProductLineJob={this.props.productLineJobs.selection}
           jobs={this.props.jobs}
           detections={this.props.detections}
           imagery={this.props.imagery}
@@ -135,10 +140,11 @@ class Application extends Component {
   //
 
   get _mapMode() {
-    if (this.props.location.pathname === 'create-job') {
-      return (this.props.bbox && this.props.imagery) ? MODE_SELECT_IMAGERY : MODE_DRAW_BBOX
+    switch (this.props.location.pathname) {
+    case 'create-job': return (this.props.bbox && this.props.imagery) ? MODE_SELECT_IMAGERY : MODE_DRAW_BBOX
+    case 'product-lines': return MODE_PRODUCT_LINES
+    default: return MODE_NORMAL
     }
-    return MODE_NORMAL
   }
 
   _handleAnchorChange(anchor) {
@@ -186,6 +192,8 @@ export default connect((state, ownProps) => ({
   jobs:            state.jobs.records,
   isLoggedIn:      !!state.authentication.token,
   isSearching:     state.search.searching,
+  productLines:    state.productLines.records,
+  productLineJobs: state.productLineJobs,
   selectedFeature: state.draftJob.image || state.jobs.records.find(j => j.id === ownProps.location.query.jobId) || null,
   workers:         state.workers,
 }))(Application)
