@@ -112,11 +112,8 @@ class Application extends Component {
         <Navigation currentLocation={this.props.location}/>
         <PrimaryMap
           geoserverUrl={this.props.geoserverUrl}
-          productLines={this.props.productLines}
-          hoveredProductLineJob={this.props.productLineJobs.hovered}
-          selectedProductLineJob={this.props.productLineJobs.selection}
-          jobs={this.props.jobs}
-          detections={this.props.detections}
+          frames={this._frames}
+          detections={this._detections}
           imagery={this.props.imagery}
           isSearching={this.props.isSearching}
           anchor={this.props.location.hash}
@@ -124,6 +121,7 @@ class Application extends Component {
           bbox={this.props.bbox}
           mode={this._mapMode}
           selectedFeature={this.props.selectedFeature}
+          highlightedFeature={this.props.productLineJobs.hovered}
           onAnchorChange={this._handleAnchorChange}
           onBoundingBoxChange={this._handleBoundingBoxChange}
           onSearchPageChange={this._handleSearchPageChange}
@@ -138,6 +136,20 @@ class Application extends Component {
   //
   // Internal API
   //
+
+  get _detections() {
+    if (this._mapMode !== MODE_PRODUCT_LINES) {
+      return this.props.detections
+    }
+    return this.props.productLineJobs.selection.length ? this.props.productLineJobs.selection : this.props.productLines
+  }
+
+  get _frames() {
+    if (this._mapMode !== MODE_PRODUCT_LINES) {
+      return this.props.jobs
+    }
+    return this.props.productLines.concat(this.props.productLineJobs.selection)
+  }
 
   get _mapMode() {
     switch (this.props.location.pathname) {

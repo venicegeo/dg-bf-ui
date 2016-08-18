@@ -33,7 +33,7 @@ export class ProductLineList extends React.Component {
     isFetching:        React.PropTypes.bool,
     jobs:              React.PropTypes.object,
     productLines:      React.PropTypes.array,
-    selectedJob:       React.PropTypes.object,
+    selectedJobs:      React.PropTypes.array,
     fetchProductLines: React.PropTypes.func,
     onFetchJobs:       React.PropTypes.func,
     onJobHoverIn:      React.PropTypes.func,
@@ -58,7 +58,7 @@ export class ProductLineList extends React.Component {
               key={productLine.id}
               productLine={productLine}
               jobs={this.props.jobs[productLine.id]}
-              selectedJob={this.props.selectedJob}
+              selectedJob={this.props.selectedJobs[0]}
               fetchJobs={sinceDate => this.props.onFetchJobs(productLine.id, sinceDate)}
               onJobHoverIn={this.props.onJobHoverIn}
               onJobHoverOut={this.props.onJobHoverOut}
@@ -81,7 +81,7 @@ export default connect(state => ({
   isFetching:   state.productLines.fetching,
   jobs:         state.productLineJobs,
   productLines: state.productLines.records,
-  selectedJob:  state.productLineJobs.selection,
+  selectedJobs:  state.productLineJobs.selection,
 }), dispatch => ({
   fetchProductLines: () => dispatch(fetchProductLines()),
   onFetchJobs:       (id, sinceDate) => dispatch(fetchProductLineJobs(id, sinceDate)),

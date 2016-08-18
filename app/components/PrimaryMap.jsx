@@ -38,6 +38,7 @@ import {
   KEY_STATUS,
   KEY_IMAGE_ID,
   KEY_TYPE,
+  KEY_WMS_LAYER_ID,
   STATUS_ACTIVE,
   STATUS_ERROR,
   STATUS_INACTIVE,
@@ -71,9 +72,10 @@ export default class PrimaryMap extends Component {
     bbox:                React.PropTypes.arrayOf(React.PropTypes.number),
     catalogApiKey:       React.PropTypes.string,
     detections:          React.PropTypes.arrayOf(React.PropTypes.shape({
-      bbox:     React.PropTypes.arrayOf(React.PropTypes.number).isRequired,
-      jobId:    React.PropTypes.string.isRequired,
-      layerId:  React.PropTypes.string.isRequired,
+      geometry:   React.PropTypes.object.isRequired,
+      id:         React.PropTypes.string.isRequired,
+      properties: React.PropTypes.object.isRequired,
+      type:       React.PropTypes.string.isRequired,
     })).isRequired,
     imagery:             React.PropTypes.shape({
       count:      React.PropTypes.number.isRequired,
@@ -81,7 +83,7 @@ export default class PrimaryMap extends Component {
       images:     React.PropTypes.object.isRequired
     }),
     isSearching:         React.PropTypes.bool.isRequired,
-    jobs:                React.PropTypes.arrayOf(React.PropTypes.shape({
+    frames:              React.PropTypes.arrayOf(React.PropTypes.shape({
       geometry:   React.PropTypes.object.isRequired,
       id:         React.PropTypes.string.isRequired,
       properties: React.PropTypes.object.isRequired,
@@ -89,14 +91,13 @@ export default class PrimaryMap extends Component {
     })).isRequired,
     geoserverUrl:        React.PropTypes.string,
     mode:                React.PropTypes.string.isRequired,
-    productLines:        React.PropTypes.array.isRequired,
-    hoveredProductLineJob: React.PropTypes.object,
     selectedProductLineJob: React.PropTypes.object,
     onAnchorChange:      React.PropTypes.func.isRequired,
     onBoundingBoxChange: React.PropTypes.func.isRequired,
     onSelectImage:       React.PropTypes.func.isRequired,
     onSelectJob:         React.PropTypes.func.isRequired,
     onSearchPageChange:  React.PropTypes.func.isRequired,
+    highlightedFeature:  React.PropTypes.object,
     selectedFeature:     React.PropTypes.object,
   }
 
@@ -120,7 +121,7 @@ export default class PrimaryMap extends Component {
       .then(() => {
         this._renderSelectionPreview()
         this._renderDetections()
-        this._renderJobFrames()
+        this._renderFrames()
         this._renderImagery()
         this._renderImagerySearchResultsOverlay()
         this._recenter(this.props.anchor)
@@ -151,19 +152,11 @@ export default class PrimaryMap extends Component {
     if (previousProps.detections !== this.props.detections) {
       this._renderDetections()
     }
-    if (this.props.mode === MODE_PRODUCT_LINES) {
-      if (previousProps.productLines !== this.props.productLines) {
-        this._renderProductLineFrames()
-      }
-      if (previousProps.hoveredProductLineJob !== this.props.hoveredProductLineJob) {
-        this._renderProductLineHoveredJob()
-      }
-      if (previousProps.selectedProductLineJob !== this.props.selectedProductLineJob) {
-        this._renderProductLineSelectedJob()
-      }
+    if (previousProps.highlightedFeature !== this.props.highlightedFeature) {
+      this._renderHighlight()
     }
-    else if ((previousProps.jobs !== this.props.jobs) || previousProps.mode === MODE_PRODUCT_LINES) {
-      this._renderJobFrames()
+    if (previousProps.frames !== this.props.frames) {
+      this._renderFrames()
     }
     if (previousProps.imagery !== this.props.imagery) {
       this._renderImagery()
@@ -426,7 +419,7 @@ export default class PrimaryMap extends Component {
     const layer = this._detectionsLayer
     const source = layer.getSource()
     const currentLayerIds = source.getParams()[KEY_LAYERS]
-    const incomingLayerIds = detections.map(d => d.layerId).sort().join(',')
+    const incomingLayerIds = detections.map(d => d.properties[KEY_WMS_LAYER_ID]).sort().join(',')
 
     if (!geoserverUrl) {
       return  // No server to point to
@@ -444,7 +437,7 @@ export default class PrimaryMap extends Component {
 
     // Additions/Updates
     const extent = ol.extent.createEmpty()
-    detections.forEach(d => ol.extent.extend(extent, d.bbox))
+    detections.forEach(d => ol.extent.extend(extent, bboxUtil.featureToBbox(d)))
     layer.setExtent(extent)
     source.updateParams({
       [KEY_LAYERS]: incomingLayerIds,
@@ -452,19 +445,19 @@ export default class PrimaryMap extends Component {
     source.setUrl(`${geoserverUrl}/wms`)
   }
 
-  _renderJobFrames() {
+  _renderFrames() {
     this._clearFrames()
 
     const source = this._frameLayer.getSource()
     const reader = new ol.format.GeoJSON()
-    this.props.jobs.map(job => {
-      const frame = reader.readFeature(job, {featureProjection: 'EPSG:3857'})
+    this.props.frames.forEach(raw => {
+      const frame = reader.readFeature(raw, {featureProjection: 'EPSG:3857'})
       source.addFeature(frame)
 
       const frameExtent = frame.getGeometry().getExtent()
       const topRight = ol.extent.getTopRight(ol.extent.buffer(frameExtent, STEM_OFFSET))
       const center = ol.extent.getCenter(frameExtent)
-      const jobId = frame.getId()
+      const id = frame.getId()
 
       const stem = new ol.Feature({
         geometry: new ol.geom.LineString([
@@ -473,21 +466,21 @@ export default class PrimaryMap extends Component {
         ])
       })
       stem.set(KEY_TYPE, TYPE_STEM)
-      stem.set(KEY_OWNER_ID, jobId)
+      stem.set(KEY_OWNER_ID, id)
       source.addFeature(stem)
 
       const divotInboard = new ol.Feature({
         geometry: new ol.geom.Point(center)
       })
       divotInboard.set(KEY_TYPE, TYPE_DIVOT_INBOARD)
-      divotInboard.set(KEY_OWNER_ID, jobId)
+      divotInboard.set(KEY_OWNER_ID, id)
       source.addFeature(divotInboard)
 
       const divotOutboard = new ol.Feature({
         geometry: new ol.geom.Point(topRight)
       })
       divotOutboard.set(KEY_TYPE, TYPE_DIVOT_OUTBOARD)
-      divotOutboard.set(KEY_OWNER_ID, jobId)
+      divotOutboard.set(KEY_OWNER_ID, id)
       divotOutboard.set(KEY_STATUS, frame.get(KEY_STATUS))
       source.addFeature(divotOutboard)
 
@@ -495,7 +488,7 @@ export default class PrimaryMap extends Component {
         geometry: new ol.geom.Point(topRight)
       })
       name.set(KEY_TYPE, TYPE_LABEL_MAJOR)
-      name.set(KEY_OWNER_ID, jobId)
+      name.set(KEY_OWNER_ID, id)
       name.set(KEY_NAME, frame.get(KEY_NAME).toUpperCase())
       source.addFeature(name)
 
@@ -503,7 +496,7 @@ export default class PrimaryMap extends Component {
         geometry: new ol.geom.Point(topRight)
       })
       status.set(KEY_TYPE, TYPE_LABEL_MINOR)
-      status.set(KEY_OWNER_ID, jobId)
+      status.set(KEY_OWNER_ID, id)
       status.set(KEY_STATUS, frame.get(KEY_STATUS))
       status.set(KEY_IMAGE_ID, frame.get(KEY_IMAGE_ID))
       source.addFeature(status)
@@ -563,88 +556,20 @@ export default class PrimaryMap extends Component {
     this._drawLayer.getSource().addFeature(feature)
   }
 
-
-
-
-
-  _renderProductLineHoveredJob() {
+  _renderHighlight() {
     const source = this._highlightLayer.getSource()
     source.clear()
 
-    const job = this.props.hoveredProductLineJob
-    if (!job) {
+    const geojson = this.props.highlightedFeature
+    if (!geojson) {
       return
     }
 
     const reader = new ol.format.GeoJSON()
-    const feature = reader.readFeature(job, {featureProjection: 'EPSG:3857'})
+    const feature = reader.readFeature(geojson, {featureProjection: 'EPSG:3857'})
 
     source.addFeature(feature)
   }
-  _renderProductLineSelectedJob() {
-    const job = this.props.selectedProductLineJob
-    console.debug('_renderProductLineSelectedJob', job)
-  }
-  _renderProductLineFrames() {
-    this._clearFrames()
-
-    const source = this._frameLayer.getSource()
-    const reader = new ol.format.GeoJSON()
-    this.props.productLines.forEach(productLine => {
-      const frame = reader.readFeature(productLine, {featureProjection: 'EPSG:3857'})
-      source.addFeature(frame)
-
-      const frameExtent = frame.getGeometry().getExtent()
-      const topRight = ol.extent.getTopRight(ol.extent.buffer(frameExtent, STEM_OFFSET))
-      const center = ol.extent.getCenter(frameExtent)
-      const productLineId = frame.getId()
-
-      const stem = new ol.Feature({
-        geometry: new ol.geom.LineString([
-          center,
-          topRight
-        ])
-      })
-      stem.set(KEY_TYPE, TYPE_STEM)
-      stem.set(KEY_OWNER_ID, productLineId)
-      source.addFeature(stem)
-
-      const divotInboard = new ol.Feature({
-        geometry: new ol.geom.Point(center)
-      })
-      divotInboard.set(KEY_TYPE, TYPE_DIVOT_INBOARD)
-      divotInboard.set(KEY_OWNER_ID, productLineId)
-      source.addFeature(divotInboard)
-
-      const divotOutboard = new ol.Feature({
-        geometry: new ol.geom.Point(topRight)
-      })
-      divotOutboard.set(KEY_TYPE, TYPE_DIVOT_OUTBOARD)
-      divotOutboard.set(KEY_OWNER_ID, productLineId)
-      divotOutboard.set(KEY_STATUS, frame.get(KEY_STATUS))
-      source.addFeature(divotOutboard)
-
-      const name = new ol.Feature({
-        geometry: new ol.geom.Point(topRight)
-      })
-      name.set(KEY_TYPE, TYPE_LABEL_MAJOR)
-      name.set(KEY_OWNER_ID, productLineId)
-      name.set(KEY_NAME, frame.get(KEY_NAME).toUpperCase())
-      source.addFeature(name)
-
-      const status = new ol.Feature({
-        geometry: new ol.geom.Point(topRight)
-      })
-      status.set(KEY_TYPE, TYPE_LABEL_MINOR)
-      status.set(KEY_OWNER_ID, productLineId)
-      status.set(KEY_STATUS, frame.get(KEY_STATUS))
-      source.addFeature(status)
-    })
-  }
-
-
-
-
 
   _renderSelectionPreview() {
     const images = featuresToImages(this.props.selectedFeature)
