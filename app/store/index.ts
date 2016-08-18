@@ -20,26 +20,37 @@ import debounce = require('lodash/debounce')
 import * as algorithms from './reducers/algorithms'
 import * as authentication from './reducers/authentication'
 import * as catalog from './reducers/catalog'
+import * as detections from './reducers/detections'
 import * as draftJob from './reducers/draftJob'
+import * as executor from './reducers/executor'
+import * as geoserver from './reducers/geoserver'
 import * as imagery from './reducers/imagery'
 import * as jobs from './reducers/jobs'
-import * as results from './reducers/results'
+import * as productLines from './reducers/productLines'
+import * as productLineJobs from './reducers/productLineJobs'
 import * as search from './reducers/search'
 import * as workers from './reducers/workers'
 
 const beachfrontApp = combineReducers({
-  algorithms:     algorithms.reducer,
-  authentication: authentication.reducer,
-  catalog:        catalog.reducer,
-  draftJob:       draftJob.reducer,
-  imagery:        imagery.reducer,
-  jobs:           jobs.reducer,
-  results:        results.reducer,
-  search:         search.reducer,
-  workers:        workers.reducer,
+  algorithms:      algorithms.reducer,
+  authentication:  authentication.reducer,
+  catalog:         catalog.reducer,
+  detections:      detections.reducer,
+  draftJob:        draftJob.reducer,
+  executor:        executor.reducer,
+  geoserver:       geoserver.reducer,
+  imagery:         imagery.reducer,
+  jobs:            jobs.reducer,
+  productLines:    productLines.reducer,
+  productLineJobs: productLineJobs.reducer,
+  search:          search.reducer,
+  workers:         workers.reducer,
 })
 
-declare var window: {devToolsExtension()}
+declare var window: {
+  store: Redux.Store<any>
+  devToolsExtension()
+}
 
 let devtoolsExtension = f => f
 if (process.env.NODE_ENV === 'development') {
@@ -55,6 +66,9 @@ export function configureStore(initialState?) {
       devtoolsExtension
     )
   )
+  if (process.env.NODE_ENV === 'development') {
+    window.store = store
+  }
   store.subscribe(debounce(() => serializeState(store.getState()), 1000))
   return store
 }
@@ -66,9 +80,12 @@ export function configureStore(initialState?) {
 function deserializeState() {
   try {
     return {
+      algorithms:     algorithms.deserialize(),
       authentication: authentication.deserialize(),
       catalog:        catalog.deserialize(),
       draftJob:       draftJob.deserialize(),
+      executor:       executor.deserialize(),
+      geoserver:      geoserver.deserialize(),
       imagery:        imagery.deserialize(),
       jobs:           jobs.deserialize(),
       search:         search.deserialize(),
@@ -81,9 +98,12 @@ function deserializeState() {
 
 function serializeState(state) {
   try {
+    algorithms.serialize(state.algorithms)
     authentication.serialize(state.authentication)
     catalog.serialize(state.catalog)
     draftJob.serialize(state.draftJob)
+    executor.serialize(state.executor)
+    geoserver.serialize(state.geoserver)
     imagery.serialize(state.imagery)
     jobs.serialize(state.jobs)
     search.serialize(state.search)

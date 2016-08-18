@@ -15,34 +15,34 @@
  **/
 
 import {
-  AUTHENTICATE,
-  AUTHENTICATE_SUCCESS,
-  AUTHENTICATE_ERROR,
-} from '../../actions/authentication'
+  DISCOVER_GEOSERVER,
+  DISCOVER_GEOSERVER_SUCCESS,
+  DISCOVER_GEOSERVER_ERROR,
+} from '../../actions/geoserver'
 
 const INITIAL_STATE = {
-  authenticating: false,
+  baselineLayerId: null,
+  discovering: false,
+  url: null,
   error: null,
-  token: null,
 }
 
 export function reducer(state = INITIAL_STATE, action) {
   switch (action.type) {
-  case AUTHENTICATE:
+  case DISCOVER_GEOSERVER:
     return Object.assign({}, state, {
-      authenticating: true,
+      discovering: true,
     })
-  case AUTHENTICATE_SUCCESS:
+  case DISCOVER_GEOSERVER_SUCCESS:
     return Object.assign({}, state, {
-      authenticating: false,
-      error:          null,
-      token:          action.token,
+      discovering:     false,
+      baselineLayerId: action.baselineLayerId,
+      url:             action.url,
     })
-  case AUTHENTICATE_ERROR:
+  case DISCOVER_GEOSERVER_ERROR:
     return Object.assign({}, state, {
-      authenticating: false,
-      error:          action.err,
-      token:          null,
+      discovering: false,
+      error: action.err,
     })
   default:
     return state
@@ -50,11 +50,13 @@ export function reducer(state = INITIAL_STATE, action) {
 }
 
 export function deserialize() {
-  return Object.assign({}, INITIAL_STATE,{
-    token: sessionStorage.getItem('authentication_token') || INITIAL_STATE.token,
+  return Object.assign({}, INITIAL_STATE, {
+    baselineLayerId: sessionStorage.getItem('geoserver_baselineLayerId') || INITIAL_STATE.baselineLayerId,
+    url: sessionStorage.getItem('geoserver_url') || INITIAL_STATE.url,
   })
 }
 
 export function serialize(state) {
-  sessionStorage.setItem('authentication_token', state.token)
+  sessionStorage.setItem('geoserver_url', state.url || '')
+  sessionStorage.setItem('geoserver_baselineLayerId', state.baselineLayerId || '')
 }

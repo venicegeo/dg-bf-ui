@@ -15,46 +15,35 @@
  **/
 
 import {
-  AUTHENTICATE,
-  AUTHENTICATE_SUCCESS,
-  AUTHENTICATE_ERROR,
-} from '../../actions/authentication'
+  FETCH_PRODUCT_LINES,
+  FETCH_PRODUCT_LINES_SUCCESS,
+  FETCH_PRODUCT_LINES_ERROR,
+} from '../../actions/productLines'
 
-const INITIAL_STATE = {
-  authenticating: false,
-  error: null,
-  token: null,
-}
-
-export function reducer(state = INITIAL_STATE, action) {
+export function reducer(state = {
+  error:    null,
+  fetching: false,
+  records:  [],
+}, action) {
   switch (action.type) {
-  case AUTHENTICATE:
+  case FETCH_PRODUCT_LINES:
     return Object.assign({}, state, {
-      authenticating: true,
+      fetching: true,
     })
-  case AUTHENTICATE_SUCCESS:
+  case FETCH_PRODUCT_LINES_SUCCESS:
     return Object.assign({}, state, {
-      authenticating: false,
-      error:          null,
-      token:          action.token,
+      fetching: false,
+      records: action.records,
     })
-  case AUTHENTICATE_ERROR:
+  case FETCH_PRODUCT_LINES_ERROR:
     return Object.assign({}, state, {
-      authenticating: false,
-      error:          action.err,
-      token:          null,
+      fetching: false,
+      error: {
+        message: action.err.message,
+        stack:   action.err.stack,
+      },
     })
   default:
     return state
   }
-}
-
-export function deserialize() {
-  return Object.assign({}, INITIAL_STATE,{
-    token: sessionStorage.getItem('authentication_token') || INITIAL_STATE.token,
-  })
-}
-
-export function serialize(state) {
-  sessionStorage.setItem('authentication_token', state.token)
 }

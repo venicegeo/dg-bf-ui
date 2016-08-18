@@ -15,34 +15,34 @@
  **/
 
 import {
-  AUTHENTICATE,
-  AUTHENTICATE_SUCCESS,
-  AUTHENTICATE_ERROR,
-} from '../../actions/authentication'
+  DISCOVER_EXECUTOR,
+  DISCOVER_EXECUTOR_SUCCESS,
+  DISCOVER_EXECUTOR_ERROR,
+} from '../../actions/executor'
 
 const INITIAL_STATE = {
-  authenticating: false,
-  error: null,
-  token: null,
+  discovering: false,
+  serviceId:   null,
+  url:         null,
+  error:       null,
 }
 
 export function reducer(state = INITIAL_STATE, action) {
   switch (action.type) {
-  case AUTHENTICATE:
+  case DISCOVER_EXECUTOR:
     return Object.assign({}, state, {
-      authenticating: true,
+      discovering: true,
     })
-  case AUTHENTICATE_SUCCESS:
+  case DISCOVER_EXECUTOR_SUCCESS:
     return Object.assign({}, state, {
-      authenticating: false,
-      error:          null,
-      token:          action.token,
+      discovering: false,
+      serviceId: action.serviceId,
+      url: action.url,
     })
-  case AUTHENTICATE_ERROR:
+  case DISCOVER_EXECUTOR_ERROR:
     return Object.assign({}, state, {
-      authenticating: false,
-      error:          action.err,
-      token:          null,
+      discovering: false,
+      error: action.err,
     })
   default:
     return state
@@ -50,11 +50,13 @@ export function reducer(state = INITIAL_STATE, action) {
 }
 
 export function deserialize() {
-  return Object.assign({}, INITIAL_STATE,{
-    token: sessionStorage.getItem('authentication_token') || INITIAL_STATE.token,
+  return Object.assign({}, INITIAL_STATE, {
+    serviceId: sessionStorage.getItem('executor_serviceId') || INITIAL_STATE.serviceId,
+    url: sessionStorage.getItem('executor_url') || INITIAL_STATE.url,
   })
 }
 
 export function serialize(state) {
-  sessionStorage.setItem('authentication_token', state.token)
+  sessionStorage.setItem('executor_serviceId', state.serviceId || '')
+  sessionStorage.setItem('executor_url', state.url || '')
 }

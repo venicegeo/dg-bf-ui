@@ -22,6 +22,7 @@ import * as moment from 'moment'
 
 export const CHANGE_JOB_NAME = 'CHANGE_JOB_NAME'
 export const SELECT_IMAGE = 'SELECT_IMAGE'
+export const CLEAR_SELECTED_IMAGE = 'CLEAR_SELECTED_IMAGE'
 
 //
 // Action Creators
@@ -45,5 +46,11 @@ export function selectImage(feature) {
   return {
     type: SELECT_IMAGE,
     feature,
+  }
+}
+
+export function clearSelectedImage() {
+  return {
+    type: CLEAR_SELECTED_IMAGE,
   }
 }

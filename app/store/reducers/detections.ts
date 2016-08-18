@@ -14,15 +14,23 @@
  * limitations under the License.
  **/
 
-export * from './algorithms'
-export * from './authentication'
-export * from './catalog'
-export * from './detections'
-export * from './draftJob'
-export * from './executor'
-export * from './geoserver'
-export * from './imagery'
-export * from './jobs'
-export * from './productLines'
-export * from './productLineJobs'
-export * from './search'
+import {
+  REMOVE_JOB,
+} from '../../actions/jobs'
+import {
+  LOAD_DETECTIONS,
+  UNLOAD_DETECTIONS
+} from '../../actions/detections'
+
+export function reducer(state = [], action) {
+  switch (action.type) {
+  case LOAD_DETECTIONS:
+    return action.detections
+  case REMOVE_JOB:
+    return state.filter(r => r.id !== action.id)
+  case UNLOAD_DETECTIONS:
+    return []
+  default:
+    return state
+  }
+}

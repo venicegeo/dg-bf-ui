@@ -20,12 +20,10 @@ import {
   CREATE_JOB,
   CREATE_JOB_SUCCESS,
   CREATE_JOB_ERROR,
-  DISCOVER_EXECUTOR,
-  DISCOVER_EXECUTOR_ERROR,
-  DISCOVER_EXECUTOR_SUCCESS,
   DISMISS_JOB_ERROR,
   FETCH_JOBS,
   FETCH_JOBS_SUCCESS,
+  IMPORT_JOB_SUCCESS,
   JOBS_WORKER_ERROR,
   REMOVE_JOB,
   UPDATE_JOB,
@@ -40,9 +38,7 @@ import {
 } from '../../constants'
 
 const INITIAL_STATE = {
-  serviceId:   null,
   creating:    false,
-  discovering: false,
   fetching:    false,
   records:     [],
   error:       null,
@@ -50,20 +46,6 @@ const INITIAL_STATE = {
 
 export function reducer(state = INITIAL_STATE, action) {
   switch (action.type) {
-  case DISCOVER_EXECUTOR:
-    return Object.assign({}, state, {
-      discovering: true,
-    })
-  case DISCOVER_EXECUTOR_SUCCESS:
-    return Object.assign({}, state, {
-      discovering: false,
-      serviceId: action.serviceId,
-    })
-  case DISCOVER_EXECUTOR_ERROR:
-    return Object.assign({}, state, {
-      discovering: false,
-      error: action.err,
-    })
   case FETCH_JOBS:
     return Object.assign({}, state, {
       fetching: true,
@@ -84,6 +66,10 @@ export function reducer(state = INITIAL_STATE, action) {
   case CREATE_JOB_SUCCESS:
     return Object.assign({}, state, {
       creating: false,
+      records: [...state.records, action.record],
+    })
+  case IMPORT_JOB_SUCCESS:
+    return Object.assign({}, state, {
       records: [...state.records, action.record],
     })
   case CREATE_JOB_ERROR:
@@ -123,10 +109,10 @@ export function reducer(state = INITIAL_STATE, action) {
 
 export function deserialize() {
   return Object.assign({}, INITIAL_STATE, {
-    records: (JSON.parse(localStorage.getItem('jobs.records')) || INITIAL_STATE.records).map(upgradeIfNeeded).filter(Boolean),
+    records: (JSON.parse(localStorage.getItem('jobs_records')) || INITIAL_STATE.records).map(upgradeIfNeeded).filter(Boolean),
   })
 }
 
 export function serialize(state) {
-  localStorage.setItem('jobs.records', JSON.stringify(state.records))
+  localStorage.setItem('jobs_records', JSON.stringify(state.records))
 }

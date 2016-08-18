@@ -21,7 +21,6 @@ import {connect} from 'react-redux'
 import JobStatus from './JobStatus'
 import {
   dismissJobError,
-  downloadResult,
   removeJob,
   startJobsWorkerIfNeeded,
 } from '../actions'
@@ -30,7 +29,6 @@ interface Props {
   error: any
   jobs: beachfront.Job[]
   location: any
-  results: any[]
   dismissJobError()
   downloadResult(jobId: string)
   removeJob(jobId: string)
@@ -47,7 +45,6 @@ class JobStatusList extends React.Component<Props, {}> {
   constructor() {
     super()
     this._dismissError = this._dismissError.bind(this)
-    this._handleDownload = this._handleDownload.bind(this)
     this._handleForgetJob = this._handleForgetJob.bind(this)
   }
 
@@ -75,8 +72,6 @@ class JobStatusList extends React.Component<Props, {}> {
               key={job.id}
               isActive={this._isActive(job.id)}
               job={job}
-              result={this.props.results.find(r => r.jobId === job.id)}
-              onDownload={this._handleDownload}
               onForgetJob={this._handleForgetJob}
             />
           ))}
@@ -88,16 +83,6 @@ class JobStatusList extends React.Component<Props, {}> {
   _dismissError() {
     this.props.dismissJobError()
     this.props.startJobsWorkerIfNeeded()
-  }
-
-  _handleDownload(job) {
-    this.context.router.push(Object.assign({}, this.props.location, {
-      // HACK -- ensure job isn't automatically unloaded because its ID isn't in the URL
-      query: {
-        jobId: job.id,
-      },
-    }))
-    this.props.downloadResult(job.id)
   }
 
   _handleForgetJob(jobId) {
@@ -118,10 +103,8 @@ class JobStatusList extends React.Component<Props, {}> {
 export default connect(state => ({
   error:   state.jobs.error,
   jobs:    state.jobs.records,
-  results: state.results,
 }), dispatch => ({
   dismissJobError:         () => dispatch(dismissJobError()),
-  downloadResult:          (jobId) => dispatch(downloadResult(jobId)),
   removeJob:               (jobId) => dispatch(removeJob(jobId)),
   startJobsWorkerIfNeeded: () => dispatch(startJobsWorkerIfNeeded()),
 }))(JobStatusList)

@@ -1,0 +1,125 @@
+/**
+ * Copyright 2016, RadiantBlue Technologies, Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ **/
+
+:root {
+  --padding-size: 15px;
+  --bgcolor-control: #739cb4;
+  --bgcolor-control-hover: #175b82;
+}
+
+.root {
+  font-size: 14px;
+}
+
+.root + .root {
+  border-top: 1px solid white;
+}
+
+.caret {
+  width: 1em;
+  color: rgba(0,0,0, .3);
+  transform: rotate(0deg);
+  transform-origin: .4em .5em;
+  transition: transform .15s ease-in-out;
+}
+
+.isExpanded .caret {
+  transform: rotate(90deg);
+}
+
+/* =========================================================================
+   Header
+   ========================================================================= */
+
+.header {
+  display: flex;
+  background-color: white;
+  cursor: pointer;
+}
+
+.headerCell {
+  padding: var(--padding-size);
+}
+
+.title {
+  composes: headerCell;
+  composes: heading from '../styles/typography.css';
+  composes: heading from '../styles/typography.css';
+  flex: 1;
+}
+
+.viewButton {
+  composes: headerCell;
+  background-color: var(--bgcolor-control);
+  color: white;
+}
+
+.viewButton:hover {
+  background-color: var(--bgcolor-control-hover);
+}
+
+/* =========================================================================
+   Details
+   ========================================================================= */
+
+.details {
+  height: 0;
+  overflow: hidden;
+  transition: height .2s ease-in-out;
+  display: flex;
+  flex-direction: column;
+  background-color: #f5f5f5;
+}
+
+.isExpanded .details {
+  height: 600px;
+}
+
+/* =========================================================================
+   Metadata
+   ========================================================================= */
+
+.metadata dl {
+  display: flex;
+  margin: 1em 0;
+  flex-wrap: wrap;
+}
+
+.metadata dt,
+.metadata dd {
+  margin: 0;
+}
+
+.metadata dt {
+  flex-basis: 30%;
+  padding-right: 1em;
+  text-align: right;
+  font-weight: bold;
+}
+
+.metadata dd {
+  flex: 1 200px;
+  word-break: break-all;
+}
+
+/* =========================================================================
+   Jobs
+   ========================================================================= */
+
+.activityTable {
+  flex: 1;
+  overflow-y: scroll;
+}

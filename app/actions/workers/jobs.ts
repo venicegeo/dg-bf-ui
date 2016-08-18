@@ -15,6 +15,12 @@
  **/
 
 import {
+  extractGeojsonDataId,
+  extractGeojsonDeploymentId,
+  parseString,
+} from '../../utils/execution-output'
+
+import {
   KEY_CREATED_ON,
   KEY_STATUS,
   STATUS_ERROR,
@@ -132,20 +138,10 @@ function resolveResultIdentifiers(status) {
 
   console.debug('(jobs:worker) <%s> resolving result IDs (via <%s>)', status.jobId, executionOutputDataId)
   return _client.getFile(executionOutputDataId)
-    .then(normalizeExecutionOutput)
-    .then(output => {
-      const {deploymentId, geojsonDataId} = output
-
-      if (!geojsonDataId) {
-        throw new Error('GeoJSON data ID missing from execution output')
-      }
-
-      if (!deploymentId) {
-        // TODO -- warning for now but will probably become required in the near future
-        console.warn('(jobs:worker) <%s> missing WMS deployment info', status.jobId, executionOutputDataId)
-        return Object.assign(status, {geojsonDataId})
-      }
-
+    .then(parseString)
+    .then(executionOutput => {
+      const geojsonDataId = extractGeojsonDataId(executionOutput)
+      const deploymentId = extractGeojsonDeploymentId(executionOutput)
       return _client.getDeployment(deploymentId)
         .then(deploymentDescriptor => Object.assign({}, status, {
           geojsonDataId,
@@ -159,17 +155,4 @@ function resolveResultIdentifiers(status) {
 function getRunningJobs() {
   return _handlers.getRecords()
     .filter(j => j.properties[KEY_STATUS] === STATUS_RUNNING)
-}
-
-function normalizeExecutionOutput(raw) {
-  try {
-    const parsed = JSON.parse(raw)
-    return {
-      deploymentId:  parsed.shoreDeplID || null,
-      error:         parsed.error || null,
-      geojsonDataId: parsed.shoreDataID || null,
-    }
-  } catch (err) {
-    throw new Error('Execution output could not be parsed')
-  }
 }

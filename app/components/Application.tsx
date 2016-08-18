@@ -19,12 +19,17 @@ const styles: any = require('./Application.css')
 import * as React from 'react'
 import {connect} from 'react-redux'
 import Navigation from './Navigation'
-import PrimaryMap, {MODE_DRAW_BBOX, MODE_NORMAL, MODE_SELECT_IMAGERY} from './PrimaryMap'
+import PrimaryMap, {MODE_DRAW_BBOX, MODE_NORMAL, MODE_SELECT_IMAGERY, MODE_PRODUCT_LINES} from './PrimaryMap'
 import {
+  // DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG
+  importJob,
+  // DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG
   clearImagery,
-  changeLoadedResults,
+  clearSelectedImage,
   discoverCatalogIfNeeded,
   discoverExecutorIfNeeded,
+  discoverGeoserverIfNeeded,
+  changeLoadedDetections,
   searchCatalog,
   selectImage,
   startAlgorithmsWorkerIfNeeded,
@@ -42,10 +47,13 @@ interface Props {
   jobs: beachfront.Job[]
   location: any
   selectedFeature: beachfront.Scene
-  changeLoadedResults(ids: string[])
+  changeLoadedDetections(ids: string[])
   clearImagery()
+  clearSelectedImage()
   discoverCatalogIfNeeded()
   discoverExecutorIfNeeded()
+  discoverGeoserverIfNeeded()
+  importJob(id: string)
   searchCatalog(offset: number, count: number)
   selectImage(feature: beachfront.Scene)
   startAlgorithmsWorkerIfNeeded()
@@ -74,16 +82,26 @@ class Application extends React.Component<Props, {}> {
     if (isLoggedIn) {
       this.props.discoverCatalogIfNeeded()
       this.props.discoverExecutorIfNeeded()
+      this.props.discoverGeoserverIfNeeded()
       this.props.startAlgorithmsWorkerIfNeeded()
       this.props.startJobsWorkerIfNeeded()
+      this.props.changeLoadedDetections(enumerate(location.query.jobId))
+      // DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG
+      for (const jobId of enumerate(this.props.location.query.jobId)) {
+        if (!this.props.jobs.find(j => j.id === jobId)) {
+          this.props.importJob(jobId)
+            .catch(console.log.bind(console))
+        }
+      }
+      // DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG
     }
-    this.props.changeLoadedResults(asArray(location.query.jobId))
   }
 
   componentWillReceiveProps(nextProps) {
-    if (!this.props.isLoggedIn && nextProps.isLoggedIn) {
+    if (nextProps.isLoggedIn && !this.props.isLoggedIn) {
       this.props.discoverCatalogIfNeeded()
       this.props.discoverExecutorIfNeeded()
+      this.props.discoverGeoserverIfNeeded()
       this.props.startAlgorithmsWorkerIfNeeded()
       this.props.startJobsWorkerIfNeeded()
     }
@@ -93,7 +111,7 @@ class Application extends React.Component<Props, {}> {
     if (nextProps.bbox !== this.props.bbox) {
       this.props.clearImagery()
     }
-    this.props.changeLoadedResults(asArray(nextProps.location.query.jobId))
+    this.props.changeLoadedDetections(enumerate(nextProps.location.query.jobId))
   }
 
   render() {
@@ -101,8 +119,9 @@ class Application extends React.Component<Props, {}> {
       <div className={styles.root}>
         <Navigation currentLocation={this.props.location}/>
         <PrimaryMap
-          jobs={this.props.jobs}
-          detections={this.props.detections}
+          geoserverUrl={this.props.geoserverUrl}
+          frames={this.framesForCurrentMode}
+          detections={this.detectionsForCurrentMode}
           imagery={this.props.imagery}
           isSearching={this.props.isSearching}
           anchor={this.props.location.hash}
@@ -110,11 +129,12 @@ class Application extends React.Component<Props, {}> {
           bbox={this.props.bbox}
           mode={this.mapMode}
           selectedFeature={this.props.selectedFeature}
-          onAnchorChange={this.handleAnchorChange}
-          onBoundingBoxChange={this.handleBoundingBoxChange}
-          onSearchPageChange={this.handleSearchPageChange}
-          onSelectImage={this.handleSelectImage}
-          onSelectJob={this.handleSelectJob}
+          highlightedFeature={this.props.productLineJobs.hovered}
+          onAnchorChange={this._handleAnchorChange}
+          onBoundingBoxChange={this._handleBoundingBoxChange}
+          onSearchPageChange={this._handleSearchPageChange}
+          onSelectImage={this._handleSelectImage}
+          onSelectJob={this._handleSelectJob}
         />
         {this.props.children}
       </div>
@@ -125,11 +145,26 @@ class Application extends React.Component<Props, {}> {
   // Internal API
   //
 
-  private get mapMode() {
-    if (this.props.location.pathname === 'create-job') {
-      return (this.props.bbox && this.props.imagery) ? MODE_SELECT_IMAGERY : MODE_DRAW_BBOX
+  private get detectionsForCurrentMode() {
+    if (this._mapMode !== MODE_PRODUCT_LINES) {
+      return this.props.detections
     }
-    return MODE_NORMAL
+    return this.props.productLineJobs.selection.length ? this.props.productLineJobs.selection : this.props.productLines
+  }
+
+  private get framesForCurrentMode() {
+    if (this._mapMode !== MODE_PRODUCT_LINES) {
+      return this.props.jobs
+    }
+    return this.props.productLines.concat(this.props.productLineJobs.selection)
+  }
+
+  private get mapMode() {
+    switch (this.props.location.pathname) {
+      case 'create-job': return (this.props.bbox && this.props.imagery) ? MODE_SELECT_IMAGERY : MODE_DRAW_BBOX
+      case 'product-lines': return MODE_PRODUCT_LINES
+      default: return MODE_NORMAL
+    }
   }
 
   private handleAnchorChange(anchor) {
@@ -145,18 +180,25 @@ class Application extends React.Component<Props, {}> {
   }
 
   private handleSelectImage(feature) {
-    this.props.selectImage(feature)
+    if (feature) {
+      this.props.selectImage(feature)
+    }
+    else {
+      this.props.clearSelectedImage()
+    }
   }
 
   private handleSelectJob(jobId) {
-    this.context.router.push(Object.assign({}, this.props.location, {
+    this.context.router.push({
+      hash:     this.props.location.hash,
+      pathname: this.props.location.pathname,
       query: {
         jobId: jobId || undefined,
       },
-    }))
+    })
   }
 
-  private handleSearchPageChange({count, startIndex}) {
+  private handleSearchPageChange({ count, startIndex }) {
     this.props.searchCatalog(startIndex, count)
   }
 }
@@ -164,17 +206,25 @@ class Application extends React.Component<Props, {}> {
 export default connect((state, ownProps) => ({
   bbox:            state.search.bbox,
   catalogApiKey:   state.catalog.apiKey,
-  detections:      state.results,
+  detections:      state.detections,
+  geoserverUrl:    state.geoserver.url,
   imagery:         state.imagery,
   jobs:            state.jobs.records,
   isLoggedIn:      !!state.authentication.token,
   isSearching:     state.search.searching,
-  selectedFeature: state.draftJob.image || state.jobs.records.find(j => j.id === ownProps.location.query.jobId) || null,
+  productLines:    state.productLines.records,
+  productLineJobs: state.productLineJobs,
+  selectedFeature: state.productLineJobs.selection[0] || state.draftJob.image || state.jobs.records.find(j => j.id === ownProps.location.query.jobId) || null,
+  workers:         state.workers,
 }), dispatch => ({
   changeLoadedResults:           (jobIds) => dispatch(changeLoadedResults(jobIds)),
   clearImagery:                  () => dispatch(clearImagery()),
+  clearSelectedImage:            () => dispatch(clearSelectedImage()),
   discoverCatalogIfNeeded:       () => dispatch(discoverCatalogIfNeeded()),
   discoverExecutorIfNeeded:      () => dispatch(discoverExecutorIfNeeded()),
+  importJob:                     (jobId) => dispatch(importJob(jobId)),
+  discoverGeoserverIfNeeded:     () => dispatch(discoverGeoserverIfNeeded()),
+  changeLoadedDetections:        () => dispatch(changeLoadedDetections()),
   searchCatalog:                 (offset, count) => dispatch(searchCatalog(offset, count)),
   selectImage:                   (feature) => dispatch(selectImage(feature)),
   startAlgorithmsWorkerIfNeeded: () => dispatch(startAlgorithmsWorkerIfNeeded()),
@@ -183,11 +233,9 @@ export default connect((state, ownProps) => ({
 }))(Application)
 
 //
-// Internals
+// Helpers
 //
 
-function asArray(value) {
-  if (value) {
-    return [].concat(value)
-  }
+function enumerate(value) {
+  return value ? [].concat(value) : []
 }
