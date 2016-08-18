@@ -27,7 +27,7 @@ export function reducer(state = [], action) {
   case LOAD_DETECTIONS:
     return action.detections
   case REMOVE_JOB:
-    return state.filter(r => r.jobId !== action.id)
+    return state.filter(r => r.id !== action.id)
   case UNLOAD_DETECTIONS:
     return []
   default:

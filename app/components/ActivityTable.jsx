@@ -21,8 +21,6 @@ import SinceDateSelect from './SinceDateSelect'
 const styles = require('./ActivityTable.css')
 
 import {
-  KEY_ALGORITHM_NAME,
-  KEY_CREATED_ON,
   KEY_IMAGE_CAPTURED_ON,
   KEY_IMAGE_ID,
   KEY_IMAGE_SENSOR,
@@ -32,9 +30,8 @@ const PLACEHOLDER = <span className={styles.placeholder}/>
 
 const ActivityTable = ({
   className,
-  error,
   jobs,
-  selectedJobId,
+  selectedJobIds,
   sinceDate,
   sinceDates,
   onHoverIn,
@@ -70,10 +67,10 @@ const ActivityTable = ({
           {jobs.map(job => (
             <tr
               key={job.id}
-              className={selectedJobId === job.id ? styles.isActive : ''}
+              className={selectedJobIds.includes(job.id) ? styles.isActive : ''}
               onClick={() => onRowClick(job)}
-              onMouseEnter={() => onHoverIn(job)}
-              onMouseLeave={() => onHoverOut(job)}
+              onMouseEnter={() => job.properties && onHoverIn(job)}
+              onMouseLeave={() => job.properties && onHoverOut(job)}
               >
               <td>
                 {job.properties
@@ -105,7 +102,7 @@ ActivityTable.propTypes = {
   className: React.PropTypes.string,
   error: React.PropTypes.object,
   jobs: React.PropTypes.array.isRequired,
-  selectedJobId: React.PropTypes.string,
+  selectedJobIds: React.PropTypes.arrayOf(React.PropTypes.string),
   sinceDate: React.PropTypes.string.isRequired,
   sinceDates: React.PropTypes.array.isRequired,
   onHoverIn: React.PropTypes.func.isRequired,

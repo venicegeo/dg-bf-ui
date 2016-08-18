@@ -42,7 +42,7 @@ const unloadDetections = () => ({
 export function changeLoadedDetections(jobIds = []) {
   return (dispatch, getState) => {
     const state = getState()
-    const alreadyLoadedIds = simplify(state.detections.map(d => d.jobId))
+    const alreadyLoadedIds = simplify(state.detections.map(d => d.id))
     const incomingIds = simplify(jobIds)
 
     if (alreadyLoadedIds === incomingIds) {
@@ -61,21 +61,13 @@ export function changeLoadedDetections(jobIds = []) {
     if (alreadyLoadedIds === loadableIds) {
       return  // Avoid thrashing the reducer with spurious updates
     }
-    dispatch(loadDetections(loadableJobs.map(toDetection)))
+    dispatch(loadDetections(loadableJobs))
   }
 }
 
 //
 // Helpers
 //
-
-function toDetection(job) {
-  return {
-    bbox:    featureToBbox(job),
-    jobId:   job.id,
-    layerId: job.properties[KEY_GEOJSON_DATA_ID],
-  }
-}
 
 function simplify(items) {
   return items.slice().sort().join(',')

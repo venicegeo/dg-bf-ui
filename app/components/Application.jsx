@@ -17,7 +17,7 @@
 import React, {Component} from 'react'
 import {connect} from 'react-redux'
 import Navigation from './Navigation'
-import PrimaryMap, {MODE_DRAW_BBOX, MODE_NORMAL, MODE_SELECT_IMAGERY} from './PrimaryMap'
+import PrimaryMap, {MODE_DRAW_BBOX, MODE_NORMAL, MODE_SELECT_IMAGERY, MODE_PRODUCT_LINES} from './PrimaryMap'
 import styles from './Application.css'
 import {
   // DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG
@@ -53,6 +53,8 @@ class Application extends Component {
     isSearching:     React.PropTypes.bool.isRequired,
     jobs:            React.PropTypes.array.isRequired,
     location:        React.PropTypes.object.isRequired,
+    productLines:    React.PropTypes.array.isRequired,
+    productLineJobs: React.PropTypes.object.isRequired,
     selectedFeature: React.PropTypes.object,
     workers:         React.PropTypes.object.isRequired
   }
@@ -110,8 +112,8 @@ class Application extends Component {
         <Navigation currentLocation={this.props.location}/>
         <PrimaryMap
           geoserverUrl={this.props.geoserverUrl}
-          jobs={this.props.jobs}
-          detections={this.props.detections}
+          frames={this._frames}
+          detections={this._detections}
           imagery={this.props.imagery}
           isSearching={this.props.isSearching}
           anchor={this.props.location.hash}
@@ -119,6 +121,7 @@ class Application extends Component {
           bbox={this.props.bbox}
           mode={this._mapMode}
           selectedFeature={this.props.selectedFeature}
+          highlightedFeature={this.props.productLineJobs.hovered}
           onAnchorChange={this._handleAnchorChange}
           onBoundingBoxChange={this._handleBoundingBoxChange}
           onSearchPageChange={this._handleSearchPageChange}
@@ -134,11 +137,26 @@ class Application extends Component {
   // Internal API
   //
 
-  get _mapMode() {
-    if (this.props.location.pathname === 'create-job') {
-      return (this.props.bbox && this.props.imagery) ? MODE_SELECT_IMAGERY : MODE_DRAW_BBOX
+  get _detections() {
+    if (this._mapMode !== MODE_PRODUCT_LINES) {
+      return this.props.detections
     }
-    return MODE_NORMAL
+    return this.props.productLineJobs.selection.length ? this.props.productLineJobs.selection : this.props.productLines
+  }
+
+  get _frames() {
+    if (this._mapMode !== MODE_PRODUCT_LINES) {
+      return this.props.jobs
+    }
+    return this.props.productLines.concat(this.props.productLineJobs.selection)
+  }
+
+  get _mapMode() {
+    switch (this.props.location.pathname) {
+    case 'create-job': return (this.props.bbox && this.props.imagery) ? MODE_SELECT_IMAGERY : MODE_DRAW_BBOX
+    case 'product-lines': return MODE_PRODUCT_LINES
+    default: return MODE_NORMAL
+    }
   }
 
   _handleAnchorChange(anchor) {
@@ -186,7 +204,9 @@ export default connect((state, ownProps) => ({
   jobs:            state.jobs.records,
   isLoggedIn:      !!state.authentication.token,
   isSearching:     state.search.searching,
-  selectedFeature: state.draftJob.image || state.jobs.records.find(j => j.id === ownProps.location.query.jobId) || null,
+  productLines:    state.productLines.records,
+  productLineJobs: state.productLineJobs,
+  selectedFeature: state.productLineJobs.selection[0] || state.draftJob.image || state.jobs.records.find(j => j.id === ownProps.location.query.jobId) || null,
   workers:         state.workers,
 }))(Application)
 

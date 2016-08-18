@@ -15,6 +15,10 @@
  **/
 
 import {
+  SCHEMA_VERSION,
+} from '../config'
+
+import {
   extractAlgorithmUrl,
   extractDateCreated,
   extractGeometry,
@@ -37,8 +41,8 @@ import {
   KEY_SCHEMA_VERSION,
   KEY_STATUS,
   KEY_TYPE,
+  KEY_WMS_LAYER_ID,
   STATUS_SUCCESS,
-  SCHEMA_VERSION,
   TYPE_JOB,
 } from '../constants'
 
@@ -65,6 +69,7 @@ export function importRecordById(client, id, algorithmNames) {
         [KEY_STATUS]:            STATUS_SUCCESS,
         [KEY_TYPE]:              TYPE_JOB,
         [KEY_SCHEMA_VERSION]:    SCHEMA_VERSION,
+        [KEY_WMS_LAYER_ID]:      extractGeojsonDataId(executionOutput),
       },
       type: 'Feature',
     }))

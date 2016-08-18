@@ -23,12 +23,16 @@ import {
   KEY_CREATED_ON,
 } from '../constants'
 
-export const FETCH_PRODUCT_LINE_JOBS = 'Fetch Product Line Jobs'
-export const FETCH_PRODUCT_LINE_JOBS_SUCCESS = 'Fetch Product Line Jobs (Success)'
-export const FETCH_PRODUCT_LINE_JOBS_ERROR = 'Fetch Product Line Jobs (Error)'
+export const FETCH_PRODUCT_LINE_JOBS = 'FETCH_PRODUCT_LINE_JOBS'
+export const FETCH_PRODUCT_LINE_JOBS_SUCCESS = 'FETCH_PRODUCT_LINE_JOBS_SUCCESS'
+export const FETCH_PRODUCT_LINE_JOBS_ERROR = 'FETCH_PRODUCT_LINE_JOBS_ERROR'
 export const IMPORT_PRODUCT_LINE_JOB = 'IMPORT_PRODUCT_LINE_JOB'
 export const IMPORT_PRODUCT_LINE_JOB_SUCCESS = 'IMPORT_PRODUCT_LINE_JOB_SUCCESS'
 export const IMPORT_PRODUCT_LINE_JOB_ERROR = 'IMPORT_PRODUCT_LINE_JOB_ERROR'
+export const SELECT_PRODUCT_LINE_JOB = 'SELECT_PRODUCT_LINE_JOB'
+export const CLEAR_SELECTED_PRODUCT_LINE_JOB = 'CLEAR_SELECTED_PRODUCT_LINE_JOBS'
+export const HOVER_PRODUCT_LINE_JOB = 'HOVER_PRODUCT_LINE_JOB'
+export const CLEAR_HOVERED_PRODUCT_LINE_JOB = 'CLEAR_HOVERED_PRODUCT_LINE_JOBS'
 
 const fetchProductLineJobsSuccess = (productLineId, jobIds) => ({
   type: FETCH_PRODUCT_LINE_JOBS_SUCCESS,
@@ -75,6 +79,24 @@ export function fetchProductLineJobs(productLineId, sinceDate) {
       })
   }
 }
+
+export const clearHoveredProductLineJob = () => ({
+  type: CLEAR_HOVERED_PRODUCT_LINE_JOB,
+})
+
+export const hoverProductLineJob = (job) => ({
+  type: HOVER_PRODUCT_LINE_JOB,
+  job,
+})
+
+export const clearSelectedProductLineJob = () => ({
+  type: CLEAR_SELECTED_PRODUCT_LINE_JOB,
+})
+
+export const selectProductLineJob = (job) => ({
+  type: SELECT_PRODUCT_LINE_JOB,
+  job,
+})
 
 // HACK HACK HACK HACK HACK HACK HACK HACK HACK HACK HACK HACK HACK HACK HACK
 // HACK HACK HACK HACK HACK HACK HACK HACK HACK HACK HACK HACK HACK HACK HACK

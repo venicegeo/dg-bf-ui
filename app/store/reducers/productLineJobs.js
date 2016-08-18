@@ -25,14 +25,23 @@ import {
   IMPORT_PRODUCT_LINE_JOB,
   IMPORT_PRODUCT_LINE_JOB_SUCCESS,
   IMPORT_PRODUCT_LINE_JOB_ERROR,
+  SELECT_PRODUCT_LINE_JOB,
+  CLEAR_SELECTED_PRODUCT_LINE_JOB,
+  HOVER_PRODUCT_LINE_JOB,
+  CLEAR_HOVERED_PRODUCT_LINE_JOB,
 } from '../../actions/productLineJobs'
 
-export function reducer(state = {}, action) {
+const INITIAL_STATE = {
+  hovered: null,
+  selection: [],
+}
+
+export function reducer(state = INITIAL_STATE, action) {
   switch (action.type) {
 
   // Provision new collections for all incoming product lines
   case FETCH_PRODUCT_LINES_SUCCESS:
-    const newState = {}
+    const newState = INITIAL_STATE
     for (const productLine of action.records) {
       newState[productLine.id] = collection(undefined, action)
     }
@@ -47,6 +56,26 @@ export function reducer(state = {}, action) {
   case IMPORT_PRODUCT_LINE_JOB_ERROR:
     return Object.assign({}, state, {
       [action.productLineId]: collection(state[action.productLineId], action)
+    })
+
+  // Selected Jobs
+  case SELECT_PRODUCT_LINE_JOB:
+    return Object.assign({}, state, {
+      selection: [action.job],
+    })
+  case CLEAR_SELECTED_PRODUCT_LINE_JOB:
+    return Object.assign({}, state, {
+      selection: [],
+    })
+
+  // Hovered
+  case HOVER_PRODUCT_LINE_JOB:
+    return Object.assign({}, state, {
+      hovered: action.job,
+    })
+  case CLEAR_HOVERED_PRODUCT_LINE_JOB:
+    return Object.assign({}, state, {
+      hovered: null,
     })
 
   default:
