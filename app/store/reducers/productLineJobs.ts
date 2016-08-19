@@ -58,7 +58,9 @@ export function reducer(state: TypeState = INITIAL_STATE, action): TypeState {
   case IMPORT_PRODUCT_LINE_JOB_SUCCESS:
   case IMPORT_PRODUCT_LINE_JOB_ERROR:
     return Object.assign({}, state, {
-      [action.productLineId]: collection(state[action.productLineId], action),
+      byPLID: Object.assign({}, state.byPLID, {
+        [action.productLineId]: collection(state.byPLID[action.productLineId], action),
+      }),
     })
 
   // Selected Jobs
