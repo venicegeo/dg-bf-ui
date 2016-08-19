@@ -8,14 +8,14 @@
     "sinon": "registry:dt/sinon#1.16.0+20160517064723"
   },
   "globalDependencies": {
-    "core-js": "registry:dt/core-js#0.0.0+20160602141332",
+    "core-js": "registry:dt/core-js#0.0.0+20160725163759",
     "geojson": "registry:dt/geojson#0.0.0+20160619034323",
-    "lodash": "registry:dt/lodash#4.14.0+20160802150749",
-    "react": "registry:dt/react#0.14.0+20160802191555",
+    "lodash": "registry:dt/lodash#4.14.0+20160817155621",
     "openlayers-3.14.2": "github:dbazile/DefinitelyTyped/openlayers/openlayers-3.14.2.d.ts#e111d2cc69b1e75cc844320ba788cacbb1eeb1c2",
+    "react": "registry:dt/react#0.14.0+20160817201227",
     "react-dom": "registry:dt/react-dom#0.14.0+20160412154040",
     "react-redux": "registry:dt/react-redux#4.4.0+20160724070751",
-    "react-router": "registry:dt/react-router#2.0.0+20160621215300",
+    "react-router": "registry:dt/react-router#2.0.0+20160813233016",
     "react-router/history": "registry:dt/react-router/history#2.0.0+20160608102730",
     "redux": "registry:dt/redux#3.5.2+20160703092728",
     "redux-thunk": "registry:dt/redux-thunk#2.1.0+20160703120921",
