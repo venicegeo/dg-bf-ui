@@ -15,6 +15,21 @@ declare namespace beachfront {
       status: string
       type: 'PRODUCT_LINE'
     }
+
+    interface JobProperties {
+      __schemaVersion__: number
+      algorithmName: string
+      createdOn: string
+      detectionsDataId: string
+      detectionsLayerId: string
+      imageCaptureDate: string
+      imageCloudCover: number
+      imageId: string
+      imageSensorName: string
+      name: string
+      status: string
+      type: 'JOB'
+    }
   }
 
   interface Algorithm {
@@ -34,6 +49,7 @@ declare namespace beachfront {
 
   interface Job extends GeoJSON.Feature<GeoJSON.Polygon> {
     id: string
+    properties: x.JobProperties
   }
 
   interface ProductLine extends GeoJSON.Feature<GeoJSON.Polygon> {
@@ -47,9 +63,14 @@ declare namespace beachfront {
   }
 
   interface SceneMetadata {
+    type: 'SCENE'
+    acquiredDate: string
     bands: {
       [key: string]: string
     }
+    cloudCover: number
+    sensorName: string
+    thumb_large: string
   }
 
   interface ImageryCatalogPage {

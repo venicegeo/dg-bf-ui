@@ -29,14 +29,6 @@ import {
   UPDATE_JOB,
 } from '../../actions/jobs'
 
-import {
-  KEY_GEOJSON_DATA_ID,
-  KEY_RASTER_DATA_ID,
-  KEY_STATUS,
-  KEY_WMS_LAYER_ID,
-  KEY_WMS_URL,
-} from '../../constants'
-
 const INITIAL_STATE = {
   creating: false,
   fetching: false,
@@ -93,12 +85,10 @@ export function reducer(state: TypeState = INITIAL_STATE, action): TypeState {
         }
         return Object.assign({}, job, {
           properties: Object.assign({}, job.properties, {
-            [KEY_STATUS]:          action.status,
-            [KEY_GEOJSON_DATA_ID]: action.geojsonDataId,
-            [KEY_RASTER_DATA_ID]:  action.imageryDataId,
-            [KEY_WMS_LAYER_ID]:    action.wmsLayerId,
-            [KEY_WMS_URL]:         action.wmsUrl,
-          }),
+            status:            action.status,
+            detectionsDataId:  action.geojsonDataId,
+            detectionsLayerId: action.wmsLayerId,
+          } as beachfront.x.JobProperties),
         })
       }),
     })

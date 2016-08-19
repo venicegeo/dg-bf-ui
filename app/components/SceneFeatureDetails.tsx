@@ -19,12 +19,6 @@ const styles: any = require('./SceneFeatureDetails.css')
 import * as React from 'react'
 import * as moment from 'moment'
 
-const KEY_DATE = 'acquiredDate'
-const KEY_BANDS = 'bands'
-const KEY_CLOUD_COVER = 'cloudCover'
-const KEY_SENSOR_NAME = 'sensorName'
-const KEY_THUMBNAIL = 'thumb_large'
-
 interface Props {
   className?: string
   feature: beachfront.Scene
@@ -36,18 +30,18 @@ const SceneFeatureDetails = ({className, feature}: Props) => (
 
     <dl>
       <dt>Thumbnail</dt>
-      <dd><a className={styles.thumbnailLink} href={feature.properties[KEY_THUMBNAIL]} target="_blank">Click here to open</a></dd>
+      <dd><a className={styles.thumbnailLink} href={feature.properties.thumb_large} target="_blank">Click here to open</a></dd>
       <dt>Date Captured</dt>
-      <dd>{moment(feature.properties[KEY_DATE]).utc().format('MM/DD/YYYY HH:mm z')}</dd>
+      <dd>{moment(feature.properties.acquiredDate).utc().format('MM/DD/YYYY HH:mm z')}</dd>
 
       <dt>Bands</dt>
-      <dd>{Object.keys(feature.properties[KEY_BANDS]).join(', ')}</dd>
+      <dd>{Object.keys(feature.properties.bands).join(', ')}</dd>
 
       <dt>Cloud Cover</dt>
-      <dd>{feature.properties[KEY_CLOUD_COVER]}%</dd>
+      <dd>{feature.properties.cloudCover}%</dd>
 
       <dt>Sensor Name</dt>
-      <dd>{feature.properties[KEY_SENSOR_NAME]}</dd>
+      <dd>{feature.properties.sensorName}</dd>
     </dl>
   </div>
 )

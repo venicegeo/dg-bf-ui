@@ -20,12 +20,6 @@ import SinceDateSelect from './SinceDateSelect'
 
 const styles = require('./ActivityTable.css')
 
-import {
-  KEY_IMAGE_CAPTURED_ON,
-  KEY_IMAGE_ID,
-  KEY_IMAGE_SENSOR,
-} from '../constants'
-
 interface Props {
   className?: string
   error?: any
@@ -118,14 +112,14 @@ export default ActivityTable
 //
 
 function getCapturedOn({ properties }) {
-  const then = moment(properties[KEY_IMAGE_CAPTURED_ON])
+  const then = moment(properties.imageCaptureDatelol)
   return then.format(then.year() === new Date().getFullYear() ? 'MM/DD' : 'MM/DD/YYYY')
 }
 
 function getImageId({ properties }) {
-  return properties[KEY_IMAGE_ID].replace(/^landsat:/, '')
+  return properties.imageId.replace(/^landsat:/, '')
 }
 
 function getImageSensor({ properties }) {
-  return properties[KEY_IMAGE_SENSOR]
+  return properties.imageSensorName
 }

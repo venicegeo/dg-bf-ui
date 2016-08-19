@@ -21,17 +21,6 @@ import * as moment from 'moment'
 import {Link} from 'react-router'
 import {featureToAnchor} from '../utils/map-anchor'
 import ActivityTable from './ActivityTable'
-
-import {
-  KEY_ALGORITHM_NAME,
-  KEY_CREATED_ON,
-  KEY_EXPIRES_ON,
-  KEY_IMAGE_CLOUDCOVER,
-  KEY_NAME,
-  KEY_OWNER,
-  KEY_SPATIAL_FILTER_NAME,
-  KEY_STARTS_ON,
-} from '../constants'
 import {TypeCollection as TypeJobCollection} from '../store/reducers/productLineJobs'
 
 interface Props {
@@ -77,7 +66,7 @@ export default class ProductLine extends React.Component<Props, State> {
         <section className={styles.header} onClick={this._handleExpansionToggle}>
           <h3 className={styles.title}>
             <i className={`fa fa-chevron-right ${styles.caret}`}/>
-            <span>{properties[KEY_NAME]}</span>
+            <span>{properties.name}</span>
           </h3>
           <Link to={{pathname: '/product-lines', hash: featureToAnchor(productLine)}} className={styles.viewButton}>
             <i className="fa fa-globe"/>
@@ -87,21 +76,21 @@ export default class ProductLine extends React.Component<Props, State> {
           <div className={styles.metadata}>
             <dl>
               <dt>Scheduling</dt>
-              <dd>{formatDate(properties[KEY_STARTS_ON])} &mdash; {formatDate(properties[KEY_EXPIRES_ON]) || 'Forever'}</dd>
+              <dd>{formatDate(properties.startsOn)} &mdash; {formatDate(properties.expiresOn) || 'Forever'}</dd>
               <dt>Algorithm</dt>
-              <dd>{properties[KEY_ALGORITHM_NAME]}</dd>
+              <dd>{properties.algorithmName}</dd>
               <dt>Cloud Cover</dt>
-              <dd>{properties[KEY_IMAGE_CLOUDCOVER]}</dd>
+              <dd>{properties.imageCloudCover}</dd>
               {/*
               <dt>Compute Mask</dt>
               <dd>{computeMask}</dd>
               */}
               <dt>Spatial Filter</dt>
-              <dd>{titleCase(properties[KEY_SPATIAL_FILTER_NAME])}</dd>
+              <dd>{titleCase(properties.spatialFilterName)}</dd>
               <dt>Owner</dt>
-              <dd>{properties[KEY_OWNER]}</dd>
+              <dd>{properties.owner}</dd>
               <dt>Date Created</dt>
-              <dd>{formatDate(properties[KEY_CREATED_ON])}</dd>
+              <dd>{formatDate(properties.createdOn)}</dd>
             </dl>
           </div>
           <ActivityTable
@@ -114,7 +103,7 @@ export default class ProductLine extends React.Component<Props, State> {
               {value: last24Hours(), label: 'Last 24 Hours'},
               {value: last7Days(), label: 'Last 7 Days'},
               {value: last30Days(), label: 'Last 30 Days'},
-              {value: properties[KEY_CREATED_ON], label: 'All'},
+              {value: properties.createdOn, label: 'All'},
             ]}
             onHoverIn={this.props.onJobHoverIn}
             onHoverOut={this.props.onJobHoverOut}
@@ -158,7 +147,7 @@ function formatDate(input) {
 }
 
 function jobFilter(sinceDate) {
-  return job => job.loading || (job.properties && job.properties[KEY_CREATED_ON] > sinceDate)
+  return job => job.loading || (job.properties && job.properties.createdOn > sinceDate)
 }
 
 function last24Hours() {

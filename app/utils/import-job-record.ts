@@ -31,17 +31,6 @@ import {
 } from './execution-output'
 
 import {
-  KEY_ALGORITHM_NAME,
-  KEY_CREATED_ON,
-  KEY_GEOJSON_DATA_ID,
-  KEY_IMAGE_ID,
-  KEY_IMAGE_CAPTURED_ON,
-  KEY_IMAGE_SENSOR,
-  KEY_NAME,
-  KEY_SCHEMA_VERSION,
-  KEY_STATUS,
-  KEY_TYPE,
-  KEY_WMS_LAYER_ID,
   STATUS_SUCCESS,
   TYPE_JOB,
 } from '../constants'
@@ -59,20 +48,20 @@ export function importRecordById(client, id, algorithmNames) {
       id,
       geometry: extractGeometry(executionOutput),
       properties: {
-        [KEY_ALGORITHM_NAME]:    algorithmNames[extractAlgorithmUrl(executionOutput)] || 'Unknown',
-        [KEY_CREATED_ON]:        extractDateCreated(executionOutput),
-        [KEY_IMAGE_CAPTURED_ON]: extractImageCaptureDate(executionOutput),
-        [KEY_GEOJSON_DATA_ID]:   extractGeojsonDataId(executionOutput),
-        [KEY_IMAGE_ID]:          extractImageId(executionOutput),
-        [KEY_IMAGE_SENSOR]:      extractSensorName(executionOutput),
-        [KEY_NAME]:              extractName(executionOutput),
-        [KEY_STATUS]:            STATUS_SUCCESS,
-        [KEY_TYPE]:              TYPE_JOB,
-        [KEY_SCHEMA_VERSION]:    SCHEMA_VERSION,
-        [KEY_WMS_LAYER_ID]:      extractGeojsonDataId(executionOutput),
+        __schemaVersion__: SCHEMA_VERSION,
+        algorithmName:     algorithmNames[extractAlgorithmUrl(executionOutput)] || 'Unknown',
+        createdOn:         extractDateCreated(executionOutput),
+        detectionsDataId:  extractGeojsonDataId(executionOutput),
+        detectionsLayerId: extractGeojsonDataId(executionOutput),
+        imageId:           extractImageId(executionOutput),
+        imageCaptureDate:  extractImageCaptureDate(executionOutput),
+        imageSensorName:   extractSensorName(executionOutput),
+        name:              extractName(executionOutput),
+        status:            STATUS_SUCCESS,
+        type:              TYPE_JOB,
       },
       type: 'Feature',
-    }))
+    } as beachfront.Job))
     .catch(err => {
       throw Object.assign(err, {
         jobId:   id,

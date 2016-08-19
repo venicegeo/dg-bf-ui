@@ -14,108 +14,90 @@
  * limitations under the License.
  **/
 
-import * as ol from 'openlayers'
 import * as moment from 'moment'
 
 import {
   SCHEMA_VERSION,
 } from '../config'
 import {
-  KEY_ALGORITHM_NAME,
-  KEY_CREATED_ON,
-  KEY_GEOJSON_DATA_ID,
-  KEY_IMAGE_CAPTURED_ON,
-  KEY_IMAGE_ID,
-  KEY_IMAGE_SENSOR,
-  KEY_NAME,
-  KEY_SCHEMA_VERSION,
-  KEY_STATUS,
-  KEY_TYPE,
   STATUS_RUNNING,
   TYPE_JOB,
 } from '../constants'
 
 export function upgradeIfNeeded(record) {
-  const recordVersion = record.properties ? record.properties[KEY_SCHEMA_VERSION] : 0
-  switch (recordVersion) {
-  case SCHEMA_VERSION: return record
-  case 2: return upgradeFromV2(record)
-  case 1: return upgradeFromV1(record)
-  case 0: return upgradeFromV0(record)
-  default: return null  // Discard incompatible record
+  try {
+    const recordVersion = record.properties['beachfront:schemaVersion'] || record.properties.__schemaVersion__
+    switch (recordVersion) {
+    case SCHEMA_VERSION: return record
+    case 3: return upgradeFromV3(record)
+    case 2: return upgradeFromV2(record)
+    case 1: return upgradeFromV1(record)
+    default: return null  // Discard incompatible record
+    }
+  } catch (err) {
+    emitFailure(err, record)
   }
+}
+
+function upgradeFromV3(legacyRecord) {
+  console.debug('(upgrade-job-record:upgradeFromV3)', legacyRecord)
+  return Object.assign({}, legacyRecord, {
+    properties: {
+      __schemaVersion__: SCHEMA_VERSION,
+      algorithmName:     legacyRecord.properties['beachfront:algorithmName'],
+      createdOn:         legacyRecord.properties['beachfront:createdOn'],
+      imageId:           legacyRecord.properties['beachfront:imageId'],
+      imageCaptureDate:  legacyRecord.properties['acquiredDate'],  // tslint:disable-line
+      imageSensorName:   legacyRecord.properties['sensorName'],  // tslint:disable-line
+      name:              legacyRecord.properties['beachfront:name'],
+      type:              TYPE_JOB,
+
+      // Force a re-fetch to populate the detections fields
+      status:            STATUS_RUNNING,
+    },
+  } as beachfront.Job)
 }
 
 function upgradeFromV2(legacyRecord) {
-  console.debug('upgrade-job-record:upgradeFromV2', legacyRecord)
+  console.debug('(upgrade-job-record:upgradeFromV2)', legacyRecord)
   return Object.assign({}, legacyRecord, {
-    properties: Object.assign({}, legacyRecord.properties, {
-      [KEY_SCHEMA_VERSION]: SCHEMA_VERSION,
+    properties: {
+      __schemaVersion__: SCHEMA_VERSION,
+      algorithmName:     legacyRecord.properties['beachfront:algorithmName'],
+      createdOn:         legacyRecord.properties['beachfront:createdOn'],
+      imageId:           legacyRecord.properties['beachfront:imageId'],
+      name:              legacyRecord.properties['beachfront:name'],
+      type:              TYPE_JOB,
 
       // Deduce image metadata
-      [KEY_IMAGE_CAPTURED_ON]: extractLandsatCaptureDate(legacyRecord.properties[KEY_IMAGE_ID]),
-      [KEY_IMAGE_SENSOR]: extractLandsatSensor(legacyRecord.properties[KEY_IMAGE_ID]),
-    }),
-  })
+      imageCaptureDate:  extractLandsatCaptureDate(legacyRecord.properties['beachfront:imageId']),
+      imageSensorName:   extractLandsatSensor(legacyRecord.properties['beachfront:imageId']),
+
+      // Force a re-fetch to populate the detections fields
+      status:            STATUS_RUNNING,
+    },
+  } as beachfront.Job)
 }
 
 function upgradeFromV1(legacyRecord) {
-  console.debug('upgrade-job-record:upgradeFromV1', legacyRecord)
+  console.debug('(upgrade-job-record:upgradeFromV1)', legacyRecord)
   return Object.assign({}, legacyRecord, {
-    properties: Object.assign({}, legacyRecord.properties, {
-      [KEY_SCHEMA_VERSION]: SCHEMA_VERSION,
-
-      // Force a re-fetch to populate the missing fields
-      [KEY_STATUS]: STATUS_RUNNING,
-
-      // Prune dead properties
-      'beachfront:resultId': undefined,
+    properties: {
+      __schemaVersion__: SCHEMA_VERSION,
+      algorithmName:     legacyRecord.properties['beachfront:algorithmName'],
+      createdOn:         legacyRecord.properties['beachfront:createdOn'],
+      imageId:           legacyRecord.properties['beachfront:imageId'],
+      name:              legacyRecord.properties['beachfront:name'],
+      type:              TYPE_JOB,
 
       // Deduce image metadata
-      [KEY_IMAGE_CAPTURED_ON]: extractLandsatCaptureDate(legacyRecord.properties[KEY_IMAGE_ID]),
-      [KEY_IMAGE_SENSOR]: extractLandsatSensor(legacyRecord.properties[KEY_IMAGE_ID]),
-    }),
-  })
-}
+      imageCaptureDate:  extractLandsatCaptureDate(legacyRecord.properties['beachfront:imageId']),
+      imageSensorName:   extractLandsatSensor(legacyRecord.properties['beachfront:imageId']),
 
-function upgradeFromV0(legacyRecord) {
-  console.debug('upgrade-job-record:upgradeFromV0', legacyRecord)
-  try {
-    return {
-      id: legacyRecord.id,
-      properties: {
-        [KEY_IMAGE_ID]:        legacyRecord.imageId,
-        [KEY_ALGORITHM_NAME]:  legacyRecord.algorithmName || 'Unknown Algorithm',
-        [KEY_CREATED_ON]:      legacyRecord.createdOn || new Date().toISOString(),
-        [KEY_NAME]:            legacyRecord.name || legacyRecord.createdOn || 'Untitled Job',
-        [KEY_GEOJSON_DATA_ID]: legacyRecord.resultId,
-        [KEY_STATUS]:          STATUS_RUNNING,
-        [KEY_TYPE]:            TYPE_JOB,
-        [KEY_SCHEMA_VERSION]:  SCHEMA_VERSION,
-
-        // Deduce image metadata
-        [KEY_IMAGE_CAPTURED_ON]: extractLandsatCaptureDate(legacyRecord.imageId),
-        [KEY_IMAGE_SENSOR]: extractLandsatSensor(legacyRecord.imageId),
-      },
-      geometry: bboxToGeometry(legacyRecord.bbox),
-      type: 'Feature',
-    }
-  } catch (err) {
-    console.warn(`\
---------------------------------------------------------------------------------
-Could not upgrade legacy record
-
-Error:
-${err.stack}
-
-Record:
-${JSON.stringify(legacyRecord, null, 2)} 
---------------------------------------------------------------------------------`)
-  }
-}
-
-function bboxToGeometry(bbox) {
-  return new ol.format.GeoJSON().writeGeometryObject(ol.geom.Polygon.fromExtent(bbox))
+      // Force a re-fetch to populate the detections fields
+      status:            STATUS_RUNNING,
+    },
+  } as beachfront.Job)
 }
 
 function decomposeLandsatId(id) {
@@ -136,4 +118,17 @@ function extractLandsatSensor(imageId) {
   case 'LE7': return 'Landsat7'
   default: return 'Unknown'
   }
+}
+
+function emitFailure(err, record) {
+  console.warn(`\
+-----------------------------------------------------------
+(upgrade-job-record) error: ${err.message}
+
+RECORD:
+
+${JSON.stringify(record, null, 4)}
+
+-----------------------------------------------------------
+`)
 }

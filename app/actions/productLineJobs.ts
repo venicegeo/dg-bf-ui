@@ -18,10 +18,11 @@ import * as moment from 'moment'
 import {importRecordById as importJobRecordById} from '../utils/import-job-record'
 import {Client} from '../utils/piazza-client'
 import {GATEWAY} from '../config'
+import {TypeAppState} from '../store'
 
-import {
-  KEY_CREATED_ON,
-} from '../constants'
+//
+// Action Types
+//
 
 export const FETCH_PRODUCT_LINE_JOBS = 'FETCH_PRODUCT_LINE_JOBS'
 export const FETCH_PRODUCT_LINE_JOBS_SUCCESS = 'FETCH_PRODUCT_LINE_JOBS_SUCCESS'
@@ -33,6 +34,10 @@ export const SELECT_PRODUCT_LINE_JOB = 'SELECT_PRODUCT_LINE_JOB'
 export const CLEAR_SELECTED_PRODUCT_LINE_JOB = 'CLEAR_SELECTED_PRODUCT_LINE_JOBS'
 export const HOVER_PRODUCT_LINE_JOB = 'HOVER_PRODUCT_LINE_JOB'
 export const CLEAR_HOVERED_PRODUCT_LINE_JOB = 'CLEAR_HOVERED_PRODUCT_LINE_JOBS'
+
+//
+// Action Creators
+//
 
 const fetchProductLineJobsSuccess = (productLineId, jobIds) => ({
   type: FETCH_PRODUCT_LINE_JOBS_SUCCESS,
@@ -51,7 +56,7 @@ const fetchProductLineJobsError = (productLineId, err) => ({
 
 export function fetchProductLineJobs(productLineId, sinceDate) {
   return (dispatch, getState) => {
-    const state = getState()
+    const state: TypeAppState = getState()
     dispatch({
       type: FETCH_PRODUCT_LINE_JOBS,
       productLineId,
@@ -117,8 +122,8 @@ export const selectProductLineJob = (job) => ({
       course of ~5 minutes
  */
 function __keepFetchingJobRecordsUntilSinceDate__(productLineId, sinceDate) {
-  return (dispatch, getState) => {
-    const getRecords = () => getState().productLineJobs[productLineId].records
+  return (dispatch, getState: () => TypeAppState) => {
+    const getRecords = () => getState().productLineJobs.byPLID[productLineId].records
 
     const firstTenIds = getRecords().filter(r => !r.properties).map(r => r.id).slice(0, 10)
     if (!firstTenIds.length) {
@@ -133,8 +138,8 @@ function __keepFetchingJobRecordsUntilSinceDate__(productLineId, sinceDate) {
     return Promise.all(firstTenIds.map(jobId => dispatch(importProductLineJob(productLineId, jobId))))
       .then(() => {
         const localsInDateOrder = getRecords()
-        const oldestLoadedRecord = localsInDateOrder.filter(r => r.properties).pop()
-        const haventReachedSinceDate = moment(sinceDate).isBefore(moment(oldestLoadedRecord.properties[KEY_CREATED_ON]))
+        const oldestLoadedRecord = localsInDateOrder.filter(r => !!r.properties).pop()
+        const haventReachedSinceDate = moment(sinceDate).isBefore(moment(oldestLoadedRecord.properties.createdOn))
         const isMoreToLoad = localsInDateOrder.some(j => !j.properties)
         if (isMoreToLoad && haventReachedSinceDate) {
           dispatch(__keepFetchingJobRecordsUntilSinceDate__(productLineId, sinceDate))

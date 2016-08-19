@@ -23,7 +23,6 @@ import SceneFeatureDetails from './SceneFeatureDetails'
 import {
   TYPE_JOB,
   TYPE_SCENE,
-  KEY_TYPE,
 } from '../constants'
 
 interface Props {
@@ -38,14 +37,14 @@ export default class FeatureDetails extends React.Component<Props, {}> {
     }
     return (
       <div className={styles.root}>
-        {feature.properties[KEY_TYPE] === TYPE_JOB && (
+        {feature.properties.type === TYPE_JOB && (
           <JobFeatureDetails
             className={styles.jobDetails}
             feature={feature as beachfront.Job}
           />
         )}
 
-        {feature.properties[KEY_TYPE] === TYPE_SCENE && (
+        {feature.properties.type === TYPE_SCENE && (
           <SceneFeatureDetails
             className={styles.sceneDetails}
             feature={feature as beachfront.Scene}

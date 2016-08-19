@@ -25,16 +25,6 @@ import {
 } from '../config'
 
 import {
-  KEY_ALGORITHM_NAME,
-  KEY_CREATED_ON,
-  KEY_IMAGE_ID,
-  KEY_IMAGE_CAPTURED_ON,
-  KEY_IMAGE_SENSOR,
-  KEY_NAME,
-  KEY_SCHEMA_VERSION,
-  KEY_STATUS,
-  KEY_TYPE,
-  KEY_THUMBNAIL,
   REQUIREMENT_BANDS,
   STATUS_RUNNING,
   TYPE_JOB,
@@ -170,26 +160,25 @@ function createJobError(err) {
   }
 }
 
-function createJobSuccess(id, name, algorithm, feature) {
+function createJobSuccess(id, name, algorithm, feature: beachfront.Scene) {
   return {
     type: CREATE_JOB_SUCCESS,
     record: {
       id,
       geometry: feature.geometry,
       properties: {
-        [KEY_ALGORITHM_NAME]:    algorithm.name,
-        [KEY_CREATED_ON]:        new Date().toISOString(),
-        [KEY_IMAGE_CAPTURED_ON]: moment(feature.properties[KEY_IMAGE_CAPTURED_ON]).toISOString(),
-        [KEY_IMAGE_ID]:          feature.id,
-        [KEY_IMAGE_SENSOR]:      feature.properties[KEY_IMAGE_SENSOR],
-        [KEY_NAME]:              name,
-        [KEY_STATUS]:            STATUS_RUNNING,
-        [KEY_THUMBNAIL]:         feature.properties[KEY_THUMBNAIL],
-        [KEY_TYPE]:              TYPE_JOB,
-        [KEY_SCHEMA_VERSION]:    SCHEMA_VERSION,
+        __schemaVersion__: SCHEMA_VERSION,
+        algorithmName:     algorithm.name,
+        createdOn:         new Date().toISOString(),
+        imageCaptureDate:  moment(feature.properties.acquiredDate).toISOString(),
+        imageId:           feature.id,
+        imageSensorName:   feature.properties.sensorName,
+        name:              name,
+        status:            STATUS_RUNNING,
+        type:              TYPE_JOB,
       },
       type: 'Feature',
-    },
+    } as beachfront.Job,
   }
 }
 

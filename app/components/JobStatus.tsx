@@ -24,14 +24,6 @@ import FileDownloadLink from './FileDownloadLink'
 import {featureToAnchor} from '../utils/map-anchor'
 
 import {
-  KEY_ALGORITHM_NAME,
-  KEY_CREATED_ON,
-  KEY_IMAGE_ID,
-  KEY_IMAGE_CAPTURED_ON,
-  KEY_IMAGE_SENSOR,
-  KEY_NAME,
-  KEY_STATUS,
-  KEY_GEOJSON_DATA_ID,
   STATUS_SUCCESS,
   STATUS_RUNNING,
   STATUS_ERROR,
@@ -72,29 +64,21 @@ export default class JobStatus extends React.Component<Props, State> {
 
   render() {
     const {id, properties} = this.props.job
-    const name = properties[KEY_NAME]
-    const status = properties[KEY_STATUS]
-    const createdOn = properties[KEY_CREATED_ON]
-    const imageId = properties[KEY_IMAGE_ID]
-    const algorithmName = properties[KEY_ALGORITHM_NAME]
-    const capturedOn = properties[KEY_IMAGE_CAPTURED_ON]
-    const sensor = properties[KEY_IMAGE_SENSOR]
-    const resultDataId = properties[KEY_GEOJSON_DATA_ID]
-    const canDownload = status === STATUS_SUCCESS && resultDataId
+    const canDownload = properties.status === STATUS_SUCCESS && properties.detectionsDataId
     const downloadPercentage = `${this.state.downloadProgress || 0}%`
     return (
       <li className={`${styles.root} ${this.aggregatedClassNames}`}>
         <div className={styles.details} onClick={this.handleExpansionToggle}>
           <h3 className={styles.title}>
             <i className={`fa fa-chevron-right ${styles.caret}`}/>
-            <span>{name}</span>
+            <span>{properties.name}</span>
           </h3>
 
           <div className={styles.summary}>
-            <span className={styles.status}>{status}</span>
+            <span className={styles.status}>{properties.status}</span>
             <Timestamp
               className={styles.timer}
-              timestamp={createdOn}
+              timestamp={properties.createdOn}
             />
           </div>
 
@@ -105,13 +89,13 @@ export default class JobStatus extends React.Component<Props, State> {
           <div className={styles.metadata} onClick={e => e.stopPropagation()}>
             <dl>
               <dt>Algorithm</dt>
-              <dd>{algorithmName}</dd>
+              <dd>{properties.algorithmName}</dd>
               <dt>Image ID</dt>
-              <dd>{imageId || 'No ID?'}</dd>
+              <dd>{normalizeImageId(properties.imageId)}</dd>
               <dt>Captured On</dt>
-              <dd>{moment(capturedOn).utc().format('MM/DD/YYYY HH:mm z')}</dd>
+              <dd>{moment(properties.imageCaptureDate).utc().format('MM/DD/YYYY HH:mm z')}</dd>
               <dt>Sensor</dt>
-              <dd>{sensor}</dd>
+              <dd>{properties.imageSensorName}</dd>
             </dl>
             <div className={styles.removeToggle}>
               <button onClick={this.handleForgetToggle}>
@@ -141,8 +125,8 @@ export default class JobStatus extends React.Component<Props, State> {
           </Link>
           {canDownload && (
             <FileDownloadLink
-              dataId={resultDataId}
-              filename={name + '.geojson'}
+              dataId={properties.detectionsDataId}
+              filename={properties.name + '.geojson'}
               className={styles.download}
               onProgress={this.handleDownloadProgress}
               onStart={this.handleDownloadStart}
@@ -191,7 +175,7 @@ export default class JobStatus extends React.Component<Props, State> {
   }
 
   private get _classForStatus() {
-    switch (this.props.job.properties[KEY_STATUS]) {
+    switch (this.props.job.properties.status) {
       case STATUS_SUCCESS: return styles.succeeded
       case STATUS_RUNNING: return styles.running
       case STATUS_TIMED_OUT: return styles.timedOut
@@ -233,4 +217,12 @@ export default class JobStatus extends React.Component<Props, State> {
   private handleForgetToggle() {
     this.setState({ isRemoving: !this.state.isRemoving })
   }
+}
+
+//
+// Helpers
+//
+
+function normalizeImageId(imageId) {
+  return imageId.replace(/^landsat:/, '')
 }

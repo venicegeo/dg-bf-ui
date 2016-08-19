@@ -35,11 +35,6 @@ import {
   SCENE_TILE_PROVIDERS,
 } from '../config'
 import {
-  KEY_NAME,
-  KEY_STATUS,
-  KEY_IMAGE_ID,
-  KEY_TYPE,
-  KEY_WMS_LAYER_ID,
   STATUS_ACTIVE,
   STATUS_ERROR,
   STATUS_INACTIVE,
@@ -55,8 +50,12 @@ const MIN_ZOOM = 2.5
 const MAX_ZOOM = 22
 const RESOLUTION_CLOSE = 1000
 const STEM_OFFSET = 10000
-const KEY_OWNER_ID = 'OWNER_ID'
+const KEY_IMAGE_ID = 'imageId'
 const KEY_LAYERS = 'LAYERS'
+const KEY_NAME = 'name'
+const KEY_OWNER_ID = 'OWNER_ID'
+const KEY_STATUS = 'status'
+const KEY_TYPE = 'type'
 const TYPE_DIVOT_INBOARD = 'DIVOT_INBOARD'
 const TYPE_DIVOT_OUTBOARD = 'DIVOT_OUTBOARD'
 const TYPE_LABEL_MAJOR = 'LABEL_MAJOR'
@@ -432,7 +431,7 @@ export default class PrimaryMap extends React.Component<Props, State> {
     const layer = this._detectionsLayer
     const source = layer.getSource() as ol.source.TileWMS
     const currentLayerIds = source.getParams()[KEY_LAYERS]
-    const incomingLayerIds = detections.map(d => d.properties[KEY_WMS_LAYER_ID]).sort().join(',')
+    const incomingLayerIds = detections.map(d => d.properties.detectionsLayerId).sort().join(',')
 
     if (!geoserverUrl) {
       return  // No server to point to
@@ -494,7 +493,7 @@ export default class PrimaryMap extends React.Component<Props, State> {
       })
       divotOutboard.set(KEY_TYPE, TYPE_DIVOT_OUTBOARD)
       divotOutboard.set(KEY_OWNER_ID, id)
-      divotOutboard.set(KEY_STATUS, frame.get(KEY_STATUS))
+      divotOutboard.set(KEY_STATUS, raw.properties.status)
       source.addFeature(divotOutboard)
 
       const name = new ol.Feature({
@@ -502,7 +501,7 @@ export default class PrimaryMap extends React.Component<Props, State> {
       })
       name.set(KEY_TYPE, TYPE_LABEL_MAJOR)
       name.set(KEY_OWNER_ID, id)
-      name.set(KEY_NAME, frame.get(KEY_NAME).toUpperCase())
+      name.set(KEY_NAME, raw.properties.name.toUpperCase())
       source.addFeature(name)
 
       const status = new ol.Feature({
@@ -510,8 +509,8 @@ export default class PrimaryMap extends React.Component<Props, State> {
       })
       status.set(KEY_TYPE, TYPE_LABEL_MINOR)
       status.set(KEY_OWNER_ID, id)
-      status.set(KEY_STATUS, frame.get(KEY_STATUS))
-      status.set(KEY_IMAGE_ID, frame.get(KEY_IMAGE_ID))
+      status.set(KEY_STATUS, raw.properties.status)
+      status.set(KEY_IMAGE_ID, (raw as beachfront.Job).properties.imageId)
       source.addFeature(status)
     })
   }

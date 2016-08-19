@@ -53,7 +53,7 @@ export function changeLoadedDetections(jobIds = []) {
     }
 
     // Additions/Updates
-    const loadableJobs = state.jobs.records.filter(j => jobIds.includes(j.id) && j.properties[KEY_GEOJSON_DATA_ID])
+    const loadableJobs = state.jobs.records.filter(j => jobIds.includes(j.id) && !!j.properties.detectionsDataId)
     const loadableIds = simplify(loadableJobs.map(j => j.id))
     if (alreadyLoadedIds === loadableIds) {
       return  // Avoid thrashing the reducer with spurious updates
@@ -66,6 +66,6 @@ export function changeLoadedDetections(jobIds = []) {
 // Helpers
 //
 
-function simplify(items) {
+function simplify(items): string {
   return items.slice().sort().join(',')
 }

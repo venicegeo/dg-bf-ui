@@ -21,8 +21,6 @@ import {
 } from '../../utils/execution-output'
 
 import {
-  KEY_CREATED_ON,
-  KEY_STATUS,
   STATUS_ERROR,
   STATUS_RUNNING,
   STATUS_SUCCESS,
@@ -119,7 +117,7 @@ function fetchUpdate(job: beachfront.Job) {
         return resolveResultIdentifiers(status)
       }
 
-      else if (status.status === STATUS_RUNNING && exceededTTL(job.properties[KEY_CREATED_ON])) {
+      else if (status.status === STATUS_RUNNING && exceededTTL(job.properties.createdOn)) {
         console.warn('(jobs:worker) <%s> appears to have stalled and will no longer be tracked', status.jobId)
         return Object.assign(status, {status: STATUS_TIMED_OUT})
       }
@@ -154,5 +152,5 @@ function resolveResultIdentifiers(status) {
 
 function getRunningJobs() {
   return _handlers.getRecords()
-    .filter(j => j.properties[KEY_STATUS] === STATUS_RUNNING)
+    .filter(j => j.properties.status === STATUS_RUNNING)
 }

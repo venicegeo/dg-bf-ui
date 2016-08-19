@@ -82,7 +82,7 @@ export class ProductLineList extends React.Component<Props, {}> {
 
 export default connect((state: TypeAppState) => ({
   isFetching:     state.productLines.fetching,
-  jobs:           state.productLineJobs,
+  jobs:           state.productLineJobs.byPLID,
   productLines:   state.productLines.records,
   selectedJobIds: state.productLineJobs.selection.map(j => j.id),
 }), dispatch => ({
