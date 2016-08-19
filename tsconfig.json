@@ -10,7 +10,7 @@
   ],
   "files": [
     "./typings/index.d.ts",
-    "./app/types.d.ts",
+    "./app/globals.d.ts",
     "./app/index.ts"
   ]
 }
