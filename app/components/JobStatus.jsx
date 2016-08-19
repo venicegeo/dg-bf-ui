@@ -81,17 +81,19 @@ export default class JobStatus extends Component {
     return (
       <li className={`${styles.root} ${this._aggregatedClassNames}`}>
         <div className={styles.details} onClick={this._handleExpansionToggle}>
-          <h3 className={styles.title}>
-            <i className={`fa fa-chevron-right ${styles.caret}`}/>
-            <span>{name}</span>
-          </h3>
+          <div className={styles.header}>
+            <h3 className={styles.title}>
+              <i className={`fa fa-chevron-right ${styles.caret}`}/>
+              <span>{name}</span>
+            </h3>
 
-          <div className={styles.summary}>
-            <span className={styles.status}>{status}</span>
-            <Timestamp
-              className={styles.timer}
-              timestamp={createdOn}
-            />
+            <div className={styles.summary}>
+              <span className={styles.status}>{status}</span>
+              <Timestamp
+                className={styles.timer}
+                timestamp={createdOn}
+              />
+            </div>
           </div>
 
           <div className={styles.progressBar} title={downloadPercentage}>

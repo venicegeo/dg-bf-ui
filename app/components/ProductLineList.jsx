@@ -55,6 +55,7 @@ export class ProductLineList extends React.Component {
         <ul>
           {this.props.productLines.map(productLine => (
             <ProductLine
+              className={styles.listItem}
               key={productLine.id}
               productLine={productLine}
               jobs={this.props.jobs[productLine.id]}

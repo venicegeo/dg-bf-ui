@@ -35,6 +35,7 @@ import {
 
 export default class ProductLine extends React.Component {
   static propTypes = {
+    className:     React.PropTypes.string,
     jobs:          React.PropTypes.object.isRequired,
     productLine:   React.PropTypes.object.isRequired,
     selectedJobIds: React.PropTypes.array.isRequired,
@@ -63,19 +64,26 @@ export default class ProductLine extends React.Component {
   }
 
   render() {
-    const {jobs, productLine} = this.props
+    const {className, jobs, productLine} = this.props
     const {properties} = productLine
     const {isExpanded, sinceDate} = this.state
     return (
-      <li className={`${styles.root} ${isExpanded ? styles.isExpanded : ''}`}>
+      <li className={`${styles.root} ${className || ''} ${isExpanded ? styles.isExpanded : ''}`}>
         <section className={styles.header} onClick={this._handleExpansionToggle}>
           <h3 className={styles.title}>
             <i className={`fa fa-chevron-right ${styles.caret}`}/>
             <span>{properties[KEY_NAME]}</span>
           </h3>
-          <Link to={{pathname: '/product-lines', hash: featureToAnchor(productLine)}} className={styles.viewButton} onClick={this._handleJumpTo}>
-            <i className="fa fa-globe"/>
-          </Link>
+          <div className={styles.controls}>
+            <Link
+              to={{
+                hash: featureToAnchor(productLine),
+                pathname: '/product-lines',
+              }}
+              title="View on Map">
+              <i className="fa fa-globe"/>
+            </Link>
+          </div>
         </section>
         <section className={styles.details}>
           <div className={styles.metadata}>

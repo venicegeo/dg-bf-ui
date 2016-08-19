@@ -107,8 +107,16 @@
   flex: 1;
 }
 
-/* Details: Summary
+/* Details: Header
    ========================================================================= */
+
+.header {
+  overflow: hidden;
+}
+
+.header:hover {
+  background-color: hsla(202, 100%, 85%, 0.13);
+}
 
 .summary {
   composes: buffered-container;
