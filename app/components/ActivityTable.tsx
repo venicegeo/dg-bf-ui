@@ -28,6 +28,7 @@ import {
 
 interface Props {
   className?: string
+  error?: any
   jobs: beachfront.Job[]
   selectedJobIds: string[]
   sinceDate: string

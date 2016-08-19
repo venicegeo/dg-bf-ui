@@ -53,7 +53,7 @@ const discoverGeoserverSuccess = (url, baselineLayerId) => ({
 function discoverGeoserver() {
   return (dispatch, getState) => {
     dispatch({
-      type: DISCOVER_GEOSERVER
+      type: DISCOVER_GEOSERVER,
     })
 
     const client = new Client(GATEWAY, getState().authentication.token)

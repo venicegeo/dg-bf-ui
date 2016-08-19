@@ -19,7 +19,7 @@ import {
 } from '../../actions/jobs'
 import {
   LOAD_DETECTIONS,
-  UNLOAD_DETECTIONS
+  UNLOAD_DETECTIONS,
 } from '../../actions/detections'
 
 export function reducer(state = [], action) {

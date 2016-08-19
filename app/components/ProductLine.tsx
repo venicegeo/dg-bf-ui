@@ -34,7 +34,7 @@ import {
 } from '../constants'
 
 interface Props {
-  jobs: beachfront.Job[]
+  jobs: {error?: any, records: beachfront.Job[]}  // FIXME -- this needs to be formalized at the reducer
   productLine: beachfront.Job  // FIXME
   selectedJobIds: string[]
   fetchJobs(sinceDate: string)
@@ -89,7 +89,7 @@ export default class ProductLine extends React.Component<Props, State> {
             <i className={`fa fa-chevron-right ${styles.caret}`}/>
             <span>{properties[KEY_NAME]}</span>
           </h3>
-          <Link to={{pathname: '/product-lines', hash: featureToAnchor(productLine)}} className={styles.viewButton} onClick={this._handleJumpTo}>
+          <Link to={{pathname: '/product-lines', hash: featureToAnchor(productLine)}} className={styles.viewButton}>
             <i className="fa fa-globe"/>
           </Link>
         </section>

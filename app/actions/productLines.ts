@@ -61,7 +61,7 @@ export function fetchProductLines() {
         pzAddr: GATEWAY,
       }),
       headers: {'content-type': 'application/json'},
-      method: 'POST'
+      method: 'POST',
     })
       .then(checkResponse)
       .then(extractRecords(algorithmNames, filterNames))
@@ -96,7 +96,7 @@ function extractRecords(algorithmNames, filterNames) {
         [datum.maxX, datum.maxY],
         [datum.maxX, datum.minY],
         [datum.minX, datum.minY],
-      ]]
+      ]],
     },
     properties: {
       [KEY_OWNER]:               datum.owner,
@@ -133,5 +133,5 @@ function generateFilterNamesHash(filters) {
 }
 
 function isActive(maxDate) {
-  return !maxDate || new Date(maxDate).getTime() < Date.now().getTime()
+  return !maxDate || new Date(maxDate).getTime() < Date.now()
 }

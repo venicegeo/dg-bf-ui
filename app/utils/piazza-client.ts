@@ -23,8 +23,8 @@ interface ProgressNotifier {
 }
 
 export class Client {
-  readonly gateway: string
-  readonly authToken: string
+  gateway: string
+  authToken: string
 
   constructor(gateway, authToken) {
     this.gateway   = gateway.replace(/\/+$/g, '')

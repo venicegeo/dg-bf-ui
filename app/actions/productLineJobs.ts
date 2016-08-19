@@ -14,7 +14,7 @@
  * limitations under the License.
  **/
 
-import moment from 'moment'
+import * as moment from 'moment'
 import {importRecordById as importJobRecordById} from '../utils/import-job-record'
 import {Client} from '../utils/piazza-client'
 import {GATEWAY} from '../config'
@@ -67,7 +67,7 @@ export function fetchProductLineJobs(productLineId, sinceDate) {
         PerPage:     '200',  // HACK -- see explanation below
       }),
       headers: {'content-type': 'application/json'},
-      method: 'POST'
+      method: 'POST',
     })
       .then(checkResponse)
       .then(jobIds => {
@@ -151,7 +151,7 @@ function __keepFetchingJobRecordsUntilSinceDate__(productLineId, sinceDate) {
           err: {
             message: err.message,
             stack: err.stack,
-          }
+          },
         })
         console.warn('Abandoning attempt to keep fetching jobs due to error:')
         console.error(err)

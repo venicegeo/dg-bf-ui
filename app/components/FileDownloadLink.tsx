@@ -21,7 +21,6 @@ import {GATEWAY} from '../config'
 
 const MB = 1024000
 
-
 interface Props {
   authToken:  string
   className?: string
@@ -94,7 +93,7 @@ export class FileDownloadLink extends React.Component<Props, State> {
     }
 
     this.setState({
-      isDownloading: true
+      isDownloading: true,
     })
     this.props.onStart()
 
@@ -119,7 +118,7 @@ export class FileDownloadLink extends React.Component<Props, State> {
     }
     this.props.onError(err)
     this.setState({
-      isDownloading: false
+      isDownloading: false,
     })
   }
 
@@ -127,7 +126,7 @@ export class FileDownloadLink extends React.Component<Props, State> {
     this.cancel = cancel
     this.setState({
       loaded,
-      total
+      total,
     })
     this.props.onProgress(loaded, total)
   }
@@ -140,8 +139,3 @@ export class FileDownloadLink extends React.Component<Props, State> {
 export default connect(state => ({
   authToken: state.authentication.token,
 }))(FileDownloadLink)
-
-//
-// Helpers
-//
-

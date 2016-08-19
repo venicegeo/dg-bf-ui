@@ -29,6 +29,7 @@ import {
 } from '../actions'
 
 interface Props {
+  className?: string
   isFetching:        boolean
   jobs:              beachfront.Job[]
   productLines:      beachfront.Job[]  // FIXME

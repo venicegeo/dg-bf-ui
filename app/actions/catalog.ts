@@ -50,12 +50,12 @@ export function updateCatalogApiKey(apiKey) {
 const discoverCatalogSuccess = (url, filters) => ({
   type: DISCOVER_CATALOG_SUCCESS,
   url,
-  filters
+  filters,
 })
 
 const discoverCatalogError = (err) => ({
   type: DISCOVER_CATALOG_ERROR,
-  err
+  err,
 })
 
 function discoverCatalog() {

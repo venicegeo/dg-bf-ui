@@ -24,6 +24,7 @@ import './styles/menus.css'
 
 // Polyfills
 import 'core-js/es6/object'
+import 'core-js/es6/array'
 
 import {bootstrap} from './router'
 

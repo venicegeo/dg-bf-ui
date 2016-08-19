@@ -50,7 +50,7 @@ export function reducer(state = INITIAL_STATE, action) {
 }
 
 export function deserialize() {
-  return Object.assign({}, INITIAL_STATE,{
+  return Object.assign({}, INITIAL_STATE, {
     token: sessionStorage.getItem('authentication_token') || INITIAL_STATE.token,
   })
 }

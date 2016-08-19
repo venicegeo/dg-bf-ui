@@ -94,7 +94,7 @@ export function createJob(catalogApiKey, name, algorithm, feature) {
           type:     'text',
         },
       ],
-      serviceId: state.executor.serviceId
+      serviceId: state.executor.serviceId,
     })
       .then(id => {
         dispatch(createJobSuccess(id, name, algorithm, feature))

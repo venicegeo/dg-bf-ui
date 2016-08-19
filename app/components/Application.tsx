@@ -24,12 +24,12 @@ import {
   // DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG
   importJob,
   // DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG
+  changeLoadedDetections,
   clearImagery,
   clearSelectedImage,
   discoverCatalogIfNeeded,
   discoverExecutorIfNeeded,
   discoverGeoserverIfNeeded,
-  changeLoadedDetections,
   searchCatalog,
   selectImage,
   startAlgorithmsWorkerIfNeeded,
@@ -44,8 +44,11 @@ interface Props {
   imagery: any
   isLoggedIn: boolean
   isSearching: boolean
+  geoserverUrl: string
   jobs: beachfront.Job[]
   location: any
+  productLines: beachfront.Job[]  // FIXME
+  productLineJobs: any  // FIXME
   selectedFeature: beachfront.Scene
   changeLoadedDetections(ids: string[])
   clearImagery()
@@ -130,11 +133,11 @@ class Application extends React.Component<Props, {}> {
           mode={this.mapMode}
           selectedFeature={this.props.selectedFeature}
           highlightedFeature={this.props.productLineJobs.hovered}
-          onAnchorChange={this._handleAnchorChange}
-          onBoundingBoxChange={this._handleBoundingBoxChange}
-          onSearchPageChange={this._handleSearchPageChange}
-          onSelectImage={this._handleSelectImage}
-          onSelectJob={this._handleSelectJob}
+          onAnchorChange={this.handleAnchorChange}
+          onBoundingBoxChange={this.handleBoundingBoxChange}
+          onSearchPageChange={this.handleSearchPageChange}
+          onSelectImage={this.handleSelectImage}
+          onSelectJob={this.handleSelectJob}
         />
         {this.props.children}
       </div>
@@ -146,14 +149,14 @@ class Application extends React.Component<Props, {}> {
   //
 
   private get detectionsForCurrentMode() {
-    if (this._mapMode !== MODE_PRODUCT_LINES) {
+    if (this.mapMode !== MODE_PRODUCT_LINES) {
       return this.props.detections
     }
     return this.props.productLineJobs.selection.length ? this.props.productLineJobs.selection : this.props.productLines
   }
 
   private get framesForCurrentMode() {
-    if (this._mapMode !== MODE_PRODUCT_LINES) {
+    if (this.mapMode !== MODE_PRODUCT_LINES) {
       return this.props.jobs
     }
     return this.props.productLines.concat(this.props.productLineJobs.selection)
@@ -217,7 +220,7 @@ export default connect((state, ownProps) => ({
   selectedFeature: state.productLineJobs.selection[0] || state.draftJob.image || state.jobs.records.find(j => j.id === ownProps.location.query.jobId) || null,
   workers:         state.workers,
 }), dispatch => ({
-  changeLoadedResults:           (jobIds) => dispatch(changeLoadedResults(jobIds)),
+  changeLoadedResults:           (jobIds) => dispatch(changeLoadedDetections(jobIds)),
   clearImagery:                  () => dispatch(clearImagery()),
   clearSelectedImage:            () => dispatch(clearSelectedImage()),
   discoverCatalogIfNeeded:       () => dispatch(discoverCatalogIfNeeded()),

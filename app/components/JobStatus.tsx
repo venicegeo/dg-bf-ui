@@ -70,15 +70,6 @@ export default class JobStatus extends React.Component<Props, State> {
     this.handleForgetToggle     = this.handleForgetToggle.bind(this)
   }
 
-  componentWillReceiveProps(nextProps) {
-    if (this.state.isDownloading && !nextProps.result) {
-      this.setState({isDownloading: false})
-    }
-    if (this.state.isDownloading && nextProps.result && nextProps.result.geojson) {
-      this.triggerDownload(nextProps.result.geojson)
-    }
-  }
-
   render() {
     const {id, properties} = this.props.job
     const name = properties[KEY_NAME]
@@ -201,11 +192,11 @@ export default class JobStatus extends React.Component<Props, State> {
 
   private get _classForStatus() {
     switch (this.props.job.properties[KEY_STATUS]) {
-    case STATUS_SUCCESS: return styles.succeeded
-    case STATUS_RUNNING: return styles.running
-    case STATUS_TIMED_OUT: return styles.timedOut
-    case STATUS_ERROR: return styles.failed
-    default: return ''
+      case STATUS_SUCCESS: return styles.succeeded
+      case STATUS_RUNNING: return styles.running
+      case STATUS_TIMED_OUT: return styles.timedOut
+      case STATUS_ERROR: return styles.failed
+      default: return ''
     }
   }
 
