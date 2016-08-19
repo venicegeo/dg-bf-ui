@@ -138,4 +138,4 @@ export class FileDownloadLink extends React.Component<Props, State> {
 
 export default connect(state => ({
   authToken: state.authentication.token,
-}))(FileDownloadLink)
+}))(FileDownloadLink) as any

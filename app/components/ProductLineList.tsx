@@ -37,7 +37,7 @@ interface Props {
   fetchProductLines()
   onFetchJobs(productLineId: string, sinceDate: string)
   onJobHoverIn(job: beachfront.Job)
-  onJobHoverOut(job: beachfront.Job)
+  onJobHoverOut()
   onJobSelect(job: beachfront.Job)
   onJobDeselect()
 }

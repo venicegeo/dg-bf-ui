@@ -104,7 +104,7 @@ export default class PrimaryMap extends React.Component<Props, State> {
   private _drawLayer: ol.layer.Vector
   private _drawInteraction: ol.interaction.Draw
   private _frameLayer: ol.layer.Vector
-  private _detectionsLayer: ol.layer.Vector
+  private _detectionsLayer: ol.layer.Tile
   private _highlightLayer: ol.layer.Vector
   private _imageryLayer: ol.layer.Vector
   private _selectInteraction: ol.interaction.Select
@@ -430,7 +430,7 @@ export default class PrimaryMap extends React.Component<Props, State> {
   _renderDetections() {
     const {detections, geoserverUrl} = this.props
     const layer = this._detectionsLayer
-    const source = layer.getSource()
+    const source = layer.getSource() as ol.source.TileWMS
     const currentLayerIds = source.getParams()[KEY_LAYERS]
     const incomingLayerIds = detections.map(d => d.properties[KEY_WMS_LAYER_ID]).sort().join(',')
 
