@@ -28,10 +28,10 @@ import {
   STOP_JOBS_WORKER,
 } from '../../actions/jobs'
 
-function algorithms(state = {
-  running: false,
+function algorithms(state: TypeState = {
   error:   null,
-}, action) {
+  running: false,
+}, action): TypeState {
   switch (action.type) {
   case ALGORITHMS_WORKER_ERROR:
     return Object.assign({}, state, {
@@ -50,10 +50,10 @@ function algorithms(state = {
   }
 }
 
-function jobs(state = {
-  running: false,
+function jobs(state: TypeState = {
   error:   null,
-}, action) {
+  running: false,
+}, action): TypeState {
   switch (action.type) {
   case DISMISS_JOB_ERROR:
     return Object.assign({}, state, {
@@ -80,3 +80,8 @@ export const reducer = combineReducers({
   algorithms,
   jobs,
 })
+
+export interface TypeState {
+  error: any
+  running: boolean
+}

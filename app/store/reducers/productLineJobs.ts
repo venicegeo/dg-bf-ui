@@ -36,7 +36,7 @@ const INITIAL_STATE = {
   selection: [],
 }
 
-export function reducer(state = INITIAL_STATE, action) {
+export function reducer(state: TypeState = INITIAL_STATE, action): TypeState {
   switch (action.type) {
 
   // Provision new collections for all incoming product lines
@@ -83,12 +83,12 @@ export function reducer(state = INITIAL_STATE, action) {
   }
 }
 
-function collection(state = {
+function collection(state: Collection = {
   error:     null,
   fetching:  false,
   records:   [],
   sinceDate: null,
-}, action) {
+}, action): Collection {
   switch (action.type) {
   case FETCH_PRODUCT_LINE_JOBS:
     return Object.assign({}, state, {
@@ -159,4 +159,16 @@ function collection(state = {
   default:
     return state
   }
+}
+
+interface Collection {
+  error: any
+  fetching: boolean
+  records: beachfront.Job[]
+  sinceDate: string
+}
+
+export interface TypeState {
+  hovered: beachfront.Job
+  selection: beachfront.Job[]
 }

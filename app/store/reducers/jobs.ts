@@ -38,13 +38,13 @@ import {
 } from '../../constants'
 
 const INITIAL_STATE = {
-  creating:    false,
-  fetching:    false,
-  records:     [],
-  error:       null,
+  creating: false,
+  fetching: false,
+  records:  [],
+  error:    null,
 }
 
-export function reducer(state = INITIAL_STATE, action) {
+export function reducer(state: TypeState = INITIAL_STATE, action): TypeState {
   switch (action.type) {
   case FETCH_JOBS:
     return Object.assign({}, state, {
@@ -115,4 +115,11 @@ export function deserialize() {
 
 export function serialize(state) {
   localStorage.setItem('jobs_records', JSON.stringify(state.records))
+}
+
+export interface TypeState {
+  creating: boolean
+  error: any
+  fetching: boolean
+  records: beachfront.Job[]
 }

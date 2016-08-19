@@ -22,7 +22,7 @@ import {
   UNLOAD_DETECTIONS,
 } from '../../actions/detections'
 
-export function reducer(state = [], action) {
+export function reducer(state: TypeState = [], action): TypeState {
   switch (action.type) {
   case LOAD_DETECTIONS:
     return action.detections
@@ -34,3 +34,5 @@ export function reducer(state = [], action) {
     return state
   }
 }
+
+export type TypeState = (beachfront.Job | beachfront.ProductLine)[]

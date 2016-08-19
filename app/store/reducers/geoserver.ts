@@ -27,7 +27,7 @@ const INITIAL_STATE = {
   error: null,
 }
 
-export function reducer(state = INITIAL_STATE, action) {
+export function reducer(state: TypeState = INITIAL_STATE, action): TypeState {
   switch (action.type) {
   case DISCOVER_GEOSERVER:
     return Object.assign({}, state, {
@@ -59,4 +59,11 @@ export function deserialize() {
 export function serialize(state) {
   sessionStorage.setItem('geoserver_url', state.url || '')
   sessionStorage.setItem('geoserver_baselineLayerId', state.baselineLayerId || '')
+}
+
+export interface TypeState {
+  baselineLayerId: string
+  discovering: boolean
+  url: string
+  error: any
 }

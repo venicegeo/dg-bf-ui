@@ -73,6 +73,22 @@ export function configureStore(initialState?) {
   return store
 }
 
+export interface TypeAppState {
+  algorithms:      algorithms.TypeState
+  authentication:  authentication.TypeState
+  catalog:         catalog.TypeState
+  detections:      detections.TypeState
+  draftJob:        draftJob.TypeState
+  executor:        executor.TypeState
+  geoserver:       geoserver.TypeState
+  imagery:         imagery.TypeState
+  jobs:            jobs.TypeState
+  productLines:    productLines.TypeState
+  productLineJobs: productLineJobs.TypeState
+  search:          search.TypeState
+  workers:         workers.TypeState
+}
+
 //
 // Internals
 //

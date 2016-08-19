@@ -113,7 +113,7 @@ function extractRecords(algorithmNames, filterNames) {
       [KEY_WMS_LAYER_ID]:        datum.bfInputJSON.lGroupId,
     },
     type: 'Feature',
-  }))
+  } as beachfront.ProductLine))
 }
 
 function generateAlgorithmNamesHash(algorithms) {

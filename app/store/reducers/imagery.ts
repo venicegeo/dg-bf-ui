@@ -17,7 +17,7 @@
 import {CLEAR_IMAGERY} from '../../actions/imagery'
 import {SEARCH_CATALOG_SUCCESS} from '../../actions/search'
 
-export function reducer(state = null, action) {
+export function reducer(state: TypeState = null, action): TypeState {
   switch (action.type) {
   case CLEAR_IMAGERY:
     return null
@@ -35,3 +35,5 @@ export function deserialize() {
 export function serialize(state) {
   sessionStorage.setItem('imagery', JSON.stringify(state))
 }
+
+export interface TypeState {}

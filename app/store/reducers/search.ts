@@ -35,12 +35,12 @@ const INITIAL_STATE = {
   cloudCover: 10,
   dateFrom:   moment().subtract(30, 'days').format('YYYY-MM-DD'),
   dateTo:     moment().format('YYYY-MM-DD'),
-  searching:  false,
-  filter:     null,
   error:      null,
+  filter:     null,
+  searching:  false,
 }
 
-export function reducer(state = null, action) {
+export function reducer(state: TypeState = null, action): TypeState {
   switch (action.type) {
   case UPDATE_SEARCH_BBOX:
     return Object.assign({}, state, {
@@ -97,4 +97,14 @@ export function serialize(state) {
     dateTo:     state.dateTo,
     filter:     state.filter,
   }))
+}
+
+export interface TypeState {
+  bbox: number[]
+  cloudCover: number
+  dateFrom: string
+  dateTo: string
+  error: any
+  filter: string
+  searching: boolean
 }

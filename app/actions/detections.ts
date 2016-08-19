@@ -14,9 +14,7 @@
  * limitations under the License.
  **/
 
-import {
-  KEY_GEOJSON_DATA_ID,
-} from '../constants'
+import {TypeAppState} from '../store'
 
 //
 // Action Types
@@ -40,7 +38,7 @@ const unloadDetections = () => ({
 
 export function changeLoadedDetections(jobIds = []) {
   return (dispatch, getState) => {
-    const state = getState()
+    const state: TypeAppState = getState()
     const alreadyLoadedIds = simplify(state.detections.map(d => d.id))
     const incomingIds = simplify(jobIds)
 

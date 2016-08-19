@@ -27,7 +27,7 @@ const INITIAL_STATE = {
   error:       null,
 }
 
-export function reducer(state = INITIAL_STATE, action) {
+export function reducer(state: TypeState = INITIAL_STATE, action): TypeState {
   switch (action.type) {
   case DISCOVER_EXECUTOR:
     return Object.assign({}, state, {
@@ -59,4 +59,11 @@ export function deserialize() {
 export function serialize(state) {
   sessionStorage.setItem('executor_serviceId', state.serviceId || '')
   sessionStorage.setItem('executor_url', state.url || '')
+}
+
+export interface TypeState {
+  discovering: boolean
+  serviceId: string
+  url: string
+  error: any
 }

@@ -20,11 +20,11 @@ import {
   FETCH_PRODUCT_LINES_ERROR,
 } from '../../actions/productLines'
 
-export function reducer(state = {
+export function reducer(state: TypeState = {
   error:    null,
   fetching: false,
   records:  [],
-}, action) {
+}, action): TypeState {
   switch (action.type) {
   case FETCH_PRODUCT_LINES:
     return Object.assign({}, state, {
@@ -46,4 +46,10 @@ export function reducer(state = {
   default:
     return state
   }
+}
+
+export interface TypeState {
+  error: any
+  fetching: boolean
+  records: beachfront.ProductLine[]
 }

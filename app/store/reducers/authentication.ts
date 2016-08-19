@@ -26,7 +26,13 @@ const INITIAL_STATE = {
   token: null,
 }
 
-export function reducer(state = INITIAL_STATE, action) {
+export interface TypeState {
+  authenticating: boolean
+  error: any
+  token: string
+}
+
+export function reducer(state: TypeState = INITIAL_STATE, action): TypeState {
   switch (action.type) {
   case AUTHENTICATE:
     return Object.assign({}, state, {

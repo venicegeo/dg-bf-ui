@@ -24,7 +24,7 @@ const INITIAL_STATE = {
   records: [],
 }
 
-export function reducer(state = INITIAL_STATE, action) {
+export function reducer(state: TypeState = INITIAL_STATE, action): TypeState {
   switch (action.type) {
   case FETCH_ALGORITHMS:
     return Object.assign({}, state, {
@@ -48,4 +48,9 @@ export function deserialize() {
 
 export function serialize(state) {
   localStorage.setItem('algorithms_records', JSON.stringify(state.records))
+}
+
+export interface TypeState {
+  fetching: boolean
+  records: beachfront.Algorithm[]
 }

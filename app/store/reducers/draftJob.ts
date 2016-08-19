@@ -28,7 +28,7 @@ const INITIAL_STATE = {
   image: null,
 }
 
-export function reducer(state = INITIAL_STATE, action) {
+export function reducer(state: TypeState = INITIAL_STATE, action): TypeState {
   switch (action.type) {
   case CHANGE_JOB_NAME:
     return Object.assign({}, state, {
@@ -56,4 +56,9 @@ export function deserialize() {
 
 export function serialize(state) {
   sessionStorage.setItem('draftJob_name', state.name)
+}
+
+export interface TypeState {
+  image: any
+  name: string
 }

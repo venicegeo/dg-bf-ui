@@ -29,7 +29,7 @@ const INITIAL_STATE = {
   error:       null,
 }
 
-export function reducer(state = INITIAL_STATE, action) {
+export function reducer(state: TypeState = INITIAL_STATE, action): TypeState {
   switch (action.type) {
   case DISCOVER_CATALOG:
     return Object.assign({}, state, {
@@ -67,4 +67,12 @@ export function serialize(state) {
   localStorage.setItem('catalog_apiKey', state.apiKey || '')
   sessionStorage.setItem('catalog_filters', JSON.stringify(state.filters))
   sessionStorage.setItem('catalog_url', state.url || '')
+}
+
+export interface TypeState {
+  apiKey: string
+  discovering: boolean
+  filters: {}[]
+  url: string
+  error: any
 }
