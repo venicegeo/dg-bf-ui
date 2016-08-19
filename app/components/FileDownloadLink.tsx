@@ -47,17 +47,17 @@ export class FileDownloadLink extends React.Component<Props, State> {
   constructor() {
     super()
     this.state = {blobUrl: undefined, isDownloading: false, loaded: null, total: null}
-    this._handleClick = this._handleClick.bind(this)
-    this._handleComplete = this._handleComplete.bind(this)
-    this._handleError = this._handleError.bind(this)
-    this._handleProgress = this._handleProgress.bind(this)
+    this.handleClick = this.handleClick.bind(this)
+    this.handleComplete = this.handleComplete.bind(this)
+    this.handleError = this.handleError.bind(this)
+    this.handleProgress = this.handleProgress.bind(this)
   }
 
   componentDidUpdate(prevProps, prevState) {
     const downloadFinished = prevState.isDownloading && !this.state.isDownloading
     const receivedBlobUrl = !prevState.blobUrl && this.state.blobUrl
     if (downloadFinished && receivedBlobUrl) {
-      this._triggerDownload()
+      this.triggerDownload()
     }
   }
 
@@ -80,14 +80,14 @@ export class FileDownloadLink extends React.Component<Props, State> {
         download={this.props.filename}
         className={this.props.className}
         title={isDownloading ? `Retrieving ${totalMegabytes} MB of GeoJSON...` : 'Download'}
-        onClick={this._handleClick}
+        onClick={this.handleClick}
       >
         {this.state.isDownloading ? percentage : <i className="fa fa-cloud-download"/>}
       </a>
     )
   }
 
-  _handleClick() {
+  private handleClick() {
     if (this.state.isDownloading || this.state.blobUrl) {
       return  // Nothing to do
     }
@@ -98,12 +98,12 @@ export class FileDownloadLink extends React.Component<Props, State> {
     this.props.onStart()
 
     const client = new Client(GATEWAY, this.props.authToken)
-    client.getFile(this.props.dataId, this._handleProgress)
-      .then(this._handleComplete)
-      .catch(this._handleError)
+    client.getFile(this.props.dataId, this.handleProgress)
+      .then(this.handleComplete)
+      .catch(this.handleError)
   }
 
-  _handleComplete(contents) {
+  private handleComplete(contents) {
     const file = new File([contents], this.props.filename, {type: 'application/json'})
     this.setState({
       blobUrl: URL.createObjectURL(file),
@@ -112,7 +112,7 @@ export class FileDownloadLink extends React.Component<Props, State> {
     this.props.onComplete()
   }
 
-  _handleError(err) {
+  private handleError(err) {
     if (err.isCancellation) {
       return
     }
@@ -122,7 +122,7 @@ export class FileDownloadLink extends React.Component<Props, State> {
     })
   }
 
-  _handleProgress({cancel, loaded, total}) {
+  private handleProgress({cancel, loaded, total}) {
     this.cancel = cancel
     this.setState({
       loaded,
@@ -131,7 +131,7 @@ export class FileDownloadLink extends React.Component<Props, State> {
     this.props.onProgress(loaded, total)
   }
 
-  _triggerDownload() {
+  private triggerDownload() {
     this.refs.hyperlink.click()
   }
 }
