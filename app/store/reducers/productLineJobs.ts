@@ -32,6 +32,7 @@ import {
 } from '../../actions/productLineJobs'
 
 const INITIAL_STATE = {
+  byPLID: {},
   hovered: null,
   selection: [],
 }
@@ -41,11 +42,13 @@ export function reducer(state: TypeState = INITIAL_STATE, action): TypeState {
 
   // Provision new collections for all incoming product lines
   case FETCH_PRODUCT_LINES_SUCCESS:
-    const newState = INITIAL_STATE
+    const collections = {}
     for (const productLine of action.records) {
-      newState[productLine.id] = collection(undefined, action)
+      collections[productLine.id] = collection(undefined, action)
     }
-    return newState
+    return Object.assign({}, state, {
+      byPLID: collections,
+    })
 
   // Delegate collection item mutations
   case FETCH_PRODUCT_LINE_JOBS:
@@ -83,12 +86,12 @@ export function reducer(state: TypeState = INITIAL_STATE, action): TypeState {
   }
 }
 
-function collection(state: Collection = {
+function collection(state: TypeCollection = {
   error:     null,
   fetching:  false,
   records:   [],
   sinceDate: null,
-}, action): Collection {
+}, action): TypeCollection {
   switch (action.type) {
   case FETCH_PRODUCT_LINE_JOBS:
     return Object.assign({}, state, {
@@ -161,7 +164,7 @@ function collection(state: Collection = {
   }
 }
 
-interface Collection {
+export interface TypeCollection {
   error: any
   fetching: boolean
   records: beachfront.Job[]
@@ -169,6 +172,9 @@ interface Collection {
 }
 
 export interface TypeState {
+  byPLID: {
+    [productLineId: string]: TypeCollection
+  }
   hovered: beachfront.Job
   selection: beachfront.Job[]
 }

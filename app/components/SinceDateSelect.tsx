@@ -30,13 +30,6 @@ interface State {
 }
 
 export default class SinceDateSelect extends React.Component<Props, State> {
-  static propTypes = {
-    options: React.PropTypes.arrayOf(React.PropTypes.object).isRequired,
-    className: React.PropTypes.string,
-    value: React.PropTypes.string.isRequired,
-    onChange: React.PropTypes.func.isRequired,
-  }
-
   constructor() {
     super()
     this.state = {isOpen: false}

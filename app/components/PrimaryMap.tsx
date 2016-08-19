@@ -77,7 +77,7 @@ interface Props {
   highlightedFeature: beachfront.Job
   imagery: beachfront.ImageryCatalogPage
   isSearching: boolean
-  frames: beachfront.Job[]
+  frames: (beachfront.Job|beachfront.ProductLine)[]
   geoserverUrl: string
   mode: string
   selectedFeature: beachfront.Scene
@@ -703,10 +703,10 @@ function animateLayerExit(layer) {
   })
 }
 
-function featuresToImages(...features) {
+function featuresToImages(...features: (beachfront.Job|beachfront.Scene)[]) {
   return features.filter(Boolean).map(feature => ({
     extent: bboxUtil.featureToBbox(feature),
-    id:     feature.properties[KEY_IMAGE_ID] || feature.id,
+    id:     (feature as beachfront.Job).properties.imageId || feature.id,
   }))
 }
 

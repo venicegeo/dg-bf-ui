@@ -41,14 +41,14 @@ export default class FeatureDetails extends React.Component<Props, {}> {
         {feature.properties[KEY_TYPE] === TYPE_JOB && (
           <JobFeatureDetails
             className={styles.jobDetails}
-            feature={feature}
+            feature={feature as beachfront.Job}
           />
         )}
 
         {feature.properties[KEY_TYPE] === TYPE_SCENE && (
           <SceneFeatureDetails
             className={styles.sceneDetails}
-            feature={feature}
+            feature={feature as beachfront.Scene}
           />
         )}
       </div>

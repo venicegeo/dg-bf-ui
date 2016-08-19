@@ -19,6 +19,8 @@ const styles = require('./ProductLineList.css')
 import * as React from 'react'
 import {connect} from 'react-redux'
 import ProductLine from './ProductLine'
+import {TypeAppState} from '../store'
+import {TypeCollection as TypeJobCollection} from '../store/reducers/productLineJobs'
 import {
   clearHoveredProductLineJob,
   clearSelectedProductLineJob,
@@ -30,10 +32,10 @@ import {
 
 interface Props {
   className?: string
-  isFetching:        boolean
-  jobs:              beachfront.Job[]
-  productLines:      beachfront.Job[]  // FIXME
-  selectedJobIds:    string[]
+  isFetching: boolean
+  jobs: { [key: string]: TypeJobCollection }
+  productLines: beachfront.ProductLine[]
+  selectedJobIds: string[]
   fetchProductLines()
   onFetchJobs(productLineId: string, sinceDate: string)
   onJobHoverIn(job: beachfront.Job)
@@ -78,7 +80,7 @@ export class ProductLineList extends React.Component<Props, {}> {
   }
 }
 
-export default connect(state => ({
+export default connect((state: TypeAppState) => ({
   isFetching:     state.productLines.fetching,
   jobs:           state.productLineJobs,
   productLines:   state.productLines.records,

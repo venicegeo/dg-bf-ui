@@ -32,10 +32,11 @@ import {
   KEY_SPATIAL_FILTER_NAME,
   KEY_STARTS_ON,
 } from '../constants'
+import {TypeCollection as TypeJobCollection} from '../store/reducers/productLineJobs'
 
 interface Props {
-  jobs: {error?: any, records: beachfront.Job[]}  // FIXME -- this needs to be formalized at the reducer
-  productLine: beachfront.Job  // FIXME
+  jobs: TypeJobCollection
+  productLine: beachfront.ProductLine
   selectedJobIds: string[]
   fetchJobs(sinceDate: string)
   onJobHoverIn(job: beachfront.Job)
@@ -50,17 +51,6 @@ interface State {
 }
 
 export default class ProductLine extends React.Component<Props, State> {
-  static propTypes = {
-    jobs:          React.PropTypes.object.isRequired,
-    productLine:   React.PropTypes.object.isRequired,
-    selectedJobIds: React.PropTypes.array.isRequired,
-    fetchJobs:     React.PropTypes.func.isRequired,
-    onJobHoverIn:  React.PropTypes.func.isRequired,
-    onJobHoverOut: React.PropTypes.func.isRequired,
-    onJobSelect:   React.PropTypes.func.isRequired,
-    onJobDeselect: React.PropTypes.func,
-  }
-
   constructor() {
     super()
     this.state = {

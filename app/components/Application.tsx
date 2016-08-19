@@ -20,6 +20,8 @@ import * as React from 'react'
 import {connect} from 'react-redux'
 import Navigation from './Navigation'
 import PrimaryMap, {MODE_DRAW_BBOX, MODE_NORMAL, MODE_SELECT_IMAGERY, MODE_PRODUCT_LINES} from './PrimaryMap'
+import {TypeAppState} from '../store'
+import {TypeState as TypeProductLineJobsState} from '../store/reducers/productLineJobs'
 import {
   // DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG
   importJob,
@@ -47,8 +49,8 @@ interface Props {
   geoserverUrl: string
   jobs: beachfront.Job[]
   location: any
-  productLines: beachfront.Job[]  // FIXME
-  productLineJobs: any  // FIXME
+  productLines: beachfront.ProductLine[]
+  productLineJobs: TypeProductLineJobsState
   selectedFeature: beachfront.Scene
   changeLoadedDetections(ids: string[])
   clearImagery()
@@ -155,11 +157,11 @@ class Application extends React.Component<Props, {}> {
     return this.props.productLineJobs.selection.length ? this.props.productLineJobs.selection : this.props.productLines
   }
 
-  private get framesForCurrentMode() {
+  private get framesForCurrentMode(): (beachfront.Job | beachfront.ProductLine)[] {
     if (this.mapMode !== MODE_PRODUCT_LINES) {
       return this.props.jobs
     }
-    return this.props.productLines.concat(this.props.productLineJobs.selection)
+    return [...this.props.productLines, ...this.props.productLineJobs.selection]
   }
 
   private get mapMode() {
@@ -206,15 +208,15 @@ class Application extends React.Component<Props, {}> {
   }
 }
 
-export default connect((state, ownProps) => ({
+export default connect((state: TypeAppState, ownProps) => ({
   bbox:            state.search.bbox,
   catalogApiKey:   state.catalog.apiKey,
   detections:      state.detections,
   geoserverUrl:    state.geoserver.url,
   imagery:         state.imagery,
-  jobs:            state.jobs.records,
   isLoggedIn:      !!state.authentication.token,
   isSearching:     state.search.searching,
+  jobs:            state.jobs.records,
   productLines:    state.productLines.records,
   productLineJobs: state.productLineJobs,
   selectedFeature: state.productLineJobs.selection[0] || state.draftJob.image || state.jobs.records.find(j => j.id === ownProps.location.query.jobId) || null,

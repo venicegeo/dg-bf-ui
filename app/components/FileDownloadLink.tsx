@@ -18,11 +18,15 @@ import * as React from 'react'
 import {connect} from 'react-redux'
 import {Client} from '../utils/piazza-client'
 import {GATEWAY} from '../config'
+import {TypeAppState} from '../store'
 
 const MB = 1024000
 
-interface Props {
-  authToken:  string
+interface StoreProps {
+  authToken: string
+}
+
+interface OwnProps {
   className?: string
   dataId:     string
   filename:   string
@@ -39,8 +43,7 @@ interface State {
   total?:         number
 }
 
-export class FileDownloadLink extends React.Component<Props, State> {
-
+export class FileDownloadLink extends React.Component<OwnProps & StoreProps, State> {
   refs: any
   private cancel: any
 
@@ -136,6 +139,6 @@ export class FileDownloadLink extends React.Component<Props, State> {
   }
 }
 
-export default connect(state => ({
+export default connect((state: TypeAppState) => ({
   authToken: state.authentication.token,
-}))(FileDownloadLink) as any
+}))(FileDownloadLink) as React.ComponentClass<OwnProps>
