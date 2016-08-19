@@ -894,6 +894,9 @@ function generateHighlightLayer() {
       fill: new ol.style.Fill({
         color: 'hsla(90, 100%, 30%, .5)',
       }),
+      stroke: new ol.style.Stroke({
+        color: 'hsla(90, 100%, 30%, .6)',
+      }),
     }),
   })
 }

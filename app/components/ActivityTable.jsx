@@ -42,8 +42,9 @@ const ActivityTable = ({
   <div className={`${styles.root} ${className}`}>
 
     <div className={styles.filter}>
-      Activity:{' '}
+      Activity:
       <SinceDateSelect
+        className={styles.filterDropdown}
         options={sinceDates}
         value={sinceDate}
         onChange={onSinceDateChange}
@@ -54,6 +55,7 @@ const ActivityTable = ({
       <div className={styles.puck}/>
     </div>
 
+    <div className={styles.shadowTop}/>
     <div className={styles.tableContainer}>
       <table>
         <thead>
@@ -95,6 +97,7 @@ const ActivityTable = ({
         </tbody>
       </table>
     </div>
+    <div className={styles.shadowBottom}/>
   </div>
 )
 
