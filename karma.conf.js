@@ -68,6 +68,11 @@ module.exports = (config) => {
             loader: 'style!css?module&localIdentName=[name]__[local]',
             exclude: /node_modules/
           },
+          {
+            test: /\.css$/,
+            loader: 'style!css',
+            include: /node_modules/
+          },
         ]
       },
       plugins: [
