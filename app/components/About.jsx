@@ -14,6 +14,8 @@
  * limitations under the License.
  **/
 
+const brand = require('../images/brand-small-circle.svg')
+
 import React, {Component} from 'react'
 import Modal from './Modal'
 import styles from './About.css'
@@ -29,9 +31,23 @@ export default class About extends Component {
 
   render() {
     return (
-      <Modal className={styles.root} onDismiss={() => this._dismiss()}>
-        <h1>Welcome to Beachfront</h1>
-        <p>Beachfront is an NGA Services project aimed at providing automated near real time feature extraction of global shoreline captured at the best possible resolution based on available sources. Beachfront leverages computer vision algorithm services, the Piazza Platform, and incoming satellite imagery to provide this capability.</p>
+      <Modal onDismiss={() => this._dismiss()}>
+        <div className={styles.root}>
+          <section className={styles.brandColumn}>
+            <img src={brand} alt="Beachfront"/>
+            <h1>Beachfront</h1>
+          </section>
+          <section className={styles.textColumn}>
+            <h2>Welcome to Beachfront</h2>
+            <p>
+              Beachfront is an NGA Services project aimed at providing automated
+              near real time feature extraction of global shoreline captured at
+              the best possible resolution based on available sources. Beachfront
+              leverages computer vision algorithm services, the Piazza Platform,
+              and incoming satellite imagery to provide this capability.
+            </p>
+          </section>
+        </div>
       </Modal>
     )
   }
