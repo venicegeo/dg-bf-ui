@@ -14,6 +14,8 @@
  * limitations under the License.
  **/
 
+const styles = require('./Modal.css')
+
 import React, {Component} from 'react'
 const ESCAPE = 27
 
@@ -44,7 +46,7 @@ export default class Modal extends Component {
 
   render() {
     return (
-      <div className={this.props.className}>
+      <div className={styles.root}>
         {this.props.children}
       </div>
     )
