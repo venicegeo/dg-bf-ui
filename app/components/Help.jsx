@@ -29,7 +29,8 @@ export default class Help extends Component {
 
   render() {
     return (
-      <Modal className={styles.root} onDismiss={() => this._dismiss()}>
+      <Modal onDismiss={() => this._dismiss()}>
+        <div className={styles.root}></div>
         <h1>Help!</h1>
         <p>Need help?  Let us know we do this stuff for a living... literally!</p>
         <p><a href="mailto:venice@radiantblue.com">venice@radiantblue.com</a></p>
