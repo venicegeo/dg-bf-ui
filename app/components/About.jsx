@@ -14,7 +14,7 @@
  * limitations under the License.
  **/
 
-const brand = require('../images/brand-small-circle.svg')
+const brand = require('../images/brand-small.svg')
 
 import React, {Component} from 'react'
 import Modal from './Modal'

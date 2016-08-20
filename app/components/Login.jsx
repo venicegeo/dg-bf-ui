@@ -15,7 +15,7 @@
  **/
 
 const styles = require('./Login.css')
-const brand = require('../images/brand-small-circle.svg')
+const brand = require('../images/brand-small.svg')
 
 import React, {Component} from 'react'
 import {connect} from 'react-redux'
