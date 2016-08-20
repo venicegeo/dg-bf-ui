@@ -14,10 +14,12 @@
  * limitations under the License.
  **/
 
+const styles = require('./Login.css')
+const brand = require('../images/brand-small-circle.svg')
+
 import React, {Component} from 'react'
 import {connect} from 'react-redux'
 import Modal from './Modal'
-import styles from './Login.css'
 import {authenticate} from '../actions'
 
 class Login extends Component {
@@ -42,16 +44,21 @@ class Login extends Component {
   }
 
   render() {
+    const {error} = this.props
     return (
-      <Modal className={styles.root} onDismiss={() => {}}>
-        <h1>Login</h1><br />
-        <form onSubmit={this._handleSubmit}>
-          <label><input ref="username" placeholder="username"/></label>&nbsp;&nbsp;
-          <label><input ref="pass" placeholder="password" type="password"/></label> <br /><br />
-          <button type="submit" disabled={this.props.authenticating}>login</button>
-          {this.props.error && (
-            <p>Bad login information</p>
+      <Modal onDismiss={() => {}}>
+        <form className={`${styles.root} ${error ? styles.failed : ''}`} onSubmit={this._handleSubmit}>
+          <img src={brand} alt="Beachfront"/>
+          <h1>Welcome to Beachfront!</h1>
+          <p>Please enter your username and password to login.</p>
+          {error && (
+            <div className={styles.errorMessage}>Oh no, login failed! ({error.message})</div>
           )}
+          <div className={styles.fields}>
+            <label><input ref="username" placeholder="username"/></label>
+            <label><input ref="pass" placeholder="password" type="password"/></label>
+          </div>
+          <button className={styles.submitButton} type="submit" disabled={this.props.authenticating}>login</button>
         </form>
       </Modal>
     )
