@@ -60,5 +60,5 @@ export function deserialize() {
 }
 
 export function serialize(state) {
-  sessionStorage.setItem('authentication_token', state.token)
+  sessionStorage.setItem('authentication_token', state.token || '')
 }
