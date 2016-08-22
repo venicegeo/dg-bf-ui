@@ -47,9 +47,9 @@ describe('<Algorithm/>', () => {
         onSubmit={_props.onSubmit}
       />
     )
-    expect(wrapper.find('.Algorithm__name').text()).toEqual('test-name')
-    expect(wrapper.find('.Algorithm__description').text()).toEqual('test-description')
-    expect(wrapper.find('.Algorithm__startButton').length).toEqual(1)
+    expect(wrapper.find('.Algorithm-name').text()).toEqual('test-name')
+    expect(wrapper.find('.Algorithm-description').text()).toEqual('test-description')
+    expect(wrapper.find('.Algorithm-startButton').length).toEqual(1)
   })
 
   it('prevents new submissions while submission in flight', () => {
@@ -61,7 +61,7 @@ describe('<Algorithm/>', () => {
         onSubmit={_props.onSubmit}
       />
     )
-    expect(wrapper.find('.Algorithm__startButton').prop('disabled')).toEqual(true)
+    expect(wrapper.find('.Algorithm-startButton').prop('disabled')).toEqual(true)
   })
 
   // FIXME -- the following cases require a component refactor to do this in a sane way
