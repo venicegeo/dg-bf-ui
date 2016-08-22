@@ -15,7 +15,7 @@
  **/
 
 import expect from 'expect'
-import * as config from 'app/config'
+import * as config from '../app/config'
 
 describe('config', () => {
   it('reads gateway URL from environment', () => {
@@ -25,6 +25,10 @@ describe('config', () => {
   it('defines jobs worker timing properties', () => {
     expect(config.JOBS_WORKER.INTERVAL).toBeA('number')
     expect(config.JOBS_WORKER.JOB_TTL).toBeA('number')
+  })
+
+  it('defines a schema version', () => {
+    expect(config.SCHEMA_VERSION).toBeA('number')
   })
 
   it('defines at least one tile provider', () => {
