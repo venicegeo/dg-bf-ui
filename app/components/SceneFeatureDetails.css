@@ -15,9 +15,9 @@
  **/
 
 :root {
-  --detail-overlay-heading-color: white;
-  --detail-overlay-table-color: #1675aa;
-  --detail-overlay-shadow-color: rgba(0,0,0,.2);
+  --detailOverlay-heading-color: white;
+  --detailOverlay-table-color: #1675aa;
+  --detailOverlay-shadow-color: color(black alpha(20%));
 }
 
 /* =========================================================================
@@ -38,10 +38,10 @@
   position: absolute;
   top: 0;
   left: -20px;
-  border-right: 20px solid var(--detail-overlay-heading-color);
+  border-right: 20px solid var(--detailOverlay-heading-color);
   border-bottom: 20px solid transparent;
   pointer-events: none;
-  filter: drop-shadow(0px 6px var(--detail-overlay-shadow-color));
+  filter: drop-shadow(0px 6px var(--detailOverlay-shadow-color));
 }
 
 /* =========================================================================
@@ -57,8 +57,8 @@
   max-width: 250px;
   font-size: 1.1em;
   border-top-right-radius: 3px;
-  background-color: var(--detail-overlay-heading-color);
-  color: var(--detail-overlay-table-color);
+  background-color: var(--detailOverlay-heading-color);
+  color: var(--detailOverlay-table-color);
 }
 
 /* =========================================================================
@@ -71,9 +71,9 @@
   border-bottom-left-radius: 3px;
   border-bottom-right-radius: 3px;
   box-shadow:
-    inset 0 3px var(--detail-overlay-shadow-color),
-    0 6px var(--detail-overlay-shadow-color);
-  background-color: color(var(--detail-overlay-table-color) alpha(92%));
+    inset 0 3px var(--detailOverlay-shadow-color),
+    0 6px var(--detailOverlay-shadow-color);
+  background-color: color(var(--detailOverlay-table-color) alpha(92%));
   color: white;
 }
 

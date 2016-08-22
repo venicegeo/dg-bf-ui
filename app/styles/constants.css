@@ -14,40 +14,19 @@
  * limitations under the License.
  **/
 
-@import '../styles/constants.css';
+:root {
+  --COLOR_TEXT: #555;
+  --COLOR_HEADINGS: #175b82;
 
-.root {
-  composes: submenu from '../styles/menus.css';
-}
+  --COLOR_BRAND: #3d94c5;
+  --COLOR_BRAND_DARK: #175b82;
+  --COLOR_BRAND_LIGHT: #b3e3ff;
 
-.communicationError {
-  padding: 15px;
-  background-color: var(--COLOR_RED);
-  color: white;
-  font-size: 13px;
-  border-top: 1px solid white;
-  border-bottom: 1px solid white;
-}
+  --COLOR_CONTROL: #739cb4;
+  --COLOR_CONTROL_DARK: #3c647c;
+  --COLOR_CONTROL_LIGHT: #b3e3ff;
 
-.communicationError h4 {
-  margin: 0 0 .5em;
-  color: inherit;
-  font-size: 1.3em;
-}
-
-.root ul {
-  background-color: hsl(202, 30%, 90%);
-}
-
-.isEmpty ul {
-  background-color: white;
-}
-
-.placeholder {
-  padding-top: 10vh;
-  font-size: 1.2em;
-  font-weight: 100;
-  text-align: center;
-  background-color: white;
-  color: #ddd;
+  --COLOR_RED: #f04;
+  --COLOR_YELLOW: #fd0;
+  --COLOR_GREEN: #16aa3e;
 }

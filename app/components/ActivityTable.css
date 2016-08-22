@@ -14,13 +14,21 @@
  * limitations under the License.
  **/
 
+@import '../styles/constants.css';
+
 :root {
-  --padding-size: 15px;
+  --paddingSize: 15px;
   --shadowHeight: 4px;
+
+  --bgcolor: hsl(203, 40%, 25%);
+  --row-bgcolor-active: color(var(--bgcolor) lightness(+25%));
+  --row-bgcolor-hover: color(var(--bgcolor) lightness(+40%) alpha(10%));
+  --filter-bgcolor: color(var(--bgcolor) lightness(+10%));
+  --progressbar-fgcolor: var(--COLOR_BRAND);
 }
 
 .root {
-  background-color: hsl(201, 40%, 26%);
+  background-color: var(--bgcolor);
   position: relative;
   display: flex;
   flex-direction: column;
@@ -28,7 +36,7 @@
 
 .filter {
   text-align: right;
-  background-color: hsla(202,35%,36%,1);
+  background-color: var(--filter-bgcolor);
   color: #eee;
 }
 
@@ -37,8 +45,9 @@
   margin-left: .25em;
 }
 
-.loadingIndicator {
-  transition: height .1s liinear;
+.progressbar {
+  position: relative;
+  transition: height .1s linear;
   height: 0;
 }
 
@@ -48,10 +57,10 @@
   left: 0;
   bottom: 0;
   width: 0;
-  background-color: #354852;
+  background-color: var(--progressbar-fgcolor);
 }
 
-.isLoading .loadingIndicator {
+.isLoading .progressbar {
   height: 5px;
 }
 
@@ -92,11 +101,11 @@
 }
 
 .tableContainer tr > :first-child {
-  padding-left: var(--padding-size);
+  padding-left: var(--paddingSize);
 }
 
 .tableContainer tr > :last-child {
-  padding-right: var(--padding-size);
+  padding-right: var(--paddingSize);
 }
 
 /* =========================================================================
@@ -127,12 +136,12 @@
 }
 
 .tableContainer tbody tr:hover {
-  background-color: hsla(202,100%,85%,0.1);
+  background-color: var(--row-bgcolor-hover);
   color: #d9f1ff;
 }
 
 .tableContainer tr.isActive {
-  background-color: #739cb4 !important;
+  background-color: var(--row-bgcolor-active) !important;
   color: white !important;
 }
 

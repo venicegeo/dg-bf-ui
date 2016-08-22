@@ -51,7 +51,7 @@ const ActivityTable = ({
       />
     </div>
 
-    <div className={styles.loadingIndicator}>
+    <div className={styles.progressbar}>
       <div className={styles.puck}/>
     </div>
 
