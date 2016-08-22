@@ -104,7 +104,7 @@ export default class PrimaryMap extends Component {
   constructor() {
     super()
     this.state = {basemapIndex: 0, loadingRefCount: 0}
-    this._emitAnchorChange = debounce(this._emitAnchorChange.bind(this), 1000)
+    this._emitAnchorChange = debounce(this._emitAnchorChange.bind(this), 100)
     this._handleBasemapChange = this._handleBasemapChange.bind(this)
     this._handleDrawStart = this._handleDrawStart.bind(this)
     this._handleDrawEnd = this._handleDrawEnd.bind(this)
@@ -118,25 +118,23 @@ export default class PrimaryMap extends Component {
 
   componentDidMount() {
     this._initializeOpenLayers()
-      .then(() => {
-        this._renderSelectionPreview()
-        this._renderDetections()
-        this._renderFrames()
-        this._renderImagery()
-        this._renderImagerySearchResultsOverlay()
-        this._recenter(this.props.anchor)
-        if (this.props.bbox) {
-          this._renderImagerySearchBbox()
-        }
-        this._updateInteractions()
-        if (this.props.selectedFeature) {
-          this._updateSelectedFeature()
-        }
-      })
+    this._renderSelectionPreview()
+    this._renderDetections()
+    this._renderFrames()
+    this._renderImagery()
+    this._renderImagerySearchResultsOverlay()
+    this._recenter(this.props.anchor)
+    if (this.props.bbox) {
+      this._renderImagerySearchBbox()
+    }
+    this._updateInteractions()
+    if (this.props.selectedFeature) {
+      this._updateSelectedFeature()
+    }
+
     // DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG
     // DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG
     window.ol = ol
-    window.map = this._map
     window.primaryMap = this
     // DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG
     // DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG
@@ -381,10 +379,6 @@ export default class PrimaryMap extends Component {
         this._detectionsLayer,
         this._highlightLayer,
       ],
-      overlays: [
-        this._imageSearchResultsOverlay,
-        this._featureDetailsOverlay,
-      ],
       target: this.refs.container,
       view: new ol.View({
         center: ol.proj.fromLonLat(DEFAULT_CENTER),
@@ -394,9 +388,20 @@ export default class PrimaryMap extends Component {
       })
     })
 
+    /*
+      2016-08-22 -- Due to internal implementation of the 'autoPan' option,
+          overlays that will be immediately visible cannot be added to a map
+          instance until the instance has been fully rendered first.
+
+          Reference:
+              https://github.com/openlayers/ol3/issues/5456
+    */
+    this._map.renderSync()
+    this._map.addOverlay(this._imageSearchResultsOverlay)
+    this._map.addOverlay(this._featureDetailsOverlay)
+
     this._map.on('pointermove', this._handleMouseMove)
     this._map.on('moveend', this._emitAnchorChange)
-    return new Promise(resolve => this._map.once('postrender', resolve))
   }
 
   _recenter(anchor) {
