@@ -30,6 +30,7 @@ const styles = require('./ProductLineList.css')
 
 export class ProductLineList extends React.Component {
   static propTypes = {
+    error:             React.PropTypes.object,
     isFetching:        React.PropTypes.bool.isRequired,
     jobs:              React.PropTypes.object.isRequired,
     productLines:      React.PropTypes.array.isRequired,
@@ -72,6 +73,16 @@ export class ProductLineList extends React.Component {
               Loading Product Lines
             </li>
           )}
+          {this.props.error && (
+            <li className={styles.error}>
+              <h4><i className="fa fa-warning"/> {this.props.error.code ? 'Communication' : 'Application'} Error</h4>
+              <p>{this.props.error.code
+                ? 'Cannot communicate with the server'
+                : 'An error is preventing the display of product lines'
+              }. (<code>{this.props.error.toString()}</code>)</p>
+              <button onClick={this.props.fetchProductLines}>Retry</button>
+            </li>
+          )}
         </ul>
       </div>
     )
@@ -80,6 +91,7 @@ export class ProductLineList extends React.Component {
 
 export default connect(state => ({
   isFetching:     state.productLines.fetching,
+  error:          state.productLines.error,
   jobs:           state.productLineJobs,
   productLines:   state.productLines.records,
   selectedJobIds: state.productLineJobs.selection.map(j => j.id),

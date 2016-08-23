@@ -28,6 +28,7 @@ export function reducer(state = {
   switch (action.type) {
   case FETCH_PRODUCT_LINES:
     return Object.assign({}, state, {
+      error: null,
       fetching: true,
     })
   case FETCH_PRODUCT_LINES_SUCCESS:
@@ -39,6 +40,7 @@ export function reducer(state = {
     return Object.assign({}, state, {
       fetching: false,
       error: {
+        code:    action.err.code,
         message: action.err.message,
         stack:   action.err.stack,
       },

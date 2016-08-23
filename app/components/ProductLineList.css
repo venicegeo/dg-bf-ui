@@ -14,6 +14,8 @@
  * limitations under the License.
  **/
 
+@import '../styles/constants.css';
+
 .root {
   composes: submenu from '../styles/menus.css';
   background-color: hsl(202, 30%, 90%);
@@ -21,4 +23,19 @@
 
 .listItem + .listItem {
   margin-top: 1px;
+}
+
+.error {
+  padding: 15px;
+  background-color: var(--COLOR_RED);
+  color: white;
+  font-size: 13px;
+  border-top: 1px solid white;
+  border-bottom: 1px solid white;
+}
+
+.error h4 {
+  margin: 0 0 .5em;
+  color: inherit;
+  font-size: 1.3em;
 }

@@ -82,7 +82,9 @@ function checkResponse(response) {
   if (response.ok) {
     return response.json()
   }
-  throw new Error(`HttpError: (code=${response.status})`)
+  throw Object.assign(new Error(`HttpError: (code=${response.status})`), {
+    code: response.status
+  })
 }
 
 function extractRecords(algorithmNames, filterNames) {
