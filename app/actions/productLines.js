@@ -86,7 +86,7 @@ function checkResponse(response) {
 }
 
 function extractRecords(algorithmNames, filterNames) {
-  return data => data.map(datum => ({
+  return data => data.triggerList.map(datum => ({
     id: datum.triggerId,
     geometry: {
       type: 'Polygon',
