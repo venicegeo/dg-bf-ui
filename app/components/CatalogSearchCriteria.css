@@ -18,50 +18,46 @@
 
 .root {}
 
-.controls {
-  text-align: center;
+.minimap {
+  position: relative;
+  height: 200px;
 }
 
-.errorMessage {
-  padding: 15px;
-  background-color: var(--COLOR_RED);
-  color: white;
-  font-size: 13px;
-}
-
-.errorMessage h4 {
-  margin: 0 0 .5em;
-  color: inherit;
-  font-size: 1.3em;
-}
-
-.errorMessage pre {
-  margin: 1em -15px -10px;
-  padding: 1em;
-  text-align: left;
-  background-color: rgba(0,0,0,.2);
-  overflow-x: auto;
-}
-
-.loadingMask {
-  display: none;
+.clearBbox {
   position: absolute;
-  top: 0;
-  left: 0;
-  bottom: 0;
-  right: 0;
-  padding-top: 10vh;
-  cursor: wait;
-  background-color: var(--COLOR_BRAND);
-  text-align: center;
-  opacity: .6;
+  right: 10px;
+  bottom: 10px;
+  padding: .25em .75em;
+  border-radius: 3px;
+  background-color: white;
+  color: #5f5f5f;
+  font-size: 14px;
+  cursor: pointer;
+  opacity: .7;
 }
 
-.isSearching .loadingMask {
-  display: block;
+.clearBbox:hover {
+  opacity: 1;
 }
 
-.loadingAnimation {
-  width: 100px;
-  height: 100px;
+.root h3 {
+  margin-top: 15px;
+  padding: 5px 15px;
+  font-size: inherit;
+  color: inherit;
+}
+
+.captureDateFrom,
+.captureDateTo,
+.catalogApiKey,
+.cloudCover,
+.provider,
+.spatialFilter {
+  composes: field-normal from '../styles/forms.css';
+}
+
+.cloudCover .value {
+  margin: 0 0 0 .5em;
+  width: auto;
+  opacity: .5;
 }
