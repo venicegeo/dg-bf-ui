@@ -60,11 +60,11 @@ describe('<ImagerySearch/>', () => {
         onSubmit={_props.onSubmit}
       />
     )
-    expect(wrapper.find('.ImagerySearch__catalogApiKey input').get(0).value).toEqual('test-catalog-api-key')
-    expect(wrapper.find('.ImagerySearch__cloudCover input').get(0).value).toEqual('19')
-    expect(wrapper.find('.ImagerySearch__captureDateFrom input').get(0).value).toEqual('2016-01-01')
-    expect(wrapper.find('.ImagerySearch__captureDateTo input').get(0).value).toEqual('2016-02-01')
-    expect(wrapper.find('.ImagerySearch__spatialFilter select').get(0).value).toEqual('')
+    expect(wrapper.find('.ImagerySearch-catalogApiKey input').get(0).value).toEqual('test-catalog-api-key')
+    expect(wrapper.find('.ImagerySearch-cloudCover input').get(0).value).toEqual('19')
+    expect(wrapper.find('.ImagerySearch-captureDateFrom input').get(0).value).toEqual('2016-01-01')
+    expect(wrapper.find('.ImagerySearch-captureDateTo input').get(0).value).toEqual('2016-02-01')
+    expect(wrapper.find('.ImagerySearch-spatialFilter select').get(0).value).toEqual('')
   })
 
   it('renders spatial filter options', () => {
@@ -88,8 +88,8 @@ describe('<ImagerySearch/>', () => {
         onSubmit={_props.onSubmit}
       />
     )
-    const options = wrapper.find('.ImagerySearch__spatialFilter option')
-    expect(wrapper.find('.ImagerySearch__spatialFilter select').get(0).value).toEqual('test-id')
+    const options = wrapper.find('.ImagerySearch-spatialFilter option')
+    expect(wrapper.find('.ImagerySearch-spatialFilter select').get(0).value).toEqual('test-id')
     expect(options.get(0).value).toEqual('')
     expect(options.at(0).text()).toEqual('None')
     expect(options.get(1).value).toEqual('test-id')
@@ -118,8 +118,8 @@ describe('<ImagerySearch/>', () => {
         onSubmit={_props.onSubmit}
       />
     )
-    expect(wrapper.find('.ImagerySearch__spatialFilter option').at(1).text()).toEqual('Lorem Ipsum')
-    expect(wrapper.find('.ImagerySearch__spatialFilter option').at(2).text()).toEqual('Dolor Sit Amet')
+    expect(wrapper.find('.ImagerySearch-spatialFilter option').at(1).text()).toEqual('Lorem Ipsum')
+    expect(wrapper.find('.ImagerySearch-spatialFilter option').at(2).text()).toEqual('Dolor Sit Amet')
   })
 
   it('renders with correct initial spatial filter selection', () => {
@@ -144,7 +144,7 @@ describe('<ImagerySearch/>', () => {
         onSubmit={_props.onSubmit}
       />
     )
-    expect(wrapper.find('.ImagerySearch__spatialFilter select').get(0).value).toEqual('test-filter-1')
+    expect(wrapper.find('.ImagerySearch-spatialFilter select').get(0).value).toEqual('test-filter-1')
   })
 
   it('emits api key change event', () => {
@@ -166,7 +166,7 @@ describe('<ImagerySearch/>', () => {
         onSubmit={_props.onSubmit}
       />
     )
-    const input = wrapper.find('.ImagerySearch__catalogApiKey input')
+    const input = wrapper.find('.ImagerySearch-catalogApiKey input')
     input.get(0).value = 'test-new-catalog-api-key'
     input.simulate('change')
     expect(_props.onApiKeyChange).toHaveBeenCalledWith('test-new-catalog-api-key')
@@ -191,7 +191,7 @@ describe('<ImagerySearch/>', () => {
         onSubmit={_props.onSubmit}
       />
     )
-    wrapper.find('.ImagerySearch__clearBbox').simulate('click')
+    wrapper.find('.ImagerySearch-clearBbox').simulate('click')
     expect(_props.onClearBbox).toHaveBeenCalled()
   })
 
@@ -214,7 +214,7 @@ describe('<ImagerySearch/>', () => {
         onSubmit={_props.onSubmit}
       />
     )
-    const input = wrapper.find('.ImagerySearch__cloudCover input')
+    const input = wrapper.find('.ImagerySearch-cloudCover input')
     input.get(0).value = 42
     input.simulate('change')
     expect(_props.onCloudCoverChange).toHaveBeenCalledWith(42)
@@ -239,7 +239,7 @@ describe('<ImagerySearch/>', () => {
         onSubmit={_props.onSubmit}
       />
     )
-    const input = wrapper.find('.ImagerySearch__captureDateFrom input')
+    const input = wrapper.find('.ImagerySearch-captureDateFrom input')
     input.get(0).value = '1999-12-31'
     input.simulate('change')
     expect(_props.onDateChange).toHaveBeenCalledWith('1999-12-31', _props.dateTo)
@@ -264,7 +264,7 @@ describe('<ImagerySearch/>', () => {
         onSubmit={_props.onSubmit}
       />
     )
-    const input = wrapper.find('.ImagerySearch__captureDateTo input')
+    const input = wrapper.find('.ImagerySearch-captureDateTo input')
     input.get(0).value = '1999-12-31'
     input.simulate('change')
     expect(_props.onDateChange).toHaveBeenCalledWith(_props.dateFrom, '1999-12-31')
@@ -291,7 +291,7 @@ describe('<ImagerySearch/>', () => {
         onSubmit={_props.onSubmit}
       />
     )
-    const dropdown = wrapper.find('.ImagerySearch__spatialFilter select')
+    const dropdown = wrapper.find('.ImagerySearch-spatialFilter select')
     dropdown.get(0).value = 'test-id'
     dropdown.simulate('change')
     expect(_props.onFilterChange).toHaveBeenCalledWith('test-id')
@@ -318,7 +318,7 @@ describe('<ImagerySearch/>', () => {
         onSubmit={_props.onSubmit}
       />
     )
-    const dropdown = wrapper.find('.ImagerySearch__spatialFilter select')
+    const dropdown = wrapper.find('.ImagerySearch-spatialFilter select')
     dropdown.get(0).value = ''
     dropdown.simulate('change')
     expect(_props.onFilterChange).toHaveBeenCalledWith(null)
@@ -367,7 +367,7 @@ describe('<ImagerySearch/>', () => {
       />
     )
     wrapper.setProps({catalogApiKey: 'test-new-catalog-api-key'})
-    expect(wrapper.find('.ImagerySearch__catalogApiKey input').get(0).value).toEqual('test-new-catalog-api-key')
+    expect(wrapper.find('.ImagerySearch-catalogApiKey input').get(0).value).toEqual('test-new-catalog-api-key')
   })
 
   it('updates cloud cover when props change', () => {
@@ -390,7 +390,7 @@ describe('<ImagerySearch/>', () => {
       />
     )
     wrapper.setProps({cloudCover: 42})
-    expect(wrapper.find('.ImagerySearch__cloudCover input').get(0).value).toEqual('42')
+    expect(wrapper.find('.ImagerySearch-cloudCover input').get(0).value).toEqual('42')
   })
 
   it('updates date when props change (via "from" date)', () => {
@@ -413,8 +413,8 @@ describe('<ImagerySearch/>', () => {
       />
     )
     wrapper.setProps({dateFrom: '1999-12-31'})
-    expect(wrapper.find('.ImagerySearch__captureDateFrom input').get(0).value).toEqual('1999-12-31')
-    expect(wrapper.find('.ImagerySearch__captureDateTo input').get(0).value).toEqual(_props.dateTo)
+    expect(wrapper.find('.ImagerySearch-captureDateFrom input').get(0).value).toEqual('1999-12-31')
+    expect(wrapper.find('.ImagerySearch-captureDateTo input').get(0).value).toEqual(_props.dateTo)
   })
 
   it('updates date when props change (via "to" date)', () => {
@@ -437,8 +437,8 @@ describe('<ImagerySearch/>', () => {
       />
     )
     wrapper.setProps({dateTo: '1999-12-31'})
-    expect(wrapper.find('.ImagerySearch__captureDateFrom input').get(0).value).toEqual(_props.dateFrom)
-    expect(wrapper.find('.ImagerySearch__captureDateTo input').get(0).value).toEqual('1999-12-31')
+    expect(wrapper.find('.ImagerySearch-captureDateFrom input').get(0).value).toEqual(_props.dateFrom)
+    expect(wrapper.find('.ImagerySearch-captureDateTo input').get(0).value).toEqual('1999-12-31')
   })
 
   it('updates spatial filter when props change', () => {
@@ -463,7 +463,7 @@ describe('<ImagerySearch/>', () => {
       />
     )
     wrapper.setProps({filter: 'test-id'})
-    expect(wrapper.find('.ImagerySearch__spatialFilter select').get(0).value).toEqual('test-id')
+    expect(wrapper.find('.ImagerySearch-spatialFilter select').get(0).value).toEqual('test-id')
   })
 
   it('shows loading indicator while search is in flight')

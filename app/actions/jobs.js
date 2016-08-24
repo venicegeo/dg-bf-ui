@@ -16,8 +16,13 @@
 
 import moment from 'moment'
 import {Client} from '../utils/piazza-client'
+import {importRecordById} from '../utils/import-job-record'
 import * as worker from './workers/jobs'
-import {GATEWAY, JOBS_WORKER, SCHEMA_VERSION} from '../config'
+import {
+  GATEWAY,
+  JOBS_WORKER,
+  SCHEMA_VERSION,
+} from '../config'
 
 import {
   KEY_ALGORITHM_NAME,
@@ -26,9 +31,9 @@ import {
   KEY_IMAGE_CAPTURED_ON,
   KEY_IMAGE_SENSOR,
   KEY_NAME,
+  KEY_SCHEMA_VERSION,
   KEY_STATUS,
   KEY_TYPE,
-  KEY_SCHEMA_VERSION,
   KEY_THUMBNAIL,
   REQUIREMENT_BANDS,
   STATUS_RUNNING,
@@ -42,12 +47,12 @@ import {
 export const CREATE_JOB = 'CREATE_JOB'
 export const CREATE_JOB_SUCCESS = 'CREATE_JOB_SUCCESS'
 export const CREATE_JOB_ERROR = 'CREATE_JOB_ERROR'
-export const DISCOVER_EXECUTOR = 'DISCOVER_EXECUTOR'
-export const DISCOVER_EXECUTOR_SUCCESS = 'DISCOVER_EXECUTOR_SUCCESS'
-export const DISCOVER_EXECUTOR_ERROR = 'DISCOVER_EXECUTOR_ERROR'
 export const DISMISS_JOB_ERROR = 'DISMISS_JOB_ERROR'
 export const FETCH_JOBS = 'FETCH_JOBS'
 export const FETCH_JOBS_SUCCESS = 'FETCH_JOBS_SUCCESS'
+export const IMPORT_JOB = 'IMPORT_JOB'
+export const IMPORT_JOB_SUCCESS = 'IMPORT_JOB_SUCCESS'
+export const IMPORT_JOB_ERROR = 'IMPORT_JOB_ERROR'
 export const REMOVE_JOB = 'REMOVE_JOB'
 export const JOBS_WORKER_ERROR = 'JOBS_WORKER_ERROR'
 export const START_JOBS_WORKER = 'START_JOBS_WORKER'
@@ -76,7 +81,8 @@ export function createJob(catalogApiKey, name, algorithm, feature) {
             pzAddr:        client.gateway,
             dbAuthToken:   catalogApiKey,
             bands:         algorithm.requirements.find(a => a.name === REQUIREMENT_BANDS).literal.split(','),
-            metaDataJSON:  feature
+            metaDataJSON:  feature,
+            resultName:    name,
           }),
           type:     'body',
           mimeType: 'application/json'
@@ -88,7 +94,7 @@ export function createJob(catalogApiKey, name, algorithm, feature) {
           type:     'text'
         }
       ],
-      serviceId: state.jobs.serviceId
+      serviceId: state.executor.serviceId
     })
       .then(id => {
         dispatch(createJobSuccess(id, name, algorithm, feature))
@@ -100,19 +106,39 @@ export function createJob(catalogApiKey, name, algorithm, feature) {
   }
 }
 
-export function discoverExecutorIfNeeded() {
-  return (dispatch, getState) => {
-    const state = getState()
-    if (state.jobs.serviceId || state.jobs.discovering || state.jobs.error) {
-      return
-    }
-    dispatch(discoverExecutor())
-  }
-}
-
 export function dismissJobError() {
   return {
     type: DISMISS_JOB_ERROR
+  }
+}
+
+const importJobSuccess = (record) => ({
+  type: IMPORT_JOB_SUCCESS,
+  record,
+})
+
+const importJobError = (err) => ({
+  type: IMPORT_JOB_ERROR,
+  err,
+})
+
+export function importJob(id) {
+  return (dispatch, getState) => {
+    dispatch({
+      type: IMPORT_JOB,
+      id,
+    })
+    const state = getState()
+    const client = new Client(GATEWAY, state.authentication.token)
+    const algorithmNames = generateAlgorithmNamesHash(state.algorithms.records)
+    return importRecordById(client, id, algorithmNames)
+      .then(record => {
+        dispatch(importJobSuccess(record))
+      })
+      .catch(err => {
+        dispatch(importJobError(err))
+        throw err
+      })
   }
 }
 
@@ -164,42 +190,6 @@ function createJobSuccess(id, name, algorithm, feature) {
       },
       type: 'Feature',
     }
-  }
-}
-
-function discoverExecutor() {
-  return (dispatch, getState) => {
-    dispatch({
-      type: DISCOVER_EXECUTOR
-    })
-
-    const client = new Client(GATEWAY, getState().authentication.token)
-    client.getServices({pattern: '^bf-handle'})
-      .then(([executor]) => {
-        if (executor) {
-          dispatch(discoverExecutorSuccess(executor.serviceId))
-        }
-        else {
-          dispatch(discoverExecutorError('Could not find Beachfront API service'))
-        }
-      })
-      .catch(err => {
-        dispatch(discoverExecutorError(err))
-      })
-  }
-}
-
-function discoverExecutorError(err) {
-  return {
-    type: DISCOVER_EXECUTOR_ERROR,
-    err
-  }
-}
-
-function discoverExecutorSuccess(serviceId) {
-  return {
-    type: DISCOVER_EXECUTOR_SUCCESS,
-    serviceId
   }
 }
 
@@ -257,4 +247,16 @@ function updateJob(
     wmsLayerId,
     wmsUrl,
   }
+}
+
+//
+// Helpers
+//
+
+function generateAlgorithmNamesHash(algorithms) {
+  const hash = {}
+  for (const algorithm of algorithms) {
+    hash[algorithm.url] = algorithm.name
+  }
+  return hash
 }

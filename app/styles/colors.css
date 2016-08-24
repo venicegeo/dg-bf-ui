@@ -14,13 +14,15 @@
  * limitations under the License.
  **/
 
+@import 'constants.css';
+
 /* =========================================================================
    Colors (Base Styles)
    ========================================================================= */
 
 html {
-  background-color: hsl(202, 71%, 24%);
-  color: #555;
+  background-color: var(--COLOR_BRAND_DARK);
+  color: var(--COLOR_TEXT);
 }
 
 body:before {
@@ -40,5 +42,5 @@ h3,
 h4,
 h5,
 h6 {
-  color: hsl(202, 70%, 30%);
+  color: var(--COLOR_HEADINGS);
 }

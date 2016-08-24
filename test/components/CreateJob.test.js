@@ -79,11 +79,11 @@ describe('<CreateJob/>', () => {
         onSearchSubmit={_props.onSearchSubmit}
       />
     )
-    expect(wrapper.find('.CreateJob__root').length).toEqual(1)
-    expect(wrapper.find('.CreateJob__placeholder').length).toEqual(0)
-    expect(wrapper.find('.CreateJob__search').length).toEqual(1)
-    expect(wrapper.find('.CreateJob__details').length).toEqual(1)
-    expect(wrapper.find('.CreateJob__algorithms').length).toEqual(1)
+    expect(wrapper.find('.CreateJob-root').length).toEqual(1)
+    expect(wrapper.find('.CreateJob-placeholder').length).toEqual(0)
+    expect(wrapper.find('.CreateJob-search').length).toEqual(1)
+    expect(wrapper.find('.CreateJob-details').length).toEqual(1)
+    expect(wrapper.find('.CreateJob-algorithms').length).toEqual(1)
   })
 
   it('shows placeholder if bbox does not exist', () => {
@@ -113,7 +113,7 @@ describe('<CreateJob/>', () => {
         onSearchSubmit={_props.onSearchSubmit}
       />
     )
-    expect(wrapper.find('.CreateJob__placeholder').length).toEqual(1)
+    expect(wrapper.find('.CreateJob-placeholder').length).toEqual(1)
   })
 
   it('hides imagery search if no bbox exists', () => {
@@ -143,7 +143,7 @@ describe('<CreateJob/>', () => {
         onSearchSubmit={_props.onSearchSubmit}
       />
     )
-    expect(wrapper.find('.CreateJob__search').length).toEqual(0)
+    expect(wrapper.find('.CreateJob-search').length).toEqual(0)
   })
 
   it('hides job details if no image is selected', () => {
@@ -173,7 +173,7 @@ describe('<CreateJob/>', () => {
         onSearchSubmit={_props.onSearchSubmit}
       />
     )
-    expect(wrapper.find('.CreateJob__details').length).toEqual(0)
+    expect(wrapper.find('.CreateJob-details').length).toEqual(0)
   })
 
   it('hides algorithms if no image is selected', () => {
@@ -203,6 +203,6 @@ describe('<CreateJob/>', () => {
         onSearchSubmit={_props.onSearchSubmit}
       />
     )
-    expect(wrapper.find('.CreateJob__algorithms').length).toEqual(0)
+    expect(wrapper.find('.CreateJob-algorithms').length).toEqual(0)
   })
 })

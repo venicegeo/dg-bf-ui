@@ -14,13 +14,15 @@
  * limitations under the License.
  **/
 
+@import '../styles/constants.css';
+
 .root {
   composes: submenu from '../styles/menus.css';
 }
 
 .communicationError {
   padding: 15px;
-  background-color: hsl(349, 100%, 60%);
+  background-color: var(--COLOR_RED);
   color: white;
   font-size: 13px;
   border-top: 1px solid white;

@@ -55,12 +55,10 @@ export function reducer(state = INITIAL_STATE, action) {
 export function deserialize() {
   return {
     ...INITIAL_STATE,
-    ...JSON.parse(sessionStorage.getItem('authentication')),
+    token: sessionStorage.getItem('authentication_token') || INITIAL_STATE.token,
   }
 }
 
 export function serialize(state) {
-  sessionStorage.setItem('authentication', JSON.stringify({
-    token: state.token
-  }))
+  sessionStorage.setItem('authentication_token', state.token || '')
 }

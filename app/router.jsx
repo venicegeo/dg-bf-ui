@@ -24,6 +24,7 @@ import Login from './components/Login'
 import CreateJob from './components/CreateJob'
 import CreateProductLine from './components/CreateProductLine'
 import JobStatusList from './components/JobStatusList'
+import ProductLineList from './components/ProductLineList'
 import Help from './components/Help'
 import About from './components/About'
 import {configureStore} from './store'
@@ -43,6 +44,7 @@ export function bootstrap(element) {
           <Route path="jobs" component={JobStatusList} onEnter={loginFilter}/>
           <Route path="create-job" component={CreateJob} onEnter={loginFilter}/>
           <Route path="create-product-line" component={CreateProductLine} onEnter={loginFilter}/>
+          <Route path="product-lines" component={ProductLineList} onEnter={loginFilter}/>
           <Route path="help" component={Help} onEnter={loginFilter}/>
           <Route path="about" component={About} onEnter={loginFilter}/>
         </Route>

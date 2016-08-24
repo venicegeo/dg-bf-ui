@@ -17,7 +17,8 @@
 import React, {Component} from 'react'
 import moment from 'moment'
 import {Link} from 'react-router'
-import Timer from './Timestamp'
+import Timestamp from './Timestamp'
+import FileDownloadLink from './FileDownloadLink'
 import {featureToAnchor} from '../utils/map-anchor'
 import styles from './JobStatus.css'
 
@@ -29,6 +30,7 @@ import {
   KEY_IMAGE_SENSOR,
   KEY_NAME,
   KEY_STATUS,
+  KEY_GEOJSON_DATA_ID,
   STATUS_SUCCESS,
   STATUS_RUNNING,
   STATUS_ERROR,
@@ -44,32 +46,28 @@ export default class JobStatus extends Component {
       geometry:   React.PropTypes.object.isRequired,
       properties: React.PropTypes.object.isRequired,
     }).isRequired,
-    onDownload:  React.PropTypes.func.isRequired,
     onForgetJob: React.PropTypes.func.isRequired,
-    result:      React.PropTypes.object
   }
 
   constructor() {
     super()
-    this.state = {isDownloading: false, isExpanded: false, isRemoving: false}
+    this.state = {
+      downloadProgress: 0,
+      isDownloading: false,
+      isExpanded: false,
+      isRemoving: false,
+    }
     this._emitOnForgetJob = this._emitOnForgetJob.bind(this)
-    this._handleDownloadClicked = this._handleDownloadClicked.bind(this)
+    this._handleDownloadComplete = this._handleDownloadComplete.bind(this)
+    this._handleDownloadError = this._handleDownloadError.bind(this)
+    this._handleDownloadProgress = this._handleDownloadProgress.bind(this)
+    this._handleDownloadStart = this._handleDownloadStart.bind(this)
     this._handleExpansionToggle = this._handleExpansionToggle.bind(this)
     this._handleForgetToggle = this._handleForgetToggle.bind(this)
   }
 
-  componentWillReceiveProps(nextProps) {
-    if (this.state.isDownloading && !nextProps.result) {
-      this.setState({isDownloading: false})
-    }
-    if (this.state.isDownloading && nextProps.result && nextProps.result.geojson) {
-      this._triggerDownload(nextProps.result.geojson)
-    }
-  }
-
   render() {  // eslint-disable-line
     const {id, properties} = this.props.job
-    const progress = calculateProgress(this.props.result) || {}
     const name = properties[KEY_NAME]
     const status = properties[KEY_STATUS]
     const createdOn = properties[KEY_CREATED_ON]
@@ -77,24 +75,29 @@ export default class JobStatus extends Component {
     const algorithmName = properties[KEY_ALGORITHM_NAME]
     const capturedOn = properties[KEY_IMAGE_CAPTURED_ON]
     const sensor = properties[KEY_IMAGE_SENSOR]
+    const resultDataId = properties[KEY_GEOJSON_DATA_ID]
+    const canDownload = status === STATUS_SUCCESS && resultDataId
+    const downloadPercentage = `${this.state.downloadProgress || 0}%`
     return (
       <li className={`${styles.root} ${this._aggregatedClassNames}`}>
         <div className={styles.details} onClick={this._handleExpansionToggle}>
-          <h3 className={styles.title}>
-            <i className={`fa fa-chevron-right ${styles.caret}`}/>
-            <span>{name}</span>
-          </h3>
+          <div className={styles.header}>
+            <h3 className={styles.title}>
+              <i className={`fa fa-chevron-right ${styles.caret}`}/>
+              <span>{name}</span>
+            </h3>
 
-          <div className={styles.summary}>
-            <span className={styles.status}>{status}</span>
-            <Timer
-              className={styles.timer}
-              timestamp={createdOn}
-            />
+            <div className={styles.summary}>
+              <span className={styles.status}>{status}</span>
+              <Timestamp
+                className={styles.timer}
+                timestamp={createdOn}
+              />
+            </div>
           </div>
 
-          <div className={styles.progressBar} title={progress.verbose}>
-            <div className={styles.puck} style={{width: progress.percentage}}></div>
+          <div className={styles.progressBar} title={downloadPercentage}>
+            <div className={styles.puck} style={{width: downloadPercentage}}/>
           </div>
 
           <div className={styles.metadata} onClick={e => e.stopPropagation()}>
@@ -134,14 +137,16 @@ export default class JobStatus extends Component {
           >
             <i className="fa fa-globe"/>
           </Link>
-          {status === STATUS_SUCCESS && (
-            <a
+          {canDownload && (
+            <FileDownloadLink
+              dataId={resultDataId}
+              filename={name + '.geojson'}
               className={styles.download}
-              title={this.state.isDownloading ? progress.percentage : 'Download'}
-              onClick={this._handleDownloadClicked}
-            >
-              {this.state.isDownloading ? progress.percentage : <i className="fa fa-cloud-download"/>}
-            </a>
+              onProgress={this._handleDownloadProgress}
+              onStart={this._handleDownloadStart}
+              onComplete={this._handleDownloadComplete}
+              onError={this._handleDownloadError}
+            />
           )}
         </div>
       </li>
@@ -176,7 +181,7 @@ export default class JobStatus extends Component {
   }
 
   get _classForLoading() {
-    return (this.props.result && this.props.result.loading) ? styles.isLoading : ''
+    return (this.state.isDownloading) ? styles.isLoading : ''
   }
 
   get _classForRemoving() {
@@ -197,16 +202,23 @@ export default class JobStatus extends Component {
     this.props.onForgetJob(this.props.job.id)
   }
 
-  _handleDownloadClicked() {
-    const {result} = this.props
-    if (result && result.geojson) {
-      this._triggerDownload(result.geojson)
-      return
-    }
-    if (!this.state.isDownloading) {
-      this.setState({isDownloading: true})
-      setTimeout(() => this.props.onDownload(this.props.job))
-    }
+  _handleDownloadProgress(loadedBytes, totalBytes) {
+    this.setState({
+      downloadProgress: Math.floor((loadedBytes / totalBytes) * 100)
+    })
+  }
+
+  _handleDownloadStart() {
+    this.setState({ isDownloading: true })
+  }
+
+  _handleDownloadComplete() {
+    this.setState({ isDownloading: false })
+  }
+
+  _handleDownloadError(err) {
+    this.setState({ isDownloading: false })
+    console.error('Download failed: ' + err.stack)
   }
 
   _handleExpansionToggle() {
@@ -218,34 +230,5 @@ export default class JobStatus extends Component {
 
   _handleForgetToggle() {
     this.setState({isRemoving: !this.state.isRemoving})
-  }
-
-  _triggerDownload(contents) {
-    this.setState({isDownloading: false})
-    const file = new File([contents], {type: 'application/json'})
-    const virtualHyperlink = document.createElement('a')
-    virtualHyperlink.href = URL.createObjectURL(file)
-    virtualHyperlink.download = this.props.job.properties[KEY_NAME] + '.geojson'
-    document.body.appendChild(virtualHyperlink)
-    virtualHyperlink.click()
-    document.body.removeChild(virtualHyperlink)
-  }
-}
-
-//
-// Helper Component
-//
-
-const MB = 1024000
-
-function calculateProgress(result) {
-  if (result && result.progress && result.progress.total) {
-    const {loaded, total} = result.progress
-    const loadedMB = (Math.round((loaded / MB) * 10) / 10)
-    const totalMB = (Math.round((total / MB) * 10) / 10)
-    return {
-      percentage: Math.ceil((loaded / total) * 100) + '%',
-      verbose: `Retrieving GeoJSON (${loadedMB} of ${totalMB}MB)`
-    }
   }
 }

@@ -14,9 +14,12 @@
  * limitations under the License.
  **/
 
+@import '../styles/constants.css';
+
 :root {
   --header-height: 60px;
   --header-margin-horizontal: 15px;
+  --header-bgcolor: var(--COLOR_BRAND);
 }
 
 .submenu {
@@ -47,7 +50,7 @@
   margin: 1px 0;
   padding: 5px var(--header-margin-horizontal);
   font-size: 1.2em;
-  background-color: #3d94c5;
+  background-color: var(--header-bgcolor);
   color: white;
 }
 

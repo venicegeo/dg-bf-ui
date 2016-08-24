@@ -20,6 +20,7 @@ import './styles/colors.css'
 import './styles/typography.css'
 import './styles/forms.css'
 import './styles/menus.css'
+import 'core-js/fn/array/includes'  // Polyfill
 import {bootstrap} from './router'
 
 const root = document.createElement('div')

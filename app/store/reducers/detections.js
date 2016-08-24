@@ -14,10 +14,23 @@
  * limitations under the License.
  **/
 
-export function debounce(fn, duration = 100) {
-  let handle
-  return (...args) => {
-    clearTimeout(handle)
-    handle = setTimeout(() => fn(...args), duration)
+import {
+  REMOVE_JOB,
+} from '../../actions/jobs'
+import {
+  LOAD_DETECTIONS,
+  UNLOAD_DETECTIONS
+} from '../../actions/detections'
+
+export function reducer(state = [], action) {
+  switch (action.type) {
+  case LOAD_DETECTIONS:
+    return action.detections
+  case REMOVE_JOB:
+    return state.filter(r => r.id !== action.id)
+  case UNLOAD_DETECTIONS:
+    return []
+  default:
+    return state
   }
 }

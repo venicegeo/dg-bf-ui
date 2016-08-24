@@ -20,7 +20,6 @@ import JobStatus from './JobStatus'
 import styles from './JobStatusList.css'
 import {
   dismissJobError,
-  downloadResult,
   removeJob,
   startJobsWorkerIfNeeded,
 } from '../actions'
@@ -35,13 +34,11 @@ class JobStatusList extends Component {
     error:    React.PropTypes.string,
     jobs:     React.PropTypes.array.isRequired,
     location: React.PropTypes.object,
-    results:  React.PropTypes.array.isRequired,
   }
 
   constructor() {
     super()
     this._dismissError = this._dismissError.bind(this)
-    this._handleDownload = this._handleDownload.bind(this)
     this._handleForgetJob = this._handleForgetJob.bind(this)
   }
 
@@ -69,8 +66,6 @@ class JobStatusList extends Component {
               key={job.id}
               isActive={this._isActive(job.id)}
               job={job}
-              result={this.props.results.find(r => r.jobId === job.id)}
-              onDownload={this._handleDownload}
               onForgetJob={this._handleForgetJob}
             />
           ))}
@@ -82,16 +77,6 @@ class JobStatusList extends Component {
   _dismissError() {
     this.props.dispatch(dismissJobError())
     this.props.dispatch(startJobsWorkerIfNeeded())
-  }
-
-  _handleDownload(job) {
-    this.context.router.push({...this.props.location,
-      // HACK -- ensure job isn't automatically unloaded because its ID isn't in the URL
-      query: {
-        jobId: job.id
-      }
-    })
-    this.props.dispatch(downloadResult(job.id))
   }
 
   _handleForgetJob(jobId) {
@@ -110,7 +95,6 @@ class JobStatusList extends Component {
 }
 
 export default connect(state => ({
-  error:   state.jobs.error,
-  jobs:    state.jobs.records,
-  results: state.results,
+  error: state.jobs.error,
+  jobs:  state.jobs.records,
 }))(JobStatusList)

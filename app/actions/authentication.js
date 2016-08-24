@@ -42,7 +42,7 @@ export function authenticate(username, password) {
     })
       .then(response => {
         if (!response.ok) {
-          throw new Error(`HttpError (code=${response.status})`)
+          throw httpError(response)
         }
         return response.json()
       })
@@ -73,4 +73,17 @@ function authenticateSuccess(token) {
     type: AUTHENTICATE_SUCCESS,
     token
   }
+}
+
+//
+// Helpers
+//
+
+function httpError(response) {
+  const err = new Error(`HttpError (code=${response.status})`)
+  return Object.assign(err, {
+    message: err.message,
+    stack: err.stack,
+    code: response.status,
+  })
 }
