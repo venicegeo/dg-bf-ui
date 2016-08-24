@@ -27,13 +27,21 @@ describe('<Algorithm/>', () => {
       algorithm: {
         description:  'test-description',
         name:         'test-name',
-        requirements: []
+        requirements: [
+          {
+            name: 'Bands',
+            description: 'test-description',
+            literal: 'red,green',
+          },
+        ],
       },
       imageProperties: {
         bands: {},
         cloudCover: 5,
       },
+      isSelected: false,
       isSubmitting: false,
+      onSelect:  createSpy(),
       onSubmit:  createSpy(),
     }
   })
@@ -43,12 +51,57 @@ describe('<Algorithm/>', () => {
       <Algorithm
         algorithm={_props.algorithm}
         imageProperties={_props.imageProperties}
-        isSubmitting={_props.isSubmitting}
-        onSubmit={_props.onSubmit}
       />
     )
     expect(wrapper.find('.Algorithm-name').text()).toEqual('test-name')
     expect(wrapper.find('.Algorithm-description').text()).toEqual('test-description')
+    expect(wrapper.find('.Algorithm-requirements tbody tr th').text()).toEqual('Bands')
+    expect(wrapper.find('.Algorithm-requirements tbody tr td').text()).toEqual('test-description')
+  })
+
+  it('can be neither selectable nor submittable', () => {
+    const wrapper = shallow(
+      <Algorithm
+        algorithm={_props.algorithm}
+        imageProperties={_props.imageProperties}
+      />
+    )
+    expect(wrapper.find('.Algorithm-selectionIndicator').length).toEqual(0)
+    expect(wrapper.find('.Algorithm-startButton').length).toEqual(0)
+  })
+
+  it('can be selectable', () => {
+    const wrapper = shallow(
+      <Algorithm
+        algorithm={_props.algorithm}
+        imageProperties={_props.imageProperties}
+        onSelect={_props.onSelect}
+      />
+    )
+    expect(wrapper.find('.Algorithm-selectionIndicator').length).toEqual(1)
+  })
+
+  it('can be submittable', () => {
+    const wrapper = shallow(
+      <Algorithm
+        algorithm={_props.algorithm}
+        imageProperties={_props.imageProperties}
+        onSubmit={_props.onSubmit}
+      />
+    )
+    expect(wrapper.find('.Algorithm-startButton').length).toEqual(1)
+  })
+
+  it('can be selectable AND submittable', () => {
+    const wrapper = shallow(
+      <Algorithm
+        algorithm={_props.algorithm}
+        imageProperties={_props.imageProperties}
+        onSelect={_props.onSelect}
+        onSubmit={_props.onSubmit}
+      />
+    )
+    expect(wrapper.find('.Algorithm-selectionIndicator').length).toEqual(1)
     expect(wrapper.find('.Algorithm-startButton').length).toEqual(1)
   })
 
@@ -64,8 +117,139 @@ describe('<Algorithm/>', () => {
     expect(wrapper.find('.Algorithm-startButton').prop('disabled')).toEqual(true)
   })
 
-  // FIXME -- the following cases require a component refactor to do this in a sane way
-  it('verifies image compatibility (meets all requirements)')
-  it('verifies image compatibility (meets some requirements)')
-  it('verifies image compatibility (meets no requirements)')
+  it('shows as `selected` appropriately', () => {
+    const wrapper = shallow(
+      <Algorithm
+        algorithm={_props.algorithm}
+        imageProperties={_props.imageProperties}
+        isSelected={true}
+        onSelect={_props.onSelect}
+      />
+    )
+    expect(wrapper.find('.Algorithm-selectionIndicator').prop('checked')).toEqual(true)
+  })
+
+  it('emits `onSelect` event', () => {
+    const wrapper = shallow(
+      <Algorithm
+        algorithm={_props.algorithm}
+        imageProperties={_props.imageProperties}
+        isSelected={_props.isSelected}
+        onSelect={_props.onSelect}
+      />
+    )
+    wrapper.find('.Algorithm-selectionIndicator').simulate('click')
+    expect(_props.onSelect).toHaveBeenCalled()
+  })
+
+  it('emits `onSubmit` event', () => {
+    const wrapper = shallow(
+      <Algorithm
+        algorithm={_props.algorithm}
+        imageProperties={_props.imageProperties}
+        onSubmit={_props.onSubmit}
+      />
+    )
+    wrapper.find('.Algorithm-startButton').simulate('click')
+    expect(_props.onSubmit).toHaveBeenCalled()
+  })
+
+  it('verifies image compatibility (meets all requirements)', () => {
+    const wrapper = shallow(
+      <Algorithm
+        algorithm={{
+          description:  'test-description',
+          name:         'test-name',
+          requirements: [
+            {
+              name: 'Bands',
+              description: 'test-description',
+              literal: 'red,green',
+            },
+            {
+              name: 'Cloud Cover',
+              description: 'test-description',
+              literal: 10,
+            },
+          ],
+        }}
+        imageProperties={{
+          bands: {
+            red: 'lorem',
+            green: 'lorem',
+          },
+          cloudCover: 5,
+        }}
+      />
+    )
+    expect(wrapper.find('.Algorithm-root').hasClass('Algorithm-isCompatible')).toEqual(true)
+    expect(wrapper.find('.Algorithm-requirements tbody tr').at(0).hasClass('Algorithm-met')).toEqual(true)
+    expect(wrapper.find('.Algorithm-requirements tbody tr').at(1).hasClass('Algorithm-met')).toEqual(true)
+  })
+
+  it('verifies image compatibility (meets some requirements)', () => {
+    const wrapper = shallow(
+      <Algorithm
+        algorithm={{
+          description:  'test-description',
+          name:         'test-name',
+          requirements: [
+            {
+              name: 'Bands',
+              description: 'test-description',
+              literal: 'red,green',
+            },
+            {
+              name: 'Cloud Cover',
+              description: 'test-description',
+              literal: 9000,
+            },
+          ],
+        }}
+        imageProperties={{
+          bands: {
+            red: 'lorem',
+            green: 'lorem',
+          },
+          cloudCover: 9001,
+        }}
+      />
+    )
+    expect(wrapper.find('.Algorithm-root').hasClass('Algorithm-isNotCompatible')).toEqual(true)
+    expect(wrapper.find('.Algorithm-requirements tbody tr').at(0).hasClass('Algorithm-met')).toEqual(true)
+    expect(wrapper.find('.Algorithm-requirements tbody tr').at(1).hasClass('Algorithm-unmet')).toEqual(true)
+  })
+
+  it('verifies image compatibility (meets no requirements)', () => {
+    const wrapper = shallow(
+      <Algorithm
+        algorithm={{
+          description:  'test-description',
+          name:         'test-name',
+          requirements: [
+            {
+              name: 'Bands',
+              description: 'test-description',
+              literal: 'red,green',
+            },
+            {
+              name: 'Cloud Cover',
+              description: 'test-description',
+              literal: 9000,
+            },
+          ],
+        }}
+        imageProperties={{
+          bands: {
+            hotpink: 'lorem',
+            fuschia: 'lorem',
+          },
+          cloudCover: 9001,
+        }}
+      />
+    )
+    expect(wrapper.find('.Algorithm-root').hasClass('Algorithm-isNotCompatible')).toEqual(true)
+    expect(wrapper.find('.Algorithm-requirements tbody tr').at(0).hasClass('Algorithm-unmet')).toEqual(true)
+    expect(wrapper.find('.Algorithm-requirements tbody tr').at(1).hasClass('Algorithm-unmet')).toEqual(true)
+  })
 })

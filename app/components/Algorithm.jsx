@@ -22,88 +22,68 @@ import {
   REQUIREMENT_CLOUDCOVER
 } from '../constants'
 
-export default class Algorithm extends Component {
-  static propTypes = {
-    algorithm:       React.PropTypes.shape({
-      name:         React.PropTypes.string,
-      description:  React.PropTypes.string,
-      requirements: React.PropTypes.array.isRequired,
-    }).isRequired,
-    imageProperties: React.PropTypes.object.isRequired,
-    isSubmitting:    React.PropTypes.bool.isRequired,
-    onSubmit:        React.PropTypes.func.isRequired,
-  }
+const Algorithm = ({ algorithm, imageProperties, isSelected, isSubmitting, onSelect, onSubmit }) => (
+  <div className={`${styles.root} ${isSubmitting ? styles.isSubmitting : ''} ${algorithm.requirements.every(r => isCompatible(r, imageProperties)) ? styles.isCompatible : styles.isNotCompatible}`}>
 
-  constructor() {
-    super()
-    this._handleSubmit = this._handleSubmit.bind(this)
-  }
+    {onSelect && (
+      <input
+        className={styles.selectionIndicator}
+        type="radio"
+        checked={isSelected}
+        onClick={() => onSelect(algorithm)}
+      />
+    )}
 
-  render() {
-    return (
-      <form className={`${styles.root} ${this._aggregatedClassNames}`} onSubmit={this._handleSubmit}>
-        <h3 className={styles.name}>{this.props.algorithm.name}</h3>
-        <p className={styles.description}>{this.props.algorithm.description}</p>
+    <h3 className={styles.name}>{algorithm.name}</h3>
+    <p className={styles.description}>{algorithm.description}</p>
 
-        <div className={styles.controls}>
-          <div className={styles.compatibilityWarning}>
-            <h4><i className="fa fa-warning"/> Incompatible Image Selected</h4>
-            <p>The image you've selected does not meet all of this algorithm's requirements.  You can run it anyway but it may not produce the expected results.</p>
-          </div>
-          <button className={styles.startButton} disabled={!this._canSubmit}>
-            {this.props.isSubmitting ? 'Starting' : 'Run Algorithm'}
-          </button>
-        </div>
+    <div className={styles.controls}>
+      <div className={styles.compatibilityWarning}>
+        <h4><i className="fa fa-warning"/> Incompatible Image Selected</h4>
+        <p>The image you've selected does not meet all of this algorithm's requirements.  You can run it anyway but it may not produce the expected results.</p>
+      </div>
 
-        <div className={styles.requirements}>
-          <h4>Image Requirements</h4>
-          <table>
-            <tbody>
-            {this.props.algorithm.requirements.map(r => (
-              <tr key={r.name} className={isCompatible(r, this.props.imageProperties) ? styles.met : styles.unmet}>
-                <th>{r.name}</th>
-                <td>{r.description}</td>
-              </tr>
-            ))}
-            </tbody>
-          </table>
-        </div>
-      </form>
-    )
-  }
+      {onSubmit && (
+        <button
+          className={styles.startButton}
+          disabled={isSubmitting}
+          onClick={() => onSubmit(algorithm)}
+          >
+          {isSubmitting ? 'Starting' : 'Run Algorithm'}
+        </button>
+      )}
+    </div>
 
-  //
-  // Internals
-  //
+    <div className={styles.requirements}>
+      <h4>Image Requirements</h4>
+      <table>
+        <tbody>
+        {algorithm.requirements.map(r => (
+          <tr key={r.name} className={isCompatible(r, imageProperties) ? styles.met : styles.unmet}>
+            <th>{r.name}</th>
+            <td>{r.description}</td>
+          </tr>
+        ))}
+        </tbody>
+      </table>
+    </div>
+  </div>
+)
 
-  get _aggregatedClassNames() {
-    return [
-      this._classForCompatibility,
-      this._classForSubmitting,
-    ].join(' ')
-  }
-
-  get _classForCompatibility() {
-    const compatible = this.props.algorithm.requirements.every(r => isCompatible(r, this.props.imageProperties))
-    return compatible ? styles.isCompatible : styles.isNotCompatible
-  }
-
-  get _classForSubmitting() {
-    return this.props.isSubmitting ? styles.isSubmitting : ''
-  }
-
-  get _canSubmit() {
-    return !this.props.isSubmitting
-  }
-
-  _handleSubmit(event) {
-    event.preventDefault()
-    if (!this._canSubmit) {
-      return
-    }
-    this.props.onSubmit(this.props.algorithm)
-  }
+Algorithm.propTypes = {
+  algorithm:      React.PropTypes.shape({
+    name:         React.PropTypes.string,
+    description:  React.PropTypes.string,
+    requirements: React.PropTypes.array.isRequired,
+  }).isRequired,
+  imageProperties: React.PropTypes.object.isRequired,
+  isSelected:      React.PropTypes.bool,
+  isSubmitting:    React.PropTypes.bool,
+  onSelect:        React.PropTypes.func,
+  onSubmit:        React.PropTypes.func,
 }
+
+export default Algorithm
 
 //
 // Internals
