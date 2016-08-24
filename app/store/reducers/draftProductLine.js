@@ -15,42 +15,30 @@
  **/
 
 import {
-  CHANGE_PRODUCT_LINE_NAME
+  CHANGE_PRODUCT_LINE_NAME,
 } from '../../actions/draftProductLine'
-import {
-  CLEAR_IMAGERY,
-} from '../../actions/imagery'
 
 const INITIAL_STATE = {
-  name: ''
+  name: '',
 }
 
 export function reducer(state = INITIAL_STATE, action) {
   switch (action.type) {
   case CHANGE_PRODUCT_LINE_NAME:
-    return {
-      ...state,
-      name: action.name
-    }
-  case CLEAR_IMAGERY:
-    return {
-      ...state,
-      image: null
-    }
+    return Object.assign({}, state, {
+      name: action.name,
+    })
   default:
     return state
   }
 }
 
 export function deserialize() {
-  return {
-    ...INITIAL_STATE,
-    ...JSON.parse(sessionStorage.getItem('draftProductLine'))
-  }
+  return Object.assign({}, INITIAL_STATE, {
+    name: sessionStorage.getItem('draftProductLine_name') || INITIAL_STATE.name,
+  })
 }
 
 export function serialize(state) {
-  sessionStorage.setItem('draftProductLine', JSON.stringify({
-    name: state.name
-  }))
+  sessionStorage.setItem('draftProductLine_name', state.name || '')
 }

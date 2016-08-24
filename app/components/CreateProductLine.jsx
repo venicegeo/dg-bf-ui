@@ -16,8 +16,8 @@
 
 import React, {Component} from 'react'
 import {connect} from 'react-redux'
-import AlgorithmListProductLine from './AlgorithmListProductLine'
-import ProductLineForm from './ProductLineForm'
+import AlgorithmList from './AlgorithmList'
+import CatalogSearchCriteria from './CatalogSearchCriteria'
 import NewProductLineDetails from './NewProductLineDetails'
 import ComputeMasking from './ComputeMasking'
 import styles from './CreateProductLine.css'
@@ -25,13 +25,27 @@ import {
   createProductLine,
   changeProductLineName,
   resetProductLineName,
-  searchCatalog,
   updateCatalogApiKey,
   updateSearchBbox,
   updateSearchCloudCover,
-  updateSearchDates,
   updateSearchFilter,
 } from '../actions'
+
+// FIXME -- request list of supported bands for each provider from image catalog
+const SUPPORTED_BANDS = {
+  LANDSAT: {
+    cirrus: true,
+    coastal: true,
+    green: true,
+    nir: true,
+    panchromatic: true,
+    red: true,
+    swir1: true,
+    swir2: true,
+    tirs1: true,
+    tirs2: true,
+  },
+}
 
 export class CreateProductLine extends Component {
   static contextTypes = {
@@ -46,17 +60,14 @@ export class CreateProductLine extends Component {
     filter:                   React.PropTypes.string,
     filters:                  React.PropTypes.arrayOf(React.PropTypes.object).isRequired,
     isCreating:               React.PropTypes.bool.isRequired,
-    isSearching:              React.PropTypes.bool.isRequired,
     productLineName:          React.PropTypes.string.isRequired,
     onCatalogApiKeyChange:    React.PropTypes.func.isRequired,
     onClearBbox:              React.PropTypes.func.isRequired,
-    onProductLineSubmit:              React.PropTypes.func.isRequired,
+    onProductLineSubmit:      React.PropTypes.func.isRequired,
     onNameChange:             React.PropTypes.func.isRequired,
     onResetName:              React.PropTypes.func.isRequired,
     onSearchCloudCoverChange: React.PropTypes.func.isRequired,
     onSearchFilterChange:     React.PropTypes.func.isRequired,
-    onSearchDateChange:       React.PropTypes.func.isRequired,
-    onSearchSubmit:           React.PropTypes.func.isRequired
   }
 
   constructor() {
@@ -75,40 +86,35 @@ export class CreateProductLine extends Component {
           <h1>Create Product Line</h1>
         </header>
         <ul>
-          {this.props.bbox && ([
-            <li className={styles.search}>
-              <ProductLineForm
+          {this.props.bbox && (
+            <li>
+              <CatalogSearchCriteria
+                apiKey={this.props.catalogApiKey}
                 bbox={this.props.bbox}
-                catalogApiKey={this.props.catalogApiKey}
                 cloudCover={this.props.cloudCover}
                 filter={this.props.filter}
                 filters={this.props.filters}
-                isSearching={this.props.isSearching}
                 onApiKeyChange={this.props.onCatalogApiKeyChange}
                 onClearBbox={this.props.onClearBbox}
                 onCloudCoverChange={this.props.onSearchCloudCoverChange}
-                onDateChange={this.props.onSearchDateChange}
                 onFilterChange={this.props.onSearchFilterChange}
-                onSubmit={this.props.onSearchSubmit}
               />
-            </li>,
-            <li className={styles.details}>
               <NewProductLineDetails
                 name={this.props.productLineName}
                 onNameChange={this.props.onNameChange}
               />
-            </li>,
-            <li className={styles.details}>
               <ComputeMasking/>
-            </li>,
-            <li className={styles.algorithms}>
-              <AlgorithmListProductLine
+              <AlgorithmList
                 algorithms={this.props.algorithms}
-                isSubmitting={this.props.isCreating}
-                onSubmit={this._emitProductLineSubmit}
+                imageProperties={{
+                  cloudCover: this.props.cloudCover,
+                  bands: SUPPORTED_BANDS.LANDSAT,
+                }}
+                selectedId={this.props.selectedAlgorithmId}
+                onSelect={this.props.onAlgorithmSelect}
               />
             </li>
-          ])}
+          )}
           {!this.props.bbox && (
             <li className={styles.placeholder}>
               <h3>Draw bounding box to set AOI</h3>
@@ -119,16 +125,11 @@ export class CreateProductLine extends Component {
     )
   }
 
-  _emitProductLineSubmit(algorithm) {
+  _emitProductLineSubmit() {
     const {productLineName, catalogApiKey} = this.props
     this.props.onProductLineSubmit(catalogApiKey, productLineName, algorithm)
-      .then(productLineId => {
-        this.context.router.push({
-          pathname: '/product-lines',
-          query: {
-            productLineId
-          }
-        })
+      .then(() => {
+        this.context.router.push({ pathname: '/product-lines' })
       })
   }
 }
@@ -143,7 +144,6 @@ export default connect(state => ({
   filter:          state.search.filter,
   filters:         state.catalog.filters,
   isCreating:      state.jobs.creating,
-  isSearching:     state.search.searching,
   productLineName: state.draftProductLine.name,
 }), dispatch => ({
   onProductLineSubmit:      (apiKey, name, algorithm) => dispatch(createProductLine(apiKey, name, algorithm)),
@@ -153,6 +153,4 @@ export default connect(state => ({
   onResetName:              () => dispatch(resetProductLineName()),
   onSearchCloudCoverChange: (cloudCover) => dispatch(updateSearchCloudCover(cloudCover)),
   onSearchFilterChange:     (filter) => dispatch(updateSearchFilter(filter)),
-  onSearchDateChange:       (dateFrom, dateTo) => dispatch(updateSearchDates(dateFrom, dateTo)),
-  onSearchSubmit:           () => dispatch(searchCatalog()),
 }))(CreateProductLine)
