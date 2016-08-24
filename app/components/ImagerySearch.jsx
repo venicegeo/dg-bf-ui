@@ -78,9 +78,11 @@ export default class ImagerySearch extends Component {
           <button type="submit" disabled={!this._canSubmit}>Search for imagery</button>
         </div>
 
-        <div className={styles.loadingMask}>
-          <LoadingAnimation className={styles.loadingAnimation}/>
-        </div>
+        {this.props.isSearching && (
+          <div className={styles.loadingMask}>
+            <LoadingAnimation className={styles.loadingAnimation}/>
+          </div>
+        )}
       </form>
     )
   }
