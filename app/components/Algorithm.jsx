@@ -14,7 +14,7 @@
  * limitations under the License.
  **/
 
-import React, {Component} from 'react'
+import React from 'react'
 import styles from './Algorithm.css'
 
 import {
@@ -22,7 +22,16 @@ import {
   REQUIREMENT_CLOUDCOVER
 } from '../constants'
 
-const Algorithm = ({ algorithm, imageProperties, isSelected, isSubmitting, onSelect, onSubmit }) => (
+const Algorithm = ({
+  algorithm,
+  imageProperties,
+  warningHeading,
+  warningMessage,
+  isSelected,
+  isSubmitting,
+  onSelect,
+  onSubmit,
+}) => (
   <div className={`${styles.root} ${isSubmitting ? styles.isSubmitting : ''} ${algorithm.requirements.every(r => isCompatible(r, imageProperties)) ? styles.isCompatible : styles.isNotCompatible}`}>
 
     {onSelect && (
@@ -39,8 +48,8 @@ const Algorithm = ({ algorithm, imageProperties, isSelected, isSubmitting, onSel
 
     <div className={styles.controls}>
       <div className={styles.compatibilityWarning}>
-        <h4><i className="fa fa-warning"/> Incompatible Image Selected</h4>
-        <p>The image you've selected does not meet all of this algorithm's requirements.  You can run it anyway but it may not produce the expected results.</p>
+        <h4><i className="fa fa-warning"/> {warningHeading || 'Incompatible Image Selected'}</h4>
+        <p>{warningMessage || "The image you've selected does not meet all of this algorithm's requirements.  You can run it anyway but it may not produce the expected results."}</p>
       </div>
 
       {onSubmit && (
@@ -77,6 +86,8 @@ Algorithm.propTypes = {
     requirements: React.PropTypes.array.isRequired,
   }).isRequired,
   imageProperties: React.PropTypes.object.isRequired,
+  warningHeading:  React.PropTypes.string,
+  warningMessage:  React.PropTypes.string,
   isSelected:      React.PropTypes.bool,
   isSubmitting:    React.PropTypes.bool,
   onSelect:        React.PropTypes.func,
@@ -86,7 +97,7 @@ Algorithm.propTypes = {
 export default Algorithm
 
 //
-// Internals
+// Helpers
 //
 
 function isCompatible(requirement, imageProperties) {

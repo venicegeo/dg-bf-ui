@@ -210,4 +210,18 @@ describe('<AlgorithmListList/>', () => {
     wrapper.find(Algorithm).props().onSelect(algorithm)
     expect(_props.onSelect).toHaveBeenCalledWith(algorithm)
   })
+
+  it('passes thru warning messages', () => {
+    const [algorithm] = _props.algorithms
+    const wrapper = shallow(
+      <AlgorithmList
+        algorithms={_props.algorithms}
+        imageProperties={_props.imageProperties}
+        warningHeading="test-warning-heading"
+        warningMessage="test-warning-message"
+      />
+    )
+    expect(wrapper.find(Algorithm).prop('warningHeading')).toEqual('test-warning-heading')
+    expect(wrapper.find(Algorithm).prop('warningMessage')).toEqual('test-warning-message')
+  })
 })

@@ -112,6 +112,8 @@ export class CreateProductLine extends Component {
                 }}
                 selectedId={this.props.selectedAlgorithmId}
                 onSelect={this.props.onAlgorithmSelect}
+                warningHeading="Incompatible Image Search Filters"
+                warningMessage="Current image search filter settings do not meet all of this algorithm's requirements.  You can continue anyway, but it may not produce the expected results."
               />
             </li>
           )}

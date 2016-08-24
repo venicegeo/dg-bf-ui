@@ -252,4 +252,19 @@ describe('<Algorithm/>', () => {
     expect(wrapper.find('.Algorithm-requirements tbody tr').at(0).hasClass('Algorithm-unmet')).toEqual(true)
     expect(wrapper.find('.Algorithm-requirements tbody tr').at(1).hasClass('Algorithm-unmet')).toEqual(true)
   })
+
+  it('supports custom compatibility warnings', () => {
+    const wrapper = shallow(
+      <Algorithm
+        algorithm={_props.algorithm}
+        imageProperties={_props.imageProperties}
+        warningHeading="test-warning-heading"
+        warningMessage="test-warning-message"
+        isSubmitting={true}
+        onSubmit={_props.onSubmit}
+      />
+    )
+    expect(wrapper.find('.Algorithm-compatibilityWarning h4').text().trim()).toEqual('test-warning-heading')
+    expect(wrapper.find('.Algorithm-compatibilityWarning p').text().trim()).toEqual('test-warning-message')
+  })
 })

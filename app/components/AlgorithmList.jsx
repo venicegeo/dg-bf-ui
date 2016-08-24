@@ -29,6 +29,8 @@ const AlgorithmList = (props) => (
             imageProperties={props.imageProperties}
             isSelected={props.selectedId === algorithm.id}
             isSubmitting={props.isSubmitting}
+            warningHeading={props.warningHeading}
+            warningMessage={props.warningMessage}
             onSelect={props.onSelect}
             onSubmit={props.onSubmit}
           />
@@ -44,6 +46,8 @@ AlgorithmList.propTypes = {
   imageProperties: React.PropTypes.object.isRequired,
   isSubmitting:    React.PropTypes.bool,
   selectedId:      React.PropTypes.string,
+  warningHeading:  React.PropTypes.string,
+  warningMessage:  React.PropTypes.string,
   onSelect:        React.PropTypes.func,
   onSubmit:        React.PropTypes.func,
 }
