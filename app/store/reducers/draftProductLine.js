@@ -71,11 +71,14 @@ export function reducer(state = INITIAL_STATE, action) {
 }
 
 export function deserialize() {
-  return Object.assign({}, INITIAL_STATE, {
-    name: sessionStorage.getItem('draftProductLine_name') || INITIAL_STATE.name,
-  })
+  return Object.assign({}, INITIAL_STATE, JSON.parse(sessionStorage.getItem('draftProductLine')))
 }
 
 export function serialize(state) {
-  sessionStorage.setItem('draftProductLine_name', state.name || '')
+  sessionStorage.setItem('draftProductLine', JSON.stringify({
+    algorithm: state.algorithm,
+    dateStart: state.dateStart,
+    dateStop:  state.dateStop,
+    name:      state.name,
+  }))
 }
