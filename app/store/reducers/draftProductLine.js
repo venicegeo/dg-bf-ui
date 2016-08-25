@@ -54,11 +54,11 @@ export function reducer(state = INITIAL_STATE, action) {
     })
   case CREATE_PRODUCT_LINE_SUCCESS:
     return Object.assign({}, state, {
-      creating: false,
-      name: '',
-      dateStart: INITIAL_STATE.dateStart,
-      dateStop: INITIAL_STATE,
       algorithm: null,
+      creating:  false,
+      dateStart: INITIAL_STATE.dateStart,
+      dateStop:  INITIAL_STATE.dateStop,
+      name:      '',
     })
   case CREATE_PRODUCT_LINE_ERROR:
     return Object.assign({}, state, {
