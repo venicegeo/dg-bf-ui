@@ -142,6 +142,19 @@ describe('<Algorithm/>', () => {
     expect(_props.onSelect).toHaveBeenCalled()
   })
 
+  it('does not emit `onSelect` event if already selected', () => {
+    const wrapper = shallow(
+      <Algorithm
+        algorithm={_props.algorithm}
+        imageProperties={_props.imageProperties}
+        isSelected={true}
+        onSelect={_props.onSelect}
+      />
+    )
+    wrapper.find('.Algorithm-selectionIndicator').simulate('click')
+    expect(_props.onSelect).toNotHaveBeenCalled()
+  })
+
   it('emits `onSubmit` event', () => {
     const wrapper = shallow(
       <Algorithm

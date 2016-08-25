@@ -38,8 +38,9 @@ const Algorithm = ({
       <input
         className={styles.selectionIndicator}
         type="radio"
+        readOnly={true}
         checked={isSelected}
-        onClick={() => onSelect(algorithm)}
+        onClick={() => !isSelected && onSelect(algorithm)}
       />
     )}
 
