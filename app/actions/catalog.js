@@ -47,10 +47,11 @@ export function updateCatalogApiKey(apiKey) {
   }
 }
 
-const discoverCatalogSuccess = (url, filters) => ({
+const discoverCatalogSuccess = (url, filters, eventTypeId) => ({
   type: DISCOVER_CATALOG_SUCCESS,
   url,
-  filters
+  filters,
+  eventTypeId,
 })
 
 const discoverCatalogError = (err) => ({
@@ -64,17 +65,22 @@ function discoverCatalog() {
       type: DISCOVER_CATALOG
     })
 
-    const client = new Client(GATEWAY, getState().authentication.token)
+    const authToken = getState().authentication.token
+    const client = new Client(GATEWAY, authToken)
     client.getServices({pattern: '^pzsvc-image-catalog'})
       .then(([catalog]) => {
         if (!catalog) {
           throw new Error('Could not find image catalog service')
         }
-        return catalog.url
+        return {
+          authToken,
+          url: catalog.url,
+        }
       })
       .then(lookupFilters)
-      .then(({url, filters}) => {
-        dispatch(discoverCatalogSuccess(url, filters))
+      .then(lookupEventTypeId)
+      .then(({url, filters, eventTypeId}) => {
+        dispatch(discoverCatalogSuccess(url, filters, eventTypeId))
       })
       .catch(err => {
         dispatch(discoverCatalogError(err))
@@ -86,16 +92,30 @@ function discoverCatalog() {
 // Helpers
 //
 
-function lookupFilters(url) {
-  return fetch(`${url}/subindex`)
+function lookupEventTypeId(catalog) {
+  return fetch(`${catalog.url}/eventTypeID`, {
+    headers: {
+      'authorization': catalog.authToken,
+    },
+  })
     .then(response => {
-      if (response.ok) {
-        return response.json()
+      if (!response.ok) {
+        throw new Error(`HTTP Error (code=${response.status})`)
       }
-      throw new Error('HTTP Error ' + response.status)
+      return response.text()
     })
-    .then(hash => ({
-      url,
+    .then(eventTypeId => Object.assign(catalog, {eventTypeId}))
+}
+
+function lookupFilters(catalog) {
+  return fetch(`${catalog.url}/subindex`)
+    .then(response => {
+      if (!response.ok) {
+        throw new Error(`HTTP Error (code=${response.status})`)
+      }
+      return response.json()
+    })
+    .then(hash => Object.assign(catalog, {
       filters: Object.keys(hash).map(id => ({id, name: hash[id].name}))
     }))
 }

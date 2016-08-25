@@ -59,5 +59,5 @@ export function deserialize() {
 }
 
 export function serialize(state) {
-  sessionStorage.setItem('draftJob_name', state.name)
+  sessionStorage.setItem('draftJob_name', state.name || '')
 }

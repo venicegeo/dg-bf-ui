@@ -22,6 +22,7 @@ import * as authentication from './reducers/authentication'
 import * as catalog from './reducers/catalog'
 import * as detections from './reducers/detections'
 import * as draftJob from './reducers/draftJob'
+import * as draftProductLine from './reducers/draftProductLine'
 import * as executor from './reducers/executor'
 import * as geoserver from './reducers/geoserver'
 import * as imagery from './reducers/imagery'
@@ -32,19 +33,20 @@ import * as search from './reducers/search'
 import * as workers from './reducers/workers'
 
 const beachfrontApp = combineReducers({
-  algorithms:      algorithms.reducer,
-  authentication:  authentication.reducer,
-  catalog:         catalog.reducer,
-  detections:      detections.reducer,
-  draftJob:        draftJob.reducer,
-  executor:        executor.reducer,
-  geoserver:       geoserver.reducer,
-  imagery:         imagery.reducer,
-  jobs:            jobs.reducer,
-  productLines:    productLines.reducer,
-  productLineJobs: productLineJobs.reducer,
-  search:          search.reducer,
-  workers:         workers.reducer,
+  algorithms:       algorithms.reducer,
+  authentication:   authentication.reducer,
+  catalog:          catalog.reducer,
+  detections:       detections.reducer,
+  draftJob:         draftJob.reducer,
+  draftProductLine: draftProductLine.reducer,
+  executor:         executor.reducer,
+  geoserver:        geoserver.reducer,
+  imagery:          imagery.reducer,
+  jobs:             jobs.reducer,
+  productLines:     productLines.reducer,
+  productLineJobs:  productLineJobs.reducer,
+  search:           search.reducer,
+  workers:          workers.reducer,
 })
 
 let devtoolsExtension = f => f
@@ -79,6 +81,7 @@ function deserializeState() {
       authentication: authentication.deserialize(),
       catalog: catalog.deserialize(),
       draftJob: draftJob.deserialize(),
+      draftProductLine: draftProductLine.deserialize(),
       executor: executor.deserialize(),
       geoserver: geoserver.deserialize(),
       imagery: imagery.deserialize(),
@@ -98,6 +101,7 @@ function serializeState(state) {
     authentication.serialize(state.authentication)
     catalog.serialize(state.catalog)
     draftJob.serialize(state.draftJob)
+    draftProductLine.serialize(state.draftProductLine)
     executor.serialize(state.executor)
     geoserver.serialize(state.geoserver)
     imagery.serialize(state.imagery)

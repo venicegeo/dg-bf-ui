@@ -14,16 +14,13 @@
  * limitations under the License.
  **/
 
-export * from './algorithms'
-export * from './authentication'
-export * from './catalog'
-export * from './detections'
-export * from './draftJob'
-export * from './draftProductLine'
-export * from './executor'
-export * from './geoserver'
-export * from './imagery'
-export * from './jobs'
-export * from './productLines'
-export * from './productLineJobs'
-export * from './search'
+.root h3 {
+  margin-top: 15px;
+  padding: 5px 15px;
+  font-size: inherit;
+  color: inherit;
+}
+
+.field {
+  composes: field-normal from '../styles/forms.css';
+}

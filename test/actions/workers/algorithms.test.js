@@ -82,6 +82,17 @@ describe('Algorithms Worker', () => {
       }, done)
     })
 
+    it('normalizes algorithm name', (done) => {
+      const serviceDescriptor = generateAlgorithmDescriptor()
+      serviceDescriptor.resourceMetadata.name = 'BF_Algo_SuchAlgoMuchRhythm'
+      client.getServices.andReturn(Promise.resolve([serviceDescriptor]))
+      worker.start(client, 0, handlers)
+      defer(() => {
+        const [[algorithm]] = handlers.onUpdate.getLastCall().arguments
+        expect(algorithm.name).toEqual('SuchAlgoMuchRhythm')
+      }, done)
+    })
+
     it('normalizes algorithm requirements', (done) => {
       client.getServices.andReturn(Promise.resolve([generateAlgorithmDescriptor()]))
       worker.start(client, 0, handlers)

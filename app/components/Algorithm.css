@@ -16,40 +16,122 @@
 
 @import '../styles/constants.css';
 
-.root {}
+:root {
+  --bgcolor-normal: #eee;
+  --fgcolor-normal: var(--COLOR_TEXT);
+  --bgcolor-selected: var(--COLOR_CONTROL_LIGHT);
+  --fgcolor-selected: var(--COLOR_BRAND);
+  --paddingSize: 15px;
+  --selectionIndicator-width: 30px;
+  --transition-bgcolor: background-color .15s ease-in-out;
+}
+
+.root {
+  display: flex;
+  flex-direction: column;
+  background-color: var(--bgcolor-normal);
+  transition: var(--transition-bgcolor);
+}
+
+.root.isSelected {
+  background-color: var(--bgcolor-selected);
+  color: var(--fgcolor-selected);
+}
 
 /* =========================================================================
-   Heading
+   Header
    ========================================================================= */
 
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--paddingSize);
+  background-color: color(var(--bgcolor-normal) lightness(+2%));
+  transition: var(--transition-bgcolor);
+}
+
+.isSelectable .header {
+  cursor: pointer;
+}
+
+.isSelectable .header:hover,
+.isSelected .header {
+  background-color: color(var(--bgcolor-selected) lightness(+2%));
+  color: color(var(--fgcolor-selected) lightness(-15%));
+}
+
+.selectionIndicator {
+  width: var(--selectionIndicator-width);
+}
+
 .name {
-  margin: 0 0 .25em;
+  composes: heading from '../styles/typography.css';
+  flex: 1;
+  color: inherit;
+}
+
+.warningIndicator {
+  display: none;
+  padding-left: var(--paddingSize);
+  color: #fa0;
+}
+
+.isNotCompatible .warningIndicator {
+  display: inline;
+}
+
+/* =========================================================================
+   Details
+   ========================================================================= */
+
+.details {
+  padding: var(--paddingSize) calc(var(--paddingSize) * 2);
+  font-size: .9em;
+}
+
+.isSelectable .details {
+  margin-left: calc(var(--selectionIndicator-width) - var(--paddingSize));
 }
 
 .description {
+  color: color(var(--fgcolor-normal) lightness(+20%));
+}
+
+.isSelected .description {
+  color: inherit;
+}
+
+.description p {
   margin: 0;
 }
 
-/* =========================================================================
-   Controls
+/* Details: Controls
    ========================================================================= */
 
 .controls {
-  margin: .5em 0 1em;
+  margin: 1em 0 1em;
 }
 
+.isCompatible {}
+
 .isNotCompatible .controls {
-  background-color: #ffee00;
-  padding: 2em;
-  border-radius: 3px;
+  background-color: color(var(--COLOR_YELLOW) alpha(80%));
+  padding: 1.5em;
+  border-left: 4px solid #fa0;
 }
 
 .compatibilityWarning {
   display: none;
+  color: #58530c;
 }
 
 .compatibilityWarning h4 {
-  color: #58530c;
+  color: inherit;
+}
+
+.compatibilityWarning p {
+  margin-bottom: 0;
 }
 
 .isNotCompatible .compatibilityWarning {
@@ -71,6 +153,8 @@
 }
 
 .isNotCompatible .startButton {
+  margin-top: 1em;
+  width: 80%;
   background-color: var(--COLOR_BRAND);
   color: hsl(0, 0%, 100%);
   text-shadow: 1px 1px rgba(0,0,0,.1);
@@ -94,8 +178,7 @@
   100% { background-size: 100% 100%; }
 }
 
-/* =========================================================================
-   Requirements
+/* Details: Requirements
    ========================================================================= */
 
 .requirements h4 {
@@ -104,7 +187,8 @@
 
 .requirements table {
   width: 100%;
-  font-size: 14px;
+  font-size: .9em;
+  line-height: 1.5em;
 }
 
 .requirements th {
@@ -114,8 +198,14 @@
 
 .requirements th,
 .requirements td {
-  background-color: #ddd;
   padding: .3em;
+  background-color: color(var(--fgcolor-normal) alpha(10%));
+  transition: var(--transition-bgcolor);
+}
+
+.isSelected .requirements th,
+.isSelected .requirements td {
+  background-color: color(var(--fgcolor-selected) alpha(10%));
 }
 
 .requirements .unmet td {

@@ -14,7 +14,6 @@
  * limitations under the License.
  **/
 
-import {featureToBbox} from '../utils/bbox'
 import {
   KEY_GEOJSON_DATA_ID
 } from '../constants'

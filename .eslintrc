@@ -17,8 +17,8 @@
   "extends": ["plugin:react/recommended"],
   "rules": {
     "comma-spacing": 1,
-    "complexity": [1, 5],
     "constructor-super": 1,
+    "complexity": 0,
     "curly": 1,
     "eqeqeq": 1,
     "indent": [1, 2, {"VariableDeclarator": 2}],

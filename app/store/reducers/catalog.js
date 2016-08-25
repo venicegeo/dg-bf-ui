@@ -24,6 +24,7 @@ import {
 const INITIAL_STATE = {
   apiKey:      null,
   discovering: false,
+  eventTypeId: null,
   filters:     [],
   url:         null,
   error:       null,
@@ -40,6 +41,7 @@ export function reducer(state = INITIAL_STATE, action) {
     return {
       ...state,
       discovering: false,
+      eventTypeId: action.eventTypeId,
       filters: action.filters,
       url: action.url
     }

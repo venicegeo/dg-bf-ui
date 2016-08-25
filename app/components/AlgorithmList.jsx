@@ -14,36 +14,42 @@
  * limitations under the License.
  **/
 
-import React, {Component} from 'react'
+import React from 'react'
 import Algorithm from './Algorithm'
 import styles from './AlgorithmList.css'
 
-export default class AlgorithmList extends Component {
-  static propTypes = {
-    algorithms:      React.PropTypes.array.isRequired,
-    className:       React.PropTypes.string,
-    imageProperties: React.PropTypes.object.isRequired,
-    isSubmitting:    React.PropTypes.bool.isRequired,
-    onSubmit:        React.PropTypes.func.isRequired,
-  }
+const AlgorithmList = (props) => (
+  <div className={styles.root}>
+    <h2>Select Algorithm</h2>
+    <ul>
+      {props.algorithms.map(algorithm => (
+        <li key={algorithm.id}>
+          <Algorithm
+            algorithm={algorithm}
+            imageProperties={props.imageProperties}
+            isSelected={props.selectedId === algorithm.id}
+            isSubmitting={props.isSubmitting}
+            warningHeading={props.warningHeading}
+            warningMessage={props.warningMessage}
+            onSelect={props.onSelect}
+            onSubmit={props.onSubmit}
+          />
+        </li>
+      ))}
+    </ul>
+  </div>
+)
 
-  render() {
-    return (
-      <div className={styles.root}>
-        <h2>Select Algorithm</h2>
-        <ul>
-          {this.props.algorithms.map(algorithm => (
-            <li key={algorithm.id}>
-              <Algorithm
-                algorithm={algorithm}
-                imageProperties={this.props.imageProperties}
-                isSubmitting={this.props.isSubmitting}
-                onSubmit={this.props.onSubmit}
-              />
-            </li>
-          ))}
-        </ul>
-      </div>
-    )
-  }
+AlgorithmList.propTypes = {
+  algorithms:      React.PropTypes.array.isRequired,
+  className:       React.PropTypes.string,
+  imageProperties: React.PropTypes.object.isRequired,
+  isSubmitting:    React.PropTypes.bool,
+  selectedId:      React.PropTypes.string,
+  warningHeading:  React.PropTypes.string,
+  warningMessage:  React.PropTypes.string,
+  onSelect:        React.PropTypes.func,
+  onSubmit:        React.PropTypes.func,
 }
+
+export default AlgorithmList

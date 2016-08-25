@@ -154,6 +154,7 @@ class Application extends Component {
   get _mapMode() {
     switch (this.props.location.pathname) {
     case 'create-job': return (this.props.bbox && this.props.imagery) ? MODE_SELECT_IMAGERY : MODE_DRAW_BBOX
+    case 'create-product-line': return MODE_DRAW_BBOX
     case 'product-lines': return MODE_PRODUCT_LINES
     default: return MODE_NORMAL
     }
