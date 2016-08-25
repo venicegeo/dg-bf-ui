@@ -22,15 +22,22 @@ import {REQUIREMENT_BANDS} from '../constants'
 // Action Types
 //
 
+export const CHANGE_PRODUCT_LINE_DATES = 'CHANGE_PRODUCT_LINE_DATES'
+export const CHANGE_PRODUCT_LINE_NAME = 'CHANGE_PRODUCT_LINE_NAME'
 export const CREATE_PRODUCT_LINE = 'CREATE_PRODUCT_LINE'
 export const CREATE_PRODUCT_LINE_SUCCESS = 'CREATE_PRODUCT_LINE_SUCCESS'
 export const CREATE_PRODUCT_LINE_ERROR = 'CREATE_PRODUCT_LINE_ERROR'
-export const CHANGE_PRODUCT_LINE_NAME = 'CHANGE_PRODUCT_LINE_NAME'
 export const SELECT_PRODUCT_LINE_ALGORITHM = 'SELECT_PRODUCT_LINE_ALGORITHM'
 
 //
 // Action Creators
 //
+
+export const changeProductLineDates = (dateStart, dateStop) => ({
+  type: CHANGE_PRODUCT_LINE_DATES,
+  dateStart,
+  dateStop,
+})
 
 export const changeProductLineName = (name) => ({
   type: CHANGE_PRODUCT_LINE_NAME,
@@ -63,8 +70,8 @@ export function createProductLine() {
         minY:        state.search.bbox[1].toString(),
         maxX:        state.search.bbox[2].toString(),
         maxY:        state.search.bbox[3].toString(),
-        minDate:     state.draftProductLine.dateToStart,
-        maxDate:     state.draftProductLine.dateToEnd,
+        minDate:     state.draftProductLine.dateStart,
+        maxDate:     state.draftProductLine.dateStop,
         name:        state.draftProductLine.name,
         serviceId:   state.executor.serviceId,
         bfInputJSON: {

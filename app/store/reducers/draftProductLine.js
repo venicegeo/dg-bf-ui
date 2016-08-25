@@ -14,7 +14,10 @@
  * limitations under the License.
  **/
 
+import moment from 'moment'
+
 import {
+  CHANGE_PRODUCT_LINE_DATES,
   CHANGE_PRODUCT_LINE_NAME,
   CREATE_PRODUCT_LINE,
   CREATE_PRODUCT_LINE_SUCCESS,
@@ -24,8 +27,10 @@ import {
 
 const INITIAL_STATE = {
   algorithm: null,
-  creating: false,
-  name: '',
+  creating:  false,
+  dateStart: moment().format('YYYY-MM-DD'),
+  dateStop:  '',
+  name:      '',
 }
 
 export function reducer(state = INITIAL_STATE, action) {
@@ -33,6 +38,11 @@ export function reducer(state = INITIAL_STATE, action) {
   case CHANGE_PRODUCT_LINE_NAME:
     return Object.assign({}, state, {
       name: action.name,
+    })
+  case CHANGE_PRODUCT_LINE_DATES:
+    return Object.assign({}, state, {
+      dateStart: action.dateStart,
+      dateStop:  action.dateStop || '',
     })
   case SELECT_PRODUCT_LINE_ALGORITHM:
     return Object.assign({}, state, {
@@ -46,6 +56,8 @@ export function reducer(state = INITIAL_STATE, action) {
     return Object.assign({}, state, {
       creating: false,
       name: '',
+      dateStart: INITIAL_STATE.dateStart,
+      dateStop: INITIAL_STATE,
       algorithm: null,
     })
   case CREATE_PRODUCT_LINE_ERROR:

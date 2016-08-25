@@ -22,6 +22,7 @@ import NewProductLineDetails from './NewProductLineDetails'
 import styles from './CreateProductLine.css'
 import {
   createProductLine,
+  changeProductLineDates,
   changeProductLineName,
   resetProductLineName,
   selectProductLineAlgorithm,
@@ -57,6 +58,8 @@ export class CreateProductLine extends Component {
     bbox:                     React.PropTypes.arrayOf(React.PropTypes.number),
     catalogApiKey:            React.PropTypes.string,
     cloudCover:               React.PropTypes.number.isRequired,
+    dateStart:                React.PropTypes.string,
+    dateStop:                 React.PropTypes.string,
     filter:                   React.PropTypes.string,
     filters:                  React.PropTypes.arrayOf(React.PropTypes.object).isRequired,
     isCreating:               React.PropTypes.bool.isRequired,
@@ -67,6 +70,7 @@ export class CreateProductLine extends Component {
     onClearBbox:              React.PropTypes.func.isRequired,
     onProductLineSubmit:      React.PropTypes.func.isRequired,
     onNameChange:             React.PropTypes.func.isRequired,
+    onDateChange:             React.PropTypes.func.isRequired,
     onResetName:              React.PropTypes.func.isRequired,
     onSearchCloudCoverChange: React.PropTypes.func.isRequired,
     onSearchFilterChange:     React.PropTypes.func.isRequired,
@@ -101,6 +105,9 @@ export class CreateProductLine extends Component {
               />
               <NewProductLineDetails
                 name={this.props.name}
+                dateStart={this.props.dateStart}
+                dateStop={this.props.dateStop}
+                onDateChange={this.props.onDateChange}
                 onNameChange={this._handleNameChange}
               />
               <AlgorithmList
@@ -154,8 +161,8 @@ export default connect(state => ({
   bbox:                state.search.bbox,
   catalogApiKey:       state.catalog.apiKey,
   cloudCover:          state.search.cloudCover,
-  dateToBegin:         state.search.dateToBegin,
-  dateToEnd:           state.search.dateToEnd,
+  dateStart:           state.draftProductLine.dateStart,
+  dateStop:            state.draftProductLine.dateStop,
   isCreating:          state.draftProductLine.creating,
   filter:              state.search.filter,
   filters:             state.catalog.filters,
@@ -166,6 +173,7 @@ export default connect(state => ({
   onCatalogApiKeyChange:    (apiKey) => dispatch(updateCatalogApiKey(apiKey)),
   onClearBbox:              () => dispatch(updateSearchBbox()),
   onNameChange:             (name) => dispatch(changeProductLineName(name)),
+  onDateChange:             (dateStart, dateStop) => dispatch(changeProductLineDates(dateStart, dateStop)),
   onResetName:              () => dispatch(resetProductLineName()),
   onSearchCloudCoverChange: (cloudCover) => dispatch(updateSearchCloudCover(cloudCover)),
   onSearchFilterChange:     (filter) => dispatch(updateSearchFilter(filter)),

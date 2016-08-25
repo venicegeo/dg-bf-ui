@@ -14,13 +14,19 @@
  * limitations under the License.
  **/
 
-.captureDateToBegin,
-.captureDateToEnd {
+.root h3 {
+  margin-top: 15px;
+  padding: 5px 15px;
+  font-size: inherit;
+  color: inherit;
+}
+
+.name,
+.dateStart,
+.dateStop {
   composes: field-normal from '../styles/forms.css';
 }
 
-.field {
-  composes: field-normal from '../styles/forms.css';
-  margin-top: 1em;
-  margin-bottom: 1em;
+.name {
+  margin: 0 15px;
 }

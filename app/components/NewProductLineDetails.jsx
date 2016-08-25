@@ -14,58 +14,49 @@
  * limitations under the License.
  **/
 
-import React, {Component} from 'react'
-import styles from './NewProductLineDetails.css'
+const styles = require('./NewProductLineDetails.css')
 
-export default class NewProductLineDetails extends Component {
-  static propTypes = {
-    className:    React.PropTypes.string,
-    name:         React.PropTypes.string.isRequired,
-    onNameChange: React.PropTypes.func.isRequired,
-  }
+import React from 'react'
 
-  constructor() {
-    super()
-    this._emitNameChange = this._emitNameChange.bind(this)
-  }
+const NewProductLineDetails = ({ name, dateStart, dateStop, onNameChange, onDateChange }) => (
+  <div className={styles.root}>
+    <h2>Product Line Details</h2>
 
-  componentDidMount() {
-    this.refs.name.value = this.props.name
+    <h3>Name</h3>
+    <label className={styles.name}>
+      <input
+        type="text"
+        value={name}
+        onChange={event => onNameChange(event.target.value)}
+      />
+    </label>
 
-    const date = new Date(new Date() + 1)
-    this.refs.dateToBegin.value = new Date(new Date() + 1).toISOString().split('T')[0]
-    this.refs.dateToEnd.value = new Date(date.setDate(date.getDate() + 30)).toISOString().split('T')[0]
-  }
+    <h3>Scheduling</h3>
+    <label className={styles.dateStart}>
+      <span>Date To Begin</span>
+      <input
+        type="date"
+        value={dateStart}
+        onChange={event => onDateChange(event.target.value, dateStop)}
+      />
+    </label>
+    <label className={styles.dateStop}>
+      <span>Date To End</span>
+      <input
+        type="date"
+        value={dateStop}
+        onChange={event => onDateChange(dateStart, event.target.value)}
+      />
+    </label>
+  </div>
+)
 
-  componentWillReceiveProps(nextProps) {
-    if (this.refs.name.value !== nextProps.name) {
-      this.refs.name.value = nextProps.name
-    }
-  }
-
-  render() {
-    return (
-      <div className={styles.root}>
-        <h2>Product Line Details</h2>
-        <h3>Name</h3>
-        <label className={styles.field}>
-          <input ref="name" onChange={this._emitNameChange}/>
-        </label>
-
-        <h3>Scheduling</h3>
-        <label className={styles.captureDateToBegin}>
-          <span>Date To Begin</span>
-          <input ref="dateToBegin" type="date" onChange={this._emitDateChange} />
-        </label>
-        <label className={styles.captureDateToEnd}>
-          <span>Date To End</span>
-          <input ref="dateToEnd" type="date" onChange={this._emitDateChange} />
-        </label>
-      </div>
-    )
-  }
-
-  _emitNameChange() {
-    this.props.onNameChange(this.refs.name.value)
-  }
+NewProductLineDetails.propTypes = {
+  dateStart:    React.PropTypes.string,
+  dateStop:     React.PropTypes.string,
+  name:         React.PropTypes.string.isRequired,
+  onDateChange: React.PropTypes.func.isRequired,
+  onNameChange: React.PropTypes.func.isRequired,
 }
+
+export default NewProductLineDetails
