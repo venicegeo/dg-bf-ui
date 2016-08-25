@@ -123,7 +123,13 @@ export class CreateProductLine extends Component {
                 warningMessage="Current image search filter settings do not meet all of this algorithm's requirements.  You can continue anyway, but it may not produce the expected results."
               />
               <div className={styles.controls}>
-                <button className={styles.submitButton} onClick={this._handleSubmit}>Create Product Line</button>
+                <button
+                  className={styles.submitButton}
+                  disabled={!this._canSubmit}
+                  onClick={this._handleSubmit}
+                  >
+                  Create Product Line
+                </button>
               </div>
             </li>
           )}
@@ -135,6 +141,11 @@ export class CreateProductLine extends Component {
         </ul>
       </div>
     )
+  }
+
+  get _canSubmit() {
+    return this.props.selectedAlgorithmId
+        && this.props.dateStart
   }
 
   _handleAlgorithmSelect(algorithm) {
