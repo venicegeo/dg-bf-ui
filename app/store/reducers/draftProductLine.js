@@ -16,9 +16,15 @@
 
 import {
   CHANGE_PRODUCT_LINE_NAME,
+  CREATE_PRODUCT_LINE,
+  CREATE_PRODUCT_LINE_SUCCESS,
+  CREATE_PRODUCT_LINE_ERROR,
+  SELECT_PRODUCT_LINE_ALGORITHM,
 } from '../../actions/draftProductLine'
 
 const INITIAL_STATE = {
+  algorithm: null,
+  creating: false,
   name: '',
 }
 
@@ -27,6 +33,25 @@ export function reducer(state = INITIAL_STATE, action) {
   case CHANGE_PRODUCT_LINE_NAME:
     return Object.assign({}, state, {
       name: action.name,
+    })
+  case SELECT_PRODUCT_LINE_ALGORITHM:
+    return Object.assign({}, state, {
+      algorithm: action.algorithm,
+    })
+  case CREATE_PRODUCT_LINE:
+    return Object.assign({}, state, {
+      creating: true,
+    })
+  case CREATE_PRODUCT_LINE_SUCCESS:
+    return Object.assign({}, state, {
+      creating: false,
+      name: '',
+      algorithm: null,
+    })
+  case CREATE_PRODUCT_LINE_ERROR:
+    return Object.assign({}, state, {
+      creating: false,
+      error: action.err,
     })
   default:
     return state
