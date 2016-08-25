@@ -74,6 +74,7 @@ export function createProductLine() {
         maxDate:     state.draftProductLine.dateStop,
         name:        state.draftProductLine.name,
         serviceId:   state.executor.serviceId,
+        subindexId:  state.search.filter,
         bfInputJSON: {
           algoType:    state.draftProductLine.algorithm.type,
           bands:       state.draftProductLine.algorithm.requirements.find(a => a.name === REQUIREMENT_BANDS).literal.split(','),
