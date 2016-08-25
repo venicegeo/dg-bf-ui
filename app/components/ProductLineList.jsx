@@ -79,7 +79,7 @@ export class ProductLineList extends React.Component {
               <p>{this.props.error.code
                 ? 'Cannot communicate with the server'
                 : 'An error is preventing the display of product lines'
-              }. (<code>{this.props.error.toString()}</code>)</p>
+              }. (<code>{this.props.error.message}</code>)</p>
               <button onClick={this.props.fetchProductLines}>Retry</button>
             </li>
           )}

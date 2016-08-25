@@ -14,16 +14,17 @@
  * limitations under the License.
  **/
 
+const styles = require('./CreateProductLine.css')
+
 import React, {Component} from 'react'
 import {connect} from 'react-redux'
 import AlgorithmList from './AlgorithmList'
 import CatalogSearchCriteria from './CatalogSearchCriteria'
 import NewProductLineDetails from './NewProductLineDetails'
-import styles from './CreateProductLine.css'
 import {
-  createProductLine,
   changeProductLineDates,
   changeProductLineName,
+  createProductLine,
   resetProductLineName,
   selectProductLineAlgorithm,
   updateCatalogApiKey,
