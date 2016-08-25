@@ -147,9 +147,10 @@ export class CreateProductLine extends Component {
   }
 
   get _canSubmit() {
-    return this.props.selectedAlgorithmId
+    return this.props.bbox
         && this.props.dateStart
         && this.props.name
+        && this.props.selectedAlgorithmId
   }
 
   _handleAlgorithmSelect(algorithm) {
