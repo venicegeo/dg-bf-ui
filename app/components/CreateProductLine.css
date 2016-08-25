@@ -14,6 +14,12 @@
  * limitations under the License.
  **/
 
+@import '../styles/constants.css';
+
+:root {
+  --controls-height: 80px;
+}
+
 .root {
   composes: submenu from '../styles/menus.css';
 }
@@ -28,10 +34,74 @@
   font-size: 18px;
 }
 
-.root li + li {
+.root h2 {
   margin-top: 30px;
+}
+
+.root li > h2 {
+  margin-top: 0;
 }
 
 .search {}
 .details {}
 .algorithms {}
+
+/* =========================================================================
+   Controls
+   ========================================================================= */
+
+.controls {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 0;
+  overflow: hidden;
+  background-color: var(--COLOR_BRAND_DARK);
+  text-align: center;
+  display: flex;
+  align-items: stretch;
+}
+
+.submitButton {
+  composes: heading from '../styles/typography.css';
+  flex: 1;
+  margin: 15px 10%;
+  border-radius: 4px;
+  background-color: var(--COLOR_GREEN);
+  box-shadow: inset 0 -3px rgba(0,0,0,.1), 0 3px color(black alpha(10%));
+  color: white;
+  font-size: 14px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Controls: Entry/Exit Transitions
+   ========================================================================= */
+
+.controls,
+.root ul {
+  transition: .25s cubic-bezier(0.11, 1.13, 0.31, 1.29);
+}
+
+.root {
+  overflow-y: hidden;  /* avoids page scrollbar peekaboo during transition bounce */
+}
+
+.controls {
+  transition-property: height;
+}
+
+.root ul {
+  transition-property: bottom;
+}
+
+.canSubmit .controls {
+  height: var(--controls-height);
+}
+
+.canSubmit ul {
+  bottom: var(--controls-height);
+}

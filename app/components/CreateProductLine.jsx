@@ -86,13 +86,18 @@ export class CreateProductLine extends Component {
 
   render() {
     return (
-      <div className={styles.root}>
+      <div className={`${styles.root} ${this._canSubmit ? styles.canSubmit : ''}`}>
         <header>
           <h1>Create Product Line</h1>
         </header>
         <ul>
-          {this.props.bbox && (
+          {!this.props.bbox ? (
+            <li className={styles.placeholder}>
+              <h3>Draw bounding box to set AOI</h3>
+            </li>
+          ) : (
             <li>
+              <h2>Source Imagery</h2>
               <CatalogSearchCriteria
                 apiKey={this.props.catalogApiKey}
                 bbox={this.props.bbox}
@@ -119,26 +124,23 @@ export class CreateProductLine extends Component {
                 }}
                 selectedId={this.props.selectedAlgorithmId}
                 onSelect={this.props.onAlgorithmSelect}
-                warningHeading="Incompatible Image Search Filters"
-                warningMessage="Current image search filter settings do not meet all of this algorithm's requirements.  You can continue anyway, but it may not produce the expected results."
+                warningHeading="Check Image Search Filters"
+                warningMessage={`
+                  Current image search filters may yield imagery that do not meet all of this
+                  algorithm's requirements.  You can continue anyway, but it may not produce
+                  the expected results.
+                `}
               />
-              <div className={styles.controls}>
-                <button
-                  className={styles.submitButton}
-                  disabled={!this._canSubmit}
-                  onClick={this._handleSubmit}
-                  >
-                  Create Product Line
-                </button>
-              </div>
-            </li>
-          )}
-          {!this.props.bbox && (
-            <li className={styles.placeholder}>
-              <h3>Draw bounding box to set AOI</h3>
             </li>
           )}
         </ul>
+        <div className={styles.controls}>
+          {this._canSubmit && (
+            <div className={styles.submitButton} onClick={this._handleSubmit}>
+              Create Product Line
+            </div>
+          )}
+        </div>
       </div>
     )
   }
@@ -146,6 +148,7 @@ export class CreateProductLine extends Component {
   get _canSubmit() {
     return this.props.selectedAlgorithmId
         && this.props.dateStart
+        && this.props.name
   }
 
   _handleAlgorithmSelect(algorithm) {
