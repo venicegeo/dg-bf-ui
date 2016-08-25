@@ -101,7 +101,7 @@ function normalizeAlgorithm(serviceDescriptor) {
   return {
     description:  serviceDescriptor.resourceMetadata.description,
     id:           serviceDescriptor.serviceId,
-    name:         serviceDescriptor.resourceMetadata.name,
+    name:         serviceDescriptor.resourceMetadata.name.replace(/^BF_Algo_/, ''),
     requirements: extractRequirements(serviceDescriptor.resourceMetadata.metadata),
     type:         serviceDescriptor.resourceMetadata.metadata.Interface,
     url:          serviceDescriptor.url
