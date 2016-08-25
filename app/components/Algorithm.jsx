@@ -32,51 +32,65 @@ const Algorithm = ({
   onSelect,
   onSubmit,
 }) => (
-  <div className={`${styles.root} ${isSubmitting ? styles.isSubmitting : ''} ${algorithm.requirements.every(r => isCompatible(r, imageProperties)) ? styles.isCompatible : styles.isNotCompatible}`}>
+  <div className={[
+    styles.root,
+    isSubmitting ? styles.isSubmitting : '',
+    algorithm.requirements.every(r => isCompatible(r, imageProperties)) ? styles.isCompatible : styles.isNotCompatible,
+    isSelected ? styles.isSelected : '',
+    onSelect ? styles.isSelectable : '',
+  ].join(' ')}>
+    <section className={styles.header} onClick={onSelect && (() => !isSelected && onSelect(algorithm))}>
+      {onSelect && (
+        <span className={styles.selectionIndicator}>
+          <input
+            type="radio"
+            readOnly={true}
+            checked={isSelected}
+          />
+        </span>
+      )}
+      <span className={styles.name}>
+        <span>{algorithm.name}</span>
+      </span>
+      <span className={styles.warningIndicator}>
+        <i className="fa fa-warning"/>
+      </span>
+    </section>
 
-    {onSelect && (
-      <input
-        className={styles.selectionIndicator}
-        type="radio"
-        readOnly={true}
-        checked={isSelected}
-        onClick={() => !isSelected && onSelect(algorithm)}
-      />
-    )}
+    <section className={styles.details}>
+      <div className={styles.description}>{algorithm.description}</div>
 
-    <h3 className={styles.name}>{algorithm.name}</h3>
-    <p className={styles.description}>{algorithm.description}</p>
+      <div className={styles.controls}>
+        <div className={styles.compatibilityWarning}>
+          <h4><i className="fa fa-warning"/> {warningHeading || 'Incompatible Image Selected'}</h4>
+          <p>{warningMessage || "The image you've selected does not meet all of this algorithm's requirements.  You can run it anyway but it may not produce the expected results."}</p>
+        </div>
 
-    <div className={styles.controls}>
-      <div className={styles.compatibilityWarning}>
-        <h4><i className="fa fa-warning"/> {warningHeading || 'Incompatible Image Selected'}</h4>
-        <p>{warningMessage || "The image you've selected does not meet all of this algorithm's requirements.  You can run it anyway but it may not produce the expected results."}</p>
+        {onSubmit && (
+          <button
+            className={styles.startButton}
+            disabled={isSubmitting}
+            onClick={() => onSubmit(algorithm)}
+            >
+            {isSubmitting ? 'Starting' : 'Run Algorithm'}
+          </button>
+        )}
       </div>
 
-      {onSubmit && (
-        <button
-          className={styles.startButton}
-          disabled={isSubmitting}
-          onClick={() => onSubmit(algorithm)}
-          >
-          {isSubmitting ? 'Starting' : 'Run Algorithm'}
-        </button>
-      )}
-    </div>
-
-    <div className={styles.requirements}>
-      <h4>Image Requirements</h4>
-      <table>
-        <tbody>
-        {algorithm.requirements.map(r => (
-          <tr key={r.name} className={isCompatible(r, imageProperties) ? styles.met : styles.unmet}>
-            <th>{r.name}</th>
-            <td>{r.description}</td>
-          </tr>
-        ))}
-        </tbody>
-      </table>
-    </div>
+      <div className={styles.requirements}>
+        <h4>Image Requirements</h4>
+        <table>
+          <tbody>
+          {algorithm.requirements.map(r => (
+            <tr key={r.name} className={isCompatible(r, imageProperties) ? styles.met : styles.unmet}>
+              <th>{r.name}</th>
+              <td>{r.description}</td>
+            </tr>
+          ))}
+          </tbody>
+        </table>
+      </div>
+    </section>
   </div>
 )
 

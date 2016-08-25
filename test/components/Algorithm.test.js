@@ -126,7 +126,7 @@ describe('<Algorithm/>', () => {
         onSelect={_props.onSelect}
       />
     )
-    expect(wrapper.find('.Algorithm-selectionIndicator').prop('checked')).toEqual(true)
+    expect(wrapper.find('.Algorithm-selectionIndicator input').prop('checked')).toEqual(true)
   })
 
   it('emits `onSelect` event', () => {
@@ -138,7 +138,7 @@ describe('<Algorithm/>', () => {
         onSelect={_props.onSelect}
       />
     )
-    wrapper.find('.Algorithm-selectionIndicator').simulate('click')
+    wrapper.find('.Algorithm-header').simulate('click')
     expect(_props.onSelect).toHaveBeenCalled()
   })
 
@@ -151,7 +151,18 @@ describe('<Algorithm/>', () => {
         onSelect={_props.onSelect}
       />
     )
-    wrapper.find('.Algorithm-selectionIndicator').simulate('click')
+    wrapper.find('.Algorithm-header').simulate('click')
+    expect(_props.onSelect).toNotHaveBeenCalled()
+  })
+
+  it('does not emit `onSelect` event if not selectable', () => {
+    const wrapper = shallow(
+      <Algorithm
+        algorithm={_props.algorithm}
+        imageProperties={_props.imageProperties}
+      />
+    )
+    wrapper.find('.Algorithm-header').simulate('click')
     expect(_props.onSelect).toNotHaveBeenCalled()
   })
 
