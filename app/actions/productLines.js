@@ -88,25 +88,25 @@ function checkResponse(response) {
 }
 
 function extractRecords(algorithmNames, filterNames) {
-  return data => data.triggerList.map(datum => ({
-    id: datum.triggerId,
+  return data => data.productLines.map(datum => ({
+    id: datum.Id,
     geometry: {
       type: 'Polygon',
       coordinates: [[
-        [datum.minX, datum.minY],
-        [datum.minX, datum.maxY],
-        [datum.maxX, datum.maxY],
-        [datum.maxX, datum.minY],
-        [datum.minX, datum.minY],
+        [parseFloat(datum.minX), parseFloat(datum.minY)],
+        [parseFloat(datum.minX), parseFloat(datum.maxY)],
+        [parseFloat(datum.maxX), parseFloat(datum.maxY)],
+        [parseFloat(datum.maxX), parseFloat(datum.minY)],
+        [parseFloat(datum.minX), parseFloat(datum.minY)],
       ]]
     },
     properties: {
-      [KEY_OWNER]:               datum.owner,
+      [KEY_OWNER]:               datum.createdBy,
       [KEY_ALGORITHM_NAME]:      algorithmNames[datum.bfInputJSON.svcURL] || 'Unknown',
       [KEY_CREATED_ON]:          datum.minDate,
       [KEY_EVENT_TYPE_ID]:       datum.eventTypeId.pop(),
       [KEY_EXPIRES_ON]:          datum.maxDate,
-      [KEY_IMAGE_CLOUDCOVER]:    datum.cloudCover,
+      [KEY_IMAGE_CLOUDCOVER]:    parseFloat(datum.cloudCover),
       [KEY_IMAGE_SENSOR]:        datum.sensorName,
       [KEY_NAME]:                datum.name,
       [KEY_STATUS]:              isActive(datum.maxDate) ? STATUS_ACTIVE : STATUS_INACTIVE,

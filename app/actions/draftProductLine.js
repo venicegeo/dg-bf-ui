@@ -16,6 +16,8 @@
 
 import {GATEWAY} from '../config'
 
+import {REQUIREMENT_BANDS} from '../constants'
+
 //
 // Action Types
 //
@@ -55,18 +57,19 @@ export function createProductLine() {
     return fetch(`${state.executor.url}/newProductLine`, {
       method: 'POST',
       body: JSON.stringify({
-        cloudCover:  state.search.cloudCover,
+        cloudCover:  state.search.cloudCover.toString(),
         eventTypeId: [state.catalog.eventTypeId],
-        minX:        state.search.bbox[0],
-        minY:        state.search.bbox[1],
-        maxX:        state.search.bbox[2],
-        maxY:        state.search.bbox[3],
+        minX:        state.search.bbox[0].toString(),
+        minY:        state.search.bbox[1].toString(),
+        maxX:        state.search.bbox[2].toString(),
+        maxY:        state.search.bbox[3].toString(),
         minDate:     state.draftProductLine.dateToStart,
         maxDate:     state.draftProductLine.dateToEnd,
         name:        state.draftProductLine.name,
         serviceId:   state.executor.serviceId,
         bfInputJSON: {
           algoType:    state.draftProductLine.algorithm.type,
+          bands:       state.draftProductLine.algorithm.requirements.find(a => a.name === REQUIREMENT_BANDS).literal.split(','),
           dbAuthToken: state.catalog.apiKey,
           pzAddr:      GATEWAY,
           pzAuthToken: state.authentication.token,
