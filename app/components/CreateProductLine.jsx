@@ -19,7 +19,6 @@ import {connect} from 'react-redux'
 import AlgorithmList from './AlgorithmList'
 import CatalogSearchCriteria from './CatalogSearchCriteria'
 import NewProductLineDetails from './NewProductLineDetails'
-import ComputeMasking from './ComputeMasking'
 import styles from './CreateProductLine.css'
 import {
   createProductLine,
@@ -103,7 +102,6 @@ export class CreateProductLine extends Component {
                 name={this.props.productLineName}
                 onNameChange={this.props.onNameChange}
               />
-              <ComputeMasking/>
               <AlgorithmList
                 algorithms={this.props.algorithms}
                 imageProperties={{
