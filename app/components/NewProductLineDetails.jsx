@@ -22,26 +22,33 @@ const NewProductLineDetails = ({ name, dateStart, dateStop, onNameChange, onDate
   <div className={styles.root}>
     <h2>Product Line Details</h2>
 
-    <h3>Name</h3>
-    <label className={styles.name}>
+    <h3>Mission</h3>
+    <label className={styles.field}>
+      <span>Name</span>
       <input
         type="text"
         value={name}
         onChange={event => onNameChange(event.target.value)}
       />
     </label>
+    <label className={styles.field}>
+      <span>Category</span>
+      <select disabled={true}>
+        <option>Maritime/Coastal</option>
+      </select>
+    </label>
 
     <h3>Scheduling</h3>
-    <label className={styles.dateStart}>
-      <span>Date To Begin</span>
+    <label className={styles.field}>
+      <span>Start Date</span>
       <input
         type="date"
         value={dateStart}
         onChange={event => onDateChange(event.target.value, dateStop)}
       />
     </label>
-    <label className={styles.dateStop}>
-      <span>Date To End</span>
+    <label className={styles.field}>
+      <span>Stop Date</span>
       <input
         type="date"
         value={dateStop}

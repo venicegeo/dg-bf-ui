@@ -21,12 +21,6 @@
   color: inherit;
 }
 
-.name,
-.dateStart,
-.dateStop {
+.field {
   composes: field-normal from '../styles/forms.css';
-}
-
-.name {
-  margin: 0 15px;
 }
