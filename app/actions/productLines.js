@@ -58,7 +58,9 @@ export function fetchProductLines() {
     return fetch(`${state.executor.url}/getProductLines`, {
       body: JSON.stringify({
         pzAuthToken: state.authentication.token,
-        pzAddr: GATEWAY,
+        pzAddr:      GATEWAY,
+        eventTypeId: state.catalog.eventTypeId,
+        serviceId:   state.executor.serviceId,
       }),
       headers: {'content-type': 'application/json'},
       method: 'POST'
