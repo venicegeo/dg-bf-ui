@@ -20,6 +20,7 @@ import React, {Component} from 'react'
 import {render} from 'react-dom'
 import {About} from './About'
 import {Help} from './Help'
+import {JobStatusList} from './JobStatusList'
 import {Login} from './Login'
 import {Navigation} from './Navigation'
 import {PrimaryMap, MODE_DRAW_BBOX, MODE_NORMAL, MODE_SELECT_IMAGERY, MODE_PRODUCT_LINES} from './PrimaryMap'
@@ -154,10 +155,16 @@ export class Application extends Component {
             onDismiss={() => this._handleNavigation({ pathname: '/' })}
           />
         )
-    //   case '/jobs':
-    //     return (
-    //       <JobStatusList/>
-    //     )
+      case '/jobs':
+        return (
+          <JobStatusList
+            activeIds={this._detections.map(d => d.id)}
+            jobs={this.state.jobs.records}
+            onNavigateToJob={this._handleNavigation}
+            onRemoveJob={console.debug.bind(console)}
+            onDismissError={console.debug.bind(console)}
+          />
+        )
     //   case '/product-lines':
     //     return (
     //       <ProductLineList/>

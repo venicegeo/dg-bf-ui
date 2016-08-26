@@ -21,6 +21,7 @@ import './styles/typography.css'
 import './styles/forms.css'
 import './styles/menus.css'
 import 'core-js/fn/array/includes'  // Polyfill
+import 'core-js/es6/string'  // Polyfill
 import {createApplication} from './components/Application'
 
 const root = document.createElement('div')

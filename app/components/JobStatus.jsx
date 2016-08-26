@@ -16,10 +16,9 @@
 
 import React, {Component} from 'react'
 import moment from 'moment'
-import {Link} from 'react-router'
+import {FileDownloadLink} from './FileDownloadLink'
+import {Link} from './Link'
 import Timestamp from './Timestamp'
-import FileDownloadLink from './FileDownloadLink'
-import {featureToAnchor} from '../utils/map-anchor'
 import styles from './JobStatus.css'
 
 import {
@@ -47,6 +46,7 @@ export default class JobStatus extends Component {
       properties: React.PropTypes.object.isRequired,
     }).isRequired,
     onForgetJob: React.PropTypes.func.isRequired,
+    onNavigate: React.PropTypes.func.isRequired,
   }
 
   constructor() {
@@ -128,13 +128,10 @@ export default class JobStatus extends Component {
 
         <div className={styles.controls}>
           <Link
-            to={{
-              pathname: '/',
-              query: {jobId: id},
-              hash: featureToAnchor(this.props.job)
-            }}
+            pathname="/"
+            search={'jobId=' + id}
             title="View on Map"
-          >
+            onClick={this.props.onNavigate}>
             <i className="fa fa-globe"/>
           </Link>
           {canDownload && (

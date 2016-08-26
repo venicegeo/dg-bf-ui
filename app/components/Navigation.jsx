@@ -15,30 +15,11 @@
  **/
 
 const styles = require('./Navigation.css')
+const brand = require('../images/brand-experiment2.svg')
+const brandSmall = require('../images/brand-small.svg')
 
 import React from 'react'
-import brand from '../images/brand-experiment2.svg'
-import brandSmall from '../images/brand-small.svg'
-
-const Link = ({ activeRoute, children, className, pathname, search = '', hash = '', onClick }) => (
-  <a
-    href={pathname + search + hash}
-    onClick={generateClickHandler(onClick, pathname, search, hash)}
-    className={`${className} ${pathname === activeRoute ? styles.active : ''}`}
-    >
-    {children}
-  </a>
-)
-
-Link.propTypes = {
-  activeRoute: React.PropTypes.string,
-  children: React.PropTypes.any,
-  className: React.PropTypes.string,
-  hash: React.PropTypes.string,
-  pathname: React.PropTypes.string,
-  search: React.PropTypes.string,
-  onClick: React.PropTypes.func,
-}
+import {Link} from './Link'
 
 export const Navigation = ({ activeRoute, onClick }) => (
   <nav className={`${styles.root} ${location.pathname === '/' ? styles.atHome : ''}`}>
@@ -89,15 +70,4 @@ export const Navigation = ({ activeRoute, onClick }) => (
 Navigation.propTypes = {
   activeRoute: React.PropTypes.string,
   onClick: React.PropTypes.func,
-}
-
-//
-// Helpers
-//
-
-function generateClickHandler(handler, pathname, search, hash) {
-  return event => {
-    event.preventDefault()
-    return handler({ pathname, search, hash })
-  }
 }

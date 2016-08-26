@@ -15,7 +15,6 @@
  **/
 
 import React from 'react'
-import {connect} from 'react-redux'
 import {Client} from '../utils/piazza-client'
 import {GATEWAY} from '../config'
 
@@ -124,12 +123,3 @@ export class FileDownloadLink extends React.Component {
     this.refs.hyperlink.click()
   }
 }
-
-export default connect(state => ({
-  authToken: state.authentication.token,
-}))(FileDownloadLink)
-
-//
-// Helpers
-//
-
