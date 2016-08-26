@@ -24,11 +24,20 @@ import {Navigation} from './Navigation'
 
 export const createApplication = (element) => render(<Application/>, element)
 
+const createCollection = (records = []) => ({
+  error:    null,
+  fetching: false,
+  records,
+})
+
 export class Application extends Component {
 
   constructor() {
     super()
     this.state = Object.assign({
+      // Data Collections
+      jobs: createCollection(),
+
       sessionToken: null,
     }, deserialize())
     this._handleAnchorChange = this._handleAnchorChange.bind(this)
@@ -162,10 +171,10 @@ export class Application extends Component {
   }
 
   get _frames() {
+    if (this._mapMode !== MODE_PRODUCT_LINES) {
+      return this.state.jobs.records
+    }
     return []
-    // if (this._mapMode !== MODE_PRODUCT_LINES) {
-    //   return this.props.jobs
-    // }
     // return this.props.productLines.concat(this.props.productLineJobs.selection)
   }
 
@@ -221,10 +230,13 @@ function enumerate(value) {
 
 function deserialize() {
   return {
+    jobs:         createCollection(JSON.parse(localStorage.getItem('jobs_records')) || []),
     sessionToken: sessionStorage.getItem('sessionToken') || null,
   }
 }
 
 function serialize(state) {
+  console.debug('(serialize)', state)
+  localStorage.setItem('jobs_records', JSON.stringify(state.jobs.records))
   sessionStorage.setItem('sessionToken', state.sessionToken || '')
 }
