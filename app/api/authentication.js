@@ -14,16 +14,9 @@
  * limitations under the License.
  **/
 
-export * from './algorithms'
-export * from './authentication'
-export * from './catalog'
-export * from './detections'
-export * from './draftJob'
-export * from './draftProductLine'
-export * from './executor'
-export * from './geoserver'
-export * from './imagery'
-export * from './jobs'
-export * from './productLines'
-export * from './productLineJobs'
-export * from './search'
+import {Client} from '../utils/piazza-client'
+import {GATEWAY} from '../config'
+
+export function createSession(username, password) {
+  return Client.createSessionToken(GATEWAY, username, password)
+}

@@ -21,8 +21,8 @@ import './styles/typography.css'
 import './styles/forms.css'
 import './styles/menus.css'
 import 'core-js/fn/array/includes'  // Polyfill
-import {bootstrap} from './router'
+import {createApplication} from './components/Application'
 
 const root = document.createElement('div')
 document.body.appendChild(root)
-bootstrap(root)
+createApplication(root)

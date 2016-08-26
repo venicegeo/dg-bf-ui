@@ -19,6 +19,22 @@ export const STATUS_SUCCESS = 'Success'
 export const STATUS_ERROR   = 'Error'
 
 export class Client {
+  static createSessionToken(gateway, username, password) {
+    return fetch(`${gateway}/key`, {
+      method:  'GET',
+      headers: {
+        'Authorization': `Basic ${btoa(username + ':' + password)}`
+      },
+    })
+      .then(asJson)
+      .then(auth => {
+        if (!auth.uuid) {
+          throw new Error('Credentials rejected')
+        }
+        return `Basic ${btoa(auth.uuid + ':')}`
+      })
+  }
+
   constructor(gateway, authToken) {
     this.gateway   = gateway.replace(/\/+$/g, '')
     this.authToken = authToken
