@@ -18,6 +18,8 @@ const styles = require('./Application.css')
 
 import React, {Component} from 'react'
 import {render} from 'react-dom'
+import {About} from './About'
+import {Help} from './Help'
 import {Login} from './Login'
 import {Navigation} from './Navigation'
 import {PrimaryMap, MODE_DRAW_BBOX, MODE_NORMAL, MODE_SELECT_IMAGERY, MODE_PRODUCT_LINES} from './PrimaryMap'
@@ -131,11 +133,13 @@ export class Application extends Component {
         />
       )
     }
-    // switch (location.pathname) {
-    //   case '/about':
-    //     return (
-    //       <About/>
-    //     )
+    switch (this.state.route) {
+      case '/about':
+        return (
+          <About
+            onDismiss={() => this._handleNavigation({ pathname: '/' })}
+          />
+        )
     //   case '/create-job':
     //     return (
     //       <CreateJob/>
@@ -144,10 +148,12 @@ export class Application extends Component {
     //     return (
     //       <CreateProductLine/>
     //     )
-    //   case '/help':
-    //     return (
-    //       <Help/>
-    //     )
+      case '/help':
+        return (
+          <Help
+            onDismiss={() => this._handleNavigation({ pathname: '/' })}
+          />
+        )
     //   case '/jobs':
     //     return (
     //       <JobStatusList/>
@@ -156,9 +162,13 @@ export class Application extends Component {
     //     return (
     //       <ProductLineList/>
     //     )
-    //   default:
-
-    // }
+      default:
+        return (
+          <div className={styles.unknownRoute}>
+            wat
+          </div>
+        )
+    }
   }
 
   //

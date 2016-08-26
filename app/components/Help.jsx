@@ -14,31 +14,20 @@
  * limitations under the License.
  **/
 
-import React, {Component} from 'react'
-import Modal from './Modal'
-import styles from './Help.css'
+const styles = require('./Help.css')
 
-export default class Help extends Component {
-  static contextTypes = {
-    router: React.PropTypes.object
-  }
+import React from 'react'
+import {Modal} from './Modal'
 
-  static propTypes = {
-    location: React.PropTypes.object
-  }
+export const Help = ({ onDismiss }) => (
+  <Modal onDismiss={onDismiss}>
+    <div className={styles.root}></div>
+    <h1>Help!</h1>
+    <p>Need help?  Let us know we do this stuff for a living... literally!</p>
+    <p><a href="mailto:venice@radiantblue.com">venice@radiantblue.com</a></p>
+  </Modal>
+)
 
-  render() {
-    return (
-      <Modal onDismiss={() => this._dismiss()}>
-        <div className={styles.root}></div>
-        <h1>Help!</h1>
-        <p>Need help?  Let us know we do this stuff for a living... literally!</p>
-        <p><a href="mailto:venice@radiantblue.com">venice@radiantblue.com</a></p>
-      </Modal>
-    )
-  }
-
-  _dismiss() {
-    this.context.router.push({...this.props.location, pathname: '/'})
-  }
+Help.propTypes = {
+  onDismiss: React.PropTypes.func,
 }

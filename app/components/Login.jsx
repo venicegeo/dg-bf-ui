@@ -18,7 +18,7 @@ const styles = require('./Login.css')
 const brand = require('../images/brand-small.svg')
 
 import React, {Component} from 'react'
-import Modal from './Modal'
+import {Modal} from './Modal'
 import {createSession} from '../api/authentication'
 
 export class Login extends Component {
@@ -66,6 +66,7 @@ export class Login extends Component {
         this.props.onSuccess(token)
       })
       .catch(err => {
+        console.error(err.stack)
         this.setState({ error: err })
       })
   }
