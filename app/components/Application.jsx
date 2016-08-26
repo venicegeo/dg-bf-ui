@@ -50,6 +50,7 @@ export class Application extends Component {
     super()
     this.state = Object.assign({
       sessionToken: null,
+      route: location.pathname,
 
       // Services
       catalog: {},
@@ -65,6 +66,7 @@ export class Application extends Component {
     }, deserialize())
     this._handleAnchorChange = this._handleAnchorChange.bind(this)
     this._handleBoundingBoxChange = this._handleBoundingBoxChange.bind(this)
+    this._handleNavigation = this._handleNavigation.bind(this)
     this._handleSearchPageChange = this._handleSearchPageChange.bind(this)
     this._handleSelectImage = this._handleSelectImage.bind(this)
     this._handleSelectJob = this._handleSelectJob.bind(this)
@@ -81,47 +83,22 @@ export class Application extends Component {
   }
 
   componentDidMount() {
+    this.subscribeToHistoryEvents()
     if (this.state.sessionToken) {
       this.discoverAlgorithms()
       this.discoverCatalog()
       this.discoverExecutor()
       this.discoverGeoserver()
     }
-    // const {dispatch, location, isLoggedIn} = this.props
-    // if (isLoggedIn) {
-    //   dispatch(discoverGeoserverIfNeeded())
-    //   dispatch(startJobsWorkerIfNeeded())
-    //   dispatch(changeLoadedDetections(enumerate(location.query.jobId)))
-    //   // DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG
-    //   for (const jobId of enumerate(this.props.location.query.jobId)) {
-    //     if (!this.props.jobs.find(j => j.id === jobId)) {
-    //       dispatch(importJob(jobId))
-    //         .catch(console.log.bind(console))
-    //     }
-    //   }
-    //   // DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG
-    // }
   }
-
-  // componentWillReceiveProps(nextProps) {
-  //   const {dispatch} = this.props
-  //   if (nextProps.isLoggedIn && !this.props.isLoggedIn) {
-  //     dispatch(discoverGeoserverIfNeeded())
-  //     dispatch(startJobsWorkerIfNeeded())
-  //   }
-  //   if (nextProps.location.pathname !== this.props.location.pathname) {
-  //     dispatch(updateSearchBbox(null))
-  //   }
-  //   if (nextProps.bbox !== this.props.bbox) {
-  //     dispatch(clearImagery())
-  //   }
-  //   dispatch(changeLoadedDetections(enumerate(nextProps.location.query.jobId)))
-  // }
 
   render() {
     return (
       <div className={styles.root}>
-        <Navigation currentLocation={location}/>
+        <Navigation
+          activeRoute={this.state.route}
+          onClick={this._handleNavigation}
+        />
         <PrimaryMap
           geoserverUrl={null}
           frames={this._frames}
@@ -185,7 +162,7 @@ export class Application extends Component {
   }
 
   //
-  // Internal API
+  // Internals
   //
 
   get _detections() {
@@ -259,6 +236,11 @@ export class Application extends Component {
     this.setState({ bbox })
   }
 
+  _handleNavigation({pathname = '/', search = '', hash = ''}) {
+    history.pushState(null, null, pathname + search + hash)
+    this.setState({ route: pathname })
+  }
+
   _handleSelectImage(feature) {
     // if (feature) {
     //   this.props.dispatch(selectImage(feature))
@@ -279,6 +261,14 @@ export class Application extends Component {
 
   _handleSearchPageChange(paging) {
     // this.props.dispatch(searchCatalog(paging.startIndex, paging.count))
+  }
+
+  subscribeToHistoryEvents() {
+    window.addEventListener('popstate', () => {
+      if (this.state.route !== location.pathname) {
+        this.setState({ route: location.pathname })
+      }
+    })
   }
 }
 
