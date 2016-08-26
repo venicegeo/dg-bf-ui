@@ -17,10 +17,10 @@
 const styles = require('./Application.css')
 
 import React, {Component} from 'react'
-import PrimaryMap, {MODE_DRAW_BBOX, MODE_NORMAL, MODE_SELECT_IMAGERY, MODE_PRODUCT_LINES} from './PrimaryMap'
 import {render} from 'react-dom'
 import {Login} from './Login'
 import {Navigation} from './Navigation'
+import {PrimaryMap, MODE_DRAW_BBOX, MODE_NORMAL, MODE_SELECT_IMAGERY, MODE_PRODUCT_LINES} from './PrimaryMap'
 
 export const createApplication = (element) => render(<Application/>, element)
 
@@ -35,10 +35,14 @@ export class Application extends Component {
   constructor() {
     super()
     this.state = Object.assign({
+      sessionToken: null,
+
       // Data Collections
       jobs: createCollection(),
 
-      sessionToken: null,
+      // Map state
+      bbox: null,
+      mapView: null,
     }, deserialize())
     this._handleAnchorChange = this._handleAnchorChange.bind(this)
     this._handleBoundingBoxChange = this._handleBoundingBoxChange.bind(this)
@@ -102,17 +106,17 @@ export class Application extends Component {
           detections={this._detections}
           imagery={null}
           isSearching={false}
-          anchor={this.state.mapAnchor}
+          view={this.state.mapView}
           catalogApiKey={null}
           bbox={this.state.bbox}
           mode={this._mapMode}
           selectedFeature={null}
           highlightedFeature={null}
-          onAnchorChange={this._handleAnchorChange}
-          onBoundingBoxChange={this._handleBoundingBoxChange}
+          onBoundingBoxChange={bbox => this.setState({ bbox })}
           onSearchPageChange={this._handleSearchPageChange}
           onSelectImage={this._handleSelectImage}
           onSelectJob={this._handleSelectJob}
+          onViewChange={mapView => this.setState({ mapView })}
         />
         {this.renderRoute()}
       </div>
@@ -179,13 +183,12 @@ export class Application extends Component {
   }
 
   get _mapMode() {
-    return MODE_NORMAL
-    // switch (this.props.location.pathname) {
-    // case 'create-job': return (this.props.bbox && this.props.imagery) ? MODE_SELECT_IMAGERY : MODE_DRAW_BBOX
-    // case 'create-product-line': return MODE_DRAW_BBOX
-    // case 'product-lines': return MODE_PRODUCT_LINES
-    // default: return MODE_NORMAL
-    // }
+    switch (location.pathname) {
+    case '/create-job': return (this.state.bbox && this.state.imagery) ? MODE_SELECT_IMAGERY : MODE_DRAW_BBOX
+    case '/create-product-line': return MODE_DRAW_BBOX
+    case '/product-lines': return MODE_PRODUCT_LINES
+    default: return MODE_NORMAL
+    }
   }
 
   _handleAnchorChange(mapAnchor) {
@@ -230,13 +233,17 @@ function enumerate(value) {
 
 function deserialize() {
   return {
+    bbox:         JSON.parse(sessionStorage.getItem('bbox')),
     jobs:         createCollection(JSON.parse(localStorage.getItem('jobs_records')) || []),
+    mapView:      JSON.parse(sessionStorage.getItem('mapView')),
     sessionToken: sessionStorage.getItem('sessionToken') || null,
   }
 }
 
 function serialize(state) {
   console.debug('(serialize)', state)
+  sessionStorage.setItem('bbox', JSON.stringify(state.bbox))
   localStorage.setItem('jobs_records', JSON.stringify(state.jobs.records))
+  sessionStorage.setItem('mapView', JSON.stringify(state.mapView))
   sessionStorage.setItem('sessionToken', state.sessionToken || '')
 }

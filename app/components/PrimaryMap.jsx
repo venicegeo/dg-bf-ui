@@ -26,7 +26,6 @@ import LoadingAnimation from './LoadingAnimation'
 import ImagerySearchResults from './ImagerySearchResults'
 import debounce from 'lodash/debounce'
 import throttle from 'lodash/throttle'
-import * as anchorUtil from '../utils/map-anchor'
 import * as bboxUtil from '../utils/bbox'
 import styles from './PrimaryMap.css'
 import {
@@ -66,9 +65,8 @@ export const MODE_NORMAL = 'MODE_NORMAL'
 export const MODE_PRODUCT_LINES = 'MODE_PRODUCT_LINES'
 export const MODE_SELECT_IMAGERY = 'MODE_SELECT_IMAGERY'
 
-export default class PrimaryMap extends Component {
+export class PrimaryMap extends Component {
   static propTypes = {
-    anchor:              React.PropTypes.string,
     bbox:                React.PropTypes.arrayOf(React.PropTypes.number),
     catalogApiKey:       React.PropTypes.string,
     detections:          React.PropTypes.arrayOf(React.PropTypes.shape({
@@ -92,11 +90,16 @@ export default class PrimaryMap extends Component {
     geoserverUrl:        React.PropTypes.string,
     mode:                React.PropTypes.string.isRequired,
     selectedProductLineJob: React.PropTypes.object,
-    onAnchorChange:      React.PropTypes.func.isRequired,
+    view:              React.PropTypes.shape({
+      basemapIndex: React.PropTypes.number.isRequired,
+      center:       React.PropTypes.array.isRequired,
+      zoom:         React.PropTypes.number.isRequired,
+    }),
     onBoundingBoxChange: React.PropTypes.func.isRequired,
     onSelectImage:       React.PropTypes.func.isRequired,
     onSelectJob:         React.PropTypes.func.isRequired,
     onSearchPageChange:  React.PropTypes.func.isRequired,
+    onViewChange:        React.PropTypes.func.isRequired,
     highlightedFeature:  React.PropTypes.object,
     selectedFeature:     React.PropTypes.object,
   }
@@ -104,7 +107,7 @@ export default class PrimaryMap extends Component {
   constructor() {
     super()
     this.state = {basemapIndex: 0, loadingRefCount: 0}
-    this._emitAnchorChange = debounce(this._emitAnchorChange.bind(this), 100)
+    this._emitViewChange = debounce(this._emitViewChange.bind(this), 100)
     this._handleBasemapChange = this._handleBasemapChange.bind(this)
     this._handleDrawStart = this._handleDrawStart.bind(this)
     this._handleDrawEnd = this._handleDrawEnd.bind(this)
@@ -112,7 +115,7 @@ export default class PrimaryMap extends Component {
     this._handleLoadStop = this._handleLoadStop.bind(this)
     this._handleMouseMove = throttle(this._handleMouseMove.bind(this), 15)
     this._handleSelect = this._handleSelect.bind(this)
-    this._recenter = debounce(this._recenter.bind(this), 100)
+    this._updateView = debounce(this._updateView.bind(this), 100)
     this._renderImagerySearchBbox = debounce(this._renderImagerySearchBbox.bind(this))
   }
 
@@ -123,7 +126,7 @@ export default class PrimaryMap extends Component {
     this._renderFrames()
     this._renderImagery()
     this._renderImagerySearchResultsOverlay()
-    this._recenter(this.props.anchor)
+    this._updateView()
     if (this.props.bbox) {
       this._renderImagerySearchBbox()
     }
@@ -169,8 +172,8 @@ export default class PrimaryMap extends Component {
     if (previousState.basemapIndex !== this.state.basemapIndex) {
       this._updateBasemap()
     }
-    if (previousProps.anchor !== this.props.anchor && this.props.anchor) {
-      this._recenter(this.props.anchor)
+    if (previousProps.view !== this.props.view && this.props.view) {
+      this._updateView()
     }
     if (previousProps.mode !== this.props.mode) {
       this._updateInteractions()
@@ -238,15 +241,19 @@ export default class PrimaryMap extends Component {
     this._selectInteraction.setActive(false)
   }
 
-  _emitAnchorChange() {
+  _emitViewChange() {
     const view = this._map.getView()
+    const {basemapIndex} = this.state
     const center = view.getCenter()
-    const resolution = view.getResolution()
-    const anchor = anchorUtil.serialize(center, resolution, this.state.basemapIndex)
+    const zoom = view.getZoom() || MIN_ZOOM  // HACK -- sometimes getZoom returns undefined...
     // Don't emit false positives
-    if (this.props.anchor !== anchor) {
-      this._skipNextRecenter = true
-      this.props.onAnchorChange(anchor)
+    if (!this.props.view
+      || this.props.view.center[0] !== center[0]
+      || this.props.view.center[1] !== center[1]
+      || this.props.view.zoom !== zoom
+      || this.props.view.basemapIndex !== basemapIndex) {
+      this._skipNextViewUpdate = true
+      this.props.onViewChange({ basemapIndex, center, zoom })
     }
   }
 
@@ -257,7 +264,7 @@ export default class PrimaryMap extends Component {
 
   _handleBasemapChange(index) {
     this.setState({basemapIndex: index})
-    this._emitAnchorChange()
+    this._emitViewChange()
   }
 
   _handleDrawEnd(event) {
@@ -401,22 +408,22 @@ export default class PrimaryMap extends Component {
     this._map.addOverlay(this._featureDetailsOverlay)
 
     this._map.on('pointermove', this._handleMouseMove)
-    this._map.on('moveend', this._emitAnchorChange)
+    this._map.on('moveend', this._emitViewChange)
   }
 
-  _recenter(anchor) {
-    if (this._skipNextRecenter) {
-      this._skipNextRecenter = false
+  _updateView() {
+    if (this._skipNextViewUpdate) {
+      this._skipNextViewUpdate = false
       return
     }
-    const deserialized = anchorUtil.deserialize(anchor)
-    if (deserialized) {
-      const {basemapIndex, resolution, center} = deserialized
-      this.setState({basemapIndex})
-      const view = this._map.getView()
-      view.setCenter(view.constrainCenter(center))
-      view.setResolution(view.constrainResolution(resolution))
+    if (!this.props.view) {
+      return
     }
+    const {basemapIndex, zoom, center} = this.props.view
+    this.setState({basemapIndex})
+    const view = this._map.getView()
+    view.setCenter(view.constrainCenter(center))
+    view.setZoom(zoom)
   }
 
   _renderDetections() {
