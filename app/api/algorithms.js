@@ -14,63 +14,36 @@
  * limitations under the License.
  **/
 
-const IMAGE_REQUIREMENT_PREFIX = 'ImgReq - '
-
+import {Client} from '../utils/piazza-client'
+import {GATEWAY} from '../config'
 import {
   REQUIREMENT_BANDS,
   REQUIREMENT_CLOUDCOVER
-} from '../../constants'
+} from '../constants'
 
-let _client, _handlers, _instance
+const PATTERN_REQUIREMENT_PREFIX = /^ImgReq - /
+const PATTERN_NAME_PREFIX = /^BF_Algo_/
 
-export function start(client, interval, {beforeFetch, onFailure, onTerminate, onUpdate, shouldRun}) {
-  if (typeof _instance === 'number') {
-    throw new Error('Attempted to start while already running')
-  }
-  _client = client
-  _instance = setInterval(work, interval)
-  _handlers = {beforeFetch, onFailure, onTerminate, onUpdate, shouldRun}
-  work()
-}
-
-export function terminate() {
-  if (typeof _instance !== 'number') {
-    return
-  }
-  clearInterval(_instance)
-  _handlers.onTerminate()
-  _instance = null
-  _client = null
-  _handlers = null
-}
-
-//
-// Internals
-//
-
-function work() {
-  if (!_handlers.shouldRun()) {
-    console.debug('(algorithms:worker) skipping cycle')
-    return
-  }
-  console.debug('(algorithms:worker) updating')
-  _handlers.beforeFetch()
-  _client.getServices({pattern: '^BF_Algo'})
-    .then(algorithms => {
-      _handlers.onUpdate(algorithms.map(normalizeAlgorithm))
-    })
+export function discover(sessionToken) {
+  console.debug('(algorithms:discover)')
+  const client = new Client(GATEWAY, sessionToken)
+  return client.getServices({pattern: PATTERN_NAME_PREFIX.source})
+    .then(algorithms => algorithms.map(normalizeAlgorithm))
     .catch(err => {
-      _handlers.onFailure(err)
-      terminate()
-      console.error('(algorithms:worker) cycle failed; terminating.', err)
+      console.error('(algorithms:discoverAlgorithms) discovery failed:', err)
+      throw err
     })
 }
+
+//
+// Helpers
+//
 
 function extractRequirements(metadata) {
   const requirements = []
   if (metadata) {
     Object.keys(metadata).forEach(key => {
-      if (key.indexOf(IMAGE_REQUIREMENT_PREFIX) === 0) {
+      if (PATTERN_REQUIREMENT_PREFIX.test(key)) {
         requirements.push(normalizeRequirement(key, metadata[key]))
       }
     })
@@ -79,7 +52,7 @@ function extractRequirements(metadata) {
 }
 
 function normalizeRequirement(key, value) {
-  let name = key.replace(IMAGE_REQUIREMENT_PREFIX, '')
+  let name = key.replace(PATTERN_REQUIREMENT_PREFIX, '')
   let description = value.trim()
   switch (name) {
   case 'bands':
@@ -101,7 +74,7 @@ function normalizeAlgorithm(serviceDescriptor) {
   return {
     description:  serviceDescriptor.resourceMetadata.description,
     id:           serviceDescriptor.serviceId,
-    name:         serviceDescriptor.resourceMetadata.name.replace(/^BF_Algo_/, ''),
+    name:         serviceDescriptor.resourceMetadata.name.replace(PATTERN_NAME_PREFIX, ''),
     requirements: extractRequirements(serviceDescriptor.resourceMetadata.metadata),
     type:         serviceDescriptor.resourceMetadata.metadata.Interface,
     url:          serviceDescriptor.url

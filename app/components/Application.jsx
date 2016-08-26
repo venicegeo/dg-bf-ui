@@ -21,13 +21,27 @@ import {render} from 'react-dom'
 import {Login} from './Login'
 import {Navigation} from './Navigation'
 import {PrimaryMap, MODE_DRAW_BBOX, MODE_NORMAL, MODE_SELECT_IMAGERY, MODE_PRODUCT_LINES} from './PrimaryMap'
+import {discover as discoverAlgorithms} from '../api/algorithms'
+import {discover as discoverCatalog} from '../api/catalog'
+import {discover as discoverExecutor} from '../api/executor'
+import {discover as discoverGeoserver} from '../api/geoserver'
 
 export const createApplication = (element) => render(<Application/>, element)
 
-const createCollection = (records = []) => ({
+// TODO -- consider feasibility of Immutable
+const createCollection = (initialRecords = []) => ({
   error:    null,
   fetching: false,
-  records,
+  records: initialRecords,
+  $fetching() {
+    return Object.assign({}, this, {fetching: true})
+  },
+  $records(records) {
+    return Object.assign({}, this, {records, fetching: false})
+  },
+  $error(error) {
+    return Object.assign({}, this, {error, fetching: false})
+  },
 })
 
 export class Application extends Component {
@@ -37,7 +51,12 @@ export class Application extends Component {
     this.state = Object.assign({
       sessionToken: null,
 
+      // Services
+      catalog: {},
+      executor: {},
+
       // Data Collections
+      algorithms: createCollection(),
       jobs: createCollection(),
 
       // Map state
@@ -53,18 +72,24 @@ export class Application extends Component {
 
   componentDidUpdate(_, prevState) {
     if (!prevState.sessionToken && this.state.sessionToken) {
-      // Logged in
+      this.discoverAlgorithms()
+      this.discoverCatalog()
+      this.discoverExecutor()
+      this.discoverGeoserver()
     }
     serialize(this.state)
   }
 
   componentDidMount() {
+    if (this.state.sessionToken) {
+      this.discoverAlgorithms()
+      this.discoverCatalog()
+      this.discoverExecutor()
+      this.discoverGeoserver()
+    }
     // const {dispatch, location, isLoggedIn} = this.props
     // if (isLoggedIn) {
-    //   dispatch(discoverCatalogIfNeeded())
-    //   dispatch(discoverExecutorIfNeeded())
     //   dispatch(discoverGeoserverIfNeeded())
-    //   dispatch(startAlgorithmsWorkerIfNeeded())
     //   dispatch(startJobsWorkerIfNeeded())
     //   dispatch(changeLoadedDetections(enumerate(location.query.jobId)))
     //   // DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG
@@ -81,10 +106,7 @@ export class Application extends Component {
   // componentWillReceiveProps(nextProps) {
   //   const {dispatch} = this.props
   //   if (nextProps.isLoggedIn && !this.props.isLoggedIn) {
-  //     dispatch(discoverCatalogIfNeeded())
-  //     dispatch(discoverExecutorIfNeeded())
   //     dispatch(discoverGeoserverIfNeeded())
-  //     dispatch(startAlgorithmsWorkerIfNeeded())
   //     dispatch(startJobsWorkerIfNeeded())
   //   }
   //   if (nextProps.location.pathname !== this.props.location.pathname) {
@@ -191,6 +213,44 @@ export class Application extends Component {
     }
   }
 
+  discoverAlgorithms() {
+    this.setState({
+      algorithms: this.state.algorithms.$fetching(),
+    })
+    discoverAlgorithms(this.state.sessionToken)
+      .then(algorithms => {
+        this.setState({
+          algorithms: this.state.algorithms.$records(algorithms)
+        })
+      })
+      .catch(err => {
+        this.setState({
+          algorithms: this.state.algorithms.$error(err)
+        })
+      })
+  }
+
+  discoverCatalog() {
+    this.setState({ catalog: { discovering: true } })
+    discoverCatalog(this.state.sessionToken)
+      .then(catalog => this.setState({ catalog }))
+      .catch(error => this.setState({ catalog: { error }}))
+  }
+
+  discoverExecutor() {
+    this.setState({ executor: { discovering: true }})
+    discoverExecutor(this.state.sessionToken)
+      .then(executor => this.setState({ executor }))
+      .catch(error => this.setState({ executor: { error }}))
+  }
+
+  discoverGeoserver() {
+    this.setState({ geoserver: { discovering: true }})
+    discoverGeoserver(this.state.sessionToken)
+      .then(geoserver => this.setState({ geoserver }))
+      .catch(error => this.setState({ geoserver: { error }}))
+  }
+
   _handleAnchorChange(mapAnchor) {
     this.setState({ mapAnchor })
   }
@@ -222,7 +282,6 @@ export class Application extends Component {
   }
 }
 
-
 //
 // Internals
 //
@@ -233,7 +292,11 @@ function enumerate(value) {
 
 function deserialize() {
   return {
+    algorithms:   createCollection(JSON.parse(localStorage.getItem('algorithms_records')) || []),
     bbox:         JSON.parse(sessionStorage.getItem('bbox')),
+    catalog:      JSON.parse(sessionStorage.getItem('catalog')),
+    executor:     JSON.parse(sessionStorage.getItem('executor')),
+    geoserver:    JSON.parse(sessionStorage.getItem('geoserver')),
     jobs:         createCollection(JSON.parse(localStorage.getItem('jobs_records')) || []),
     mapView:      JSON.parse(sessionStorage.getItem('mapView')),
     sessionToken: sessionStorage.getItem('sessionToken') || null,
@@ -242,7 +305,11 @@ function deserialize() {
 
 function serialize(state) {
   console.debug('(serialize)', state)
+  sessionStorage.setItem('algorithms_records', JSON.stringify(state.algorithms.records))
   sessionStorage.setItem('bbox', JSON.stringify(state.bbox))
+  sessionStorage.setItem('catalog', JSON.stringify(state.catalog))
+  sessionStorage.setItem('executor', JSON.stringify(state.executor))
+  sessionStorage.setItem('geoserver', JSON.stringify(state.geoserver))
   localStorage.setItem('jobs_records', JSON.stringify(state.jobs.records))
   sessionStorage.setItem('mapView', JSON.stringify(state.mapView))
   sessionStorage.setItem('sessionToken', state.sessionToken || '')
