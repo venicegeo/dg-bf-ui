@@ -112,7 +112,7 @@ function extractRecords(algorithmNames, filterNames) {
       [KEY_IMAGE_SENSOR]:        datum.sensorName,
       [KEY_NAME]:                datum.name,
       [KEY_STATUS]:              isActive(datum.maxDate) ? STATUS_ACTIVE : STATUS_INACTIVE,
-      [KEY_SPATIAL_FILTER_NAME]: filterNames[datum.subindexId],
+      [KEY_SPATIAL_FILTER_NAME]: filterNames[datum.spatialFilter],
       [KEY_STARTS_ON]:           datum.minDate,
       [KEY_WMS_LAYER_ID]:        datum.bfInputJSON.lGroupId,
     },
