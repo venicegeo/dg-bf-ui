@@ -36,8 +36,14 @@ const createCollection = (initialRecords = []) => ({
   error:    null,
   fetching: false,
   records: initialRecords,
+  $append(record) {
+    return Object.assign({}, this, {records: this.records.concat(record)})
+  },
   $fetching() {
     return Object.assign({}, this, {fetching: true})
+  },
+  $filter(func) {
+    return Object.assign({}, this, {records: this.records.filter(func)})
   },
   $records(records) {
     return Object.assign({}, this, {records, fetching: false})
@@ -69,6 +75,8 @@ export class Application extends Component {
     }, deserialize())
     this._handleAnchorChange = this._handleAnchorChange.bind(this)
     this._handleBoundingBoxChange = this._handleBoundingBoxChange.bind(this)
+    this._handleDismissJobError = this._handleDismissJobError.bind(this)
+    this._handleForgetJob = this._handleForgetJob.bind(this)
     this._handleNavigation = this._handleNavigation.bind(this)
     this._handleSearchPageChange = this._handleSearchPageChange.bind(this)
     this._handleSelectImage = this._handleSelectImage.bind(this)
@@ -135,6 +143,7 @@ export class Application extends Component {
       )
     }
     switch (this.state.route) {
+      /* eslint-disable indent */
       case '/about':
         return (
           <About
@@ -158,11 +167,13 @@ export class Application extends Component {
       case '/jobs':
         return (
           <JobStatusList
+            authToken={this.state.sessionToken}
             activeIds={this._detections.map(d => d.id)}
+            error={this.state.jobs.error}
             jobs={this.state.jobs.records}
+            onDismissError={this._handleDismissJobError}
+            onForgetJob={this._handleForgetJob}
             onNavigateToJob={this._handleNavigation}
-            onRemoveJob={console.debug.bind(console)}
-            onDismissError={console.debug.bind(console)}
           />
         )
     //   case '/product-lines':
@@ -175,6 +186,7 @@ export class Application extends Component {
             wat
           </div>
         )
+      /* eslint-enable indent */
     }
   }
 
@@ -253,6 +265,18 @@ export class Application extends Component {
     this.setState({ bbox })
   }
 
+  _handleDismissJobError() {
+    this.setState({
+      jobs: this.state.jobs.$error(null),
+    })
+  }
+
+  _handleForgetJob(id) {
+    this.setState({
+      jobs: this.state.jobs.$filter(j => j.id !== id),
+    })
+  }
+
   _handleNavigation({pathname = '/', search = '', hash = ''}) {
     history.pushState(null, null, pathname + search + hash)
     this.setState({ route: pathname })
@@ -311,7 +335,9 @@ function deserialize() {
 }
 
 function serialize(state) {
-  console.debug('(serialize)', state)
+  console.groupCollapsed('(Application:serialize)')
+  console.debug(JSON.stringify(state, null, 2))
+  console.groupEnd()
   sessionStorage.setItem('algorithms_records', JSON.stringify(state.algorithms.records))
   sessionStorage.setItem('bbox', JSON.stringify(state.bbox))
   sessionStorage.setItem('catalog', JSON.stringify(state.catalog))

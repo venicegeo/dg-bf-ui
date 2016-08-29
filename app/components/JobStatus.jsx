@@ -38,6 +38,7 @@ import {
 
 export default class JobStatus extends Component {
   static propTypes = {
+    authToken:   React.PropTypes.string.isRequired,
     className:   React.PropTypes.string,
     isActive:    React.PropTypes.bool.isRequired,
     job:         React.PropTypes.shape({
@@ -136,6 +137,7 @@ export default class JobStatus extends Component {
           </Link>
           {canDownload && (
             <FileDownloadLink
+              authToken={this.props.authToken}
               dataId={resultDataId}
               filename={name + '.geojson'}
               className={styles.download}
