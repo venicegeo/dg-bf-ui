@@ -14,14 +14,13 @@
  * limitations under the License.
  **/
 
-const styles = require('./Navigation.css')
-
 import React from 'react'
 
 export const Link = ({
-  activeRoute,
+  activeClassName,
   children,
   className,
+  isActive,
   pathname,
   search = '',
   hash = '',
@@ -30,7 +29,7 @@ export const Link = ({
 }) => (
   <a
     href={pathname + search + hash}
-    className={`${className} ${pathname === activeRoute ? styles.active : ''}`}
+    className={`${className} ${isActive === true || (typeof isActive === 'undefined' && location.pathname === pathname) ? activeClassName : ''}`}
     title={title}
     onClick={event => {
       event.preventDefault()
@@ -42,10 +41,11 @@ export const Link = ({
 )
 
 Link.propTypes = {
-  activeRoute: React.PropTypes.string,
+  activeClassName: React.PropTypes.string,
   children: React.PropTypes.any,
   className: React.PropTypes.string,
   hash: React.PropTypes.string,
+  isActive: React.PropTypes.bool,
   pathname: React.PropTypes.string,
   search: React.PropTypes.string,
   title: React.PropTypes.string,

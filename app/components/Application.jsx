@@ -44,7 +44,7 @@ export class Application extends Component {
     super()
     this.state = Object.assign({
       sessionToken: null,
-      route: location.pathname,
+      route: generateRoute(location),
 
       // Services
       catalog: {},
@@ -59,13 +59,12 @@ export class Application extends Component {
       mapView: null,
       selectedFeature: null,
     }, deserialize())
-    this._handleAnchorChange = this._handleAnchorChange.bind(this)
     this._handleBoundingBoxChange = this._handleBoundingBoxChange.bind(this)
     this._handleDismissJobError = this._handleDismissJobError.bind(this)
     this._handleForgetJob = this._handleForgetJob.bind(this)
-    this._handleNavigation = this._handleNavigation.bind(this)
     this._handleSearchPageChange = this._handleSearchPageChange.bind(this)
     this._handleSelectFeature = this._handleSelectFeature.bind(this)
+    this.navigateTo = this.navigateTo.bind(this)
   }
 
   componentDidUpdate(_, prevState) {
@@ -93,7 +92,7 @@ export class Application extends Component {
       <div className={styles.root}>
         <Navigation
           activeRoute={this.state.route}
-          onClick={this._handleNavigation}
+          onClick={this.navigateTo}
         />
         <PrimaryMap
           geoserverUrl={null}
@@ -126,12 +125,11 @@ export class Application extends Component {
         />
       )
     }
-    switch (this.state.route) {
-      /* eslint-disable indent */
+    switch (this.state.route.pathname) {
       case '/about':
         return (
           <About
-            onDismiss={() => this._handleNavigation({ pathname: '/' })}
+            onDismiss={() => this.navigateTo({ pathname: '/' })}
           />
         )
     //   case '/create-job':
@@ -145,7 +143,7 @@ export class Application extends Component {
       case '/help':
         return (
           <Help
-            onDismiss={() => this._handleNavigation({ pathname: '/' })}
+            onDismiss={() => this.navigateTo({ pathname: '/' })}
           />
         )
       case '/jobs':
@@ -157,7 +155,7 @@ export class Application extends Component {
             jobs={this.state.jobs.records}
             onDismissError={this._handleDismissJobError}
             onForgetJob={this._handleForgetJob}
-            onNavigateToJob={this._handleNavigation}
+            onNavigateToJob={this.navigateTo}
           />
         )
     //   case '/product-lines':
@@ -170,7 +168,6 @@ export class Application extends Component {
             wat
           </div>
         )
-      /* eslint-enable indent */
     }
   }
 
@@ -195,11 +192,11 @@ export class Application extends Component {
   }
 
   get _mapMode() {
-    switch (location.pathname) {
-    case '/create-job': return (this.state.bbox && this.state.imagery) ? MODE_SELECT_IMAGERY : MODE_DRAW_BBOX
-    case '/create-product-line': return MODE_DRAW_BBOX
-    case '/product-lines': return MODE_PRODUCT_LINES
-    default: return MODE_NORMAL
+    switch (this.state.route.pathname) {
+      case '/create-job': return (this.state.bbox && this.state.imagery) ? MODE_SELECT_IMAGERY : MODE_DRAW_BBOX
+      case '/create-product-line': return MODE_DRAW_BBOX
+      case '/product-lines': return MODE_PRODUCT_LINES
+      default: return MODE_NORMAL
     }
   }
 
@@ -241,10 +238,6 @@ export class Application extends Component {
       .catch(error => this.setState({ geoserver: { error }}))
   }
 
-  _handleAnchorChange(mapAnchor) {
-    this.setState({ mapAnchor })
-  }
-
   _handleBoundingBoxChange(bbox) {
     this.setState({ bbox })
   }
@@ -261,41 +254,42 @@ export class Application extends Component {
     })
   }
 
-  _handleNavigation({pathname = '/', search = '', hash = ''}) {
-    history.pushState(null, null, pathname + search + hash)
-    this.setState({ route: pathname })
-  }
-
   _handleSelectFeature(feature) {
+    if (this.state.selectedFeature === feature) {
+      return  // Nothing to do
+    }
     this.setState({
       selectedFeature: feature || null,
     })
-    this._handleNavigation({
-      pathname: this.state.route,
+    this.navigateTo({
+      pathname: this.state.route.pathname,
       search:   (feature && feature.properties[KEY_TYPE] === TYPE_JOB) ? `?jobId=${feature.id}` : '',
     })
   }
 
-  _handleSearchPageChange(paging) {
+  _handleSearchPageChange(/*paging*/) {
     // this.props.dispatch(searchCatalog(paging.startIndex, paging.count))
+  }
+
+  navigateTo(loc) {
+    const route = generateRoute(loc)
+    history.pushState({}, null, route.href)
+    this.setState({ route })
   }
 
   subscribeToHistoryEvents() {
     window.addEventListener('popstate', () => {
-      if (this.state.route !== location.pathname) {
-        this.setState({ route: location.pathname })
+      if (this.state.route.href !== location.pathname + location.search + location.hash) {
+        console.debug('popped history state')
+        this.setState({ route: generateRoute(location) })
       }
     })
   }
 }
 
 //
-// Internals
+// Helpers
 //
-
-function enumerate(value) {
-  return value ? [].concat(value) : []
-}
 
 function deserialize() {
   return {
@@ -324,4 +318,16 @@ function serialize(state) {
   sessionStorage.setItem('mapView', JSON.stringify(state.mapView))
   sessionStorage.setItem('sessionToken', state.sessionToken || '')
   localStorage.setItem('catalog_apiKey', state.catalogApiKey)  // HACK
+}
+
+function generateRoute({ pathname = '/', search = '', hash = '' }) {
+  return {
+    pathname,
+    search,
+    hash,
+
+    // Helpers
+    href: pathname + search + hash,
+    jobIds: search.substr(1).split('&').filter(s => s.startsWith('jobId')).map(s => s.replace('jobId=', '')),
+  }
 }
