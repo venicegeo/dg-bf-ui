@@ -28,33 +28,12 @@ import {discover as discoverAlgorithms} from '../api/algorithms'
 import {discover as discoverCatalog} from '../api/catalog'
 import {discover as discoverExecutor} from '../api/executor'
 import {discover as discoverGeoserver} from '../api/geoserver'
+import {createCollection} from '../utils/collections'
 
 export const createApplication = (element) => render(<Application/>, element)
 
-// TODO -- consider feasibility of Immutable
-const createCollection = (initialRecords = []) => ({
-  error:    null,
-  fetching: false,
-  records: initialRecords,
-  $append(record) {
-    return Object.assign({}, this, {records: this.records.concat(record)})
-  },
-  $fetching() {
-    return Object.assign({}, this, {fetching: true})
-  },
-  $filter(func) {
-    return Object.assign({}, this, {records: this.records.filter(func)})
-  },
-  $records(records) {
-    return Object.assign({}, this, {records, fetching: false})
-  },
-  $error(error) {
-    return Object.assign({}, this, {error, fetching: false})
-  },
-})
 
 export class Application extends Component {
-
   constructor() {
     super()
     this.state = Object.assign({

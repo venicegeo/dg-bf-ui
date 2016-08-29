@@ -130,7 +130,7 @@ export default class JobStatus extends Component {
         <div className={styles.controls}>
           <Link
             pathname="/"
-            search={'jobId=' + id}
+            search={'?jobId=' + id}
             title="View on Map"
             onClick={this.props.onNavigate}>
             <i className="fa fa-globe"/>
