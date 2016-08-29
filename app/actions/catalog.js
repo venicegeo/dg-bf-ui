@@ -93,7 +93,7 @@ function discoverCatalog() {
 //
 
 function lookupEventTypeId(catalog) {
-  return fetch(`${catalog.url}/eventTypeID`, {
+  return fetch(`${catalog.url}/eventTypeID?pzGateway=${encodeURIComponent(GATEWAY)}`, {
     headers: {
       'authorization': catalog.authToken,
     },
