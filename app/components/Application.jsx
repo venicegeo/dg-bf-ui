@@ -30,8 +30,14 @@ import {discover as discoverExecutor} from '../api/executor'
 import {discover as discoverGeoserver} from '../api/geoserver'
 import {createCollection} from '../utils/collections'
 
-export const createApplication = (element) => render(<Application/>, element)
+import {
+  KEY_TYPE,
+  KEY_STATUS,
+  STATUS_SUCCESS,
+  TYPE_JOB,
+} from '../constants'
 
+export const createApplication = (element) => render(<Application/>, element)
 
 export class Application extends Component {
   constructor() {
@@ -51,6 +57,7 @@ export class Application extends Component {
       // Map state
       bbox: null,
       mapView: null,
+      selectedFeature: null,
     }, deserialize())
     this._handleAnchorChange = this._handleAnchorChange.bind(this)
     this._handleBoundingBoxChange = this._handleBoundingBoxChange.bind(this)
@@ -58,8 +65,7 @@ export class Application extends Component {
     this._handleForgetJob = this._handleForgetJob.bind(this)
     this._handleNavigation = this._handleNavigation.bind(this)
     this._handleSearchPageChange = this._handleSearchPageChange.bind(this)
-    this._handleSelectImage = this._handleSelectImage.bind(this)
-    this._handleSelectJob = this._handleSelectJob.bind(this)
+    this._handleSelectFeature = this._handleSelectFeature.bind(this)
   }
 
   componentDidUpdate(_, prevState) {
@@ -96,15 +102,14 @@ export class Application extends Component {
           imagery={null}
           isSearching={false}
           view={this.state.mapView}
-          catalogApiKey={null}
+          catalogApiKey={this.state.catalogApiKey}
           bbox={this.state.bbox}
           mode={this._mapMode}
-          selectedFeature={null}
+          selectedFeature={this.state.selectedFeature}
           highlightedFeature={null}
           onBoundingBoxChange={bbox => this.setState({ bbox })}
           onSearchPageChange={this._handleSearchPageChange}
-          onSelectImage={this._handleSelectImage}
-          onSelectJob={this._handleSelectJob}
+          onSelectFeature={this._handleSelectFeature}
           onViewChange={mapView => this.setState({ mapView })}
         />
         {this.renderRoute()}
@@ -261,22 +266,14 @@ export class Application extends Component {
     this.setState({ route: pathname })
   }
 
-  _handleSelectImage(feature) {
-    // if (feature) {
-    //   this.props.dispatch(selectImage(feature))
-    // }
-    // else {
-    //   this.props.dispatch(clearSelectedImage())
-    // }
-  }
-
-  _handleSelectJob(jobId) {
-    // this.context.router.push({
-    //   ...this.props.location,
-    //   query: {
-    //     jobId: jobId || undefined
-    //   }
-    // })
+  _handleSelectFeature(feature) {
+    this.setState({
+      selectedFeature: feature || null,
+    })
+    this._handleNavigation({
+      pathname: this.state.route,
+      search:   (feature && feature.properties[KEY_TYPE] === TYPE_JOB) ? `?jobId=${feature.id}` : '',
+    })
   }
 
   _handleSearchPageChange(paging) {
@@ -310,6 +307,7 @@ function deserialize() {
     jobs:         createCollection(JSON.parse(localStorage.getItem('jobs_records')) || []),
     mapView:      JSON.parse(sessionStorage.getItem('mapView')),
     sessionToken: sessionStorage.getItem('sessionToken') || null,
+    catalogApiKey: localStorage.getItem('catalog_apiKey') || '',  // HACK
   }
 }
 
@@ -325,4 +323,5 @@ function serialize(state) {
   localStorage.setItem('jobs_records', JSON.stringify(state.jobs.records))
   sessionStorage.setItem('mapView', JSON.stringify(state.mapView))
   sessionStorage.setItem('sessionToken', state.sessionToken || '')
+  localStorage.setItem('catalog_apiKey', state.catalogApiKey)  // HACK
 }
