@@ -95,11 +95,11 @@ function extractRecords(algorithmNames, filterNames) {
     geometry: {
       type: 'Polygon',
       coordinates: [[
-        [parseFloat(datum.minX), parseFloat(datum.minY)],
-        [parseFloat(datum.minX), parseFloat(datum.maxY)],
-        [parseFloat(datum.maxX), parseFloat(datum.maxY)],
-        [parseFloat(datum.maxX), parseFloat(datum.minY)],
-        [parseFloat(datum.minX), parseFloat(datum.minY)],
+        [datum.minX, datum.minY],
+        [datum.minX, datum.maxY],
+        [datum.maxX, datum.maxY],
+        [datum.maxX, datum.minY],
+        [datum.minX, datum.minY],
       ]]
     },
     properties: {
@@ -108,7 +108,7 @@ function extractRecords(algorithmNames, filterNames) {
       [KEY_CREATED_ON]:          datum.minDate,
       [KEY_EVENT_TYPE_ID]:       datum.eventTypeId.pop(),
       [KEY_EXPIRES_ON]:          datum.maxDate,
-      [KEY_IMAGE_CLOUDCOVER]:    parseFloat(datum.cloudCover),
+      [KEY_IMAGE_CLOUDCOVER]:    parseInt(datum.cloudCover, 10),
       [KEY_IMAGE_SENSOR]:        datum.sensorName,
       [KEY_NAME]:                datum.name,
       [KEY_STATUS]:              isActive(datum.maxDate) ? STATUS_ACTIVE : STATUS_INACTIVE,

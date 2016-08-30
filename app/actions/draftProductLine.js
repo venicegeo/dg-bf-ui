@@ -64,17 +64,17 @@ export function createProductLine() {
     return fetch(`${state.executor.url}/newProductLine`, {
       method: 'POST',
       body: JSON.stringify({
-        cloudCover:  state.search.cloudCover.toString(),
+        cloudCover:  state.search.cloudCover,
         eventTypeId: [state.catalog.eventTypeId],
-        minX:        state.search.bbox[0].toString(),
-        minY:        state.search.bbox[1].toString(),
-        maxX:        state.search.bbox[2].toString(),
-        maxY:        state.search.bbox[3].toString(),
+        minX:        state.search.bbox[0],
+        minY:        state.search.bbox[1],
+        maxX:        state.search.bbox[2],
+        maxY:        state.search.bbox[3],
         minDate:     state.draftProductLine.dateStart,
         maxDate:     state.draftProductLine.dateStop,
         name:        state.draftProductLine.name,
         serviceId:   state.executor.serviceId,
-        spatialFilter: state.search.filter,
+        spatialFilterId: state.search.filter,
         bfInputJSON: {
           algoType:    state.draftProductLine.algorithm.type,
           bands:       state.draftProductLine.algorithm.requirements.find(a => a.name === REQUIREMENT_BANDS).literal.split(','),
