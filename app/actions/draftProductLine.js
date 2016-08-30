@@ -87,7 +87,7 @@ export function createProductLine() {
     })
       .then(checkResponse)
       .then(data => {
-        if (!data.triggerId || !data.layerId) {
+        if (!data.triggerId || !data.layerGroupId) {
           throw new Error('Server response is missing required data')
         }
         dispatch(createProductLineSuccess())
