@@ -18,12 +18,19 @@ const styles = require('./Application.css')
 
 import React, {Component} from 'react'
 import {render} from 'react-dom'
+import debounce from 'lodash/debounce'
 import {About} from './About'
 import {Help} from './Help'
 import {JobStatusList} from './JobStatusList'
 import {Login} from './Login'
 import {Navigation} from './Navigation'
-import {PrimaryMap, MODE_DRAW_BBOX, MODE_NORMAL, MODE_SELECT_IMAGERY, MODE_PRODUCT_LINES} from './PrimaryMap'
+import {
+  PrimaryMap,
+  MODE_DRAW_BBOX,
+  MODE_NORMAL,
+  MODE_SELECT_IMAGERY,
+  MODE_PRODUCT_LINES
+} from './PrimaryMap'
 import {discover as discoverAlgorithms} from '../api/algorithms'
 import {discover as discoverCatalog} from '../api/catalog'
 import {discover as discoverExecutor} from '../api/executor'
@@ -37,28 +44,16 @@ import {
   TYPE_JOB,
 } from '../constants'
 
-export const createApplication = (element) => render(<Application/>, element)
+export const createApplication = (element) => render(
+  <Application
+    deserialize={generateInitialState}
+    serialize={debounce(serialize, 100)}
+  />, element)
 
 export class Application extends Component {
-  constructor() {
-    super()
-    this.state = Object.assign({
-      sessionToken: null,
-      route: generateRoute(location),
-
-      // Services
-      catalog: {},
-      executor: {},
-
-      // Data Collections
-      algorithms: createCollection(),
-      jobs: createCollection(),
-
-      // Map state
-      bbox: null,
-      mapView: null,
-      selectedFeature: null,
-    }, deserialize())
+  constructor(props) {
+    super(props)
+    this.state = props.deserialize()
     this._handleBoundingBoxChange = this._handleBoundingBoxChange.bind(this)
     this._handleDismissJobError = this._handleDismissJobError.bind(this)
     this._handleForgetJob = this._handleForgetJob.bind(this)
@@ -74,7 +69,7 @@ export class Application extends Component {
       this.discoverExecutor()
       this.discoverGeoserver()
     }
-    serialize(this.state)
+    this.props.serialize(this.state)
   }
 
   componentDidMount() {
@@ -95,7 +90,7 @@ export class Application extends Component {
           onClick={this.navigateTo}
         />
         <PrimaryMap
-          geoserverUrl={null}
+          geoserverUrl={this.state.geoserver.url}
           frames={this._frames}
           detections={this._detections}
           imagery={null}
@@ -106,7 +101,7 @@ export class Application extends Component {
           mode={this._mapMode}
           selectedFeature={this.state.selectedFeature}
           highlightedFeature={null}
-          onBoundingBoxChange={bbox => this.setState({ bbox })}
+          onBoundingBoxChange={this._handleBoundingBoxChange}
           onSearchPageChange={this._handleSearchPageChange}
           onSelectFeature={this._handleSelectFeature}
           onViewChange={mapView => this.setState({ mapView })}
@@ -176,11 +171,11 @@ export class Application extends Component {
   //
 
   get _detections() {
+    if (this._mapMode !== MODE_PRODUCT_LINES) {
+      return this.state.jobs.records.filter(j => this.state.route.jobIds.includes(j.id) && j.properties[KEY_STATUS] === STATUS_SUCCESS)
+    }
     return []
-    // if (this._mapMode !== MODE_PRODUCT_LINES) {
-    //   return this.props.detections
-    // }
-    // return this.props.productLineJobs.selection.length ? this.props.productLineJobs.selection : this.props.productLines
+    // return this.state.productLineJobs.selection.length ? this.props.productLineJobs.selection : this.props.productLines
   }
 
   get _frames() {
@@ -254,6 +249,10 @@ export class Application extends Component {
     })
   }
 
+  _handleSearchPageChange(/*paging*/) {
+    // this.props.dispatch(searchCatalog(paging.startIndex, paging.count))
+  }
+
   _handleSelectFeature(feature) {
     if (this.state.selectedFeature === feature) {
       return  // Nothing to do
@@ -267,10 +266,6 @@ export class Application extends Component {
     })
   }
 
-  _handleSearchPageChange(/*paging*/) {
-    // this.props.dispatch(searchCatalog(paging.startIndex, paging.count))
-  }
-
   navigateTo(loc) {
     const route = generateRoute(loc)
     history.pushState({}, null, route.href)
@@ -280,27 +275,62 @@ export class Application extends Component {
   subscribeToHistoryEvents() {
     window.addEventListener('popstate', () => {
       if (this.state.route.href !== location.pathname + location.search + location.hash) {
-        console.debug('popped history state')
         this.setState({ route: generateRoute(location) })
       }
     })
   }
 }
 
+Application.propTypes = {
+  deserialize: React.PropTypes.func,
+  serialize: React.PropTypes.func,
+}
+
 //
 // Helpers
 //
 
+function generateInitialState() {
+  const state = {
+    sessionToken: null,
+    route: generateRoute(location),
+
+    // Services
+    catalog: {},
+    executor: {},
+    geoserver: {},
+
+    // Data Collections
+    algorithms: createCollection(),
+    jobs: createCollection(),
+
+    // Map state
+    bbox: null,
+    mapView: null,
+    selectedFeature: null,
+
+  }
+
+  const deserializedState = deserialize()
+  for (const key in deserializedState) {
+    state[key] = deserializedState[key] || state[key]
+  }
+
+  state.selectedFeature = state.jobs.records.find(j => state.route.jobIds.includes(j.id)) || null
+
+  return state
+}
+
 function deserialize() {
   return {
-    algorithms:   createCollection(JSON.parse(localStorage.getItem('algorithms_records')) || []),
-    bbox:         JSON.parse(sessionStorage.getItem('bbox')),
-    catalog:      JSON.parse(sessionStorage.getItem('catalog')),
-    executor:     JSON.parse(sessionStorage.getItem('executor')),
-    geoserver:    JSON.parse(sessionStorage.getItem('geoserver')),
-    jobs:         createCollection(JSON.parse(localStorage.getItem('jobs_records')) || []),
-    mapView:      JSON.parse(sessionStorage.getItem('mapView')),
-    sessionToken: sessionStorage.getItem('sessionToken') || null,
+    algorithms:    createCollection(JSON.parse(sessionStorage.getItem('algorithms_records')) || []),
+    bbox:          JSON.parse(sessionStorage.getItem('bbox')),
+    catalog:       JSON.parse(sessionStorage.getItem('catalog')),
+    executor:      JSON.parse(sessionStorage.getItem('executor')),
+    geoserver:     JSON.parse(sessionStorage.getItem('geoserver')),
+    jobs:          createCollection(JSON.parse(localStorage.getItem('jobs_records')) || []),
+    mapView:       JSON.parse(sessionStorage.getItem('mapView')),
+    sessionToken:  sessionStorage.getItem('sessionToken') || null,
     catalogApiKey: localStorage.getItem('catalog_apiKey') || '',  // HACK
   }
 }

@@ -21,7 +21,7 @@
     "complexity": 0,
     "curly": 1,
     "eqeqeq": 1,
-    "indent": [1, 2, {"VariableDeclarator": 2}],
+    "indent": [1, 2, {"VariableDeclarator": 2, "SwitchCase": 1}],
     "new-cap": 1,
     "no-alert": 1,
     "no-caller": 2,
