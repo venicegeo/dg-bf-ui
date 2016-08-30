@@ -324,7 +324,11 @@ export class Application extends Component {
   navigateTo(loc) {
     const route = generateRoute(loc)
     history.pushState({}, null, route.href)
-    this.setState({ route })
+    this.setState({
+      route,
+      bbox: this.state.route.pathname === route.pathname ? this.state.bbox : null,
+      searchResults: this.state.route.pathname === route.pathname ? this.state.searchResults : null,
+    })
   }
 
   subscribeToHistoryEvents() {
