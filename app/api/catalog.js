@@ -45,6 +45,39 @@ export function discover(sessionToken) {
     })
 }
 
+export function search({
+  catalogUrl,
+  bbox,
+  cloudCover,
+  dateFrom,
+  dateTo,
+  filter,
+  startIndex = 0,
+  count = 100,
+}) {
+  console.debug('(catalog:search)')
+  return fetch(`${catalogUrl}/discover?` + [
+    `acquiredDate=${new Date(dateFrom).toISOString()}`,
+    `maxAcquiredDate=${new Date(dateTo).toISOString()}`,
+    `bbox=${bbox}`,
+    `cloudCover=${cloudCover}`,
+    `subIndex=${filter || ''}`,
+    `count=${count}`,
+    `startIndex=${startIndex}`,
+  ].join('&'))
+    .then(response => {
+      if (!response.ok) {
+        throw new Error(`HTTP Error (code=${response.status})`)
+      }
+      return response.json()
+    })
+    .catch(err => {
+      console.error('(catalog:search) discovery failed:', err)
+      throw err
+    })
+}
+
+
 //
 // Helpers
 //

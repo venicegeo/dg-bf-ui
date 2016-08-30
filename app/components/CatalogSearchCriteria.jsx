@@ -47,7 +47,7 @@ const CatalogSearchCriteria = (props) => (
       />
     </label>
 
-    {(props.dateFrom && props.dateTo) && (
+    {(typeof props.dateFrom !== 'undefined' && typeof props.dateTo !== 'undefined') && (
       <div>
         <h3>Date of Capture</h3>
 

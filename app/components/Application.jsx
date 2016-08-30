@@ -20,6 +20,7 @@ import React, {Component} from 'react'
 import {render} from 'react-dom'
 import debounce from 'lodash/debounce'
 import {About} from './About'
+import {CreateJob, createSearchCriteria} from './CreateJob'
 import {Help} from './Help'
 import {JobStatusList} from './JobStatusList'
 import {Login} from './Login'
@@ -31,10 +32,10 @@ import {
   MODE_SELECT_IMAGERY,
   MODE_PRODUCT_LINES
 } from './PrimaryMap'
-import {discover as discoverAlgorithms} from '../api/algorithms'
-import {discover as discoverCatalog} from '../api/catalog'
-import {discover as discoverExecutor} from '../api/executor'
-import {discover as discoverGeoserver} from '../api/geoserver'
+import * as algorithmsService from '../api/algorithms'
+import * as catalogService from '../api/catalog'
+import * as executorService from '../api/executor'
+import * as geoserverService from '../api/geoserver'
 import {createCollection} from '../utils/collections'
 
 import {
@@ -42,6 +43,7 @@ import {
   KEY_STATUS,
   STATUS_SUCCESS,
   TYPE_JOB,
+  TYPE_SCENE,
 } from '../constants'
 
 export const createApplication = (element) => render(
@@ -55,9 +57,13 @@ export class Application extends Component {
     super(props)
     this.state = props.deserialize()
     this._handleBoundingBoxChange = this._handleBoundingBoxChange.bind(this)
+    this._handleCatalogApiKeyChange = this._handleCatalogApiKeyChange.bind(this)
+    this._handleClearBbox = this._handleClearBbox.bind(this)
     this._handleDismissJobError = this._handleDismissJobError.bind(this)
     this._handleForgetJob = this._handleForgetJob.bind(this)
-    this._handleSearchPageChange = this._handleSearchPageChange.bind(this)
+    this._handleJobCreated = this._handleJobCreated.bind(this)
+    this._handleSearchCriteriaChange = this._handleSearchCriteriaChange.bind(this)
+    this._handleSearchSubmit = this._handleSearchSubmit.bind(this)
     this._handleSelectFeature = this._handleSelectFeature.bind(this)
     this.navigateTo = this.navigateTo.bind(this)
   }
@@ -93,7 +99,7 @@ export class Application extends Component {
           geoserverUrl={this.state.geoserver.url}
           frames={this._frames}
           detections={this._detections}
-          imagery={null}
+          imagery={this.state.searchResults}
           isSearching={false}
           view={this.state.mapView}
           catalogApiKey={this.state.catalogApiKey}
@@ -102,7 +108,7 @@ export class Application extends Component {
           selectedFeature={this.state.selectedFeature}
           highlightedFeature={null}
           onBoundingBoxChange={this._handleBoundingBoxChange}
-          onSearchPageChange={this._handleSearchPageChange}
+          onSearchPageChange={this._handleSearchSubmit}
           onSelectFeature={this._handleSelectFeature}
           onViewChange={mapView => this.setState({ mapView })}
         />
@@ -127,10 +133,26 @@ export class Application extends Component {
             onDismiss={() => this.navigateTo({ pathname: '/' })}
           />
         )
-    //   case '/create-job':
-    //     return (
-    //       <CreateJob/>
-    //     )
+      case '/create-job':
+        return (
+          <CreateJob
+            algorithms={this.state.algorithms.records}
+            bbox={this.state.bbox}
+            catalogApiKey={this.state.catalogApiKey}
+            executorServiceId={this.state.executor.serviceId}
+            sessionToken={this.state.sessionToken}
+            filters={this.state.catalog.filters || []}
+            isSearching={this.state.isSearching}
+            searchError={this.state.searchError}
+            searchCriteria={this.state.searchCriteria}
+            selectedImage={this.state.selectedFeature && this.state.selectedFeature.properties[KEY_TYPE] === TYPE_SCENE ? this.state.selectedFeature : null}
+            onCatalogApiKeyChange={this._handleCatalogApiKeyChange}
+            onClearBbox={this._handleClearBbox}
+            onJobCreated={this._handleJobCreated}
+            onSearchCriteriaChange={this._handleSearchCriteriaChange}
+            onSearchSubmit={this._handleSearchSubmit}
+          />
+        )
     //   case '/create-product-line':
     //     return (
     //       <CreateProductLine/>
@@ -188,7 +210,7 @@ export class Application extends Component {
 
   get _mapMode() {
     switch (this.state.route.pathname) {
-      case '/create-job': return (this.state.bbox && this.state.imagery) ? MODE_SELECT_IMAGERY : MODE_DRAW_BBOX
+      case '/create-job': return (this.state.bbox && this.state.searchResults) ? MODE_SELECT_IMAGERY : MODE_DRAW_BBOX
       case '/create-product-line': return MODE_DRAW_BBOX
       case '/product-lines': return MODE_PRODUCT_LINES
       default: return MODE_NORMAL
@@ -199,7 +221,7 @@ export class Application extends Component {
     this.setState({
       algorithms: this.state.algorithms.$fetching(),
     })
-    discoverAlgorithms(this.state.sessionToken)
+    algorithmsService.discover(this.state.sessionToken)
       .then(algorithms => {
         this.setState({
           algorithms: this.state.algorithms.$records(algorithms)
@@ -214,21 +236,21 @@ export class Application extends Component {
 
   discoverCatalog() {
     this.setState({ catalog: { discovering: true } })
-    discoverCatalog(this.state.sessionToken)
+    catalogService.discover(this.state.sessionToken)
       .then(catalog => this.setState({ catalog }))
       .catch(error => this.setState({ catalog: { error }}))
   }
 
   discoverExecutor() {
     this.setState({ executor: { discovering: true }})
-    discoverExecutor(this.state.sessionToken)
+    executorService.discover(this.state.sessionToken)
       .then(executor => this.setState({ executor }))
       .catch(error => this.setState({ executor: { error }}))
   }
 
   discoverGeoserver() {
     this.setState({ geoserver: { discovering: true }})
-    discoverGeoserver(this.state.sessionToken)
+    geoserverService.discover(this.state.sessionToken)
       .then(geoserver => this.setState({ geoserver }))
       .catch(error => this.setState({ geoserver: { error }}))
   }
@@ -249,8 +271,41 @@ export class Application extends Component {
     })
   }
 
-  _handleSearchPageChange(/*paging*/) {
-    // this.props.dispatch(searchCatalog(paging.startIndex, paging.count))
+  _handleCatalogApiKeyChange(catalogApiKey) {
+    this.setState({ catalogApiKey })
+  }
+
+  _handleClearBbox() {
+    this.setState({ bbox: null })
+  }
+
+  _handleJobCreated(job) {
+    this.setState({
+      jobs: this.state.jobs.$append(job)
+    })
+    this.navigateTo({
+      pathname: '/jobs',
+      search: '?jobId=' + job.id,
+    })
+  }
+
+  _handleSearchCriteriaChange(searchCriteria) {
+    this.setState({ searchCriteria })
+  }
+
+  _handleSearchSubmit({startIndex, count} = {}) {
+    this.setState({
+      isSearching: true,
+      selectedFeature: null,
+    })
+    catalogService.search(Object.assign({
+      count,
+      startIndex,
+      bbox: this.state.bbox,
+      catalogUrl: this.state.catalog.url,
+    }, this.state.searchCriteria))
+      .then(searchResults => this.setState({ searchResults, isSearching: false }))
+      .catch(searchError => this.setState({ searchError, isSearching: false }))
   }
 
   _handleSelectFeature(feature) {
@@ -309,6 +364,11 @@ function generateInitialState() {
     mapView: null,
     selectedFeature: null,
 
+    // Search state
+    isSearching: false,
+    searchCriteria: createSearchCriteria(),
+    searchError: null,
+    searchResults: null,
   }
 
   const deserializedState = deserialize()
@@ -323,15 +383,17 @@ function generateInitialState() {
 
 function deserialize() {
   return {
-    algorithms:    createCollection(JSON.parse(sessionStorage.getItem('algorithms_records')) || []),
-    bbox:          JSON.parse(sessionStorage.getItem('bbox')),
-    catalog:       JSON.parse(sessionStorage.getItem('catalog')),
-    executor:      JSON.parse(sessionStorage.getItem('executor')),
-    geoserver:     JSON.parse(sessionStorage.getItem('geoserver')),
-    jobs:          createCollection(JSON.parse(localStorage.getItem('jobs_records')) || []),
-    mapView:       JSON.parse(sessionStorage.getItem('mapView')),
-    sessionToken:  sessionStorage.getItem('sessionToken') || null,
-    catalogApiKey: localStorage.getItem('catalog_apiKey') || '',  // HACK
+    algorithms:     createCollection(JSON.parse(sessionStorage.getItem('algorithms_records')) || []),
+    bbox:           JSON.parse(sessionStorage.getItem('bbox')),
+    catalog:        JSON.parse(sessionStorage.getItem('catalog')),
+    executor:       JSON.parse(sessionStorage.getItem('executor')),
+    geoserver:      JSON.parse(sessionStorage.getItem('geoserver')),
+    jobs:           createCollection(JSON.parse(localStorage.getItem('jobs_records')) || []),
+    mapView:        JSON.parse(sessionStorage.getItem('mapView')),
+    searchCriteria: JSON.parse(sessionStorage.getItem('searchCriteria')),
+    searchResults:  JSON.parse(sessionStorage.getItem('searchResults')),
+    sessionToken:   sessionStorage.getItem('sessionToken') || null,
+    catalogApiKey:  localStorage.getItem('catalog_apiKey') || '',  // HACK
   }
 }
 
@@ -346,6 +408,8 @@ function serialize(state) {
   sessionStorage.setItem('geoserver', JSON.stringify(state.geoserver))
   localStorage.setItem('jobs_records', JSON.stringify(state.jobs.records))
   sessionStorage.setItem('mapView', JSON.stringify(state.mapView))
+  sessionStorage.setItem('searchCriteria', JSON.stringify(state.searchCriteria))
+  sessionStorage.setItem('searchResults', JSON.stringify(state.searchResults))
   sessionStorage.setItem('sessionToken', state.sessionToken || '')
   localStorage.setItem('catalog_apiKey', state.catalogApiKey)  // HACK
 }
