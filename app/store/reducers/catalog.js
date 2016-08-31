@@ -64,14 +64,16 @@ export function reducer(state = INITIAL_STATE, action) {
 export function deserialize() {
   return {
     ...INITIAL_STATE,
-    apiKey:  localStorage.getItem('catalog_apiKey') || INITIAL_STATE.apiKey,
-    url:     sessionStorage.getItem('catalog_url') || INITIAL_STATE.url,
-    filters: JSON.parse(sessionStorage.getItem('catalog_filters')) || INITIAL_STATE.filters,
+    apiKey:      localStorage.getItem('catalog_apiKey') || INITIAL_STATE.apiKey,
+    eventTypeId: sessionStorage.getItem('catalog_eventTypeId') || INITIAL_STATE.eventTypeId,
+    url:         sessionStorage.getItem('catalog_url') || INITIAL_STATE.url,
+    filters:     JSON.parse(sessionStorage.getItem('catalog_filters')) || INITIAL_STATE.filters,
   }
 }
 
 export function serialize(state) {
   localStorage.setItem('catalog_apiKey', state.apiKey || '')
+  sessionStorage.setItem('catalog_eventTypeId', JSON.stringify(state.eventTypeId))
   sessionStorage.setItem('catalog_filters', JSON.stringify(state.filters))
   sessionStorage.setItem('catalog_url', state.url || '')
 }
