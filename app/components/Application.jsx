@@ -32,10 +32,12 @@ import {
   MODE_SELECT_IMAGERY,
   MODE_PRODUCT_LINES
 } from './PrimaryMap'
+import {ProductLineList} from './ProductLineList'
 import * as algorithmsService from '../api/algorithms'
 import * as catalogService from '../api/catalog'
 import * as executorService from '../api/executor'
 import * as geoserverService from '../api/geoserver'
+import * as productLinesService from '../api/productLines'
 import {createCollection} from '../utils/collections'
 
 import {
@@ -60,8 +62,14 @@ export class Application extends Component {
     this._handleCatalogApiKeyChange = this._handleCatalogApiKeyChange.bind(this)
     this._handleClearBbox = this._handleClearBbox.bind(this)
     this._handleDismissJobError = this._handleDismissJobError.bind(this)
+    this._handleFetchProductLines = this._handleFetchProductLines.bind(this)
+    this._handleFetchProductLineJobs = this._handleFetchProductLineJobs.bind(this)
     this._handleForgetJob = this._handleForgetJob.bind(this)
     this._handleJobCreated = this._handleJobCreated.bind(this)
+    this._handleProductLineJobHoverIn = this._handleProductLineJobHoverIn.bind(this)
+    this._handleProductLineJobHoverOut = this._handleProductLineJobHoverOut.bind(this)
+    this._handleProductLineJobSelect = this._handleProductLineJobSelect.bind(this)
+    this._handleProductLineJobDeselect = this._handleProductLineJobDeselect.bind(this)
     this._handleSearchCriteriaChange = this._handleSearchCriteriaChange.bind(this)
     this._handleSearchSubmit = this._handleSearchSubmit.bind(this)
     this._handleSelectFeature = this._handleSelectFeature.bind(this)
@@ -70,21 +78,15 @@ export class Application extends Component {
 
   componentDidUpdate(_, prevState) {
     if (!prevState.sessionToken && this.state.sessionToken) {
-      this.discoverAlgorithms()
-      this.discoverCatalog()
-      this.discoverExecutor()
-      this.discoverGeoserver()
+      this._autodiscoverServices()
     }
     this.props.serialize(this.state)
   }
 
-  componentDidMount() {
+  componentWillMount() {
     this.subscribeToHistoryEvents()
     if (this.state.sessionToken) {
-      this.discoverAlgorithms()
-      this.discoverCatalog()
-      this.discoverExecutor()
-      this.discoverGeoserver()
+      this._autodiscoverServices()
     }
   }
 
@@ -106,7 +108,7 @@ export class Application extends Component {
           bbox={this.state.bbox}
           mode={this._mapMode}
           selectedFeature={this.state.selectedFeature}
-          highlightedFeature={null}
+          highlightedFeature={this.state.hoveredFeature}
           onBoundingBoxChange={this._handleBoundingBoxChange}
           onSearchPageChange={this._handleSearchSubmit}
           onSelectFeature={this._handleSelectFeature}
@@ -175,10 +177,21 @@ export class Application extends Component {
             onNavigateToJob={this.navigateTo}
           />
         )
-    //   case '/product-lines':
-    //     return (
-    //       <ProductLineList/>
-    //     )
+      case '/product-lines':
+        return (
+          <ProductLineList
+            error={this.state.productLines.error}
+            isFetching={this.state.productLines.fetching}
+            productLines={this.state.productLines.records}
+            sessionToken={this.state.sessionToken}
+            onFetch={this._handleFetchProductLines}
+            onFetchJobs={this._handleFetchProductLineJobs}
+            onJobHoverIn={this._handleProductLineJobHoverIn}
+            onJobHoverOut={this._handleProductLineJobHoverOut}
+            onJobSelect={this._handleProductLineJobSelect}
+            onJobDeselect={this._handleProductLineJobDeselect}
+          />
+        )
       default:
         return (
           <div className={styles.unknownRoute}>
@@ -193,19 +206,23 @@ export class Application extends Component {
   //
 
   get _detections() {
-    if (this._mapMode !== MODE_PRODUCT_LINES) {
-      return this.state.jobs.records.filter(j => this.state.route.jobIds.includes(j.id) && j.properties[KEY_STATUS] === STATUS_SUCCESS)
+    switch (this.state.route.pathname) {
+      case '/create-product-line':
+      case '/product-lines':
+        return this.state.selectedFeature ? [this.state.selectedFeature] : this.state.productLines.records
+      default:
+        return this.state.jobs.records.filter(j => this.state.route.jobIds.includes(j.id) && j.properties[KEY_STATUS] === STATUS_SUCCESS)
     }
-    return []
-    // return this.state.productLineJobs.selection.length ? this.props.productLineJobs.selection : this.props.productLines
   }
 
   get _frames() {
-    if (this._mapMode !== MODE_PRODUCT_LINES) {
-      return this.state.jobs.records
+    switch (this.state.route.pathname) {
+      case '/create-product-line':
+      case '/product-lines':
+        return [this.state.selectedFeature, ...this.state.productLines.records].filter(Boolean)
+      default:
+        return this.state.jobs.records
     }
-    return []
-    // return this.props.productLines.concat(this.props.productLineJobs.selection)
   }
 
   get _mapMode() {
@@ -217,11 +234,20 @@ export class Application extends Component {
     }
   }
 
+  _autodiscoverServices() {
+    this._autodiscoveryPromise = Promise.all([
+      this.discoverAlgorithms(),
+      this.discoverCatalog(),
+      this.discoverExecutor(),
+      this.discoverGeoserver(),
+    ])
+  }
+
   discoverAlgorithms() {
     this.setState({
       algorithms: this.state.algorithms.$fetching(),
     })
-    algorithmsService.discover(this.state.sessionToken)
+    return algorithmsService.discover(this.state.sessionToken)
       .then(algorithms => {
         this.setState({
           algorithms: this.state.algorithms.$records(algorithms)
@@ -236,7 +262,7 @@ export class Application extends Component {
 
   discoverCatalog() {
     this.setState({ catalog: { discovering: true } })
-    catalogService.discover(this.state.sessionToken)
+    return catalogService.discover(this.state.sessionToken)
       .then(catalog => this.setState({ catalog }))
       .catch(error => this.setState({ catalog: { error }}))
   }
@@ -250,25 +276,13 @@ export class Application extends Component {
 
   discoverGeoserver() {
     this.setState({ geoserver: { discovering: true }})
-    geoserverService.discover(this.state.sessionToken)
+    return geoserverService.discover(this.state.sessionToken)
       .then(geoserver => this.setState({ geoserver }))
       .catch(error => this.setState({ geoserver: { error }}))
   }
 
   _handleBoundingBoxChange(bbox) {
     this.setState({ bbox })
-  }
-
-  _handleDismissJobError() {
-    this.setState({
-      jobs: this.state.jobs.$error(null),
-    })
-  }
-
-  _handleForgetJob(id) {
-    this.setState({
-      jobs: this.state.jobs.$filter(j => j.id !== id),
-    })
   }
 
   _handleCatalogApiKeyChange(catalogApiKey) {
@@ -279,6 +293,49 @@ export class Application extends Component {
     this.setState({ bbox: null })
   }
 
+  _handleDismissJobError() {
+    this.setState({
+      jobs: this.state.jobs.$error(null),
+    })
+  }
+
+  _handleFetchProductLines() {
+    this._autodiscoveryPromise.then(() => {
+      this.setState({
+        productLines: this.state.productLines.$error(null).$fetching(),
+      })
+      productLinesService.fetchProductLines({
+        algorithms:   this.state.algorithms.records,
+        eventTypeId:  this.state.catalog.eventTypeId,
+        executorUrl:  this.state.executor.url,
+        filters:      this.state.catalog.filters,
+        serviceId:    this.state.executor.serviceId,
+        sessionToken: this.state.sessionToken,
+      })
+        .then(records => {
+          this.setState({
+            productLines: this.state.productLines.$records(records),
+          })
+        })
+    })
+  }
+
+  _handleFetchProductLineJobs(productLineId, sinceDate) {
+    return productLinesService.fetchJobs({
+      productLineId,
+      sinceDate,
+      algorithms:   this.state.algorithms.records,
+      executorUrl:  this.state.executor.url,
+      sessionToken: this.state.sessionToken,
+    })
+  }
+
+  _handleForgetJob(id) {
+    this.setState({
+      jobs: this.state.jobs.$filter(j => j.id !== id),
+    })
+  }
+
   _handleJobCreated(job) {
     this.setState({
       jobs: this.state.jobs.$append(job)
@@ -287,6 +344,22 @@ export class Application extends Component {
       pathname: '/jobs',
       search: '?jobId=' + job.id,
     })
+  }
+
+  _handleProductLineJobHoverIn(job) {
+    this.setState({ hoveredFeature: job })
+  }
+
+  _handleProductLineJobHoverOut() {
+    this.setState({ hoveredFeature: null })
+  }
+
+  _handleProductLineJobSelect(job) {
+    this.setState({ selectedFeature: job })
+  }
+
+  _handleProductLineJobDeselect() {
+    this.setState({ selectedFeature: null })
   }
 
   _handleSearchCriteriaChange(searchCriteria) {
@@ -355,13 +428,14 @@ function generateInitialState() {
     route: generateRoute(location),
 
     // Services
-    catalog: {},
-    executor: {},
-    geoserver: {},
+    catalog: { discovering: true },
+    executor: { discovering: true },
+    geoserver: { discovering: true },
 
     // Data Collections
     algorithms: createCollection(),
     jobs: createCollection(),
+    productLines: createCollection(),
 
     // Map state
     bbox: null,

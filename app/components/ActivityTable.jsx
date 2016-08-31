@@ -16,7 +16,7 @@
 
 import React from 'react'
 import moment from 'moment'
-import SinceDateSelect from './SinceDateSelect'
+import {SinceDateSelect} from './SinceDateSelect'
 
 const styles = require('./ActivityTable.css')
 
@@ -28,7 +28,7 @@ import {
 
 const PLACEHOLDER = <span className={styles.placeholder}/>
 
-const ActivityTable = ({
+export const ActivityTable = ({
   className,
   jobs,
   selectedJobIds,
@@ -113,8 +113,6 @@ ActivityTable.propTypes = {
   onRowClick: React.PropTypes.func.isRequired,
   onSinceDateChange: React.PropTypes.func.isRequired,
 }
-
-export default ActivityTable
 
 //
 // Helpers

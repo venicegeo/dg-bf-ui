@@ -17,10 +17,8 @@
 const styles = require('./ProductLine.css')
 
 import React from 'react'
-import {Link} from 'react-router'
-import {featureToAnchor} from '../utils/map-anchor'
 import moment from 'moment'
-import ActivityTable from './ActivityTable'
+import {ActivityTable} from './ActivityTable'
 
 import {
   KEY_ALGORITHM_NAME,
@@ -33,23 +31,25 @@ import {
   KEY_STARTS_ON,
 } from '../constants'
 
-export default class ProductLine extends React.Component {
+export class ProductLine extends React.Component {
   static propTypes = {
     className:     React.PropTypes.string,
-    jobs:          React.PropTypes.object.isRequired,
     productLine:   React.PropTypes.object.isRequired,
-    selectedJobIds: React.PropTypes.array.isRequired,
-    fetchJobs:     React.PropTypes.func.isRequired,
+    onFetchJobs:   React.PropTypes.func.isRequired,
     onJobHoverIn:  React.PropTypes.func.isRequired,
     onJobHoverOut: React.PropTypes.func.isRequired,
     onJobSelect:   React.PropTypes.func.isRequired,
-    onJobDeselect: React.PropTypes.func,
+    onJobDeselect: React.PropTypes.func.isRequired,
   }
 
   constructor() {
     super()
     this.state = {
+      error: null,
       isExpanded: false,
+      isFetchingJobs: false,
+      selectedJobs: [],
+      jobs: [],
       sinceDate: last24Hours(),
     }
     this._handleExpansionToggle = this._handleExpansionToggle.bind(this)
@@ -59,12 +59,15 @@ export default class ProductLine extends React.Component {
 
   componentDidUpdate(prevProps, prevState) {
     if (this.state.isExpanded && (prevState.isExpanded !== this.state.isExpanded || prevState.sinceDate !== this.state.sinceDate)) {
-      this.props.fetchJobs(this.state.sinceDate)
+      this._fetchJobs()
+    }
+    if (prevState.isExpanded && !this.state.isExpanded && this.state.selectedJobs.length) {
+      this.props.onJobDeselect()
     }
   }
 
   render() {
-    const {className, jobs, productLine} = this.props
+    const {className, productLine} = this.props
     const {properties} = productLine
     const {isExpanded, sinceDate} = this.state
     return (
@@ -75,14 +78,9 @@ export default class ProductLine extends React.Component {
             <span>{properties[KEY_NAME]}</span>
           </h3>
           <div className={styles.controls}>
-            <Link
-              to={{
-                hash: featureToAnchor(productLine),
-                pathname: '/product-lines',
-              }}
-              title="View on Map">
+            <a href="#" title="View on Map">
               <i className="fa fa-globe"/>
-            </Link>
+            </a>
           </div>
         </section>
         <section className={styles.details}>
@@ -108,9 +106,9 @@ export default class ProductLine extends React.Component {
           </div>
           <ActivityTable
             className={styles.activityTable}
-            jobs={jobs.records.filter(jobFilter(sinceDate))}
-            selectedJobIds={this.props.selectedJobIds}
-            error={jobs.error}
+            jobs={this.state.jobs.filter(jobFilter(sinceDate))}
+            selectedJobIds={this.state.selectedJobs.map(j => j.id)}
+            error={this.state.error}
             sinceDate={sinceDate}
             sinceDates={[
               {value: last24Hours(), label: 'Last 24 Hours'},
@@ -128,17 +126,26 @@ export default class ProductLine extends React.Component {
     )
   }
 
+  _fetchJobs() {
+    this.setState({ isFetchingJobs: true })
+    this.props.onFetchJobs(this.props.productLine.id, this.state.sinceDate)
+      .then(jobs => this.setState({ jobs, isFetchingJobs: false }))
+      .catch(error => this.setState({ error, isFetchingJobs: false }))
+  }
+
   _handleExpansionToggle() {
     this.setState({ isExpanded: !this.state.isExpanded })
     // TODO -- scroll to positioning
   }
 
   _handleJobRowClick(job) {
-    if (this.props.selectedJobIds.includes(job.id)) {
+    if (this.state.selectedJobs.some(j => j.id === job.id)) {
       this.props.onJobDeselect()
+      this.setState({ selectedJobs: [] })
     }
     else {
       this.props.onJobSelect(job)
+      this.setState({ selectedJobs: [job] })
     }
   }
 
