@@ -421,6 +421,7 @@ export class Application extends Component {
     this.setState({
       route,
       bbox: this.state.route.pathname === route.pathname ? this.state.bbox : null,
+      selectedFeature: route.jobIds.length ? this.state.jobs.records.find(j => route.jobIds.includes(j.id)) : this.state.selectedFeature,
       searchResults: this.state.route.pathname === route.pathname ? this.state.searchResults : null,
     })
   }
@@ -444,7 +445,11 @@ export class Application extends Component {
   _subscribeToHistoryEvents() {
     window.addEventListener('popstate', () => {
       if (this.state.route.href !== location.pathname + location.search + location.hash) {
-        this.setState({ route: generateRoute(location) })
+        const route = generateRoute(location)
+        this.setState({
+          route,
+          selectedFeature: route.jobIds.length ? this.state.jobs.records.find(j => route.jobIds.includes(j.id)) : this.state.selectedFeature,
+        })
       }
     })
   }

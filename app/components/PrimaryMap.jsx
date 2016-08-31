@@ -148,6 +148,7 @@ export class PrimaryMap extends Component {
     }
     if (previousProps.selectedFeature !== this.props.selectedFeature) {
       this._renderSelectionPreview()
+      this._updateSelectedFeature()
     }
     if (previousProps.detections !== this.props.detections) {
       this._renderDetections()
@@ -667,10 +668,16 @@ export class PrimaryMap extends Component {
   }
 
   _updateSelectedFeature() {
+    const features = this._selectInteraction.getFeatures()
+    features.clear()
+    const {selectedFeature} = this.props
+    if (!selectedFeature) {
+      return  // Nothing to do
+    }
     const reader = new ol.format.GeoJSON()
-    const feature = reader.readFeature(this.props.selectedFeature, {dataProjection: 'EPSG:4326', featureProjection: 'EPSG:3857'})
+    const feature = reader.readFeature(selectedFeature, {dataProjection: 'EPSG:4326', featureProjection: 'EPSG:3857'})
     const center = ol.extent.getCenter(feature.getGeometry().getExtent())
-    this._selectInteraction.getFeatures().push(feature)
+    features.push(feature)
     this._featureDetailsOverlay.setPosition(center)
   }
 }
