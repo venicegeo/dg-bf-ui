@@ -33,6 +33,10 @@ export const createCollection = (initialRecords = []) => ({
     return Object.assign({}, this, {records: this.records.filter(func)})
   },
 
+  $map(func) {
+    return Object.assign({}, this, {records: this.records.map(func)})
+  },
+
   $records(records) {
     return Object.assign({}, this, {records, fetching: false})
   },

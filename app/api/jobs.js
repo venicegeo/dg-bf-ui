@@ -16,14 +16,19 @@
 
 import moment from 'moment'
 import {Client} from '../utils/piazza-client'
+import * as worker from './workers/jobs'
 import {
   GATEWAY,
+  JOBS_WORKER,
   SCHEMA_VERSION,
 } from '../config'
 
 import {
   KEY_ALGORITHM_NAME,
   KEY_CREATED_ON,
+  KEY_GEOJSON_DATA_ID,
+  KEY_WMS_LAYER_ID,
+  KEY_WMS_URL,
   KEY_IMAGE_ID,
   KEY_IMAGE_CAPTURED_ON,
   KEY_IMAGE_SENSOR,
@@ -92,4 +97,37 @@ export function createJob({
       console.error('(jobs:create) could not execute:', err)
       throw err
     })
+}
+
+export function startWorker({
+  sessionToken,
+  getRecords,
+  onTerminate,
+  onUpdate,
+  onError,
+}) {
+  worker.start({
+    client:   new Client(GATEWAY, sessionToken),
+    interval: JOBS_WORKER.INTERVAL,
+    ttl:      JOBS_WORKER.JOB_TTL,
+    onError,
+    onTerminate,
+
+    getRunningJobs() {
+      return getRecords().filter(j => j.properties[KEY_STATUS] === STATUS_RUNNING)
+    },
+
+    onUpdate(jobId, status, geojsonDataId, wmsLayerId, wmsUrl) {
+      const record = getRecords().find(j => j.id === jobId)
+      const updatedRecord = Object.assign({}, record, {
+        properties: Object.assign({}, record.properties, {
+          [KEY_STATUS]:          status,
+          [KEY_GEOJSON_DATA_ID]: geojsonDataId,
+          [KEY_WMS_LAYER_ID]:    wmsLayerId,
+          [KEY_WMS_URL]:         wmsUrl,
+        })
+      })
+      onUpdate(updatedRecord)
+    },
+  })
 }

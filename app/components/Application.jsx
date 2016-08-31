@@ -35,6 +35,7 @@ import {
 } from './PrimaryMap'
 import {ProductLineList} from './ProductLineList'
 import * as algorithmsService from '../api/algorithms'
+import * as jobsService from '../api/jobs'
 import * as catalogService from '../api/catalog'
 import * as executorService from '../api/executor'
 import * as geoserverService from '../api/geoserver'
@@ -81,14 +82,16 @@ export class Application extends Component {
   componentDidUpdate(_, prevState) {
     if (!prevState.sessionToken && this.state.sessionToken) {
       this._autodiscoverServices()
+      this._startJobsWorker()
     }
     this.props.serialize(this.state)
   }
 
   componentWillMount() {
-    this.subscribeToHistoryEvents()
+    this._subscribeToHistoryEvents()
     if (this.state.sessionToken) {
       this._autodiscoverServices()
+      this._startJobsWorker()
     }
   }
 
@@ -250,14 +253,14 @@ export class Application extends Component {
 
   _autodiscoverServices() {
     this._autodiscoveryPromise = Promise.all([
-      this.discoverAlgorithms(),
-      this.discoverCatalog(),
-      this.discoverExecutor(),
-      this.discoverGeoserver(),
+      this._discoverAlgorithms(),
+      this._discoverCatalog(),
+      this._discoverExecutor(),
+      this._discoverGeoserver(),
     ])
   }
 
-  discoverAlgorithms() {
+  _discoverAlgorithms() {
     this.setState({
       algorithms: this.state.algorithms.$fetching(),
     })
@@ -274,21 +277,21 @@ export class Application extends Component {
       })
   }
 
-  discoverCatalog() {
+  _discoverCatalog() {
     this.setState({ catalog: { discovering: true } })
     return catalogService.discover(this.state.sessionToken)
       .then(catalog => this.setState({ catalog }))
       .catch(error => this.setState({ catalog: { error }}))
   }
 
-  discoverExecutor() {
+  _discoverExecutor() {
     this.setState({ executor: { discovering: true }})
     executorService.discover(this.state.sessionToken)
       .then(executor => this.setState({ executor }))
       .catch(error => this.setState({ executor: { error }}))
   }
 
-  discoverGeoserver() {
+  _discoverGeoserver() {
     this.setState({ geoserver: { discovering: true }})
     return geoserverService.discover(this.state.sessionToken)
       .then(geoserver => this.setState({ geoserver }))
@@ -422,7 +425,23 @@ export class Application extends Component {
     })
   }
 
-  subscribeToHistoryEvents() {
+  _startJobsWorker() {
+    this._autodiscoveryPromise.then(() => {
+      jobsService.startWorker({
+        sessionToken: this.state.sessionToken,
+        getRecords: () => this.state.jobs.records,
+        onUpdate: (updatedRecord) => this.setState({
+          jobs: this.state.jobs.$map(j => j.id === updatedRecord.id ? updatedRecord : j),
+        }),
+        onError: (err) => this.setState({
+          jobs: this.state.jobs.$error(err),
+        }),
+        onTerminate() {}
+      })
+    })
+  }
+
+  _subscribeToHistoryEvents() {
     window.addEventListener('popstate', () => {
       if (this.state.route.href !== location.pathname + location.search + location.hash) {
         this.setState({ route: generateRoute(location) })
