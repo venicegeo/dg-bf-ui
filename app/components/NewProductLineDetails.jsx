@@ -18,7 +18,7 @@ const styles = require('./NewProductLineDetails.css')
 
 import React from 'react'
 
-const NewProductLineDetails = ({ name, dateStart, dateStop, onNameChange, onDateChange }) => (
+export const NewProductLineDetails = ({ name, dateStart, dateStop, onNameChange, onDateChange }) => (
   <div className={styles.root}>
     <h2>Product Line Details</h2>
 
@@ -65,5 +65,3 @@ NewProductLineDetails.propTypes = {
   onDateChange: React.PropTypes.func.isRequired,
   onNameChange: React.PropTypes.func.isRequired,
 }
-
-export default NewProductLineDetails

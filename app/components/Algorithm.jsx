@@ -120,7 +120,7 @@ function isCompatible(requirement, imageProperties) {
   case REQUIREMENT_BANDS:
     return requirement.literal.split(',').every(s => imageProperties.bands[s])
   case REQUIREMENT_CLOUDCOVER:
-    return imageProperties.cloudCover < requirement.literal
+    return imageProperties.cloudCover <= requirement.literal
   default:
     return false
   }

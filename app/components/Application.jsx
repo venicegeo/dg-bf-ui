@@ -21,6 +21,7 @@ import {render} from 'react-dom'
 import debounce from 'lodash/debounce'
 import {About} from './About'
 import {CreateJob, createSearchCriteria} from './CreateJob'
+import {CreateProductLine} from './CreateProductLine'
 import {Help} from './Help'
 import {JobStatusList} from './JobStatusList'
 import {Login} from './Login'
@@ -66,6 +67,7 @@ export class Application extends Component {
     this._handleFetchProductLineJobs = this._handleFetchProductLineJobs.bind(this)
     this._handleForgetJob = this._handleForgetJob.bind(this)
     this._handleJobCreated = this._handleJobCreated.bind(this)
+    this._handleProductLineCreated = this._handleProductLineCreated.bind(this)
     this._handleProductLineJobHoverIn = this._handleProductLineJobHoverIn.bind(this)
     this._handleProductLineJobHoverOut = this._handleProductLineJobHoverOut.bind(this)
     this._handleProductLineJobSelect = this._handleProductLineJobSelect.bind(this)
@@ -155,10 +157,22 @@ export class Application extends Component {
             onSearchSubmit={this._handleSearchSubmit}
           />
         )
-    //   case '/create-product-line':
-    //     return (
-    //       <CreateProductLine/>
-    //     )
+      case '/create-product-line':
+        return (
+          <CreateProductLine
+            algorithms={this.state.algorithms.records}
+            bbox={this.state.bbox}
+            catalogApiKey={this.state.catalogApiKey}
+            eventTypeId={this.state.catalogApiKey}
+            executorServiceId={this.state.executor.serviceId}
+            executorUrl={this.state.executor.url}
+            filters={this.state.catalog.filters || []}
+            sessionToken={this.state.sessionToken}
+            onCatalogApiKeyChange={this._handleCatalogApiKeyChange}
+            onClearBbox={this._handleClearBbox}
+            onProductLineCreated={this._handleProductLineCreated}
+          />
+        )
       case '/help':
         return (
           <Help
@@ -346,6 +360,10 @@ export class Application extends Component {
     })
   }
 
+  _handleProductLineCreated() {
+    this.navigateTo({ pathname: '/product-lines' })
+  }
+
   _handleProductLineJobHoverIn(job) {
     this.setState({ hoveredFeature: job })
   }
@@ -428,9 +446,9 @@ function generateInitialState() {
     route: generateRoute(location),
 
     // Services
-    catalog: { discovering: true },
-    executor: { discovering: true },
-    geoserver: { discovering: true },
+    catalog: {},
+    executor: {},
+    geoserver: {},
 
     // Data Collections
     algorithms: createCollection(),

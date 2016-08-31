@@ -32,9 +32,61 @@ import {
   KEY_STARTS_ON,
   KEY_STATUS,
   KEY_WMS_LAYER_ID,
+  REQUIREMENT_BANDS,
   STATUS_ACTIVE,
   STATUS_INACTIVE,
 } from '../constants'
+
+export function create({
+  algorithm,
+  bbox,
+  catalogApiKey,
+  cloudCover,
+  dateStart,
+  dateStop,
+  eventTypeId,
+  executorServiceId,
+  executorUrl,
+  filter,
+  name,
+  sessionToken,
+}) {
+  return fetch(`${executorUrl}/newProductLine`, {
+    method: 'POST',
+    body: JSON.stringify({
+      cloudCover:  cloudCover,
+      eventTypeId: [eventTypeId],
+      minX:        bbox[0],
+      minY:        bbox[1],
+      maxX:        bbox[2],
+      maxY:        bbox[3],
+      minDate:     dateStart,
+      maxDate:     dateStop,
+      name:        name,
+      serviceId:   executorServiceId,
+      spatialFilterId:  filter,
+      bfInputJSON: {
+        algoType:    algorithm.type,
+        bands:       algorithm.requirements.find(a => a.name === REQUIREMENT_BANDS).literal.split(','),
+        dbAuthToken: catalogApiKey,
+        pzAddr:      GATEWAY,
+        pzAuthToken: sessionToken,
+        svcURL:      algorithm.url,
+      },
+    }),
+  })
+    .then(checkResponse)
+    .then(data => {
+      if (!data.triggerId || !data.layerGroupId) {
+        throw new Error('Server response is missing required data')
+      }
+      return data
+    })
+    .catch(err => {
+      console.error('(productLines:create) failed:', err)
+      throw err
+    })
+}
 
 export function fetchJobs({
   productLineId,
