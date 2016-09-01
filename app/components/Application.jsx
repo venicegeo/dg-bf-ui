@@ -351,6 +351,12 @@ export class Application extends Component {
     this.setState({
       jobs: this.state.jobs.$filter(j => j.id !== id),
     })
+    if (this.state.route.jobIds.includes(id)) {
+      this.navigateTo({
+        pathname: this.state.route.pathname,
+        search: this.state.route.search.replace(new RegExp('\\??jobId=' + id), ''),
+      })
+    }
   }
 
   _handleJobCreated(job) {
@@ -417,11 +423,20 @@ export class Application extends Component {
 
   navigateTo(loc) {
     const route = generateRoute(loc)
-    history.pushState({}, null, route.href)
+    history.pushState(null, null, route.href)
+
+    let {selectedFeature} = this.state
+    if (!route.jobIds.length && this.state.selectedFeature && this.state.selectedFeature.properties[KEY_TYPE] === TYPE_JOB) {
+      selectedFeature = null
+    }
+    else if (route.jobIds.length) {
+      selectedFeature = this.state.jobs.records.find(j => route.jobIds.includes(j.id))
+    }
+
     this.setState({
       route,
+      selectedFeature,
       bbox: this.state.route.pathname === route.pathname ? this.state.bbox : null,
-      selectedFeature: route.jobIds.length ? this.state.jobs.records.find(j => route.jobIds.includes(j.id)) : this.state.selectedFeature,
       searchResults: this.state.route.pathname === route.pathname ? this.state.searchResults : null,
     })
   }
