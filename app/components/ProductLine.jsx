@@ -97,7 +97,7 @@ export class ProductLine extends React.Component {
               <dd>{computeMask}</dd>
               */}
               <dt>Spatial Filter</dt>
-              <dd>{titleCase(properties[KEY_SPATIAL_FILTER_NAME])}</dd>
+              <dd>{titleCase(properties[KEY_SPATIAL_FILTER_NAME]) || 'None'}</dd>
               <dt>Owner</dt>
               <dd>{properties[KEY_OWNER]}</dd>
               <dt>Date Created</dt>

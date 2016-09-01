@@ -107,7 +107,7 @@ export class Application extends Component {
           frames={this._frames}
           detections={this._detections}
           imagery={this.state.searchResults}
-          isSearching={false}
+          isSearching={this.state.isSearching}
           view={this.state.mapView}
           catalogApiKey={this.state.catalogApiKey}
           bbox={this.state.bbox}
@@ -166,7 +166,7 @@ export class Application extends Component {
             algorithms={this.state.algorithms.records}
             bbox={this.state.bbox}
             catalogApiKey={this.state.catalogApiKey}
-            eventTypeId={this.state.catalogApiKey}
+            eventTypeId={this.state.catalog.eventTypeId}
             executorServiceId={this.state.executor.serviceId}
             executorUrl={this.state.executor.url}
             filters={this.state.catalog.filters || []}
@@ -307,7 +307,10 @@ export class Application extends Component {
   }
 
   _handleClearBbox() {
-    this.setState({ bbox: null })
+    this.setState({
+      bbox: null,
+      searchResults: null,
+    })
   }
 
   _handleDismissJobError() {
