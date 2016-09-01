@@ -442,18 +442,16 @@ export class Application extends Component {
   }
 
   _startJobsWorker() {
-    this._autodiscoveryPromise.then(() => {
-      jobsService.startWorker({
-        sessionToken: this.state.sessionToken,
-        getRecords: () => this.state.jobs.records,
-        onUpdate: (updatedRecord) => this.setState({
-          jobs: this.state.jobs.$map(j => j.id === updatedRecord.id ? updatedRecord : j),
-        }),
-        onError: (err) => this.setState({
-          jobs: this.state.jobs.$error(err),
-        }),
-        onTerminate() {}
-      })
+    jobsService.startWorker({
+      sessionToken: this.state.sessionToken,
+      getRecords: () => this.state.jobs.records,
+      onUpdate: (updatedRecord) => this.setState({
+        jobs: this.state.jobs.$map(j => j.id === updatedRecord.id ? updatedRecord : j),
+      }),
+      onError: (err) => this.setState({
+        jobs: this.state.jobs.$error(err),
+      }),
+      onTerminate() {}
     })
   }
 
