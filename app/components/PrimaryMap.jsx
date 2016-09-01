@@ -387,8 +387,7 @@ export class PrimaryMap extends Component {
         this._drawLayer,
         this._imageryLayer,
         this._detectionsLayer,
-        this._highlightLayer,
-	x
+        this._highlightLayer
       ],
       target: this.refs.container,
       view: new ol.View({
