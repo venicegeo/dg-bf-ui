@@ -53,7 +53,7 @@ import {
 export const createApplication = (element) => render(
   <Application
     deserialize={generateInitialState}
-    serialize={debounce(serialize, 100)}
+    serialize={debounce(serialize, 500)}
   />, element)
 
 export class Application extends Component {
