@@ -245,7 +245,7 @@ export class PrimaryMap extends Component {
   _emitViewChange() {
     const view = this._map.getView()
     const {basemapIndex} = this.state
-    const center = view.getCenter()
+    const center = ol.proj.transform(view.getCenter(), 'EPSG:3857', 'EPSG:4326')
     const zoom = view.getZoom() || MIN_ZOOM  // HACK -- sometimes getZoom returns undefined...
     // Don't emit false positives
     if (!this.props.view
@@ -426,7 +426,7 @@ export class PrimaryMap extends Component {
     const {basemapIndex, zoom, center} = this.props.view
     this.setState({basemapIndex})
     const view = this._map.getView()
-    view.setCenter(view.constrainCenter(center))
+    view.setCenter(view.constrainCenter(ol.proj.transform(center, 'EPSG:4326', 'EPSG:3857')))
     view.setZoom(zoom)
   }
 
