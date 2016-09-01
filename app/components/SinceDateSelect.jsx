@@ -54,7 +54,7 @@ export class SinceDateSelect extends React.Component {
     return (
       <div className={`${styles.root} ${className || ''} ${this.state.isOpen ? styles.isOpen : ''}`}>
         <div className={styles.button} onClick={this._handleToggleOpen}>
-          {current.label} <i className="fa fa-caret-down"/>
+          {current ? current.label : ''} <i className="fa fa-caret-down"/>
         </div>
         <ul className={styles.options}>
           {options.map(option => (
