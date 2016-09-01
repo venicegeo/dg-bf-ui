@@ -17,6 +17,7 @@
 import React from 'react'
 import moment from 'moment'
 import {SinceDateSelect} from './SinceDateSelect'
+import LoadingAnimation from './LoadingAnimation'
 
 const styles = require('./ActivityTable.css')
 
@@ -26,10 +27,9 @@ import {
   KEY_IMAGE_SENSOR,
 } from '../constants'
 
-const PLACEHOLDER = <span className={styles.placeholder}/>
-
 export const ActivityTable = ({
   className,
+  isLoading,
   jobs,
   selectedJobIds,
   sinceDate,
@@ -39,7 +39,7 @@ export const ActivityTable = ({
   onRowClick,
   onSinceDateChange,
 }) => (
-  <div className={`${styles.root} ${className}`}>
+  <div className={`${styles.root} ${isLoading ? styles.isLoading : ''} ${className}`}>
 
     <div className={styles.filter}>
       Activity:
@@ -49,10 +49,6 @@ export const ActivityTable = ({
         value={sinceDate}
         onChange={onSinceDateChange}
       />
-    </div>
-
-    <div className={styles.progressbar}>
-      <div className={styles.puck}/>
     </div>
 
     <div className={styles.shadowTop}/>
@@ -74,36 +70,28 @@ export const ActivityTable = ({
               onMouseEnter={() => job.properties && onHoverIn(job)}
               onMouseLeave={() => job.properties && onHoverOut(job)}
               >
-              <td>
-                {job.properties
-                  ? getImageId(job)
-                  : PLACEHOLDER
-                }
-              </td>
-              <td>
-                {job.properties
-                  ? getCapturedOn(job)
-                  : PLACEHOLDER
-                }
-              </td>
-              <td>
-                {job.properties
-                  ? getImageSensor(job)
-                  : PLACEHOLDER
-                }
-              </td>
+              <td>{getImageId(job)}</td>
+              <td>{getCapturedOn(job)}</td>
+              <td>{getImageSensor(job)}</td>
             </tr>
           ))}
+          {isLoading && generatePlaceholderRows(10)}
         </tbody>
       </table>
     </div>
     <div className={styles.shadowBottom}/>
+    {isLoading && (
+      <div className={styles.loadingMask}>
+        <LoadingAnimation className={styles.loadingAnimation}/>
+      </div>
+    )}
   </div>
 )
 
 ActivityTable.propTypes = {
   className: React.PropTypes.string,
   error: React.PropTypes.object,
+  isLoading: React.PropTypes.bool.isRequired,
   jobs: React.PropTypes.array.isRequired,
   selectedJobIds: React.PropTypes.arrayOf(React.PropTypes.string),
   sinceDate: React.PropTypes.string.isRequired,
@@ -117,6 +105,20 @@ ActivityTable.propTypes = {
 //
 // Helpers
 //
+
+function generatePlaceholderRows(count) {
+  const rows = []
+  for (let i = 0; i < count; i++) {
+    rows.push(
+      <tr key={i} className={styles.placeholder}>
+        <td><span/></td>
+        <td><span/></td>
+        <td><span/></td>
+      </tr>
+    )
+  }
+  return rows
+}
 
 function getCapturedOn({ properties }) {
   const then = moment(properties[KEY_IMAGE_CAPTURED_ON])

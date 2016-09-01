@@ -24,7 +24,7 @@
   --row-bgcolor-active: color(var(--bgcolor) lightness(+25%));
   --row-bgcolor-hover: color(var(--bgcolor) lightness(+40%) alpha(10%));
   --filter-bgcolor: color(var(--bgcolor) lightness(+10%));
-  --progressbar-fgcolor: var(--COLOR_BRAND);
+  --loadingMask-bgcolor: var(--COLOR_BRAND);
 }
 
 .root {
@@ -43,25 +43,6 @@
 .filterDropdown {
   z-index: 3;
   margin-left: .25em;
-}
-
-.progressbar {
-  position: relative;
-  transition: height .1s linear;
-  height: 0;
-}
-
-.puck {
-  position: absolute;
-  top: 0;
-  left: 0;
-  bottom: 0;
-  width: 0;
-  background-color: var(--progressbar-fgcolor);
-}
-
-.isLoading .progressbar {
-  height: 5px;
 }
 
 /* =========================================================================
@@ -145,10 +126,43 @@
   color: white !important;
 }
 
-.placeholder {
+.placeholder span {
   display: inline-block;
-  height: 6px;
+  height: 3px;
   width: 60%;
   background-color: currentColor;
+  opacity: .2;
+}
+
+/* =========================================================================
+   Loading State
+   ========================================================================= */
+
+.loadingMask {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  cursor: wait;
   opacity: .3;
+  background-color: var(--loadingMask-bgcolor);
+  z-index: 4;
+}
+
+.loadingAnimation {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  opacity: .7;
+}
+
+.isLoading .loadingMask {
+  animation: cycleOpacity infinite alternate 1s;
+}
+
+@keyframes cycleOpacity {
+  from { opacity: .3; }
+  to { opacity: .5; }
 }

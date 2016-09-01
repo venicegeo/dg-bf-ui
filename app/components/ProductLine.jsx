@@ -92,7 +92,7 @@ export class ProductLine extends React.Component {
               <dt>Algorithm</dt>
               <dd>{properties[KEY_ALGORITHM_NAME]}</dd>
               <dt>Cloud Cover</dt>
-              <dd>{properties[KEY_IMAGE_CLOUDCOVER]}</dd>
+              <dd>{properties[KEY_IMAGE_CLOUDCOVER]}% or less</dd>
               {/*
               <dt>Compute Mask</dt>
               <dd>{computeMask}</dd>
@@ -107,6 +107,7 @@ export class ProductLine extends React.Component {
           </div>
           <ActivityTable
             className={styles.activityTable}
+            isLoading={this.state.isFetchingJobs}
             jobs={this.state.jobs.filter(jobFilter(sinceDate))}
             selectedJobIds={this.state.selectedJobs.map(j => j.id)}
             error={this.state.error}
