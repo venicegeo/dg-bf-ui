@@ -511,8 +511,6 @@ function generateInitialState() {
     state[key] = deserializedState[key] || state[key]
   }
 
-  state.selectedFeature = state.jobs.records.find(j => state.route.jobIds.includes(j.id)) || null
-
   return state
 }
 
@@ -527,6 +525,7 @@ function deserialize() {
     mapView:        JSON.parse(sessionStorage.getItem('mapView')),
     searchCriteria: JSON.parse(sessionStorage.getItem('searchCriteria')),
     searchResults:  JSON.parse(sessionStorage.getItem('searchResults')),
+    selectedFeature: JSON.parse(sessionStorage.getItem('selectedFeature')),
     sessionToken:   sessionStorage.getItem('sessionToken') || null,
     catalogApiKey:  localStorage.getItem('catalog_apiKey') || '',  // HACK
   }
@@ -545,6 +544,7 @@ function serialize(state) {
   sessionStorage.setItem('mapView', JSON.stringify(state.mapView))
   sessionStorage.setItem('searchCriteria', JSON.stringify(state.searchCriteria))
   sessionStorage.setItem('searchResults', JSON.stringify(state.searchResults))
+  sessionStorage.setItem('selectedFeature', JSON.stringify(state.selectedFeature))
   sessionStorage.setItem('sessionToken', state.sessionToken || '')
   localStorage.setItem('catalog_apiKey', state.catalogApiKey)  // HACK
 }

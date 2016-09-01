@@ -53,11 +53,11 @@ export class CreateJob extends Component {
     sessionToken:             React.PropTypes.string.isRequired,
   }
 
-  constructor() {
-    super()
+  constructor(props) {
+    super(props)
     this.state = {
       isCreating: false,
-      name: '',
+      name: props.selectedImage ? generateName(props.selectedImage.id) : '',
       shouldAutogenerateName: true,
     }
     this._handleCreateJob = this._handleCreateJob.bind(this)
@@ -76,7 +76,7 @@ export class CreateJob extends Component {
 
   componentWillReceiveProps(nextProps) {
     if (this.state.shouldAutogenerateName && nextProps.selectedImage && nextProps.selectedImage !== this.props.selectedImage) {
-      this.setState({ name: nextProps.selectedImage.id.replace(/^landsat:/, '') })
+      this.setState({ name: generateName(nextProps.selectedImage.id) })
     }
   }
 
@@ -185,4 +185,12 @@ export class CreateJob extends Component {
       shouldAutogenerateName: !name,
     })
   }
+}
+
+//
+// Helpers
+//
+
+function generateName(imageId) {
+  return imageId.replace(/^landsat:/, '')
 }
