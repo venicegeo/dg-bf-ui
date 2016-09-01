@@ -31,6 +31,7 @@ export class ProductLineList extends React.Component {
     onJobHoverOut: React.PropTypes.func.isRequired,
     onJobSelect:   React.PropTypes.func.isRequired,
     onJobDeselect: React.PropTypes.func.isRequired,
+    onPanTo:       React.PropTypes.func.isRequired,
   }
 
   componentDidMount() {
@@ -64,6 +65,7 @@ export class ProductLineList extends React.Component {
               onJobHoverOut={this.props.onJobHoverOut}
               onJobSelect={this.props.onJobSelect}
               onJobDeselect={this.props.onJobDeselect}
+              onPanTo={this.props.onPanTo}
             />
           ))}
           {this.props.isFetching && (

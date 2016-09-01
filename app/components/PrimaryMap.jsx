@@ -26,7 +26,7 @@ import LoadingAnimation from './LoadingAnimation'
 import ImagerySearchResults from './ImagerySearchResults'
 import debounce from 'lodash/debounce'
 import throttle from 'lodash/throttle'
-import * as bboxUtil from '../utils/bbox'
+import {featureToBbox, deserializeBbox, serializeBbox} from '../utils/geometries'
 import styles from './PrimaryMap.css'
 import {
   TILE_PROVIDERS,
@@ -269,7 +269,7 @@ export class PrimaryMap extends Component {
 
   _handleDrawEnd(event) {
     const geometry = event.feature.getGeometry()
-    const bbox = bboxUtil.serialize(geometry.getExtent())
+    const bbox = serializeBbox(geometry.getExtent())
     this.props.onBoundingBoxChange(bbox)
   }
 
@@ -453,7 +453,7 @@ export class PrimaryMap extends Component {
 
     // Additions/Updates
     const extent = ol.extent.createEmpty()
-    detections.forEach(d => ol.extent.extend(extent, bboxUtil.featureToBbox(d)))
+    detections.forEach(d => ol.extent.extend(extent, featureToBbox(d)))
     layer.setExtent(extent)
     source.updateParams({
       [KEY_LAYERS]: incomingLayerIds,
@@ -554,7 +554,7 @@ export class PrimaryMap extends Component {
   _renderImagerySearchResultsOverlay() {
     this._imageSearchResultsOverlay.setPosition(undefined)
     // HACK HACK HACK HACK HACK HACK HACK HACK
-    const bbox = bboxUtil.deserialize(this.props.bbox)
+    const bbox = deserializeBbox(this.props.bbox)
     if (!bbox) {
       return  // Nothing to pin the overlay to
     }
@@ -577,7 +577,7 @@ export class PrimaryMap extends Component {
 
   _renderImagerySearchBbox() {
     this._clearDraw()
-    const bbox = bboxUtil.deserialize(this.props.bbox)
+    const bbox = deserializeBbox(this.props.bbox)
     if (!bbox) {
       return
     }
@@ -716,7 +716,7 @@ function animateLayerExit(layer) {
 
 function featuresToImages(...features) {
   return features.filter(Boolean).map(feature => ({
-    extent: bboxUtil.featureToBbox(feature),
+    extent: featureToBbox(feature),
     id:     feature.properties[KEY_IMAGE_ID] || feature.id,
   }))
 }

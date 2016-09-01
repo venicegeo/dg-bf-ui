@@ -41,6 +41,7 @@ import * as executorService from '../api/executor'
 import * as geoserverService from '../api/geoserver'
 import * as productLinesService from '../api/productLines'
 import {createCollection} from '../utils/collections'
+import {getFeatureCenter} from '../utils/geometries'
 
 import {
   KEY_TYPE,
@@ -76,7 +77,10 @@ export class Application extends Component {
     this._handleSearchCriteriaChange = this._handleSearchCriteriaChange.bind(this)
     this._handleSearchSubmit = this._handleSearchSubmit.bind(this)
     this._handleSelectFeature = this._handleSelectFeature.bind(this)
+    this._handleNavigateToJob = this._handleNavigateToJob.bind(this)
+    this._handlePanToProductLine = this._handlePanToProductLine.bind(this)
     this.navigateTo = this.navigateTo.bind(this)
+    this.panTo = this.panTo.bind(this)
   }
 
   componentDidUpdate(_, prevState) {
@@ -191,7 +195,7 @@ export class Application extends Component {
             jobs={this.state.jobs.records}
             onDismissError={this._handleDismissJobError}
             onForgetJob={this._handleForgetJob}
-            onNavigateToJob={this.navigateTo}
+            onNavigateToJob={this._handleNavigateToJob}
           />
         )
       case '/product-lines':
@@ -207,6 +211,7 @@ export class Application extends Component {
             onJobHoverOut={this._handleProductLineJobHoverOut}
             onJobSelect={this._handleProductLineJobSelect}
             onJobDeselect={this._handleProductLineJobDeselect}
+            onPanTo={this._handlePanToProductLine}
           />
         )
       default:
@@ -372,6 +377,15 @@ export class Application extends Component {
     })
   }
 
+  _handleNavigateToJob(loc) {
+    this.navigateTo(loc)
+    this.panTo(getFeatureCenter(this.state.jobs.records.find(j => loc.search.includes(j.id))), 7.5)
+  }
+
+  _handlePanToProductLine(productLine) {
+    this.panTo(getFeatureCenter(productLine), 3.5)
+  }
+
   _handleProductLineCreated() {
     this.navigateTo({ pathname: '/product-lines' })
   }
@@ -441,6 +455,15 @@ export class Application extends Component {
       selectedFeature,
       bbox: this.state.route.pathname === route.pathname ? this.state.bbox : null,
       searchResults: this.state.route.pathname === route.pathname ? this.state.searchResults : null,
+    })
+  }
+
+  panTo(point, zoom = 10) {
+    this.setState({
+      mapView: Object.assign({}, this.state.mapView, {
+        center: point,
+        zoom,
+      })
     })
   }
 

@@ -40,6 +40,7 @@ export class ProductLine extends React.Component {
     onJobHoverOut: React.PropTypes.func.isRequired,
     onJobSelect:   React.PropTypes.func.isRequired,
     onJobDeselect: React.PropTypes.func.isRequired,
+    onPanTo:       React.PropTypes.func.isRequired,
   }
 
   constructor() {
@@ -78,7 +79,7 @@ export class ProductLine extends React.Component {
             <span>{properties[KEY_NAME]}</span>
           </h3>
           <div className={styles.controls}>
-            <a href="#" title="View on Map">
+            <a onClick={() => this.props.onPanTo(this.props.productLine)} title="View on Map">
               <i className="fa fa-globe"/>
             </a>
           </div>

@@ -15,27 +15,45 @@
  **/
 
 import ol from 'openlayers'
-import {truncate, unwrapPoint} from './coordinates'
 
 const WGS84 = 'EPSG:4326'
 const WEB_MERCATOR = 'EPSG:3857'
 
-export function featureToBbox(feature) {
+export function getFeatureCenter(feature, featureProjection = WGS84) {
+  return ol.extent.getCenter(featureToBbox(feature, featureProjection))
+}
+
+export function featureToBbox(feature, featureProjection = WEB_MERCATOR) {
   const reader = new ol.format.GeoJSON()
-  const geometry = reader.readGeometry(feature.geometry, {featureProjection: WEB_MERCATOR})
+  const geometry = reader.readGeometry(feature.geometry, {featureProjection})
   return geometry.getExtent()
 }
 
-export function deserialize(serialized) {
+export function deserializeBbox(serialized) {
   if (serialized && serialized.length === 4) {
     return ol.proj.transformExtent(serialized, WGS84, WEB_MERCATOR)
   }
   return null
 }
 
-export function serialize(extent) {
+export function serializeBbox(extent) {
   const bbox = ol.proj.transformExtent(extent, WEB_MERCATOR, WGS84)
   const p1 = unwrapPoint(bbox.slice(0, 2))
   const p2 = unwrapPoint(bbox.slice(2, 4))
   return p1.concat(p2).map(truncate)
+}
+
+//
+// Helpers
+//
+
+function truncate(number) {
+  return Math.round(number * 100) / 100
+}
+
+function unwrapPoint([x, y]) {
+  return [
+    x > 0 ? Math.min(180, x) : Math.max(-180, x),
+    y
+  ]
 }
