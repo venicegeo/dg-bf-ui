@@ -15,7 +15,7 @@
  **/
 
 import moment from 'moment'
-import {importRecordById as importJobRecordById} from '../utils/import-job-record'
+import {importByDataId} from '../utils/import-job-record'
 import {Client} from '../utils/piazza-client'
 import {GATEWAY} from '../config'
 
@@ -95,13 +95,12 @@ export function fetchJobs({
   executorUrl,
   sessionToken,
 }) {
-  return fetch(`${executorUrl}/listProdLineJobs`, {
+  return fetch(`${executorUrl}/resultsByProductLine`, {
     body: JSON.stringify({
-      // FIXME -- I can has property name consistency, bfhandle?
-      TriggerId:   productLineId,
-      PzAuthToken: sessionToken,
-      PzAddr:      GATEWAY,
-      PerPage:     '200',  // HACK -- see explanation below
+      TriggerId: productLineId,
+      PzAuth:    sessionToken,
+      PzAddr:    GATEWAY,
+      PerPage:   '200',  // HACK -- see explanation below
     }),
     headers: {'content-type': 'application/json'},
     method: 'POST'
@@ -240,7 +239,7 @@ function __keepFetchingJobRecordsUntilSinceDate__(client, ids, algorithmNames, p
 
     ;(function ___fetchNextBatch___(remainingIds) {
       console.debug('(productLines:__keepFetchingJobRecordsUntilSinceDate__) load %s jobs <%s>', count, sinceDate)
-      const promises = remainingIds.slice(0, count).map(dataId => importJobRecordById(client, dataId, algorithmNames))
+      const promises = remainingIds.slice(0, count).map(dataId => importByDataId(client, dataId, algorithmNames))
       return Promise.all(promises)
         .then(batch => {
           for (const record of batch) {
