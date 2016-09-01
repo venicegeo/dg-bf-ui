@@ -189,11 +189,11 @@ export default class JobStatus extends Component {
 
   get _classForStatus() {
     switch (this.props.job.properties[KEY_STATUS]) {
-    case STATUS_SUCCESS: return styles.succeeded
-    case STATUS_RUNNING: return styles.running
-    case STATUS_TIMED_OUT: return styles.timedOut
-    case STATUS_ERROR: return styles.failed
-    default: return ''
+      case STATUS_SUCCESS: return styles.succeeded
+      case STATUS_RUNNING: return styles.running
+      case STATUS_TIMED_OUT: return styles.timedOut
+      case STATUS_ERROR: return styles.failed
+      default: return ''
     }
   }
 

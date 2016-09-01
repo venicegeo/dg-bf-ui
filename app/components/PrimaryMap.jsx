@@ -282,12 +282,12 @@ export class PrimaryMap extends Component {
     this.setState({
       loadingRefCount: Math.max(0, this.state.loadingRefCount - 1)
     })
-   
+
     if (!this.state.tileLoadError) {
       this.setState({ tileLoadError: true })
       alert('One or more tiles failed to load!')
-    } 
- }
+    }
+  }
 
   _handleLoadStart() {
     this.setState({
@@ -306,11 +306,11 @@ export class PrimaryMap extends Component {
     let foundFeature = false
     this._map.forEachFeatureAtPixel(event.pixel, (feature) => {
       switch (feature.get(KEY_TYPE)) {
-      case TYPE_DIVOT_INBOARD:
-      case TYPE_JOB:
-      case TYPE_SCENE:
-        foundFeature = true
-        return true
+        case TYPE_DIVOT_INBOARD:
+        case TYPE_JOB:
+        case TYPE_SCENE:
+          foundFeature = true
+          return true
       }
     }, null, layerFilter)
     if (foundFeature) {
@@ -336,24 +336,24 @@ export class PrimaryMap extends Component {
     this._featureDetailsOverlay.setPosition(position)
     const selections = this._selectInteraction.getFeatures()
     switch (type) {
-    case TYPE_DIVOT_INBOARD:
-    case TYPE_STEM:
-      // Proxy clicks on "inner" decorations out to the job frame itself
-      const jobId = feature.get(KEY_OWNER_ID)
-      const jobFeature = this._frameLayer.getSource().getFeatureById(jobId)
-      selections.clear()
-      selections.push(jobFeature)
-      this.props.onSelectFeature(toGeoJSON(jobFeature))
-      break
-    case TYPE_JOB:
-    case TYPE_SCENE:
-      this.props.onSelectFeature(toGeoJSON(feature))
-      break
-    default:
-      // Not a valid "selectable" feature
-      this._clearSelection()
-      this._emitDeselectAll()
-      break
+      case TYPE_DIVOT_INBOARD:
+      case TYPE_STEM:
+        // Proxy clicks on "inner" decorations out to the job frame itself
+        const jobId = feature.get(KEY_OWNER_ID)
+        const jobFeature = this._frameLayer.getSource().getFeatureById(jobId)
+        selections.clear()
+        selections.push(jobFeature)
+        this.props.onSelectFeature(toGeoJSON(jobFeature))
+        break
+      case TYPE_JOB:
+      case TYPE_SCENE:
+        this.props.onSelectFeature(toGeoJSON(feature))
+        break
+      default:
+        // Not a valid "selectable" feature
+        this._clearSelection()
+        this._emitDeselectAll()
+        break
     }
   }
 
@@ -658,27 +658,27 @@ export class PrimaryMap extends Component {
 
   _updateInteractions() {
     switch (this.props.mode) {
-    case MODE_SELECT_IMAGERY:
-      this._deactivateDrawInteraction()
-      this._activateSelectInteraction()
-      break
-    case MODE_DRAW_BBOX:
-      this._activateDrawInteraction()
-      this._deactivateSelectInteraction()
-      break
-    case MODE_NORMAL:
-      this._clearDraw()
-      this._deactivateDrawInteraction()
-      this._activateSelectInteraction()
-      break
-    case MODE_PRODUCT_LINES:
-      this._clearDraw()
-      this._deactivateDrawInteraction()
-      this._activateSelectInteraction()
-      break
-    default:
-      console.warn('wat mode=%s', this.props.mode)
-      break
+      case MODE_SELECT_IMAGERY:
+        this._deactivateDrawInteraction()
+        this._activateSelectInteraction()
+        break
+      case MODE_DRAW_BBOX:
+        this._activateDrawInteraction()
+        this._deactivateSelectInteraction()
+        break
+      case MODE_NORMAL:
+        this._clearDraw()
+        this._deactivateDrawInteraction()
+        this._activateSelectInteraction()
+        break
+      case MODE_PRODUCT_LINES:
+        this._clearDraw()
+        this._deactivateDrawInteraction()
+        this._activateSelectInteraction()
+        break
+      default:
+        console.warn('wat mode=%s', this.props.mode)
+        break
     }
   }
 
@@ -832,80 +832,80 @@ function generateFrameLayer() {
     style(feature, resolution) {  // eslint-disable-line complexity
       const isClose = resolution < RESOLUTION_CLOSE
       switch (feature.get(KEY_TYPE)) {
-      case TYPE_DIVOT_INBOARD:
-        return new ol.style.Style({
-          image: new ol.style.RegularShape({
-            angle: Math.PI / 4,
-            points: 4,
-            radius: 5,
-            fill: new ol.style.Fill({
-              color: 'black'
+        case TYPE_DIVOT_INBOARD:
+          return new ol.style.Style({
+            image: new ol.style.RegularShape({
+              angle: Math.PI / 4,
+              points: 4,
+              radius: 5,
+              fill: new ol.style.Fill({
+                color: 'black'
+              })
             })
           })
-        })
-      case TYPE_DIVOT_OUTBOARD:
-        return new ol.style.Style({
-          image: new ol.style.RegularShape({
-            angle: Math.PI / 4,
-            points: 4,
-            radius: 10,
+        case TYPE_DIVOT_OUTBOARD:
+          return new ol.style.Style({
+            image: new ol.style.RegularShape({
+              angle: Math.PI / 4,
+              points: 4,
+              radius: 10,
+              stroke: new ol.style.Stroke({
+                color: 'black',
+                width: 1
+              }),
+              fill: new ol.style.Fill({
+                color: getColorForStatus(feature.get(KEY_STATUS))
+              })
+            })
+          })
+        case TYPE_STEM:
+          return new ol.style.Style({
             stroke: new ol.style.Stroke({
               color: 'black',
               width: 1
-            }),
-            fill: new ol.style.Fill({
-              color: getColorForStatus(feature.get(KEY_STATUS))
             })
           })
-        })
-      case TYPE_STEM:
-        return new ol.style.Style({
-          stroke: new ol.style.Stroke({
-            color: 'black',
-            width: 1
+        case TYPE_LABEL_MAJOR:
+          return new ol.style.Style({
+            text: new ol.style.Text({
+              fill: new ol.style.Fill({
+                color: 'black'
+              }),
+              offsetX: 13,
+              offsetY: 1,
+              font: 'bold 17px Catamaran, Verdana, sans-serif',
+              text: feature.get(KEY_NAME).toUpperCase(),
+              textAlign: 'left',
+              textBaseline: 'middle'
+            })
           })
-        })
-      case TYPE_LABEL_MAJOR:
-        return new ol.style.Style({
-          text: new ol.style.Text({
-            fill: new ol.style.Fill({
-              color: 'black'
+        case TYPE_LABEL_MINOR:
+          return new ol.style.Style({
+            text: new ol.style.Text({
+              fill: new ol.style.Fill({
+                color: 'rgba(0,0,0,.6)'
+              }),
+              offsetX: 13,
+              offsetY: 15,
+              font: '11px Verdana, sans-serif',
+              text: ([
+                feature.get(KEY_STATUS),
+                feature.get(KEY_IMAGE_ID),
+              ].filter(Boolean)).join(' // ').toUpperCase(),
+              textAlign: 'left',
+              textBaseline: 'middle'
+            })
+          })
+        default:
+          return new ol.style.Style({
+            stroke: new ol.style.Stroke({
+              color: 'rgba(0, 0, 0, .4)',
+              lineDash: [10, 10]
             }),
-            offsetX: 13,
-            offsetY: 1,
-            font: 'bold 17px Catamaran, Verdana, sans-serif',
-            text: feature.get(KEY_NAME).toUpperCase(),
-            textAlign: 'left',
-            textBaseline: 'middle'
-          })
-        })
-      case TYPE_LABEL_MINOR:
-        return new ol.style.Style({
-          text: new ol.style.Text({
             fill: new ol.style.Fill({
-              color: 'rgba(0,0,0,.6)'
-            }),
-            offsetX: 13,
-            offsetY: 15,
-            font: '11px Verdana, sans-serif',
-            text: ([
-              feature.get(KEY_STATUS),
-              feature.get(KEY_IMAGE_ID),
-            ].filter(Boolean)).join(' // ').toUpperCase(),
-            textAlign: 'left',
-            textBaseline: 'middle'
+              color: isClose ? 'transparent' : 'hsla(202, 100%, 85%, 0.5)'
+            })
           })
-        })
-      default:
-        return new ol.style.Style({
-          stroke: new ol.style.Stroke({
-            color: 'rgba(0, 0, 0, .4)',
-            lineDash: [10, 10]
-          }),
-          fill: new ol.style.Fill({
-            color: isClose ? 'transparent' : 'hsla(202, 100%, 85%, 0.5)'
-          })
-        })
       }
     }
   })
@@ -983,13 +983,13 @@ function generateSelectInteraction(...layers) {
 
 function getColorForStatus(status) {
   switch (status) {
-  case STATUS_ACTIVE: return 'hsl(200, 94%, 54%)'
-  case STATUS_INACTIVE: return 'hsl(0, 0%, 50%)'
-  case STATUS_RUNNING: return 'hsl(48, 94%, 54%)'
-  case STATUS_SUCCESS: return 'hsl(114, 100%, 45%)'
-  case STATUS_TIMED_OUT:
-  case STATUS_ERROR: return 'hsl(349, 100%, 60%)'
-  default: return 'magenta'
+    case STATUS_ACTIVE: return 'hsl(200, 94%, 54%)'
+    case STATUS_INACTIVE: return 'hsl(0, 0%, 50%)'
+    case STATUS_RUNNING: return 'hsl(48, 94%, 54%)'
+    case STATUS_SUCCESS: return 'hsl(114, 100%, 45%)'
+    case STATUS_TIMED_OUT:
+    case STATUS_ERROR: return 'hsl(349, 100%, 60%)'
+    default: return 'magenta'
   }
 }
 

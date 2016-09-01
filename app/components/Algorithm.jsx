@@ -117,11 +117,11 @@ export default Algorithm
 
 function isCompatible(requirement, imageProperties) {
   switch (requirement.name) {
-  case REQUIREMENT_BANDS:
-    return requirement.literal.split(',').every(s => imageProperties.bands[s])
-  case REQUIREMENT_CLOUDCOVER:
-    return imageProperties.cloudCover <= requirement.literal
-  default:
-    return false
+    case REQUIREMENT_BANDS:
+      return requirement.literal.split(',').every(s => imageProperties.bands[s])
+    case REQUIREMENT_CLOUDCOVER:
+      return imageProperties.cloudCover <= requirement.literal
+    default:
+      return false
   }
 }
