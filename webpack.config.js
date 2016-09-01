@@ -41,7 +41,7 @@ module.exports = {
   },
 
   resolve: {
-    alias: __environment__ === 'production' ? {} : {openlayers$: 'openlayers/dist/ol-debug.js'},
+    alias: __environment__ === 'production' ? {} : {/* openlayers$: 'openlayers/dist/ol-debug.js' */},
     extensions: ['', '.js', '.jsx'],
     root: __dirname,
   },
