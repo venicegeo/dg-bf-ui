@@ -31,7 +31,6 @@ module.exports = {
   entry: {
     'app': './app/index.js',
     'vendor': [
-      'history',
       'isomorphic-fetch',
       'moment',
       'openlayers',
