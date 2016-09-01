@@ -77,13 +77,12 @@ export function search({
     })
 }
 
-
 //
 // Helpers
 //
 
 function includeEventTypeId(catalog) {
-  return fetch(`${catalog.url}/eventTypeID`, {
+  return fetch(`${catalog.url}/eventTypeID?pzGateway=${encodeURIComponent(GATEWAY)}`, {
     headers: {
       'Authorization': catalog.sessionToken,
     },

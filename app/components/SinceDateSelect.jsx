@@ -58,7 +58,7 @@ export class SinceDateSelect extends React.Component {
         </div>
         <ul className={styles.options}>
           {options.map(option => (
-            <li key={option.value}
+            <li key={option.label + option.value}
                 className={current === option ? styles.active : ''}
                 onClick={() => this._handleChange(option.value)}>{option.label}</li>
           ))}
