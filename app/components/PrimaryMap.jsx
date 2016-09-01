@@ -106,11 +106,12 @@ export class PrimaryMap extends Component {
 
   constructor() {
     super()
-    this.state = {basemapIndex: 0, loadingRefCount: 0}
+    this.state = {basemapIndex: 0, loadingRefCount: 0, tileLoadError: false}
     this._emitViewChange = debounce(this._emitViewChange.bind(this), 100)
     this._handleBasemapChange = this._handleBasemapChange.bind(this)
     this._handleDrawStart = this._handleDrawStart.bind(this)
     this._handleDrawEnd = this._handleDrawEnd.bind(this)
+    this._handleLoadError = this._handleLoadError.bind(this)
     this._handleLoadStart = this._handleLoadStart.bind(this)
     this._handleLoadStop = this._handleLoadStop.bind(this)
     this._handleMouseMove = throttle(this._handleMouseMove.bind(this), 15)
@@ -278,6 +279,17 @@ export class PrimaryMap extends Component {
     this.props.onBoundingBoxChange(null)
   }
 
+  _handleLoadError() {
+    this.setState({
+      loadingRefCount: Math.max(0, this.state.loadingRefCount - 1)
+    })
+   
+    if (!this.state.tileLoadError) {
+      this.setState({ tileLoadError: true })
+      alert('One or more tiles failed to load!')
+    } 
+ }
+
   _handleLoadStart() {
     this.setState({
       loadingRefCount: this.state.loadingRefCount + 1
@@ -385,6 +397,7 @@ export class PrimaryMap extends Component {
         this._imageryLayer,
         this._detectionsLayer,
         this._highlightLayer,
+	x
       ],
       target: this.refs.container,
       view: new ol.View({
@@ -394,6 +407,7 @@ export class PrimaryMap extends Component {
         zoom: MIN_ZOOM
       })
     })
+
 
     /*
       2016-08-22 -- Due to internal implementation of the 'autoPan' option,
@@ -637,13 +651,15 @@ export class PrimaryMap extends Component {
   _subscribeToLoadEvents(layer) {
     const source = layer.getSource()
     source.on('tileloadstart', this._handleLoadStart)
-    source.on(['tileloadend', 'tileloaderror'], this._handleLoadStop)
+    source.on('tileloadend', this._handleLoadStop)
+    source.on('tileloaderror', this._handleLoadError)
   }
 
   _unsubscribeFromLoadEvents(layer) {
     const source = layer.getSource()
     source.un('tileloadstart', this._handleLoadStart)
-    source.un(['tileloadend', 'tileloaderror'], this._handleLoadStop)
+    source.un('tileloadend', this._handleLoadStop)
+    source.un('tileloaderror', this._handleLoadError)
   }
 
   _updateBasemap() {
