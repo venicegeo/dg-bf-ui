@@ -18,7 +18,8 @@ import React from 'react'
 import ol from 'openlayers'
 import {mount} from 'enzyme'
 import expect, {createSpy, restoreSpies, spyOn} from 'expect'
-import PrimaryMap, {
+import {
+  PrimaryMap,
   MODE_NORMAL,
   MODE_DRAW_BBOX,
   MODE_PRODUCT_LINES,
@@ -30,7 +31,6 @@ describe('<PrimaryMap/>', () => {
 
   beforeEach(() => {
     _props = {
-      anchor:              '',
       bbox:                null,
       catalogApiKey:       '',
       detections:          [],
@@ -41,18 +41,16 @@ describe('<PrimaryMap/>', () => {
       isSearching:         false,
       mode:                MODE_NORMAL,
       selectedFeature:     null,
-      onAnchorChange:      createSpy(),
       onBoundingBoxChange: createSpy(),
       onSearchPageChange:  createSpy(),
-      onSelectImage:       createSpy(),
-      onSelectJob:         createSpy(),
+      onSelectFeature:     createSpy(),
+      onViewChange:        createSpy(),
     }
   })
 
   it('renders', () => {
     const wrapper = mount(
       <PrimaryMap
-        anchor={_props.anchor}
         bbox={_props.bbox}
         catalogApiKey={_props.catalogApiKey}
         detections={_props.detections}
@@ -63,11 +61,11 @@ describe('<PrimaryMap/>', () => {
         isSearching={_props.isSearching}
         mode={_props.mode}
         selectedFeature={_props.selectedFeature}
-        onAnchorChange={_props.onAnchorChange}
+        view={_props.view}
         onBoundingBoxChange={_props.onBoundingBoxChange}
         onSearchPageChange={_props.onSearchPageChange}
-        onSelectImage={_props.onSelectImage}
-        onSelectJob={_props.onSelectJob}
+        onSelectFeature={_props.onSelectFeature}
+        onViewChange={_props.onViewChange}
       />
     )
     expect(wrapper.find('.PrimaryMap-root').length).toEqual(1)
@@ -77,7 +75,6 @@ describe('<PrimaryMap/>', () => {
   it('creates a map instance', () => {
     const wrapper = mount(
       <PrimaryMap
-        anchor={_props.anchor}
         bbox={_props.bbox}
         catalogApiKey={_props.catalogApiKey}
         detections={_props.detections}
@@ -88,21 +85,20 @@ describe('<PrimaryMap/>', () => {
         isSearching={_props.isSearching}
         mode={_props.mode}
         selectedFeature={_props.selectedFeature}
-        onAnchorChange={_props.onAnchorChange}
+        view={_props.view}
         onBoundingBoxChange={_props.onBoundingBoxChange}
         onSearchPageChange={_props.onSearchPageChange}
-        onSelectImage={_props.onSelectImage}
-        onSelectJob={_props.onSelectJob}
+        onSelectFeature={_props.onSelectFeature}
+        onViewChange={_props.onViewChange}
       />
     )
     expect(wrapper.instance()._map).toBeAn(ol.Map)
     expect(wrapper.ref('container').node.querySelector('canvas')).toBeAn(HTMLCanvasElement)
   })
 
-  describe('anchor', () => {
-    const getComponent = (anchor) => mount(
+  describe('view', () => {
+    const getComponent = (view) => mount(
       <PrimaryMap
-        anchor={anchor}
         bbox={_props.bbox}
         catalogApiKey={_props.catalogApiKey}
         detections={_props.detections}
@@ -113,16 +109,16 @@ describe('<PrimaryMap/>', () => {
         isSearching={_props.isSearching}
         mode={_props.mode}
         selectedFeature={_props.selectedFeature}
-        onAnchorChange={_props.onAnchorChange}
+        view={view}
         onBoundingBoxChange={_props.onBoundingBoxChange}
         onSearchPageChange={_props.onSearchPageChange}
-        onSelectImage={_props.onSelectImage}
-        onSelectJob={_props.onSelectJob}
+        onSelectFeature={_props.onSelectFeature}
+        onViewChange={_props.onViewChange}
       />
     )
 
     it('has correct center on init', () => {
-      const wrapper = getComponent('#1:3000:0,0')
+      const wrapper = getComponent({ basemapIndex: 0, center: [0, 0], zoom: 5.5 })
       return awaitMap(() => {
         const view = wrapper.instance()._map.getView()
         expect(ol.proj.toLonLat(view.getCenter())).toEqual([0, 0])
@@ -130,51 +126,51 @@ describe('<PrimaryMap/>', () => {
     })
 
     it('has correct zoom on init', () => {
-      const wrapper = getComponent('#1:3000:0,0')
+      const wrapper = getComponent({ basemapIndex: 0, center: [0, 0], zoom: 5.5 })
       return awaitMap(() => {
         const view = wrapper.instance()._map.getView()
-        expect(Math.abs(view.getResolution() - 3000)).toBeLessThan(500)  // find delta
+        expect(view.getZoom()).toBe(5.5)
       })
     })
 
     it('has correct basemap on init', () => {
-      const wrapper = getComponent('#1:3000:0,0')
+      const wrapper = getComponent({ basemapIndex: 0, center: [0, 0], zoom: 5.5 })
       return awaitMap(() => {
-        expect(wrapper.state('basemapIndex')).toEqual(1)
+        expect(wrapper.state('basemapIndex')).toEqual(0)
       })
     })
 
-    it('recenters map when `anchor` prop changes', () => {
-      const wrapper = getComponent('#1:3000:0,0')
-      wrapper.setProps({ anchor: '#1:3000:30,30' })
+    it('recenters map when `view` prop changes', () => {
+      const wrapper = getComponent({ basemapIndex: 0, center: [0, 0], zoom: 5.5 })
+      wrapper.setProps({ view: { basemapIndex: 0, center: [30, 30], zoom: 5.5 } })
       return awaitMap(() => {
         const view = wrapper.instance()._map.getView()
         expect(ol.proj.toLonLat(view.getCenter()).map(Math.round)).toEqual([30, 30])
       })
     })
 
-    it('changes zoom when `anchor` prop changes', () => {
-      const wrapper = getComponent('#1:3000:0,0')
-      wrapper.setProps({ anchor: '#1:1500:0,0' })
+    it('changes zoom when `view` prop changes', () => {
+      const wrapper = getComponent({ basemapIndex: 0, center: [0, 0], zoom: 5.5 })
+      wrapper.setProps({ view: { basemapIndex: 0, center: [0, 0], zoom: 10.5 } })
       return awaitMap(() => {
         const view = wrapper.instance()._map.getView()
-        expect(Math.abs(view.getResolution() - 1500)).toBeLessThan(250)  // find delta
+        expect(view.getZoom()).toBe(10.5)
       })
     })
 
-    it('changes basemap when `anchor` prop changes', () => {
-      const wrapper = getComponent('#1:3000:0,0')
-      wrapper.setProps({ anchor: '#2:3000:0,0' })
+    it('changes basemap when `view` prop changes', () => {
+      const wrapper = getComponent({ basemapIndex: 0, center: [0, 0], zoom: 5.5 })
+      wrapper.setProps({ view: { basemapIndex: 2, center: [0, 0], zoom: 5.5 } })
       return awaitMap(() => {
         expect(wrapper.state('basemapIndex')).toEqual(2)
       })
     })
 
-    it('doesnt reverberate `onAnchorChange` events', () => {
-      const wrapper = getComponent('#1:3000:0,0')
-      wrapper.setProps({ anchor: '#2:500:30,30' })
+    it('doesnt reverberate `onViewChange` events', () => {
+      const wrapper = getComponent({ basemapIndex: 0, center: [0, 0], zoom: 5.5 })
+      wrapper.setProps({ view: { basemapIndex: 2, center: [30, 30], zoom: 10.5 } })
       return awaitMap(() => {
-        expect(wrapper.prop('onAnchorChange')).toNotHaveBeenCalled()
+        expect(wrapper.prop('onViewChange')).toNotHaveBeenCalled()
       }, 300)  // wait for debounce to complete
     })
   })
@@ -182,7 +178,6 @@ describe('<PrimaryMap/>', () => {
   describe('bbox', () => {
     const getComponent = (bbox) => mount(
       <PrimaryMap
-        anchor={_props.anchor}
         bbox={bbox}
         catalogApiKey={_props.catalogApiKey}
         detections={_props.detections}
@@ -193,11 +188,11 @@ describe('<PrimaryMap/>', () => {
         isSearching={_props.isSearching}
         mode={_props.mode}
         selectedFeature={_props.selectedFeature}
-        onAnchorChange={_props.onAnchorChange}
+        view={_props.view}
         onBoundingBoxChange={_props.onBoundingBoxChange}
         onSearchPageChange={_props.onSearchPageChange}
-        onSelectImage={_props.onSelectImage}
-        onSelectJob={_props.onSelectJob}
+        onSelectFeature={_props.onSelectFeature}
+        onViewChange={_props.onViewChange}
       />
     )
 
@@ -238,7 +233,6 @@ describe('<PrimaryMap/>', () => {
   describe('catalogApiKey', () => {
     const getComponent = (catalogApiKey) => mount(
       <PrimaryMap
-        anchor={_props.anchor}
         bbox={_props.bbox}
         catalogApiKey={catalogApiKey}
         detections={_props.detections}
@@ -249,11 +243,11 @@ describe('<PrimaryMap/>', () => {
         isSearching={_props.isSearching}
         mode={_props.mode}
         selectedFeature={generateScene()}
-        onAnchorChange={_props.onAnchorChange}
+        view={_props.view}
         onBoundingBoxChange={_props.onBoundingBoxChange}
         onSearchPageChange={_props.onSearchPageChange}
-        onSelectImage={_props.onSelectImage}
-        onSelectJob={_props.onSelectJob}
+        onSelectFeature={_props.onSelectFeature}
+        onViewChange={_props.onViewChange}
       />
     )
 
@@ -268,7 +262,6 @@ describe('<PrimaryMap/>', () => {
   describe('detections', () => {
     const getComponent = (detections) => mount(
       <PrimaryMap
-        anchor={_props.anchor}
         bbox={_props.bbox}
         catalogApiKey={_props.catalogApiKey}
         detections={detections}
@@ -279,11 +272,11 @@ describe('<PrimaryMap/>', () => {
         isSearching={_props.isSearching}
         mode={_props.mode}
         selectedFeature={generateScene()}
-        onAnchorChange={_props.onAnchorChange}
+        view={_props.view}
         onBoundingBoxChange={_props.onBoundingBoxChange}
         onSearchPageChange={_props.onSearchPageChange}
-        onSelectImage={_props.onSelectImage}
-        onSelectJob={_props.onSelectJob}
+        onSelectFeature={_props.onSelectFeature}
+        onViewChange={_props.onViewChange}
       />
     )
 

@@ -66,39 +66,14 @@ describe('<CatalogSearchCriteria/>', () => {
     expect(wrapper.find('.CatalogSearchCriteria-spatialFilter select').prop('value')).toEqual('')
   })
 
-  it('does not render date fields if `dateFrom` is missing', () => {
+  it('does not render date fields if `dateFrom` and `dateTo` are undefined', () => {
     const wrapper = shallow(
       <CatalogSearchCriteria
         bbox={_props.bbox}
         apiKey={_props.apiKey}
         cloudCover={_props.cloudCover}
-        dateFrom={''}
-        dateTo={_props.dateTo}
-        filter={'test-id'}
-        filters={[
-          {id: 'test-id', name: 'Testing'},
-        ]}
-        isSearching={_props.isSearching}
-        onApiKeyChange={_props.onApiKeyChange}
-        onClearBbox={_props.onClearBbox}
-        onCloudCoverChange={_props.onCloudCoverChange}
-        onDateChange={_props.onDateChange}
-        onFilterChange={_props.onFilterChange}
-        onSubmit={_props.onSubmit}
-      />
-    )
-    expect(wrapper.find('.CatalogSearchCriteria-captureDateFrom input').length).toEqual(0)
-    expect(wrapper.find('.CatalogSearchCriteria-captureDateTo input').length).toEqual(0)
-  })
-
-  it('does not render date fields if `dateTo` is missing', () => {
-    const wrapper = shallow(
-      <CatalogSearchCriteria
-        bbox={_props.bbox}
-        apiKey={_props.apiKey}
-        cloudCover={_props.cloudCover}
-        dateFrom={_props.dateFrom}
-        dateTo={''}
+        dateFrom={undefined}
+        dateTo={undefined}
         filter={'test-id'}
         filters={[
           {id: 'test-id', name: 'Testing'},
