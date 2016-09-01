@@ -18,7 +18,7 @@ const styles = require('./SinceDateSelect.css')
 
 import React from 'react'
 
-export default class SinceDateSelect extends React.Component {
+export class SinceDateSelect extends React.Component {
   static propTypes = {
     options: React.PropTypes.arrayOf(React.PropTypes.object).isRequired,
     className: React.PropTypes.string,

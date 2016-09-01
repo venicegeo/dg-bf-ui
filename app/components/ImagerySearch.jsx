@@ -59,7 +59,7 @@ export default class ImagerySearch extends Component {
           dateTo={this.props.dateTo}
           filter={this.props.filter}
           filters={this.props.filters}
-          disabled={!this._canSubmit}
+          disabled={this.props.isSearching}
           onApiKeyChange={this.props.onApiKeyChange}
           onClearBbox={this.props.onClearBbox}
           onCloudCoverChange={this.props.onCloudCoverChange}

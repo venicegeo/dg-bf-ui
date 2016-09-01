@@ -18,80 +18,80 @@ const styles = require('./Application.css')
 
 import React, {Component} from 'react'
 import {render} from 'react-dom'
+import debounce from 'lodash/debounce'
 import {About} from './About'
+import {CreateJob, createSearchCriteria} from './CreateJob'
+import {CreateProductLine} from './CreateProductLine'
 import {Help} from './Help'
 import {JobStatusList} from './JobStatusList'
 import {Login} from './Login'
 import {Navigation} from './Navigation'
-import {PrimaryMap, MODE_DRAW_BBOX, MODE_NORMAL, MODE_SELECT_IMAGERY, MODE_PRODUCT_LINES} from './PrimaryMap'
-import {discover as discoverAlgorithms} from '../api/algorithms'
-import {discover as discoverCatalog} from '../api/catalog'
-import {discover as discoverExecutor} from '../api/executor'
-import {discover as discoverGeoserver} from '../api/geoserver'
+import {
+  PrimaryMap,
+  MODE_DRAW_BBOX,
+  MODE_NORMAL,
+  MODE_SELECT_IMAGERY,
+  MODE_PRODUCT_LINES
+} from './PrimaryMap'
+import {ProductLineList} from './ProductLineList'
+import * as algorithmsService from '../api/algorithms'
+import * as jobsService from '../api/jobs'
+import * as catalogService from '../api/catalog'
+import * as executorService from '../api/executor'
+import * as geoserverService from '../api/geoserver'
+import * as productLinesService from '../api/productLines'
+import {createCollection} from '../utils/collections'
 
-export const createApplication = (element) => render(<Application/>, element)
+import {
+  KEY_TYPE,
+  KEY_STATUS,
+  STATUS_SUCCESS,
+  TYPE_JOB,
+  TYPE_SCENE,
+} from '../constants'
 
-// TODO -- consider feasibility of Immutable
-const createCollection = (initialRecords = []) => ({
-  error:    null,
-  fetching: false,
-  records: initialRecords,
-  $fetching() {
-    return Object.assign({}, this, {fetching: true})
-  },
-  $records(records) {
-    return Object.assign({}, this, {records, fetching: false})
-  },
-  $error(error) {
-    return Object.assign({}, this, {error, fetching: false})
-  },
-})
+export const createApplication = (element) => render(
+  <Application
+    deserialize={generateInitialState}
+    serialize={debounce(serialize, 100)}
+  />, element)
 
 export class Application extends Component {
-
-  constructor() {
-    super()
-    this.state = Object.assign({
-      sessionToken: null,
-      route: location.pathname,
-
-      // Services
-      catalog: {},
-      executor: {},
-
-      // Data Collections
-      algorithms: createCollection(),
-      jobs: createCollection(),
-
-      // Map state
-      bbox: null,
-      mapView: null,
-    }, deserialize())
-    this._handleAnchorChange = this._handleAnchorChange.bind(this)
+  constructor(props) {
+    super(props)
+    this.state = props.deserialize()
     this._handleBoundingBoxChange = this._handleBoundingBoxChange.bind(this)
-    this._handleNavigation = this._handleNavigation.bind(this)
-    this._handleSearchPageChange = this._handleSearchPageChange.bind(this)
-    this._handleSelectImage = this._handleSelectImage.bind(this)
-    this._handleSelectJob = this._handleSelectJob.bind(this)
+    this._handleCatalogApiKeyChange = this._handleCatalogApiKeyChange.bind(this)
+    this._handleClearBbox = this._handleClearBbox.bind(this)
+    this._handleDismissJobError = this._handleDismissJobError.bind(this)
+    this._handleFetchProductLines = this._handleFetchProductLines.bind(this)
+    this._handleFetchProductLineJobs = this._handleFetchProductLineJobs.bind(this)
+    this._handleForgetJob = this._handleForgetJob.bind(this)
+    this._handleJobCreated = this._handleJobCreated.bind(this)
+    this._handleProductLineCreated = this._handleProductLineCreated.bind(this)
+    this._handleProductLineJobHoverIn = this._handleProductLineJobHoverIn.bind(this)
+    this._handleProductLineJobHoverOut = this._handleProductLineJobHoverOut.bind(this)
+    this._handleProductLineJobSelect = this._handleProductLineJobSelect.bind(this)
+    this._handleProductLineJobDeselect = this._handleProductLineJobDeselect.bind(this)
+    this._handleSearchCriteriaChange = this._handleSearchCriteriaChange.bind(this)
+    this._handleSearchSubmit = this._handleSearchSubmit.bind(this)
+    this._handleSelectFeature = this._handleSelectFeature.bind(this)
+    this.navigateTo = this.navigateTo.bind(this)
   }
 
   componentDidUpdate(_, prevState) {
     if (!prevState.sessionToken && this.state.sessionToken) {
-      this.discoverAlgorithms()
-      this.discoverCatalog()
-      this.discoverExecutor()
-      this.discoverGeoserver()
+      this._autodiscoverServices()
+      this._startJobsWorker()
     }
-    serialize(this.state)
+    this.props.serialize(this.state)
   }
 
-  componentDidMount() {
-    this.subscribeToHistoryEvents()
+  componentWillMount() {
+    this._subscribeToHistoryEvents()
     if (this.state.sessionToken) {
-      this.discoverAlgorithms()
-      this.discoverCatalog()
-      this.discoverExecutor()
-      this.discoverGeoserver()
+      this._autodiscoverServices()
+      this._startJobsWorker()
     }
   }
 
@@ -100,24 +100,23 @@ export class Application extends Component {
       <div className={styles.root}>
         <Navigation
           activeRoute={this.state.route}
-          onClick={this._handleNavigation}
+          onClick={this.navigateTo}
         />
         <PrimaryMap
-          geoserverUrl={null}
+          geoserverUrl={this.state.geoserver.url}
           frames={this._frames}
           detections={this._detections}
-          imagery={null}
+          imagery={this.state.searchResults}
           isSearching={false}
           view={this.state.mapView}
-          catalogApiKey={null}
+          catalogApiKey={this.state.catalogApiKey}
           bbox={this.state.bbox}
           mode={this._mapMode}
-          selectedFeature={null}
-          highlightedFeature={null}
-          onBoundingBoxChange={bbox => this.setState({ bbox })}
-          onSearchPageChange={this._handleSearchPageChange}
-          onSelectImage={this._handleSelectImage}
-          onSelectJob={this._handleSelectJob}
+          selectedFeature={this.state.selectedFeature}
+          highlightedFeature={this.state.hoveredFeature}
+          onBoundingBoxChange={this._handleBoundingBoxChange}
+          onSearchPageChange={this._handleSearchSubmit}
+          onSelectFeature={this._handleSelectFeature}
           onViewChange={mapView => this.setState({ mapView })}
         />
         {this.renderRoute()}
@@ -134,41 +133,82 @@ export class Application extends Component {
         />
       )
     }
-    switch (this.state.route) {
+    switch (this.state.route.pathname) {
       case '/about':
         return (
           <About
-            onDismiss={() => this._handleNavigation({ pathname: '/' })}
+            onDismiss={() => this.navigateTo({ pathname: '/' })}
           />
         )
-    //   case '/create-job':
-    //     return (
-    //       <CreateJob/>
-    //     )
-    //   case '/create-product-line':
-    //     return (
-    //       <CreateProductLine/>
-    //     )
+      case '/create-job':
+        return (
+          <CreateJob
+            algorithms={this.state.algorithms.records}
+            bbox={this.state.bbox}
+            catalogApiKey={this.state.catalogApiKey}
+            executorServiceId={this.state.executor.serviceId}
+            sessionToken={this.state.sessionToken}
+            filters={this.state.catalog.filters || []}
+            isSearching={this.state.isSearching}
+            searchError={this.state.searchError}
+            searchCriteria={this.state.searchCriteria}
+            selectedImage={this.state.selectedFeature && this.state.selectedFeature.properties[KEY_TYPE] === TYPE_SCENE ? this.state.selectedFeature : null}
+            onCatalogApiKeyChange={this._handleCatalogApiKeyChange}
+            onClearBbox={this._handleClearBbox}
+            onJobCreated={this._handleJobCreated}
+            onSearchCriteriaChange={this._handleSearchCriteriaChange}
+            onSearchSubmit={this._handleSearchSubmit}
+          />
+        )
+      case '/create-product-line':
+        return (
+          <CreateProductLine
+            algorithms={this.state.algorithms.records}
+            bbox={this.state.bbox}
+            catalogApiKey={this.state.catalogApiKey}
+            eventTypeId={this.state.catalogApiKey}
+            executorServiceId={this.state.executor.serviceId}
+            executorUrl={this.state.executor.url}
+            filters={this.state.catalog.filters || []}
+            sessionToken={this.state.sessionToken}
+            onCatalogApiKeyChange={this._handleCatalogApiKeyChange}
+            onClearBbox={this._handleClearBbox}
+            onProductLineCreated={this._handleProductLineCreated}
+          />
+        )
       case '/help':
         return (
           <Help
-            onDismiss={() => this._handleNavigation({ pathname: '/' })}
+            onDismiss={() => this.navigateTo({ pathname: '/' })}
           />
         )
       case '/jobs':
         return (
           <JobStatusList
+            authToken={this.state.sessionToken}
             activeIds={this._detections.map(d => d.id)}
+            error={this.state.jobs.error}
             jobs={this.state.jobs.records}
-            onNavigateToJob={this._handleNavigation}
-            onRemoveJob={console.debug.bind(console)}
-            onDismissError={console.debug.bind(console)}
+            onDismissError={this._handleDismissJobError}
+            onForgetJob={this._handleForgetJob}
+            onNavigateToJob={this.navigateTo}
           />
         )
-    //   case '/product-lines':
-    //     return (
-    //       <ProductLineList/>
-    //     )
+      case '/product-lines':
+        return (
+          <ProductLineList
+            error={this.state.productLines.error}
+            isFetching={this.state.productLines.fetching}
+            productLines={this.state.productLines.records}
+            sessionToken={this.state.sessionToken}
+            onFetch={this._handleFetchProductLines}
+            onFetchJobs={this._handleFetchProductLineJobs}
+            onJobHoverIn={this._handleProductLineJobHoverIn}
+            onJobHoverOut={this._handleProductLineJobHoverOut}
+            onJobSelect={this._handleProductLineJobSelect}
+            onJobDeselect={this._handleProductLineJobDeselect}
+          />
+        )
       default:
         return (
           <div className={styles.unknownRoute}>
@@ -183,35 +223,48 @@ export class Application extends Component {
   //
 
   get _detections() {
-    return []
-    // if (this._mapMode !== MODE_PRODUCT_LINES) {
-    //   return this.props.detections
-    // }
-    // return this.props.productLineJobs.selection.length ? this.props.productLineJobs.selection : this.props.productLines
+    switch (this.state.route.pathname) {
+      case '/create-product-line':
+      case '/product-lines':
+        return this.state.selectedFeature ? [this.state.selectedFeature] : this.state.productLines.records
+      default:
+        return this.state.jobs.records.filter(j => this.state.route.jobIds.includes(j.id) && j.properties[KEY_STATUS] === STATUS_SUCCESS)
+    }
   }
 
   get _frames() {
-    if (this._mapMode !== MODE_PRODUCT_LINES) {
-      return this.state.jobs.records
+    switch (this.state.route.pathname) {
+      case '/create-product-line':
+      case '/product-lines':
+        return [this.state.selectedFeature, ...this.state.productLines.records].filter(Boolean)
+      default:
+        return this.state.jobs.records
     }
-    return []
-    // return this.props.productLines.concat(this.props.productLineJobs.selection)
   }
 
   get _mapMode() {
-    switch (location.pathname) {
-    case '/create-job': return (this.state.bbox && this.state.imagery) ? MODE_SELECT_IMAGERY : MODE_DRAW_BBOX
-    case '/create-product-line': return MODE_DRAW_BBOX
-    case '/product-lines': return MODE_PRODUCT_LINES
-    default: return MODE_NORMAL
+    switch (this.state.route.pathname) {
+      case '/create-job': return (this.state.bbox && this.state.searchResults) ? MODE_SELECT_IMAGERY : MODE_DRAW_BBOX
+      case '/create-product-line': return MODE_DRAW_BBOX
+      case '/product-lines': return MODE_PRODUCT_LINES
+      default: return MODE_NORMAL
     }
   }
 
-  discoverAlgorithms() {
+  _autodiscoverServices() {
+    this._autodiscoveryPromise = Promise.all([
+      this._discoverAlgorithms(),
+      this._discoverCatalog(),
+      this._discoverExecutor(),
+      this._discoverGeoserver(),
+    ])
+  }
+
+  _discoverAlgorithms() {
     this.setState({
       algorithms: this.state.algorithms.$fetching(),
     })
-    discoverAlgorithms(this.state.sessionToken)
+    return algorithmsService.discover(this.state.sessionToken)
       .then(algorithms => {
         this.setState({
           algorithms: this.state.algorithms.$records(algorithms)
@@ -224,94 +277,250 @@ export class Application extends Component {
       })
   }
 
-  discoverCatalog() {
+  _discoverCatalog() {
     this.setState({ catalog: { discovering: true } })
-    discoverCatalog(this.state.sessionToken)
+    return catalogService.discover(this.state.sessionToken)
       .then(catalog => this.setState({ catalog }))
       .catch(error => this.setState({ catalog: { error }}))
   }
 
-  discoverExecutor() {
+  _discoverExecutor() {
     this.setState({ executor: { discovering: true }})
-    discoverExecutor(this.state.sessionToken)
+    executorService.discover(this.state.sessionToken)
       .then(executor => this.setState({ executor }))
       .catch(error => this.setState({ executor: { error }}))
   }
 
-  discoverGeoserver() {
+  _discoverGeoserver() {
     this.setState({ geoserver: { discovering: true }})
-    discoverGeoserver(this.state.sessionToken)
+    return geoserverService.discover(this.state.sessionToken)
       .then(geoserver => this.setState({ geoserver }))
       .catch(error => this.setState({ geoserver: { error }}))
-  }
-
-  _handleAnchorChange(mapAnchor) {
-    this.setState({ mapAnchor })
   }
 
   _handleBoundingBoxChange(bbox) {
     this.setState({ bbox })
   }
 
-  _handleNavigation({pathname = '/', search = '', hash = ''}) {
-    history.pushState(null, null, pathname + search + hash)
-    this.setState({ route: pathname })
+  _handleCatalogApiKeyChange(catalogApiKey) {
+    this.setState({ catalogApiKey })
   }
 
-  _handleSelectImage(feature) {
-    // if (feature) {
-    //   this.props.dispatch(selectImage(feature))
-    // }
-    // else {
-    //   this.props.dispatch(clearSelectedImage())
-    // }
+  _handleClearBbox() {
+    this.setState({ bbox: null })
   }
 
-  _handleSelectJob(jobId) {
-    // this.context.router.push({
-    //   ...this.props.location,
-    //   query: {
-    //     jobId: jobId || undefined
-    //   }
-    // })
+  _handleDismissJobError() {
+    this.setState({
+      jobs: this.state.jobs.$error(null),
+    })
   }
 
-  _handleSearchPageChange(paging) {
-    // this.props.dispatch(searchCatalog(paging.startIndex, paging.count))
+  _handleFetchProductLines() {
+    this._autodiscoveryPromise.then(() => {
+      this.setState({
+        productLines: this.state.productLines.$error(null).$fetching(),
+      })
+      productLinesService.fetchProductLines({
+        algorithms:   this.state.algorithms.records,
+        eventTypeId:  this.state.catalog.eventTypeId,
+        executorUrl:  this.state.executor.url,
+        filters:      this.state.catalog.filters,
+        serviceId:    this.state.executor.serviceId,
+        sessionToken: this.state.sessionToken,
+      })
+        .then(records => {
+          this.setState({
+            productLines: this.state.productLines.$records(records),
+          })
+        })
+    })
   }
 
-  subscribeToHistoryEvents() {
+  _handleFetchProductLineJobs(productLineId, sinceDate) {
+    return productLinesService.fetchJobs({
+      productLineId,
+      sinceDate,
+      algorithms:   this.state.algorithms.records,
+      executorUrl:  this.state.executor.url,
+      sessionToken: this.state.sessionToken,
+    })
+  }
+
+  _handleForgetJob(id) {
+    this.setState({
+      jobs: this.state.jobs.$filter(j => j.id !== id),
+    })
+  }
+
+  _handleJobCreated(job) {
+    this.setState({
+      jobs: this.state.jobs.$append(job)
+    })
+    this.navigateTo({
+      pathname: '/jobs',
+      search: '?jobId=' + job.id,
+    })
+  }
+
+  _handleProductLineCreated() {
+    this.navigateTo({ pathname: '/product-lines' })
+  }
+
+  _handleProductLineJobHoverIn(job) {
+    this.setState({ hoveredFeature: job })
+  }
+
+  _handleProductLineJobHoverOut() {
+    this.setState({ hoveredFeature: null })
+  }
+
+  _handleProductLineJobSelect(job) {
+    this.setState({ selectedFeature: job })
+  }
+
+  _handleProductLineJobDeselect() {
+    this.setState({ selectedFeature: null })
+  }
+
+  _handleSearchCriteriaChange(searchCriteria) {
+    this.setState({ searchCriteria })
+  }
+
+  _handleSearchSubmit({startIndex, count} = {}) {
+    this.setState({
+      isSearching: true,
+      selectedFeature: null,
+    })
+    catalogService.search(Object.assign({
+      count,
+      startIndex,
+      bbox: this.state.bbox,
+      catalogUrl: this.state.catalog.url,
+    }, this.state.searchCriteria))
+      .then(searchResults => this.setState({ searchResults, isSearching: false }))
+      .catch(searchError => this.setState({ searchError, isSearching: false }))
+  }
+
+  _handleSelectFeature(feature) {
+    if (this.state.selectedFeature === feature) {
+      return  // Nothing to do
+    }
+    this.setState({
+      selectedFeature: feature || null,
+    })
+    this.navigateTo({
+      pathname: this.state.route.pathname,
+      search:   (feature && feature.properties[KEY_TYPE] === TYPE_JOB) ? `?jobId=${feature.id}` : '',
+    })
+  }
+
+  navigateTo(loc) {
+    const route = generateRoute(loc)
+    history.pushState({}, null, route.href)
+    this.setState({
+      route,
+      bbox: this.state.route.pathname === route.pathname ? this.state.bbox : null,
+      selectedFeature: route.jobIds.length ? this.state.jobs.records.find(j => route.jobIds.includes(j.id)) : this.state.selectedFeature,
+      searchResults: this.state.route.pathname === route.pathname ? this.state.searchResults : null,
+    })
+  }
+
+  _startJobsWorker() {
+    this._autodiscoveryPromise.then(() => {
+      jobsService.startWorker({
+        sessionToken: this.state.sessionToken,
+        getRecords: () => this.state.jobs.records,
+        onUpdate: (updatedRecord) => this.setState({
+          jobs: this.state.jobs.$map(j => j.id === updatedRecord.id ? updatedRecord : j),
+        }),
+        onError: (err) => this.setState({
+          jobs: this.state.jobs.$error(err),
+        }),
+        onTerminate() {}
+      })
+    })
+  }
+
+  _subscribeToHistoryEvents() {
     window.addEventListener('popstate', () => {
-      if (this.state.route !== location.pathname) {
-        this.setState({ route: location.pathname })
+      if (this.state.route.href !== location.pathname + location.search + location.hash) {
+        const route = generateRoute(location)
+        this.setState({
+          route,
+          selectedFeature: route.jobIds.length ? this.state.jobs.records.find(j => route.jobIds.includes(j.id)) : this.state.selectedFeature,
+        })
       }
     })
   }
 }
 
+Application.propTypes = {
+  deserialize: React.PropTypes.func,
+  serialize: React.PropTypes.func,
+}
+
 //
-// Internals
+// Helpers
 //
 
-function enumerate(value) {
-  return value ? [].concat(value) : []
+function generateInitialState() {
+  const state = {
+    sessionToken: null,
+    route: generateRoute(location),
+
+    // Services
+    catalog: {},
+    executor: {},
+    geoserver: {},
+
+    // Data Collections
+    algorithms: createCollection(),
+    jobs: createCollection(),
+    productLines: createCollection(),
+
+    // Map state
+    bbox: null,
+    mapView: null,
+    selectedFeature: null,
+
+    // Search state
+    isSearching: false,
+    searchCriteria: createSearchCriteria(),
+    searchError: null,
+    searchResults: null,
+  }
+
+  const deserializedState = deserialize()
+  for (const key in deserializedState) {
+    state[key] = deserializedState[key] || state[key]
+  }
+
+  state.selectedFeature = state.jobs.records.find(j => state.route.jobIds.includes(j.id)) || null
+
+  return state
 }
 
 function deserialize() {
   return {
-    algorithms:   createCollection(JSON.parse(localStorage.getItem('algorithms_records')) || []),
-    bbox:         JSON.parse(sessionStorage.getItem('bbox')),
-    catalog:      JSON.parse(sessionStorage.getItem('catalog')),
-    executor:     JSON.parse(sessionStorage.getItem('executor')),
-    geoserver:    JSON.parse(sessionStorage.getItem('geoserver')),
-    jobs:         createCollection(JSON.parse(localStorage.getItem('jobs_records')) || []),
-    mapView:      JSON.parse(sessionStorage.getItem('mapView')),
-    sessionToken: sessionStorage.getItem('sessionToken') || null,
+    algorithms:     createCollection(JSON.parse(sessionStorage.getItem('algorithms_records')) || []),
+    bbox:           JSON.parse(sessionStorage.getItem('bbox')),
+    catalog:        JSON.parse(sessionStorage.getItem('catalog')),
+    executor:       JSON.parse(sessionStorage.getItem('executor')),
+    geoserver:      JSON.parse(sessionStorage.getItem('geoserver')),
+    jobs:           createCollection(JSON.parse(localStorage.getItem('jobs_records')) || []),
+    mapView:        JSON.parse(sessionStorage.getItem('mapView')),
+    searchCriteria: JSON.parse(sessionStorage.getItem('searchCriteria')),
+    searchResults:  JSON.parse(sessionStorage.getItem('searchResults')),
+    sessionToken:   sessionStorage.getItem('sessionToken') || null,
+    catalogApiKey:  localStorage.getItem('catalog_apiKey') || '',  // HACK
   }
 }
 
 function serialize(state) {
-  console.debug('(serialize)', state)
+  console.groupCollapsed('(Application:serialize)')
+  console.debug(JSON.stringify(state, null, 2))
+  console.groupEnd()
   sessionStorage.setItem('algorithms_records', JSON.stringify(state.algorithms.records))
   sessionStorage.setItem('bbox', JSON.stringify(state.bbox))
   sessionStorage.setItem('catalog', JSON.stringify(state.catalog))
@@ -319,5 +528,20 @@ function serialize(state) {
   sessionStorage.setItem('geoserver', JSON.stringify(state.geoserver))
   localStorage.setItem('jobs_records', JSON.stringify(state.jobs.records))
   sessionStorage.setItem('mapView', JSON.stringify(state.mapView))
+  sessionStorage.setItem('searchCriteria', JSON.stringify(state.searchCriteria))
+  sessionStorage.setItem('searchResults', JSON.stringify(state.searchResults))
   sessionStorage.setItem('sessionToken', state.sessionToken || '')
+  localStorage.setItem('catalog_apiKey', state.catalogApiKey)  // HACK
+}
+
+function generateRoute({ pathname = '/', search = '', hash = '' }) {
+  return {
+    pathname,
+    search,
+    hash,
+
+    // Helpers
+    href: pathname + search + hash,
+    jobIds: search.substr(1).split('&').filter(s => s.startsWith('jobId')).map(s => s.replace('jobId=', '')),
+  }
 }

@@ -55,17 +55,17 @@ function normalizeRequirement(key, value) {
   let name = key.replace(PATTERN_REQUIREMENT_PREFIX, '')
   let description = value.trim()
   switch (name) {
-  case 'bands':
-    name = REQUIREMENT_BANDS
-    description = description.toUpperCase().split(',').join(' and ')
-    break
-  case 'cloudCover':
-    name = REQUIREMENT_CLOUDCOVER
-    description = `Less than ${description}%`
-    value = parseFloat(value)
-    break
-  default:
-    break
+    case 'bands':
+      name = REQUIREMENT_BANDS
+      description = description.toUpperCase().split(',').join(' and ')
+      break
+    case 'cloudCover':
+      name = REQUIREMENT_CLOUDCOVER
+      description = `Less than ${description}%`
+      value = parseFloat(value)
+      break
+    default:
+      break
   }
   return {name, description, literal: value}
 }

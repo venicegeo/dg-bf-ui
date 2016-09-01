@@ -38,6 +38,7 @@ import {
 
 export default class JobStatus extends Component {
   static propTypes = {
+    authToken:   React.PropTypes.string.isRequired,
     className:   React.PropTypes.string,
     isActive:    React.PropTypes.bool.isRequired,
     job:         React.PropTypes.shape({
@@ -129,13 +130,14 @@ export default class JobStatus extends Component {
         <div className={styles.controls}>
           <Link
             pathname="/"
-            search={'jobId=' + id}
+            search={'?jobId=' + id}
             title="View on Map"
             onClick={this.props.onNavigate}>
             <i className="fa fa-globe"/>
           </Link>
           {canDownload && (
             <FileDownloadLink
+              authToken={this.props.authToken}
               dataId={resultDataId}
               filename={name + '.geojson'}
               className={styles.download}

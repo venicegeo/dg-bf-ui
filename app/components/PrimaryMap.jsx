@@ -96,9 +96,8 @@ export class PrimaryMap extends Component {
       zoom:         React.PropTypes.number.isRequired,
     }),
     onBoundingBoxChange: React.PropTypes.func.isRequired,
-    onSelectImage:       React.PropTypes.func.isRequired,
-    onSelectJob:         React.PropTypes.func.isRequired,
     onSearchPageChange:  React.PropTypes.func.isRequired,
+    onSelectFeature:     React.PropTypes.func.isRequired,
     onViewChange:        React.PropTypes.func.isRequired,
     highlightedFeature:  React.PropTypes.object,
     selectedFeature:     React.PropTypes.object,
@@ -150,6 +149,7 @@ export class PrimaryMap extends Component {
     }
     if (previousProps.selectedFeature !== this.props.selectedFeature) {
       this._renderSelectionPreview()
+      this._updateSelectedFeature()
     }
     if (previousProps.detections !== this.props.detections) {
       this._renderDetections()
@@ -259,8 +259,7 @@ export class PrimaryMap extends Component {
   }
 
   _emitDeselectAll() {
-    this.props.onSelectImage(null)
-    this.props.onSelectJob(null)
+    this.props.onSelectFeature(null)
   }
 
   _handleBasemapChange(index) {
@@ -335,7 +334,6 @@ export class PrimaryMap extends Component {
     }
 
     this._featureDetailsOverlay.setPosition(position)
-
     const selections = this._selectInteraction.getFeatures()
     switch (type) {
     case TYPE_DIVOT_INBOARD:
@@ -345,18 +343,11 @@ export class PrimaryMap extends Component {
       const jobFeature = this._frameLayer.getSource().getFeatureById(jobId)
       selections.clear()
       selections.push(jobFeature)
-      this.props.onSelectImage(null)
-      this.props.onSelectJob(jobId)
+      this.props.onSelectFeature(toGeoJSON(jobFeature))
       break
     case TYPE_JOB:
-      this.props.onSelectImage(null)
-      this.props.onSelectJob(feature.getId())
-      break
     case TYPE_SCENE:
-      const writer = new ol.format.GeoJSON()
-      const geojson = writer.writeFeatureObject(feature, {dataProjection: 'EPSG:4326', featureProjection: 'EPSG:3857'})
-      this.props.onSelectImage(geojson)
-      this.props.onSelectJob(null)
+      this.props.onSelectFeature(toGeoJSON(feature))
       break
     default:
       // Not a valid "selectable" feature
@@ -693,10 +684,16 @@ export class PrimaryMap extends Component {
   }
 
   _updateSelectedFeature() {
+    const features = this._selectInteraction.getFeatures()
+    features.clear()
+    const {selectedFeature} = this.props
+    if (!selectedFeature) {
+      return  // Nothing to do
+    }
     const reader = new ol.format.GeoJSON()
-    const feature = reader.readFeature(this.props.selectedFeature, {dataProjection: 'EPSG:4326', featureProjection: 'EPSG:3857'})
+    const feature = reader.readFeature(selectedFeature, {dataProjection: 'EPSG:4326', featureProjection: 'EPSG:3857'})
     const center = ol.extent.getCenter(feature.getGeometry().getExtent())
-    this._selectInteraction.getFeatures().push(feature)
+    features.push(feature)
     this._featureDetailsOverlay.setPosition(center)
   }
 }
@@ -995,4 +992,9 @@ function getColorForStatus(status) {
   case STATUS_ERROR: return 'hsl(349, 100%, 60%)'
   default: return 'magenta'
   }
+}
+
+function toGeoJSON(feature) {
+  const io = new ol.format.GeoJSON()
+  return io.writeFeatureObject(feature, {dataProjection: 'EPSG:4326', featureProjection: 'EPSG:3857'})
 }
