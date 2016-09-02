@@ -119,7 +119,6 @@ export class JobStatus extends React.Component<Props, State> {
             search={'?jobId=' + id}
             title="View on Map"
             onClick={this.props.onNavigate}>
-          >
             <i className="fa fa-globe"/>
           </Link>
           {canDownload && (
