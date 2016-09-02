@@ -43,6 +43,7 @@ import * as geoserverService from '../api/geoserver'
 import * as productLinesService from '../api/productLines'
 import {createCollection, Collection} from '../utils/collections'
 import {getFeatureCenter} from '../utils/geometries'
+import {upgradeIfNeeded} from '../utils/upgrade-job-record'
 
 import {
   STATUS_SUCCESS,
@@ -573,7 +574,7 @@ function deserialize() {
     catalog:        JSON.parse(sessionStorage.getItem('catalog')),
     executor:       JSON.parse(sessionStorage.getItem('executor')),
     geoserver:      JSON.parse(sessionStorage.getItem('geoserver')),
-    jobs:           createCollection(JSON.parse(localStorage.getItem('jobs_records')) || []),
+    jobs:           createCollection((JSON.parse(localStorage.getItem('jobs_records')) || []).map(upgradeIfNeeded).filter(Boolean)),
     mapView:        JSON.parse(sessionStorage.getItem('mapView')),
     searchCriteria: JSON.parse(sessionStorage.getItem('searchCriteria')),
     searchResults:  JSON.parse(sessionStorage.getItem('searchResults')),
