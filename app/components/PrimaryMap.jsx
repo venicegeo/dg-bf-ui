@@ -26,8 +26,7 @@ import LoadingAnimation from './LoadingAnimation'
 import ImagerySearchResults from './ImagerySearchResults'
 import debounce from 'lodash/debounce'
 import throttle from 'lodash/throttle'
-import * as anchorUtil from '../utils/map-anchor'
-import * as bboxUtil from '../utils/bbox'
+import {featureToBbox, deserializeBbox, serializeBbox} from '../utils/geometries'
 import styles from './PrimaryMap.css'
 import {
   TILE_PROVIDERS,
@@ -66,9 +65,8 @@ export const MODE_NORMAL = 'MODE_NORMAL'
 export const MODE_PRODUCT_LINES = 'MODE_PRODUCT_LINES'
 export const MODE_SELECT_IMAGERY = 'MODE_SELECT_IMAGERY'
 
-export default class PrimaryMap extends Component {
+export class PrimaryMap extends Component {
   static propTypes = {
-    anchor:              React.PropTypes.string,
     bbox:                React.PropTypes.arrayOf(React.PropTypes.number),
     catalogApiKey:       React.PropTypes.string,
     detections:          React.PropTypes.arrayOf(React.PropTypes.shape({
@@ -92,27 +90,32 @@ export default class PrimaryMap extends Component {
     geoserverUrl:        React.PropTypes.string,
     mode:                React.PropTypes.string.isRequired,
     selectedProductLineJob: React.PropTypes.object,
-    onAnchorChange:      React.PropTypes.func.isRequired,
+    view:              React.PropTypes.shape({
+      basemapIndex: React.PropTypes.number.isRequired,
+      center:       React.PropTypes.array.isRequired,
+      zoom:         React.PropTypes.number.isRequired,
+    }),
     onBoundingBoxChange: React.PropTypes.func.isRequired,
-    onSelectImage:       React.PropTypes.func.isRequired,
-    onSelectJob:         React.PropTypes.func.isRequired,
     onSearchPageChange:  React.PropTypes.func.isRequired,
+    onSelectFeature:     React.PropTypes.func.isRequired,
+    onViewChange:        React.PropTypes.func.isRequired,
     highlightedFeature:  React.PropTypes.object,
     selectedFeature:     React.PropTypes.object,
   }
 
   constructor() {
     super()
-    this.state = {basemapIndex: 0, loadingRefCount: 0}
-    this._emitAnchorChange = debounce(this._emitAnchorChange.bind(this), 100)
+    this.state = {basemapIndex: 0, loadingRefCount: 0, tileLoadError: false}
+    this._emitViewChange = debounce(this._emitViewChange.bind(this), 100)
     this._handleBasemapChange = this._handleBasemapChange.bind(this)
     this._handleDrawStart = this._handleDrawStart.bind(this)
     this._handleDrawEnd = this._handleDrawEnd.bind(this)
+    this._handleLoadError = this._handleLoadError.bind(this)
     this._handleLoadStart = this._handleLoadStart.bind(this)
     this._handleLoadStop = this._handleLoadStop.bind(this)
     this._handleMouseMove = throttle(this._handleMouseMove.bind(this), 15)
     this._handleSelect = this._handleSelect.bind(this)
-    this._recenter = debounce(this._recenter.bind(this), 100)
+    this._updateView = debounce(this._updateView.bind(this), 100)
     this._renderImagerySearchBbox = debounce(this._renderImagerySearchBbox.bind(this))
   }
 
@@ -123,7 +126,7 @@ export default class PrimaryMap extends Component {
     this._renderFrames()
     this._renderImagery()
     this._renderImagerySearchResultsOverlay()
-    this._recenter(this.props.anchor)
+    this._updateView()
     if (this.props.bbox) {
       this._renderImagerySearchBbox()
     }
@@ -146,6 +149,7 @@ export default class PrimaryMap extends Component {
     }
     if (previousProps.selectedFeature !== this.props.selectedFeature) {
       this._renderSelectionPreview()
+      this._updateSelectedFeature()
     }
     if (previousProps.detections !== this.props.detections) {
       this._renderDetections()
@@ -169,8 +173,8 @@ export default class PrimaryMap extends Component {
     if (previousState.basemapIndex !== this.state.basemapIndex) {
       this._updateBasemap()
     }
-    if (previousProps.anchor !== this.props.anchor && this.props.anchor) {
-      this._recenter(this.props.anchor)
+    if (previousProps.view !== this.props.view && this.props.view) {
+      this._updateView()
     }
     if (previousProps.mode !== this.props.mode) {
       this._updateInteractions()
@@ -238,37 +242,51 @@ export default class PrimaryMap extends Component {
     this._selectInteraction.setActive(false)
   }
 
-  _emitAnchorChange() {
+  _emitViewChange() {
     const view = this._map.getView()
-    const center = view.getCenter()
-    const resolution = view.getResolution()
-    const anchor = anchorUtil.serialize(center, resolution, this.state.basemapIndex)
+    const {basemapIndex} = this.state
+    const center = ol.proj.transform(view.getCenter(), 'EPSG:3857', 'EPSG:4326')
+    const zoom = view.getZoom() || MIN_ZOOM  // HACK -- sometimes getZoom returns undefined...
     // Don't emit false positives
-    if (this.props.anchor !== anchor) {
-      this._skipNextRecenter = true
-      this.props.onAnchorChange(anchor)
+    if (!this.props.view
+      || this.props.view.center[0] !== center[0]
+      || this.props.view.center[1] !== center[1]
+      || this.props.view.zoom !== zoom
+      || this.props.view.basemapIndex !== basemapIndex) {
+      this._skipNextViewUpdate = true
+      this.props.onViewChange({ basemapIndex, center, zoom })
     }
   }
 
   _emitDeselectAll() {
-    this.props.onSelectImage(null)
-    this.props.onSelectJob(null)
+    this.props.onSelectFeature(null)
   }
 
   _handleBasemapChange(index) {
     this.setState({basemapIndex: index})
-    this._emitAnchorChange()
+    this._emitViewChange()
   }
 
   _handleDrawEnd(event) {
     const geometry = event.feature.getGeometry()
-    const bbox = bboxUtil.serialize(geometry.getExtent())
+    const bbox = serializeBbox(geometry.getExtent())
     this.props.onBoundingBoxChange(bbox)
   }
 
   _handleDrawStart() {
     this._clearDraw()
     this.props.onBoundingBoxChange(null)
+  }
+
+  _handleLoadError() {
+    this.setState({
+      loadingRefCount: Math.max(0, this.state.loadingRefCount - 1)
+    })
+
+    if (!this.state.tileLoadError) {
+      this.setState({ tileLoadError: true })
+      alert('One or more tiles failed to load!')
+    }
   }
 
   _handleLoadStart() {
@@ -288,11 +306,11 @@ export default class PrimaryMap extends Component {
     let foundFeature = false
     this._map.forEachFeatureAtPixel(event.pixel, (feature) => {
       switch (feature.get(KEY_TYPE)) {
-      case TYPE_DIVOT_INBOARD:
-      case TYPE_JOB:
-      case TYPE_SCENE:
-        foundFeature = true
-        return true
+        case TYPE_DIVOT_INBOARD:
+        case TYPE_JOB:
+        case TYPE_SCENE:
+          foundFeature = true
+          return true
       }
     }, null, layerFilter)
     if (foundFeature) {
@@ -316,34 +334,26 @@ export default class PrimaryMap extends Component {
     }
 
     this._featureDetailsOverlay.setPosition(position)
-
     const selections = this._selectInteraction.getFeatures()
     switch (type) {
-    case TYPE_DIVOT_INBOARD:
-    case TYPE_STEM:
-      // Proxy clicks on "inner" decorations out to the job frame itself
-      const jobId = feature.get(KEY_OWNER_ID)
-      const jobFeature = this._frameLayer.getSource().getFeatureById(jobId)
-      selections.clear()
-      selections.push(jobFeature)
-      this.props.onSelectImage(null)
-      this.props.onSelectJob(jobId)
-      break
-    case TYPE_JOB:
-      this.props.onSelectImage(null)
-      this.props.onSelectJob(feature.getId())
-      break
-    case TYPE_SCENE:
-      const writer = new ol.format.GeoJSON()
-      const geojson = writer.writeFeatureObject(feature, {dataProjection: 'EPSG:4326', featureProjection: 'EPSG:3857'})
-      this.props.onSelectImage(geojson)
-      this.props.onSelectJob(null)
-      break
-    default:
-      // Not a valid "selectable" feature
-      this._clearSelection()
-      this._emitDeselectAll()
-      break
+      case TYPE_DIVOT_INBOARD:
+      case TYPE_STEM:
+        // Proxy clicks on "inner" decorations out to the job frame itself
+        const jobId = feature.get(KEY_OWNER_ID)
+        const jobFeature = this._frameLayer.getSource().getFeatureById(jobId)
+        selections.clear()
+        selections.push(jobFeature)
+        this.props.onSelectFeature(toGeoJSON(jobFeature))
+        break
+      case TYPE_JOB:
+      case TYPE_SCENE:
+        this.props.onSelectFeature(toGeoJSON(feature))
+        break
+      default:
+        // Not a valid "selectable" feature
+        this._clearSelection()
+        this._emitDeselectAll()
+        break
     }
   }
 
@@ -377,7 +387,7 @@ export default class PrimaryMap extends Component {
         this._drawLayer,
         this._imageryLayer,
         this._detectionsLayer,
-        this._highlightLayer,
+        this._highlightLayer
       ],
       target: this.refs.container,
       view: new ol.View({
@@ -387,6 +397,7 @@ export default class PrimaryMap extends Component {
         zoom: MIN_ZOOM
       })
     })
+
 
     /*
       2016-08-22 -- Due to internal implementation of the 'autoPan' option,
@@ -401,22 +412,22 @@ export default class PrimaryMap extends Component {
     this._map.addOverlay(this._featureDetailsOverlay)
 
     this._map.on('pointermove', this._handleMouseMove)
-    this._map.on('moveend', this._emitAnchorChange)
+    this._map.on('moveend', this._emitViewChange)
   }
 
-  _recenter(anchor) {
-    if (this._skipNextRecenter) {
-      this._skipNextRecenter = false
+  _updateView() {
+    if (this._skipNextViewUpdate) {
+      this._skipNextViewUpdate = false
       return
     }
-    const deserialized = anchorUtil.deserialize(anchor)
-    if (deserialized) {
-      const {basemapIndex, resolution, center} = deserialized
-      this.setState({basemapIndex})
-      const view = this._map.getView()
-      view.setCenter(view.constrainCenter(center))
-      view.setResolution(view.constrainResolution(resolution))
+    if (!this.props.view) {
+      return
     }
+    const {basemapIndex, zoom, center} = this.props.view
+    this.setState({basemapIndex})
+    const view = this._map.getView()
+    view.setCenter(view.constrainCenter(ol.proj.transform(center, 'EPSG:4326', 'EPSG:3857')))
+    view.setZoom(zoom)
   }
 
   _renderDetections() {
@@ -442,7 +453,7 @@ export default class PrimaryMap extends Component {
 
     // Additions/Updates
     const extent = ol.extent.createEmpty()
-    detections.forEach(d => ol.extent.extend(extent, bboxUtil.featureToBbox(d)))
+    detections.forEach(d => ol.extent.extend(extent, featureToBbox(d)))
     layer.setExtent(extent)
     source.updateParams({
       [KEY_LAYERS]: incomingLayerIds,
@@ -543,7 +554,7 @@ export default class PrimaryMap extends Component {
   _renderImagerySearchResultsOverlay() {
     this._imageSearchResultsOverlay.setPosition(undefined)
     // HACK HACK HACK HACK HACK HACK HACK HACK
-    const bbox = bboxUtil.deserialize(this.props.bbox)
+    const bbox = deserializeBbox(this.props.bbox)
     if (!bbox) {
       return  // Nothing to pin the overlay to
     }
@@ -566,7 +577,7 @@ export default class PrimaryMap extends Component {
 
   _renderImagerySearchBbox() {
     this._clearDraw()
-    const bbox = bboxUtil.deserialize(this.props.bbox)
+    const bbox = deserializeBbox(this.props.bbox)
     if (!bbox) {
       return
     }
@@ -630,13 +641,15 @@ export default class PrimaryMap extends Component {
   _subscribeToLoadEvents(layer) {
     const source = layer.getSource()
     source.on('tileloadstart', this._handleLoadStart)
-    source.on(['tileloadend', 'tileloaderror'], this._handleLoadStop)
+    source.on('tileloadend', this._handleLoadStop)
+    source.on('tileloaderror', this._handleLoadError)
   }
 
   _unsubscribeFromLoadEvents(layer) {
     const source = layer.getSource()
     source.un('tileloadstart', this._handleLoadStart)
-    source.un(['tileloadend', 'tileloaderror'], this._handleLoadStop)
+    source.un('tileloadend', this._handleLoadStop)
+    source.un('tileloaderror', this._handleLoadError)
   }
 
   _updateBasemap() {
@@ -645,35 +658,41 @@ export default class PrimaryMap extends Component {
 
   _updateInteractions() {
     switch (this.props.mode) {
-    case MODE_SELECT_IMAGERY:
-      this._deactivateDrawInteraction()
-      this._activateSelectInteraction()
-      break
-    case MODE_DRAW_BBOX:
-      this._activateDrawInteraction()
-      this._deactivateSelectInteraction()
-      break
-    case MODE_NORMAL:
-      this._clearDraw()
-      this._deactivateDrawInteraction()
-      this._activateSelectInteraction()
-      break
-    case MODE_PRODUCT_LINES:
-      this._clearDraw()
-      this._deactivateDrawInteraction()
-      this._activateSelectInteraction()
-      break
-    default:
-      console.warn('wat mode=%s', this.props.mode)
-      break
+      case MODE_SELECT_IMAGERY:
+        this._deactivateDrawInteraction()
+        this._activateSelectInteraction()
+        break
+      case MODE_DRAW_BBOX:
+        this._activateDrawInteraction()
+        this._deactivateSelectInteraction()
+        break
+      case MODE_NORMAL:
+        this._clearDraw()
+        this._deactivateDrawInteraction()
+        this._activateSelectInteraction()
+        break
+      case MODE_PRODUCT_LINES:
+        this._clearDraw()
+        this._deactivateDrawInteraction()
+        this._activateSelectInteraction()
+        break
+      default:
+        console.warn('wat mode=%s', this.props.mode)
+        break
     }
   }
 
   _updateSelectedFeature() {
+    const features = this._selectInteraction.getFeatures()
+    features.clear()
+    const {selectedFeature} = this.props
+    if (!selectedFeature) {
+      return  // Nothing to do
+    }
     const reader = new ol.format.GeoJSON()
-    const feature = reader.readFeature(this.props.selectedFeature, {dataProjection: 'EPSG:4326', featureProjection: 'EPSG:3857'})
+    const feature = reader.readFeature(selectedFeature, {dataProjection: 'EPSG:4326', featureProjection: 'EPSG:3857'})
     const center = ol.extent.getCenter(feature.getGeometry().getExtent())
-    this._selectInteraction.getFeatures().push(feature)
+    features.push(feature)
     this._featureDetailsOverlay.setPosition(center)
   }
 }
@@ -697,7 +716,7 @@ function animateLayerExit(layer) {
 
 function featuresToImages(...features) {
   return features.filter(Boolean).map(feature => ({
-    extent: bboxUtil.featureToBbox(feature),
+    extent: featureToBbox(feature),
     id:     feature.properties[KEY_IMAGE_ID] || feature.id,
   }))
 }
@@ -813,80 +832,80 @@ function generateFrameLayer() {
     style(feature, resolution) {  // eslint-disable-line complexity
       const isClose = resolution < RESOLUTION_CLOSE
       switch (feature.get(KEY_TYPE)) {
-      case TYPE_DIVOT_INBOARD:
-        return new ol.style.Style({
-          image: new ol.style.RegularShape({
-            angle: Math.PI / 4,
-            points: 4,
-            radius: 5,
-            fill: new ol.style.Fill({
-              color: 'black'
+        case TYPE_DIVOT_INBOARD:
+          return new ol.style.Style({
+            image: new ol.style.RegularShape({
+              angle: Math.PI / 4,
+              points: 4,
+              radius: 5,
+              fill: new ol.style.Fill({
+                color: 'black'
+              })
             })
           })
-        })
-      case TYPE_DIVOT_OUTBOARD:
-        return new ol.style.Style({
-          image: new ol.style.RegularShape({
-            angle: Math.PI / 4,
-            points: 4,
-            radius: 10,
+        case TYPE_DIVOT_OUTBOARD:
+          return new ol.style.Style({
+            image: new ol.style.RegularShape({
+              angle: Math.PI / 4,
+              points: 4,
+              radius: 10,
+              stroke: new ol.style.Stroke({
+                color: 'black',
+                width: 1
+              }),
+              fill: new ol.style.Fill({
+                color: getColorForStatus(feature.get(KEY_STATUS))
+              })
+            })
+          })
+        case TYPE_STEM:
+          return new ol.style.Style({
             stroke: new ol.style.Stroke({
               color: 'black',
               width: 1
-            }),
-            fill: new ol.style.Fill({
-              color: getColorForStatus(feature.get(KEY_STATUS))
             })
           })
-        })
-      case TYPE_STEM:
-        return new ol.style.Style({
-          stroke: new ol.style.Stroke({
-            color: 'black',
-            width: 1
+        case TYPE_LABEL_MAJOR:
+          return new ol.style.Style({
+            text: new ol.style.Text({
+              fill: new ol.style.Fill({
+                color: 'black'
+              }),
+              offsetX: 13,
+              offsetY: 1,
+              font: 'bold 17px Catamaran, Verdana, sans-serif',
+              text: feature.get(KEY_NAME).toUpperCase(),
+              textAlign: 'left',
+              textBaseline: 'middle'
+            })
           })
-        })
-      case TYPE_LABEL_MAJOR:
-        return new ol.style.Style({
-          text: new ol.style.Text({
-            fill: new ol.style.Fill({
-              color: 'black'
+        case TYPE_LABEL_MINOR:
+          return new ol.style.Style({
+            text: new ol.style.Text({
+              fill: new ol.style.Fill({
+                color: 'rgba(0,0,0,.6)'
+              }),
+              offsetX: 13,
+              offsetY: 15,
+              font: '11px Verdana, sans-serif',
+              text: ([
+                feature.get(KEY_STATUS),
+                feature.get(KEY_IMAGE_ID),
+              ].filter(Boolean)).join(' // ').toUpperCase(),
+              textAlign: 'left',
+              textBaseline: 'middle'
+            })
+          })
+        default:
+          return new ol.style.Style({
+            stroke: new ol.style.Stroke({
+              color: 'rgba(0, 0, 0, .4)',
+              lineDash: [10, 10]
             }),
-            offsetX: 13,
-            offsetY: 1,
-            font: 'bold 17px Catamaran, Verdana, sans-serif',
-            text: feature.get(KEY_NAME).toUpperCase(),
-            textAlign: 'left',
-            textBaseline: 'middle'
-          })
-        })
-      case TYPE_LABEL_MINOR:
-        return new ol.style.Style({
-          text: new ol.style.Text({
             fill: new ol.style.Fill({
-              color: 'rgba(0,0,0,.6)'
-            }),
-            offsetX: 13,
-            offsetY: 15,
-            font: '11px Verdana, sans-serif',
-            text: ([
-              feature.get(KEY_STATUS),
-              feature.get(KEY_IMAGE_ID),
-            ].filter(Boolean)).join(' // ').toUpperCase(),
-            textAlign: 'left',
-            textBaseline: 'middle'
+              color: isClose ? 'transparent' : 'hsla(202, 100%, 85%, 0.5)'
+            })
           })
-        })
-      default:
-        return new ol.style.Style({
-          stroke: new ol.style.Stroke({
-            color: 'rgba(0, 0, 0, .4)',
-            lineDash: [10, 10]
-          }),
-          fill: new ol.style.Fill({
-            color: isClose ? 'transparent' : 'hsla(202, 100%, 85%, 0.5)'
-          })
-        })
       }
     }
   })
@@ -964,12 +983,17 @@ function generateSelectInteraction(...layers) {
 
 function getColorForStatus(status) {
   switch (status) {
-  case STATUS_ACTIVE: return 'hsl(200, 94%, 54%)'
-  case STATUS_INACTIVE: return 'hsl(0, 0%, 50%)'
-  case STATUS_RUNNING: return 'hsl(48, 94%, 54%)'
-  case STATUS_SUCCESS: return 'hsl(114, 100%, 45%)'
-  case STATUS_TIMED_OUT:
-  case STATUS_ERROR: return 'hsl(349, 100%, 60%)'
-  default: return 'magenta'
+    case STATUS_ACTIVE: return 'hsl(200, 94%, 54%)'
+    case STATUS_INACTIVE: return 'hsl(0, 0%, 50%)'
+    case STATUS_RUNNING: return 'hsl(48, 94%, 54%)'
+    case STATUS_SUCCESS: return 'hsl(114, 100%, 45%)'
+    case STATUS_TIMED_OUT:
+    case STATUS_ERROR: return 'hsl(349, 100%, 60%)'
+    default: return 'magenta'
   }
+}
+
+function toGeoJSON(feature) {
+  const io = new ol.format.GeoJSON()
+  return io.writeFeatureObject(feature, {dataProjection: 'EPSG:4326', featureProjection: 'EPSG:3857'})
 }

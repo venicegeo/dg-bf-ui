@@ -17,7 +17,7 @@
 import React, {Component} from 'react'
 import ol from 'openlayers'
 import {TILE_PROVIDERS} from '../config'
-import {deserialize} from '../utils/bbox'
+import {deserializeBbox} from '../utils/geometries'
 import styles from './StaticMinimap.css'
 
 const [DEFAULT_TILE_PROVIDER] = TILE_PROVIDERS
@@ -46,7 +46,7 @@ export default class StaticMinimap extends Component {
   //
 
   _initializeMap() {
-    const bbox = deserialize(this.props.bbox)
+    const bbox = deserializeBbox(this.props.bbox)
     const bboxGeometry = ol.geom.Polygon.fromExtent(bbox)
     this._map = new ol.Map({
       controls: [],

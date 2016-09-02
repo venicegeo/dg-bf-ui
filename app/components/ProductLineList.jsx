@@ -15,36 +15,27 @@
  **/
 
 import React from 'react'
-import {connect} from 'react-redux'
-import ProductLine from './ProductLine'
-import {
-  clearHoveredProductLineJob,
-  clearSelectedProductLineJob,
-  fetchProductLines,
-  fetchProductLineJobs,
-  hoverProductLineJob,
-  selectProductLineJob,
-} from '../actions'
+import {ProductLine} from './ProductLine'
 
 const styles = require('./ProductLineList.css')
 
 export class ProductLineList extends React.Component {
   static propTypes = {
-    error:             React.PropTypes.object,
-    isFetching:        React.PropTypes.bool.isRequired,
-    jobs:              React.PropTypes.object.isRequired,
-    productLines:      React.PropTypes.array.isRequired,
-    selectedJobIds:    React.PropTypes.array.isRequired,
-    fetchProductLines: React.PropTypes.func.isRequired,
-    onFetchJobs:       React.PropTypes.func.isRequired,
-    onJobHoverIn:      React.PropTypes.func.isRequired,
-    onJobHoverOut:     React.PropTypes.func.isRequired,
-    onJobSelect:       React.PropTypes.func.isRequired,
-    onJobDeselect:     React.PropTypes.func.isRequired,
+    error:         React.PropTypes.object,
+    isFetching:    React.PropTypes.bool.isRequired,
+    productLines:  React.PropTypes.array.isRequired,
+    sessionToken:  React.PropTypes.string.isRequired,
+    onFetch:       React.PropTypes.func.isRequired,
+    onFetchJobs:   React.PropTypes.func.isRequired,
+    onJobHoverIn:  React.PropTypes.func.isRequired,
+    onJobHoverOut: React.PropTypes.func.isRequired,
+    onJobSelect:   React.PropTypes.func.isRequired,
+    onJobDeselect: React.PropTypes.func.isRequired,
+    onPanTo:       React.PropTypes.func.isRequired,
   }
 
   componentDidMount() {
-    this.props.fetchProductLines()
+    this.props.onFetch()
   }
 
   render() {
@@ -54,25 +45,6 @@ export class ProductLineList extends React.Component {
           <h1>Product Lines</h1>
         </header>
         <ul>
-          {this.props.productLines.map(productLine => (
-            <ProductLine
-              className={styles.listItem}
-              key={productLine.id}
-              productLine={productLine}
-              jobs={this.props.jobs[productLine.id]}
-              selectedJobIds={this.props.selectedJobIds}
-              fetchJobs={sinceDate => this.props.onFetchJobs(productLine.id, sinceDate)}
-              onJobHoverIn={this.props.onJobHoverIn}
-              onJobHoverOut={this.props.onJobHoverOut}
-              onJobSelect={this.props.onJobSelect}
-              onJobDeselect={this.props.onJobDeselect}
-            />
-          ))}
-          {this.props.isFetching && (
-            <li className={styles.placeholder}>
-              Loading Product Lines
-            </li>
-          )}
           {this.props.error && (
             <li className={styles.error}>
               <h4><i className="fa fa-warning"/> {this.props.error.code ? 'Communication' : 'Application'} Error</h4>
@@ -80,7 +52,25 @@ export class ProductLineList extends React.Component {
                 ? 'Cannot communicate with the server'
                 : 'An error is preventing the display of product lines'
               }. (<code>{this.props.error.message}</code>)</p>
-              <button onClick={this.props.fetchProductLines}>Retry</button>
+              <button onClick={this.props.onFetch}>Retry</button>
+            </li>
+          )}
+          {this.props.productLines.map(productLine => (
+            <ProductLine
+              className={styles.listItem}
+              key={productLine.id}
+              productLine={productLine}
+              onFetchJobs={this.props.onFetchJobs}
+              onJobHoverIn={this.props.onJobHoverIn}
+              onJobHoverOut={this.props.onJobHoverOut}
+              onJobSelect={this.props.onJobSelect}
+              onJobDeselect={this.props.onJobDeselect}
+              onPanTo={this.props.onPanTo}
+            />
+          ))}
+          {this.props.isFetching && (
+            <li className={styles.placeholder}>
+              Loading Product Lines
             </li>
           )}
         </ul>
@@ -88,18 +78,3 @@ export class ProductLineList extends React.Component {
     )
   }
 }
-
-export default connect(state => ({
-  isFetching:     state.productLines.fetching,
-  error:          state.productLines.error,
-  jobs:           state.productLineJobs,
-  productLines:   state.productLines.records,
-  selectedJobIds: state.productLineJobs.selection.map(j => j.id),
-}), dispatch => ({
-  fetchProductLines: () => dispatch(fetchProductLines()),
-  onFetchJobs:       (id, sinceDate) => dispatch(fetchProductLineJobs(id, sinceDate)),
-  onJobHoverIn:      (job) => dispatch(hoverProductLineJob(job)),
-  onJobHoverOut:     () => dispatch(clearHoveredProductLineJob()),
-  onJobSelect:       (job) => dispatch(selectProductLineJob(job)),
-  onJobDeselect:     () => dispatch(clearSelectedProductLineJob()),
-}))(ProductLineList)

@@ -19,7 +19,7 @@ const styles = require('./Modal.css')
 import React, {Component} from 'react'
 const ESCAPE = 27
 
-export default class Modal extends Component {
+export class Modal extends Component {
   static propTypes = {
     children: React.PropTypes.oneOfType([
       React.PropTypes.element,

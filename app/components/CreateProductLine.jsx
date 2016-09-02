@@ -17,21 +17,11 @@
 const styles = require('./CreateProductLine.css')
 
 import React, {Component} from 'react'
-import {connect} from 'react-redux'
+import moment from 'moment'
 import AlgorithmList from './AlgorithmList'
 import CatalogSearchCriteria from './CatalogSearchCriteria'
-import NewProductLineDetails from './NewProductLineDetails'
-import {
-  changeProductLineDates,
-  changeProductLineName,
-  createProductLine,
-  resetProductLineName,
-  selectProductLineAlgorithm,
-  updateCatalogApiKey,
-  updateSearchBbox,
-  updateSearchCloudCover,
-  updateSearchFilter,
-} from '../actions'
+import {NewProductLineDetails} from './NewProductLineDetails'
+import {create} from '../api/productLines'
 
 // FIXME -- request list of supported bands for each provider from image catalog
 const SUPPORTED_BANDS = {
@@ -50,38 +40,33 @@ const SUPPORTED_BANDS = {
 }
 
 export class CreateProductLine extends Component {
-  static contextTypes = {
-    router: React.PropTypes.object
-  }
-
   static propTypes = {
     algorithms:               React.PropTypes.array.isRequired,
     bbox:                     React.PropTypes.arrayOf(React.PropTypes.number),
     catalogApiKey:            React.PropTypes.string,
-    cloudCover:               React.PropTypes.number.isRequired,
-    dateStart:                React.PropTypes.string,
-    dateStop:                 React.PropTypes.string,
-    filter:                   React.PropTypes.string,
+    eventTypeId:              React.PropTypes.string,
+    executorServiceId:        React.PropTypes.string,
+    executorUrl:              React.PropTypes.string,
     filters:                  React.PropTypes.arrayOf(React.PropTypes.object).isRequired,
-    isCreating:               React.PropTypes.bool.isRequired,
-    name:                     React.PropTypes.string.isRequired,
-    selectedAlgorithmId:      React.PropTypes.string,
-    onAlgorithmSelect:        React.PropTypes.func.isRequired,
+    sessionToken:             React.PropTypes.string.isRequired,
     onCatalogApiKeyChange:    React.PropTypes.func.isRequired,
     onClearBbox:              React.PropTypes.func.isRequired,
-    onProductLineSubmit:      React.PropTypes.func.isRequired,
-    onNameChange:             React.PropTypes.func.isRequired,
-    onDateChange:             React.PropTypes.func.isRequired,
-    onResetName:              React.PropTypes.func.isRequired,
-    onSearchCloudCoverChange: React.PropTypes.func.isRequired,
-    onSearchFilterChange:     React.PropTypes.func.isRequired,
+    onProductLineCreated:     React.PropTypes.func.isRequired,
   }
 
   constructor() {
     super()
-    this.state = {shouldAutogenerateName: true}
+    this.state = {
+      algorithm:  null,
+      cloudCover: 10,
+      dateStart:  moment().subtract(30, 'days').format('YYYY-MM-DD'),
+      dateStop:   moment().format('YYYY-MM-DD'),
+      isCreating: false,
+      filter:     '',
+      name:       '',
+      shouldAutogenerateName: true,
+    }
     this._handleAlgorithmSelect = this._handleAlgorithmSelect.bind(this)
-    this._handleNameChange = this._handleNameChange.bind(this)
     this._handleSubmit = this._handleSubmit.bind(this)
   }
 
@@ -102,28 +87,28 @@ export class CreateProductLine extends Component {
               <CatalogSearchCriteria
                 apiKey={this.props.catalogApiKey}
                 bbox={this.props.bbox}
-                cloudCover={this.props.cloudCover}
-                filter={this.props.filter}
+                cloudCover={this.state.cloudCover}
+                filter={this.state.filter}
                 filters={this.props.filters}
                 onApiKeyChange={this.props.onCatalogApiKeyChange}
                 onClearBbox={this.props.onClearBbox}
-                onCloudCoverChange={this.props.onSearchCloudCoverChange}
-                onFilterChange={this.props.onSearchFilterChange}
+                onCloudCoverChange={cloudCover => this.setState({ cloudCover })}
+                onFilterChange={filter => this.setState({ filter })}
               />
               <NewProductLineDetails
-                name={this.props.name}
-                dateStart={this.props.dateStart}
-                dateStop={this.props.dateStop}
-                onDateChange={this.props.onDateChange}
-                onNameChange={this._handleNameChange}
+                name={this.state.name}
+                dateStart={this.state.dateStart}
+                dateStop={this.state.dateStop}
+                onDateChange={(dateStart, dateStop) => this.setState({ dateStart, dateStop })}
+                onNameChange={name => this.setState({ name, shouldAutogenerateName: !name, })}
               />
               <AlgorithmList
                 algorithms={this.props.algorithms}
                 imageProperties={{
-                  cloudCover: this.props.cloudCover,
+                  cloudCover: this.state.cloudCover,
                   bands: SUPPORTED_BANDS.LANDSAT,
                 }}
-                selectedId={this.props.selectedAlgorithmId}
+                selectedId={this.state.algorithm ? this.state.algorithm.id : null}
                 onSelect={this._handleAlgorithmSelect}
                 warningHeading="Check Image Search Filters"
                 warningMessage={`
@@ -148,54 +133,40 @@ export class CreateProductLine extends Component {
 
   get _canSubmit() {
     return this.props.bbox
-        && this.props.dateStart
-        && this.props.name
-        && this.props.selectedAlgorithmId
+        && this.state.algorithm
+        && this.state.dateStart
+        && this.state.name
   }
 
   _handleAlgorithmSelect(algorithm) {
-    if (this.state.shouldAutogenerateName) {
-      this.props.onNameChange(generateName(algorithm))
-    }
-    this.props.onAlgorithmSelect(algorithm)
-  }
-
-  _handleNameChange(name) {
-    this.setState({ shouldAutogenerateName: !name })
-    this.props.onNameChange(name)
+    this.setState({
+      name: this.state.shouldAutogenerateName ? generateName(algorithm) : this.state.name,
+      algorithm,
+    })
   }
 
   _handleSubmit() {
-    this.props.onProductLineSubmit()
-      .then(() => {
-        this.context.router.push({ pathname: '/product-lines' })
+    create({
+      algorithm:         this.state.algorithm,
+      bbox:              this.props.bbox,
+      catalogApiKey:     this.props.catalogApiKey,
+      cloudCover:        this.state.cloudCover,
+      dateStart:         this.state.dateStart,
+      dateStop:          this.state.dateStop,
+      eventTypeId:       this.props.eventTypeId,
+      executorServiceId: this.props.executorServiceId,
+      executorUrl:       this.props.executorUrl,
+      filter:            this.state.filter,
+      name:              this.state.name,
+      sessionToken:      this.props.sessionToken,
+    })
+      .then(() => this.props.onProductLineCreated())
+      .catch(error => {
+        this.setState({ error })
+        throw error
       })
   }
 }
-
-export default connect(state => ({
-  algorithms:          state.algorithms.records,
-  bbox:                state.search.bbox,
-  catalogApiKey:       state.catalog.apiKey,
-  cloudCover:          state.search.cloudCover,
-  dateStart:           state.draftProductLine.dateStart,
-  dateStop:            state.draftProductLine.dateStop,
-  isCreating:          state.draftProductLine.creating,
-  filter:              state.search.filter,
-  filters:             state.catalog.filters,
-  name:                state.draftProductLine.name,
-  selectedAlgorithmId: state.draftProductLine.algorithm && state.draftProductLine.algorithm.id,
-}), dispatch => ({
-  onProductLineSubmit:      (apiKey, name, algorithm) => dispatch(createProductLine(apiKey, name, algorithm)),
-  onCatalogApiKeyChange:    (apiKey) => dispatch(updateCatalogApiKey(apiKey)),
-  onClearBbox:              () => dispatch(updateSearchBbox()),
-  onNameChange:             (name) => dispatch(changeProductLineName(name)),
-  onDateChange:             (dateStart, dateStop) => dispatch(changeProductLineDates(dateStart, dateStop)),
-  onResetName:              () => dispatch(resetProductLineName()),
-  onSearchCloudCoverChange: (cloudCover) => dispatch(updateSearchCloudCover(cloudCover)),
-  onSearchFilterChange:     (filter) => dispatch(updateSearchFilter(filter)),
-  onAlgorithmSelect:        (algorithm) => dispatch(selectProductLineAlgorithm(algorithm))
-}))(CreateProductLine)
 
 //
 // Helpers

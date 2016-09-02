@@ -41,7 +41,7 @@ module.exports = (config) => {
 
     files: [
       // Isolate "fat" libraries that might slow down each rebuild
-      require.resolve('openlayers/dist/ol-debug.js'),
+      require.resolve('openlayers/dist/ol.js'),
 
       'test/index.js'
     ],

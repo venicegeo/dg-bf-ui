@@ -31,21 +31,16 @@ module.exports = {
   entry: {
     'app': './app/index.js',
     'vendor': [
-      'history',
       'isomorphic-fetch',
       'moment',
       'openlayers',
       'react',
       'react-dom',
-      'react-redux',
-      'react-router',
-      'redux',
-      'redux-thunk',
     ]
   },
 
   resolve: {
-    alias: __environment__ === 'production' ? {} : {openlayers$: 'openlayers/dist/ol-debug.js'},
+    alias: __environment__ === 'production' ? {} : {/* openlayers$: 'openlayers/dist/ol-debug.js' */},
     extensions: ['', '.js', '.jsx'],
     root: __dirname,
   },

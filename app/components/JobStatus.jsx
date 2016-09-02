@@ -16,10 +16,9 @@
 
 import React, {Component} from 'react'
 import moment from 'moment'
-import {Link} from 'react-router'
+import {FileDownloadLink} from './FileDownloadLink'
+import {Link} from './Link'
 import Timestamp from './Timestamp'
-import FileDownloadLink from './FileDownloadLink'
-import {featureToAnchor} from '../utils/map-anchor'
 import styles from './JobStatus.css'
 
 import {
@@ -39,6 +38,7 @@ import {
 
 export default class JobStatus extends Component {
   static propTypes = {
+    authToken:   React.PropTypes.string.isRequired,
     className:   React.PropTypes.string,
     isActive:    React.PropTypes.bool.isRequired,
     job:         React.PropTypes.shape({
@@ -47,6 +47,7 @@ export default class JobStatus extends Component {
       properties: React.PropTypes.object.isRequired,
     }).isRequired,
     onForgetJob: React.PropTypes.func.isRequired,
+    onNavigate: React.PropTypes.func.isRequired,
   }
 
   constructor() {
@@ -128,17 +129,15 @@ export default class JobStatus extends Component {
 
         <div className={styles.controls}>
           <Link
-            to={{
-              pathname: '/',
-              query: {jobId: id},
-              hash: featureToAnchor(this.props.job)
-            }}
+            pathname="/"
+            search={'?jobId=' + id}
             title="View on Map"
-          >
+            onClick={this.props.onNavigate}>
             <i className="fa fa-globe"/>
           </Link>
           {canDownload && (
             <FileDownloadLink
+              authToken={this.props.authToken}
               dataId={resultDataId}
               filename={name + '.geojson'}
               className={styles.download}
@@ -190,11 +189,11 @@ export default class JobStatus extends Component {
 
   get _classForStatus() {
     switch (this.props.job.properties[KEY_STATUS]) {
-    case STATUS_SUCCESS: return styles.succeeded
-    case STATUS_RUNNING: return styles.running
-    case STATUS_TIMED_OUT: return styles.timedOut
-    case STATUS_ERROR: return styles.failed
-    default: return ''
+      case STATUS_SUCCESS: return styles.succeeded
+      case STATUS_RUNNING: return styles.running
+      case STATUS_TIMED_OUT: return styles.timedOut
+      case STATUS_ERROR: return styles.failed
+      default: return ''
     }
   }
 

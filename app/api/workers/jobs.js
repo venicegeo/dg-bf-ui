@@ -22,7 +22,6 @@ import {
 
 import {
   KEY_CREATED_ON,
-  KEY_STATUS,
   STATUS_ERROR,
   STATUS_RUNNING,
   STATUS_SUCCESS,
@@ -31,13 +30,21 @@ import {
 
 let _client, _handlers, _instance, _ttl
 
-export function start(client, interval, ttl, {getRecords, onFailure, onTerminate, onUpdate}) {
+export function start({
+  client,
+  interval,
+  ttl,
+  getRunningJobs,
+  onError,
+  onTerminate,
+  onUpdate,
+}) {
   if (typeof _instance === 'number') {
     throw new Error('Attempted to start while already running')
   }
   _client = client
   _instance = setInterval(work, interval)
-  _handlers = {getRecords, onFailure, onTerminate, onUpdate}
+  _handlers = {getRunningJobs, onError, onTerminate, onUpdate}
   _ttl = ttl
   work()
 }
@@ -46,6 +53,7 @@ export function terminate() {
   if (typeof _instance !== 'number') {
     return
   }
+  console.debug('(jobs:worker) terminating')
   clearInterval(_instance)
   _handlers.onTerminate()
   _instance = null
@@ -61,7 +69,7 @@ export function terminate() {
 function work() {
   // TODO -- skip this cycle if already running
 
-  const jobs = getRunningJobs()
+  const jobs = _handlers.getRunningJobs()
   if (!jobs.length) {
     console.debug('(jobs:worker) nothing to do')
     return
@@ -75,14 +83,13 @@ function work() {
         u.jobId,
         u.status,
         u.geojsonDataId || null,
-        u.rasterDataId || null,
         u.wmsLayerId || null,
         u.wmsUrl || null
       ))
     })
     .catch(err => {
       console.error('(jobs:worker) cycle failed; terminating.', err)
-      _handlers.onFailure(err)
+      _handlers.onError(err)
       terminate()
     })
 }
@@ -102,7 +109,7 @@ function fetchUpdates(job) {
 
       else if (status.status === STATUS_RUNNING && exceededTTL(job.properties[KEY_CREATED_ON])) {
         console.warn('(jobs:worker) <%s> appears to have stalled and will no longer be tracked', status.jobId)
-        return {...status, status: STATUS_TIMED_OUT}
+        return Object.assign(status, {status: STATUS_TIMED_OUT})
       }
 
       return status
@@ -125,16 +132,11 @@ function resolveResultIdentifiers(status) {
       const deploymentId = extractGeojsonDeploymentId(executionOutput)
       return _client.getDeployment(deploymentId)
         .then(deploymentDescriptor => ({
-          ...status,
           geojsonDataId,
-          rasterDataId: deploymentDescriptor.dataId,
+          jobId:        status.jobId,
+          status:       status.status,
           wmsLayerId:   deploymentDescriptor.layerId,
           wmsUrl:       deploymentDescriptor.endpoint,
         }))
     })
-}
-
-function getRunningJobs() {
-  return _handlers.getRecords()
-    .filter(j => j.properties[KEY_STATUS] === STATUS_RUNNING)
 }

@@ -14,23 +14,9 @@
  * limitations under the License.
  **/
 
-import {
-  REMOVE_JOB,
-} from '../../actions/jobs'
-import {
-  LOAD_DETECTIONS,
-  UNLOAD_DETECTIONS
-} from '../../actions/detections'
+import {Client} from '../utils/piazza-client'
+import {GATEWAY} from '../config'
 
-export function reducer(state = [], action) {
-  switch (action.type) {
-  case LOAD_DETECTIONS:
-    return action.detections
-  case REMOVE_JOB:
-    return state.filter(r => r.id !== action.id)
-  case UNLOAD_DETECTIONS:
-    return []
-  default:
-    return state
-  }
+export function createSession(username, password) {
+  return Client.createSessionToken(GATEWAY, username, password)
 }
