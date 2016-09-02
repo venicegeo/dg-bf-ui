@@ -91,46 +91,46 @@ export const createApplication = (element) => render(
   />, element)
 
 export class Application extends React.Component<Props, State> {
-  private _autodiscoveryPromise: Promise<any>
+  private autodiscoveryPromise: Promise<any>
 
   constructor(props) {
     super(props)
     this.state = props.deserialize()
-    this._handleBoundingBoxChange = this._handleBoundingBoxChange.bind(this)
-    this._handleCatalogApiKeyChange = this._handleCatalogApiKeyChange.bind(this)
-    this._handleClearBbox = this._handleClearBbox.bind(this)
-    this._handleDismissJobError = this._handleDismissJobError.bind(this)
-    this._handleFetchProductLines = this._handleFetchProductLines.bind(this)
-    this._handleFetchProductLineJobs = this._handleFetchProductLineJobs.bind(this)
-    this._handleForgetJob = this._handleForgetJob.bind(this)
-    this._handleJobCreated = this._handleJobCreated.bind(this)
-    this._handleProductLineCreated = this._handleProductLineCreated.bind(this)
-    this._handleProductLineJobHoverIn = this._handleProductLineJobHoverIn.bind(this)
-    this._handleProductLineJobHoverOut = this._handleProductLineJobHoverOut.bind(this)
-    this._handleProductLineJobSelect = this._handleProductLineJobSelect.bind(this)
-    this._handleProductLineJobDeselect = this._handleProductLineJobDeselect.bind(this)
-    this._handleSearchCriteriaChange = this._handleSearchCriteriaChange.bind(this)
-    this._handleSearchSubmit = this._handleSearchSubmit.bind(this)
-    this._handleSelectFeature = this._handleSelectFeature.bind(this)
-    this._handleNavigateToJob = this._handleNavigateToJob.bind(this)
-    this._handlePanToProductLine = this._handlePanToProductLine.bind(this)
+    this.handleBoundingBoxChange = this.handleBoundingBoxChange.bind(this)
+    this.handleCatalogApiKeyChange = this.handleCatalogApiKeyChange.bind(this)
+    this.handleClearBbox = this.handleClearBbox.bind(this)
+    this.handleDismissJobError = this.handleDismissJobError.bind(this)
+    this.handleFetchProductLines = this.handleFetchProductLines.bind(this)
+    this.handleFetchProductLineJobs = this.handleFetchProductLineJobs.bind(this)
+    this.handleForgetJob = this.handleForgetJob.bind(this)
+    this.handleJobCreated = this.handleJobCreated.bind(this)
+    this.handleProductLineCreated = this.handleProductLineCreated.bind(this)
+    this.handleProductLineJobHoverIn = this.handleProductLineJobHoverIn.bind(this)
+    this.handleProductLineJobHoverOut = this.handleProductLineJobHoverOut.bind(this)
+    this.handleProductLineJobSelect = this.handleProductLineJobSelect.bind(this)
+    this.handleProductLineJobDeselect = this.handleProductLineJobDeselect.bind(this)
+    this.handleSearchCriteriaChange = this.handleSearchCriteriaChange.bind(this)
+    this.handleSearchSubmit = this.handleSearchSubmit.bind(this)
+    this.handleSelectFeature = this.handleSelectFeature.bind(this)
+    this.handleNavigateToJob = this.handleNavigateToJob.bind(this)
+    this.handlePanToProductLine = this.handlePanToProductLine.bind(this)
     this.navigateTo = this.navigateTo.bind(this)
     this.panTo = this.panTo.bind(this)
   }
 
   componentDidUpdate(_, prevState) {
     if (!prevState.sessionToken && this.state.sessionToken) {
-      this._autodiscoverServices()
-      this._startJobsWorker()
+      this.autodiscoverServices()
+      this.startJobsWorker()
     }
     this.props.serialize(this.state)
   }
 
   componentWillMount() {
-    this._subscribeToHistoryEvents()
+    this.subscribeToHistoryEvents()
     if (this.state.sessionToken) {
-      this._autodiscoverServices()
-      this._startJobsWorker()
+      this.autodiscoverServices()
+      this.startJobsWorker()
     }
   }
 
@@ -153,9 +153,9 @@ export class Application extends React.Component<Props, State> {
           mode={this.mapMode}
           selectedFeature={this.state.selectedFeature}
           view={this.state.mapView}
-          onBoundingBoxChange={this._handleBoundingBoxChange}
-          onSearchPageChange={this._handleSearchSubmit}
-          onSelectFeature={this._handleSelectFeature}
+          onBoundingBoxChange={this.handleBoundingBoxChange}
+          onSearchPageChange={this.handleSearchSubmit}
+          onSelectFeature={this.handleSelectFeature}
           onViewChange={mapView => this.setState({ mapView })}
         />
         {this.renderRoute()}
@@ -192,11 +192,11 @@ export class Application extends React.Component<Props, State> {
             searchError={this.state.searchError}
             searchCriteria={this.state.searchCriteria}
             selectedImage={this.state.selectedFeature && this.state.selectedFeature.properties.type === TYPE_SCENE ? this.state.selectedFeature as beachfront.Scene : null}
-            onCatalogApiKeyChange={this._handleCatalogApiKeyChange}
-            onClearBbox={this._handleClearBbox}
-            onJobCreated={this._handleJobCreated}
-            onSearchCriteriaChange={this._handleSearchCriteriaChange}
-            onSearchSubmit={this._handleSearchSubmit}
+            onCatalogApiKeyChange={this.handleCatalogApiKeyChange}
+            onClearBbox={this.handleClearBbox}
+            onJobCreated={this.handleJobCreated}
+            onSearchCriteriaChange={this.handleSearchCriteriaChange}
+            onSearchSubmit={this.handleSearchSubmit}
           />
         )
       case '/create-product-line':
@@ -210,9 +210,9 @@ export class Application extends React.Component<Props, State> {
             executorUrl={this.state.executor.url}
             filters={this.state.catalog.filters || []}
             sessionToken={this.state.sessionToken}
-            onCatalogApiKeyChange={this._handleCatalogApiKeyChange}
-            onClearBbox={this._handleClearBbox}
-            onProductLineCreated={this._handleProductLineCreated}
+            onCatalogApiKeyChange={this.handleCatalogApiKeyChange}
+            onClearBbox={this.handleClearBbox}
+            onProductLineCreated={this.handleProductLineCreated}
           />
         )
       case '/help':
@@ -228,9 +228,9 @@ export class Application extends React.Component<Props, State> {
             activeIds={this.detectionsForCurrentMode.map(d => d.id)}
             error={this.state.jobs.error}
             jobs={this.state.jobs.records}
-            onDismissError={this._handleDismissJobError}
-            onForgetJob={this._handleForgetJob}
-            onNavigateToJob={this._handleNavigateToJob}
+            onDismissError={this.handleDismissJobError}
+            onForgetJob={this.handleForgetJob}
+            onNavigateToJob={this.handleNavigateToJob}
           />
         )
       case '/product-lines':
@@ -240,13 +240,13 @@ export class Application extends React.Component<Props, State> {
             isFetching={this.state.productLines.fetching}
             productLines={this.state.productLines.records}
             sessionToken={this.state.sessionToken}
-            onFetch={this._handleFetchProductLines}
-            onFetchJobs={this._handleFetchProductLineJobs}
-            onJobHoverIn={this._handleProductLineJobHoverIn}
-            onJobHoverOut={this._handleProductLineJobHoverOut}
-            onJobSelect={this._handleProductLineJobSelect}
-            onJobDeselect={this._handleProductLineJobDeselect}
-            onPanTo={this._handlePanToProductLine}
+            onFetch={this.handleFetchProductLines}
+            onFetchJobs={this.handleFetchProductLineJobs}
+            onJobHoverIn={this.handleProductLineJobHoverIn}
+            onJobHoverOut={this.handleProductLineJobHoverOut}
+            onJobSelect={this.handleProductLineJobSelect}
+            onJobDeselect={this.handleProductLineJobDeselect}
+            onPanTo={this.handlePanToProductLine}
           />
         )
       default:
@@ -291,16 +291,16 @@ export class Application extends React.Component<Props, State> {
     }
   }
 
-  private _autodiscoverServices() {
-    this._autodiscoveryPromise = Promise.all([
-      this._discoverAlgorithms(),
-      this._discoverCatalog(),
-      this._discoverExecutor(),
-      this._discoverGeoserver(),
+  private autodiscoverServices() {
+    this.autodiscoveryPromise = Promise.all([
+      this.discoverAlgorithms(),
+      this.discoverCatalog(),
+      this.discoverExecutor(),
+      this.discoverGeoserver(),
     ])
   }
 
-  _discoverAlgorithms() {
+  private discoverAlgorithms() {
     this.setState({
       algorithms: this.state.algorithms.$fetching(),
     })
@@ -317,47 +317,47 @@ export class Application extends React.Component<Props, State> {
       })
   }
 
-  _discoverCatalog() {
+  private discoverCatalog() {
     return catalogService.discover(this.state.sessionToken)
       .then(catalog => this.setState({ catalog }))
       .catch(error => this.setState({ catalog: { error }}))
   }
 
-  _discoverExecutor() {
+  private discoverExecutor() {
     return executorService.discover(this.state.sessionToken)
       .then(executor => this.setState({ executor }))
       .catch(error => this.setState({ executor: { error }}))
   }
 
-  _discoverGeoserver() {
+  private discoverGeoserver() {
     return geoserverService.discover(this.state.sessionToken)
       .then(geoserver => this.setState({ geoserver }))
       .catch(error => this.setState({ geoserver: { error }}))
   }
 
-  _handleBoundingBoxChange(bbox) {
+  private handleBoundingBoxChange(bbox) {
     this.setState({ bbox })
   }
 
-  _handleCatalogApiKeyChange(catalogApiKey) {
+  private handleCatalogApiKeyChange(catalogApiKey) {
     this.setState({ catalogApiKey })
   }
 
-  _handleClearBbox() {
+  private handleClearBbox() {
     this.setState({
       bbox: null,
       searchResults: null,
     })
   }
 
-  _handleDismissJobError() {
+  private handleDismissJobError() {
     this.setState({
       jobs: this.state.jobs.$error(null),
     })
   }
 
-  _handleFetchProductLines() {
-    this._autodiscoveryPromise.then(() => {
+  private handleFetchProductLines() {
+    this.autodiscoveryPromise.then(() => {
       this.setState({
         productLines: this.state.productLines.$error(null).$fetching(),
       })
@@ -377,7 +377,7 @@ export class Application extends React.Component<Props, State> {
     })
   }
 
-  _handleFetchProductLineJobs(productLineId, sinceDate) {
+  private handleFetchProductLineJobs(productLineId, sinceDate) {
     return productLinesService.fetchJobs({
       productLineId,
       sinceDate,
@@ -387,7 +387,7 @@ export class Application extends React.Component<Props, State> {
     })
   }
 
-  _handleForgetJob(id) {
+  private handleForgetJob(id) {
     this.setState({
       jobs: this.state.jobs.$filter(j => j.id !== id),
     })
@@ -399,9 +399,9 @@ export class Application extends React.Component<Props, State> {
     }
   }
 
-  _handleJobCreated(job) {
+  private handleJobCreated(job) {
     this.setState({
-      jobs: this.state.jobs.$append(job)
+      jobs: this.state.jobs.$append(job),
     })
     this.navigateTo({
       pathname: '/jobs',
@@ -409,40 +409,40 @@ export class Application extends React.Component<Props, State> {
     })
   }
 
-  _handleNavigateToJob(loc) {
+  private handleNavigateToJob(loc) {
     this.navigateTo(loc)
     this.panTo(getFeatureCenter(this.state.jobs.records.find(j => loc.search.includes(j.id))), 7.5)
   }
 
-  _handlePanToProductLine(productLine) {
+  private handlePanToProductLine(productLine) {
     this.panTo(getFeatureCenter(productLine), 3.5)
   }
 
-  _handleProductLineCreated() {
+  private handleProductLineCreated() {
     this.navigateTo({ pathname: '/product-lines' })
   }
 
-  _handleProductLineJobHoverIn(job) {
+  private handleProductLineJobHoverIn(job) {
     this.setState({ hoveredFeature: job })
   }
 
-  _handleProductLineJobHoverOut() {
+  private handleProductLineJobHoverOut() {
     this.setState({ hoveredFeature: null })
   }
 
-  _handleProductLineJobSelect(job) {
+  private handleProductLineJobSelect(job) {
     this.setState({ selectedFeature: job })
   }
 
-  _handleProductLineJobDeselect() {
+  private handleProductLineJobDeselect() {
     this.setState({ selectedFeature: null })
   }
 
-  _handleSearchCriteriaChange(searchCriteria) {
+  private handleSearchCriteriaChange(searchCriteria) {
     this.setState({ searchCriteria })
   }
 
-  _handleSearchSubmit({startIndex, count} = {}) {
+  private handleSearchSubmit({startIndex = 0, count = 100} = {}) {
     this.setState({
       isSearching: true,
       selectedFeature: null,
@@ -457,7 +457,7 @@ export class Application extends React.Component<Props, State> {
       .catch(searchError => this.setState({ searchError, isSearching: false }))
   }
 
-  _handleSelectFeature(feature) {
+  private handleSelectFeature(feature) {
     if (this.state.selectedFeature === feature) {
       return  // Nothing to do
     }
@@ -470,7 +470,7 @@ export class Application extends React.Component<Props, State> {
     })
   }
 
-  navigateTo(loc) {
+  private navigateTo(loc) {
     const route = generateRoute(loc)
     history.pushState(null, null, route.href)
 
@@ -490,16 +490,16 @@ export class Application extends React.Component<Props, State> {
     })
   }
 
-  panTo(point, zoom = 10) {
+  private panTo(point, zoom = 10) {
     this.setState({
       mapView: Object.assign({}, this.state.mapView, {
         center: point,
         zoom,
-      })
+      }),
     })
   }
 
-  _startJobsWorker() {
+  private startJobsWorker() {
     jobsService.startWorker({
       sessionToken: this.state.sessionToken,
       getRecords: () => this.state.jobs.records,
@@ -513,7 +513,7 @@ export class Application extends React.Component<Props, State> {
     })
   }
 
-  _subscribeToHistoryEvents() {
+  private subscribeToHistoryEvents() {
     window.addEventListener('popstate', () => {
       if (this.state.route.href !== location.pathname + location.search + location.hash) {
         const route = generateRoute(location)
