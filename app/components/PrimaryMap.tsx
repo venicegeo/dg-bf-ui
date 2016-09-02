@@ -70,14 +70,14 @@ export const MODE_SELECT_IMAGERY = 'MODE_SELECT_IMAGERY'
 interface Props {
   bbox: number[]
   catalogApiKey: string
-  detections: beachfront.Job[]
+  detections: (beachfront.Job|beachfront.ProductLine)[]
   frames: (beachfront.Job|beachfront.ProductLine)[]
   geoserverUrl: string
   highlightedFeature: beachfront.Job
   imagery: beachfront.ImageryCatalogPage
   isSearching: boolean
   mode: string
-  selectedFeature: beachfront.Scene
+  selectedFeature: beachfront.Job | beachfront.Scene
   view: MapView
   onBoundingBoxChange(bbox: number[])
   onSearchPageChange(page: {count: number, startIndex: number})

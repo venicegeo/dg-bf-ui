@@ -23,6 +23,7 @@ import {
   REQUIREMENT_BANDS,
   STATUS_ACTIVE,
   STATUS_INACTIVE,
+  TYPE_PRODUCT_LINE,
 } from '../constants'
 
 export function create({
@@ -176,6 +177,7 @@ function extractRecords(algorithms, filters): (data: any) => beachfront.ProductL
       status:            isActive(datum.maxDate) ? STATUS_ACTIVE : STATUS_INACTIVE,
       spatialFilterName: filterNames[datum.spatialFilterId] || '',
       startsOn:          datum.minDate,
+      type:              TYPE_PRODUCT_LINE,
     },
     type: 'Feature',
   }))

@@ -74,7 +74,7 @@ interface State {
   // Map state
   bbox?: number[]
   mapView?: MapView
-  hoveredFeature?: beachfront.Job | beachfront.Scene
+  hoveredFeature?: beachfront.Job
   selectedFeature?: beachfront.Job | beachfront.Scene
 
   // Search state
@@ -266,7 +266,7 @@ export class Application extends React.Component<Props, State> {
     switch (this.state.route.pathname) {
       case '/create-product-line':
       case '/product-lines':
-        return this.state.selectedFeature ? [this.state.selectedFeature] : this.state.productLines.records
+        return this.state.selectedFeature ? [this.state.selectedFeature as any] : this.state.productLines.records
       default:
         return this.state.jobs.records.filter(j => this.state.route.jobIds.includes(j.id) && j.properties.status === STATUS_SUCCESS)
     }
@@ -276,7 +276,7 @@ export class Application extends React.Component<Props, State> {
     switch (this.state.route.pathname) {
       case '/create-product-line':
       case '/product-lines':
-        return [this.state.selectedFeature, ...this.state.productLines.records].filter(Boolean)
+        return [this.state.selectedFeature as any, ...this.state.productLines.records].filter(Boolean)
       default:
         return this.state.jobs.records
     }
