@@ -14,16 +14,20 @@
  * limitations under the License.
  **/
 
+@import '../styles/constants.css';
+
 :root {
+  --padding-size: 15px;
   --bgcolor-active: #f2faff;
+  --bgcolor-failed: var(--COLOR_RED);
   --bordercolor-active: hsla(201, 100%, 50%, 0.27);
   --bordercolor-failed: hsla(344, 100%, 34%, 0.46);
-  --bgcolor-control: #739cb4;
-  --bgcolor-control-hover: #175b82;
-  --bgcolor-failed: hsl(344, 100%, 50%);
-  --bgcolor-progressbar: #eee;
-  --bgcolor-progressbar-puck: #3d94c5;
-  --padding-size: 15px;
+  --control-bgcolor: var(--COLOR_CONTROL);
+  --control-bgcolor-hover: var(--COLOR_BRAND_DARK);
+  --header-bgcolor-hover: color(var(--COLOR_CONTROL_LIGHT) alpha(4%));
+  --removalWarning-bgcolor: color(var(--COLOR_YELLOW) alpha(90%));
+  --progressbar-bgcolor: #eee;
+  --progressbarPuck-bgcolor: var(--COLOR_BRAND_LIGHT);
 }
 
 /* =========================================================================
@@ -44,7 +48,7 @@
 .isActive {
   border-left: 10px solid var(--bordercolor-active);
   background-color: var(--bgcolor-active);
-  color: var(--bgcolor-control-hover);
+  color: var(--control-bgcolor-hover);
 }
 
 .succeeded {}
@@ -107,8 +111,16 @@
   flex: 1;
 }
 
-/* Details: Summary
+/* Details: Header
    ========================================================================= */
+
+.header {
+  overflow: hidden;
+}
+
+.header:hover {
+  background-color: var(--header-bgcolor-hover);
+}
 
 .summary {
   composes: buffered-container;
@@ -197,7 +209,7 @@
   padding: var(--padding-size);
   opacity: 0;
   overflow: hidden;
-  background-color: hsla(50, 100%, 50%, 0.9);
+  background-color: var(--removalWarning-bgcolor);
   transition: opacity .3s ease;
   font-size: 1.3em;
   text-align: center;
@@ -224,7 +236,7 @@
   position: relative;
   height: 0;
   overflow: hidden;
-  background-color: var(--bgcolor-progressbar);
+  background-color: var(--progressbar-bgcolor);
   transition: height .2s ease-in-out;
 }
 
@@ -233,7 +245,7 @@
   top: 0;
   left: 0;
   bottom: 0;
-  background-color: var(--bgcolor-progressbar-puck);
+  background-color: var(--progressbarPuck-bgcolor);
   transition: width .5s linear;
 }
 
@@ -261,7 +273,7 @@
   width: 15px;
   flex: 1;
   padding: 0 15px;
-  background-color: var(--bgcolor-control);
+  background-color: var(--control-bgcolor);
   color: white;
   text-decoration: none;
 }
@@ -272,7 +284,7 @@
 
 .controls a:hover,
 .controls a:hover:before {
-  background-color: var(--bgcolor-control-hover);
+  background-color: var(--control-bgcolor-hover);
 }
 
 .controls a:before {
@@ -288,7 +300,7 @@
   overflow: hidden;
   transition: width .1s ease-in-out;
   white-space: nowrap;
-  background-color: var(--bgcolor-control);
+  background-color: var(--control-bgcolor);
 }
 
 .controls:hover a:before {
@@ -296,7 +308,7 @@
 }
 
 .controls a:hover:before {
-  background-color: var(--bgcolor-control-hover);
+  background-color: var(--control-bgcolor-hover);
 }
 
 .isDownloading .download {
@@ -306,7 +318,7 @@
 
 .isDownloading .controls a:hover,
 .isDownloading .controls a:hover:before {
-  background-color: var(--bgcolor-control);
+  background-color: var(--control-bgcolor);
 }
 
 .isDownloading .download:before {

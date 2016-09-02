@@ -17,36 +17,25 @@
 const styles = require('./ProductLineList.css')
 
 import * as React from 'react'
-import {connect} from 'react-redux'
-import ProductLine from './ProductLine'
-import {TypeAppState} from '../store'
-import {TypeCollection as TypeJobCollection} from '../store/reducers/productLineJobs'
-import {
-  clearHoveredProductLineJob,
-  clearSelectedProductLineJob,
-  fetchProductLines,
-  fetchProductLineJobs,
-  hoverProductLineJob,
-  selectProductLineJob,
-} from '../actions'
+import {ProductLine} from './ProductLine'
 
 interface Props {
-  className?: string
+  error: { message: string, code?: number }
   isFetching: boolean
-  jobs: { [key: string]: TypeJobCollection }
   productLines: beachfront.ProductLine[]
-  selectedJobIds: string[]
-  fetchProductLines()
+  sessionToken: string
+  onFetch()
   onFetchJobs(productLineId: string, sinceDate: string)
   onJobHoverIn(job: beachfront.Job)
   onJobHoverOut()
   onJobSelect(job: beachfront.Job)
   onJobDeselect()
+  onPanTo(productLine: beachfront.ProductLine)
 }
 
 export class ProductLineList extends React.Component<Props, {}> {
   componentDidMount() {
-    this.props.fetchProductLines()
+    this.props.onFetch()
   }
 
   render() {
@@ -56,17 +45,27 @@ export class ProductLineList extends React.Component<Props, {}> {
           <h1>Product Lines</h1>
         </header>
         <ul>
+          {this.props.error && (
+            <li className={styles.error}>
+              <h4><i className="fa fa-warning"/> {this.props.error.code ? 'Communication' : 'Application'} Error</h4>
+              <p>{this.props.error.code
+                ? 'Cannot communicate with the server'
+                : 'An error is preventing the display of product lines'
+              }. (<code>{this.props.error.message}</code>)</p>
+              <button onClick={this.props.onFetch}>Retry</button>
+            </li>
+          )}
           {this.props.productLines.map(productLine => (
             <ProductLine
+              className={styles.listItem}
               key={productLine.id}
               productLine={productLine}
-              jobs={this.props.jobs[productLine.id]}
-              selectedJobIds={this.props.selectedJobIds}
-              fetchJobs={sinceDate => this.props.onFetchJobs(productLine.id, sinceDate)}
+              onFetchJobs={this.props.onFetchJobs}
               onJobHoverIn={this.props.onJobHoverIn}
               onJobHoverOut={this.props.onJobHoverOut}
               onJobSelect={this.props.onJobSelect}
               onJobDeselect={this.props.onJobDeselect}
+              onPanTo={this.props.onPanTo}
             />
           ))}
           {this.props.isFetching && (
@@ -79,17 +78,3 @@ export class ProductLineList extends React.Component<Props, {}> {
     )
   }
 }
-
-export default connect((state: TypeAppState) => ({
-  isFetching:     state.productLines.fetching,
-  jobs:           state.productLineJobs.byPLID,
-  productLines:   state.productLines.records,
-  selectedJobIds: state.productLineJobs.selection.map(j => j.id),
-}), dispatch => ({
-  fetchProductLines: () => dispatch(fetchProductLines()),
-  onFetchJobs:       (id, sinceDate) => dispatch(fetchProductLineJobs(id, sinceDate)),
-  onJobHoverIn:      (job) => dispatch(hoverProductLineJob(job)),
-  onJobHoverOut:     () => dispatch(clearHoveredProductLineJob()),
-  onJobSelect:       (job) => dispatch(selectProductLineJob(job)),
-  onJobDeselect:     () => dispatch(clearSelectedProductLineJob()),
-}))(ProductLineList)

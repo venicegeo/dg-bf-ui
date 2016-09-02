@@ -14,6 +14,8 @@
  * limitations under the License.
  **/
 
+const styles = require('./Modal.css')
+
 import * as React from 'react'
 const ESCAPE = 27
 
@@ -22,7 +24,7 @@ interface Props {
   onDismiss(): void
 }
 
-export default class Modal extends React.Component<Props, {}> {
+export class Modal extends React.Component {
   constructor() {
     super()
     this._keypressed = this._keypressed.bind(this)
@@ -40,7 +42,7 @@ export default class Modal extends React.Component<Props, {}> {
 
   render() {
     return (
-      <div className={this.props.className}>
+      <div className={styles.root}>
         {this.props.children}
       </div>
     )

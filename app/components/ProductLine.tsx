@@ -18,20 +18,28 @@ const styles = require('./ProductLine.css')
 
 import * as React from 'react'
 import * as moment from 'moment'
-import {Link} from 'react-router'
-import {featureToAnchor} from '../utils/map-anchor'
-import ActivityTable from './ActivityTable'
-import {TypeCollection as TypeJobCollection} from '../store/reducers/productLineJobs'
+import {ActivityTable} from './ActivityTable'
+
+import {
+  KEY_ALGORITHM_NAME,
+  KEY_CREATED_ON,
+  KEY_EXPIRES_ON,
+  KEY_IMAGE_CLOUDCOVER,
+  KEY_NAME,
+  KEY_OWNER,
+  KEY_SPATIAL_FILTER_NAME,
+  KEY_STARTS_ON,
+} from '../constants'
 
 interface Props {
-  jobs: TypeJobCollection
+  className?: string,
   productLine: beachfront.ProductLine
-  selectedJobIds: string[]
-  fetchJobs(sinceDate: string)
+  onFetchJobs(sinceDate: string)
   onJobHoverIn(job: beachfront.Job)
   onJobHoverOut(job: beachfront.Job)
   onJobSelect(job: beachfront.Job)
   onJobDeselect()
+  onPanTo(productLine: beachfront.ProductLine)
 }
 
 interface State {
@@ -39,11 +47,15 @@ interface State {
   sinceDate?: string
 }
 
-export default class ProductLine extends React.Component<Props, State> {
+export class ProductLine extends React.Component<Props, State> {
   constructor() {
     super()
     this.state = {
+      error: null,
       isExpanded: false,
+      isFetchingJobs: false,
+      selectedJobs: [],
+      jobs: [],
       sinceDate: last24Hours(),
     }
     this._handleExpansionToggle = this._handleExpansionToggle.bind(this)
@@ -53,24 +65,29 @@ export default class ProductLine extends React.Component<Props, State> {
 
   componentDidUpdate(prevProps, prevState) {
     if (this.state.isExpanded && (prevState.isExpanded !== this.state.isExpanded || prevState.sinceDate !== this.state.sinceDate)) {
-      this.props.fetchJobs(this.state.sinceDate)
+      this._fetchJobs()
+    }
+    if (prevState.isExpanded && !this.state.isExpanded && this.state.selectedJobs.length) {
+      this.props.onJobDeselect()
     }
   }
 
   render() {
-    const {jobs, productLine} = this.props
+    const {className, productLine} = this.props
     const {properties} = productLine
     const {isExpanded, sinceDate} = this.state
     return (
-      <li className={`${styles.root} ${isExpanded ? styles.isExpanded : ''}`}>
+      <li className={`${styles.root} ${className || ''} ${isExpanded ? styles.isExpanded : ''}`}>
         <section className={styles.header} onClick={this._handleExpansionToggle}>
           <h3 className={styles.title}>
             <i className={`fa fa-chevron-right ${styles.caret}`}/>
             <span>{properties.name}</span>
           </h3>
-          <Link to={{pathname: '/product-lines', hash: featureToAnchor(productLine)}} className={styles.viewButton}>
-            <i className="fa fa-globe"/>
-          </Link>
+          <div className={styles.controls}>
+            <a onClick={() => this.props.onPanTo(this.props.productLine)} title="View on Map">
+              <i className="fa fa-globe"/>
+            </a>
+          </div>
         </section>
         <section className={styles.details}>
           <div className={styles.metadata}>
@@ -80,13 +97,13 @@ export default class ProductLine extends React.Component<Props, State> {
               <dt>Algorithm</dt>
               <dd>{properties.algorithmName}</dd>
               <dt>Cloud Cover</dt>
-              <dd>{properties.imageCloudCover}</dd>
+              <dd>{properties.imageCloudCover}% or less</dd>
               {/*
               <dt>Compute Mask</dt>
               <dd>{computeMask}</dd>
               */}
               <dt>Spatial Filter</dt>
-              <dd>{titleCase(properties.spatialFilterName)}</dd>
+              <dd>{titleCase(properties.spatialFilterName) || 'None'}</dd>
               <dt>Owner</dt>
               <dd>{properties.owner}</dd>
               <dt>Date Created</dt>
@@ -95,9 +112,10 @@ export default class ProductLine extends React.Component<Props, State> {
           </div>
           <ActivityTable
             className={styles.activityTable}
-            jobs={jobs.records.filter(jobFilter(sinceDate))}
-            selectedJobIds={this.props.selectedJobIds}
-            error={jobs.error}
+            isLoading={this.state.isFetchingJobs}
+            jobs={this.state.jobs.filter(jobFilter(sinceDate))}
+            selectedJobIds={this.state.selectedJobs.map(j => j.id)}
+            error={this.state.error}
             sinceDate={sinceDate}
             sinceDates={[
               {value: last24Hours(), label: 'Last 24 Hours'},
@@ -115,17 +133,26 @@ export default class ProductLine extends React.Component<Props, State> {
     )
   }
 
+  _fetchJobs() {
+    this.setState({ isFetchingJobs: true })
+    this.props.onFetchJobs(this.props.productLine.id, this.state.sinceDate)
+      .then(jobs => this.setState({ jobs, isFetchingJobs: false }))
+      .catch(error => this.setState({ error, isFetchingJobs: false }))
+  }
+
   _handleExpansionToggle() {
     this.setState({ isExpanded: !this.state.isExpanded })
     // TODO -- scroll to positioning
   }
 
   _handleJobRowClick(job) {
-    if (this.props.selectedJobIds.includes(job.id)) {
+    if (this.state.selectedJobs.some(j => j.id === job.id)) {
       this.props.onJobDeselect()
+      this.setState({ selectedJobs: [] })
     }
     else {
       this.props.onJobSelect(job)
+      this.setState({ selectedJobs: [job] })
     }
   }
 

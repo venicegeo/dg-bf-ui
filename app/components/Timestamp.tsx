@@ -30,13 +30,13 @@ interface State {
   relative: boolean
 }
 
-export default class Timestamp extends React.Component<Props, State> {
+export class Timestamp extends React.Component<Props, State> {
   private _timer: number
 
   constructor() {
     super()
     this.state = {relative: true}
-    this._clicked = this._clicked.bind(this)
+    this.handleClick = this.handleClick.bind(this)
   }
 
   componentDidMount() {
@@ -54,13 +54,13 @@ export default class Timestamp extends React.Component<Props, State> {
     return (
       <span className={`${styles.root} ${this.props.className}`}
             title={this.state.relative ? staticTimestamp : relativeTimestamp}
-            onClick={this._clicked}>
+            onClick={this.handleClick}>
         {this.state.relative ? relativeTimestamp : staticTimestamp}
       </span>
     )
   }
 
-  _clicked(event) {
+  private handleClick(event) {
     event.stopPropagation()
     event.preventDefault()
     this.setState({relative: !this.state.relative})

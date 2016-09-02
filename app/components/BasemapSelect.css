@@ -14,6 +14,8 @@
  * limitations under the License.
  **/
 
+ @import '../styles/constants.css';
+
 .root {
   list-style: none;
   margin: 0;
@@ -90,7 +92,7 @@
 
 .options :hover {
   background-color: #d9f1ff;
-  color: #175b82;
+  color: var(--COLOR_BRAND_DARK);
 }
 
 .options li + li {
@@ -99,7 +101,7 @@
 
 .active,
 .active:hover {
-  background-color: #175B82;
+  background-color: var(--COLOR_BRAND_DARK);
   color: white;
   font-weight: bold;
 }

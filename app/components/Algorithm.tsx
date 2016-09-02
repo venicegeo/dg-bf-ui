@@ -24,94 +24,98 @@ import {
 
 interface Props {
   algorithm: beachfront.Algorithm
-  isSubmitting: boolean
   imageProperties: beachfront.SceneMetadata
-  onSubmit(algorithm: beachfront.Algorithm)
+  isSelected?: boolean
+  isSubmitting?: boolean
+  warningHeading?: string
+  warningMessage?: string
+  onSelect?(algorithm: beachfront.Algorithm)
+  onSubmit?(algorithm: beachfront.Algorithm)
 }
 
-export default class Algorithm extends React.Component<Props, {}> {
-  constructor() {
-    super()
-    this._handleSubmit = this._handleSubmit.bind(this)
-  }
+export const Algorithm = ({
+  algorithm,
+  imageProperties,
+  isSelected,
+  isSubmitting,
+  warningHeading,
+  warningMessage,
+  onSelect,
+  onSubmit,
+}: Props) => (
+  <div className={[
+    styles.root,
+    isSubmitting ? styles.isSubmitting : '',
+    algorithm.requirements.every(r => isCompatible(r, imageProperties)) ? styles.isCompatible : styles.isNotCompatible,
+    isSelected ? styles.isSelected : '',
+    onSelect ? styles.isSelectable : '',
+  ].join(' ')}>
+    <section className={styles.header} onClick={onSelect && (() => !isSelected && onSelect(algorithm))}>
+      {onSelect && (
+        <span className={styles.selectionIndicator}>
+          <input
+            type="radio"
+            readOnly={true}
+            checked={isSelected}
+          />
+        </span>
+      )}
+      <span className={styles.name}>
+        <span>{algorithm.name}</span>
+      </span>
+      <span className={styles.warningIndicator}>
+        <i className="fa fa-warning"/>
+      </span>
+    </section>
 
-  render() {
-    return (
-      <form className={`${styles.root} ${this._aggregatedClassNames}`} onSubmit={this._handleSubmit}>
-        <h3 className={styles.name}>{this.props.algorithm.name}</h3>
-        <p className={styles.description}>{this.props.algorithm.description}</p>
+    <section className={styles.details}>
+      <div className={styles.description}>{algorithm.description}</div>
 
-        <div className={styles.controls}>
-          <div className={styles.compatibilityWarning}>
-            <h4><i className="fa fa-warning"/> Incompatible Image Selected</h4>
-            <p>The image you've selected does not meet all of this algorithm's requirements.  You can run it anyway but it may not produce the expected results.</p>
-          </div>
-          <button className={styles.startButton} disabled={!this._canSubmit}>
-            {this.props.isSubmitting ? 'Starting' : 'Run Algorithm'}
+      <div className={styles.controls}>
+        <div className={styles.compatibilityWarning}>
+          <h4><i className="fa fa-warning"/> {warningHeading || 'Incompatible Image Selected'}</h4>
+          <p>{warningMessage || "The image you've selected does not meet all of this algorithm's requirements.  You can run it anyway but it may not produce the expected results."}</p>
+        </div>
+
+        {onSubmit && (
+          <button
+            className={styles.startButton}
+            disabled={isSubmitting}
+            onClick={() => onSubmit(algorithm)}
+            >
+            {isSubmitting ? 'Starting' : 'Run Algorithm'}
           </button>
-        </div>
+        )}
+      </div>
 
-        <div className={styles.requirements}>
-          <h4>Image Requirements</h4>
-          <table>
-            <tbody>
-            {this.props.algorithm.requirements.map(r => (
-              <tr key={r.name} className={isCompatible(r, this.props.imageProperties) ? styles.met : styles.unmet}>
-                <th>{r.name}</th>
-                <td>{r.description}</td>
-              </tr>
-            ))}
-            </tbody>
-          </table>
-        </div>
-      </form>
-    )
-  }
-
-  //
-  // Internals
-  //
-
-  get _aggregatedClassNames() {
-    return [
-      this._classForCompatibility,
-      this._classForSubmitting,
-    ].join(' ')
-  }
-
-  get _classForCompatibility() {
-    const compatible = this.props.algorithm.requirements.every(r => isCompatible(r, this.props.imageProperties))
-    return compatible ? styles.isCompatible : styles.isNotCompatible
-  }
-
-  get _classForSubmitting() {
-    return this.props.isSubmitting ? styles.isSubmitting : ''
-  }
-
-  get _canSubmit() {
-    return !this.props.isSubmitting
-  }
-
-  _handleSubmit(event) {
-    event.preventDefault()
-    if (!this._canSubmit) {
-      return
-    }
-    this.props.onSubmit(this.props.algorithm)
-  }
-}
+      <div className={styles.requirements}>
+        <h4>Image Requirements</h4>
+        <table>
+          <tbody>
+          {algorithm.requirements.map(r => (
+            <tr key={r.name} className={isCompatible(r, imageProperties) ? styles.met : styles.unmet}>
+              <th>{r.name}</th>
+              <td>{r.description}</td>
+            </tr>
+          ))}
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </div>
+)
 
 //
-// Internals
+// Helpers
 //
 
 function isCompatible(requirement, imageProperties) {
   switch (requirement.name) {
-  case REQUIREMENT_BANDS:
-    return requirement.literal.split(',').every(s => imageProperties.bands[s])
-  case REQUIREMENT_CLOUDCOVER:
-    return imageProperties.cloudCover < requirement.literal
-  default:
-    return false
+    case REQUIREMENT_BANDS:
+      return requirement.literal.split(',').every(s => imageProperties.bands[s])
+    case REQUIREMENT_CLOUDCOVER:
+      return imageProperties.cloudCover <= requirement.literal
+    default:
+      return false
   }
 }

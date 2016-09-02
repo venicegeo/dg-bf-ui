@@ -20,6 +20,7 @@ const path = require('path')
 const webpack = require('webpack')
 const HtmlWebpackPlugin = require('html-webpack-plugin')
 const cssnext = require('postcss-cssnext')
+const cssimport = require('postcss-import')
 
 const __environment__ = process.env.NODE_ENV || 'development'
 
@@ -30,21 +31,16 @@ module.exports = {
   entry: {
     'app': './app/index.ts',
     'vendor': [
-      'history',
       'isomorphic-fetch',
       'moment',
       'openlayers',
       'react',
       'react-dom',
-      'react-redux',
-      'react-router',
-      'redux',
-      'redux-thunk',
     ]
   },
 
   resolve: {
-    alias: __environment__ === 'production' ? {} : {openlayers$: 'openlayers/dist/ol-debug.js'},
+    alias: __environment__ === 'production' ? {} : {/* openlayers$: 'openlayers/dist/ol-debug.js' */},
     extensions: ['', '.tsx', '.ts', '.js'],
     root: __dirname,
   },
@@ -81,7 +77,7 @@ module.exports = {
       },
       {
         test: /\.css$/,
-        loader: 'style!css?module&localIdentName=[name]__[local]&importLoaders=1!postcss',
+        loader: 'style!css?module&localIdentName=[name]-[local]&importLoaders=1!postcss',
         exclude: /node_modules/
       },
       {
@@ -95,7 +91,10 @@ module.exports = {
     ]
   },
 
-  postcss: () => [cssnext({browsers: 'Firefox >= 38, Chrome >= 40'})],
+  postcss: (webpack_) => ([
+    cssimport({ addDependencyTo: webpack_ }),
+    cssnext({ browsers: 'Firefox >= 38, Chrome >= 40' }),
+  ]),
 
   plugins: [
     new webpack.IgnorePlugin(/^\.\/locale$/, /moment$/),

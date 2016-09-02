@@ -14,23 +14,23 @@
  * limitations under the License.
  **/
 
+@import '../styles/constants.css';
+
 :root {
   --padding-size: 15px;
-  --bgcolor-control: #739cb4;
-  --bgcolor-control-hover: #175b82;
+  --control-bgcolor: var(--COLOR_CONTROL);
+  --control-bgcolor-hover: var(--COLOR_BRAND_DARK);
+  --header-bgcolor-hover: color(var(--COLOR_CONTROL_LIGHT) alpha(4%));
 }
 
 .root {
   font-size: 14px;
-}
-
-.root + .root {
-  border-top: 1px solid white;
+  background-color: white;
 }
 
 .caret {
   width: 1em;
-  color: rgba(0,0,0, .3);
+  color: color(black alpha(30%));
   transform: rotate(0deg);
   transform-origin: .4em .5em;
   transition: transform .15s ease-in-out;
@@ -47,7 +47,11 @@
 .header {
   display: flex;
   background-color: white;
-  cursor: pointer;
+  cursor: default;
+}
+
+.header:hover {
+  background-color: var(--header-bgcolor-hover);
 }
 
 .headerCell {
@@ -57,18 +61,62 @@
 .title {
   composes: headerCell;
   composes: heading from '../styles/typography.css';
-  composes: heading from '../styles/typography.css';
   flex: 1;
 }
 
-.viewButton {
+/* Header: Controls
+   ========================================================================= */
+
+.controls {
   composes: headerCell;
-  background-color: var(--bgcolor-control);
-  color: white;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  align-content: stretch;
+  font-size: 15px;
 }
 
-.viewButton:hover {
-  background-color: var(--bgcolor-control-hover);
+.controls a {
+  position: relative;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  width: 15px;
+  flex: 1;
+  padding: 0 var(--padding-size);
+  background-color: var(--control-bgcolor);
+  color: white;
+  text-decoration: none;
+}
+
+.controls a:hover,
+.controls a:hover:before {
+  background-color: var(--control-bgcolor-hover);
+}
+
+.controls a:before {
+  content: attr(title);
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  position: absolute;
+  right: 43px;
+  top: 0;
+  bottom: 0;
+  width: 0;
+  overflow: hidden;
+  transition: width .1s ease-in-out;
+  white-space: nowrap;
+  background-color: var(--control-bgcolor);
+}
+
+.controls:hover a:before {
+  width: 95px;
+}
+
+.controls a:hover:before {
+  background-color: var(--control-bgcolor-hover);
 }
 
 /* =========================================================================
@@ -121,5 +169,5 @@
 
 .activityTable {
   flex: 1;
-  overflow-y: scroll;
+  overflow-y: hidden;  /* Force Firefox to recognize internal container as scrollable */
 }

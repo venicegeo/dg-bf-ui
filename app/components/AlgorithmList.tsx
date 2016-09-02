@@ -17,33 +17,37 @@
 const styles: any = require('./AlgorithmList.css')
 
 import * as React from 'react'
-import Algorithm from './Algorithm'
+import {Algorithm} from './Algorithm'
 
 interface Props {
   algorithms: beachfront.Algorithm[]
   imageProperties: beachfront.SceneMetadata
-  isSubmitting: boolean
-  onSubmit(algorithm: beachfront.Algorithm)
+  isSubmitting?: boolean
+  selectedId?: string
+  warningHeading?: string
+  warningMessage?: string
+  onSelect?(algorithm: beachfront.Algorithm)
+  onSubmit?(algorithm: beachfront.Algorithm)
 }
 
-export default class AlgorithmList extends React.Component<Props, {}> {
-  render() {
-    return (
-      <div className={styles.root}>
-        <h2>Select Algorithm</h2>
-        <ul>
-          {this.props.algorithms.map(algorithm => (
-            <li key={algorithm.id}>
-              <Algorithm
-                algorithm={algorithm}
-                imageProperties={this.props.imageProperties}
-                isSubmitting={this.props.isSubmitting}
-                onSubmit={this.props.onSubmit}
-              />
-            </li>
-          ))}
-        </ul>
-      </div>
-    )
-  }
-}
+export const AlgorithmList = (props: Props) => (
+  <div className={styles.root}>
+    <h2>Select Algorithm</h2>
+    <ul>
+      {props.algorithms.map(algorithm => (
+        <li key={algorithm.id}>
+          <Algorithm
+            algorithm={algorithm}
+            imageProperties={props.imageProperties}
+            isSelected={props.selectedId === algorithm.id}
+            isSubmitting={props.isSubmitting}
+            warningHeading={props.warningHeading}
+            warningMessage={props.warningMessage}
+            onSelect={props.onSelect}
+            onSubmit={props.onSubmit}
+          />
+        </li>
+      ))}
+    </ul>
+  </div>
+)

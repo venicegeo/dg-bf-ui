@@ -14,6 +14,8 @@
  * limitations under the License.
  **/
 
+ @import '../styles/constants.css';
+
 .root {
   display: inline-block;
   position: relative;
@@ -30,15 +32,7 @@
 }
 
 .button:hover {
-  background-color: rgba(255,255,255, .2);
-}
-
-.button i {
-  /*margin-left: .4em;*/
-}
-
-.isOpen .button {
-  background-color: rgba(255, 255, 255, 0.3);
+  background-color: color(white alpha(30%));
 }
 
 /* =========================================================================
@@ -54,8 +48,8 @@
   margin: 0;
   padding: 0;
   background-color: #fff;
-  color: #555;
-  box-shadow: 0 5px rgba(0,0,0,.3);
+  color: var(--COLOR_TEXT);
+  box-shadow: 0 3px 0 1px color(black alpha(15%));
   text-align: right;
   white-space: nowrap;
 }
@@ -72,7 +66,7 @@
 
 .options :hover {
   background-color: #d9f1ff;
-  color: #175b82;
+  color: var(--COLOR_BRAND_DARK);
 }
 
 .options li + li {
@@ -81,7 +75,7 @@
 
 .active,
 .active:hover {
-  background-color: #175B82;
+  background-color: var(--COLOR_BRAND);
   color: white;
   font-weight: bold;
 }

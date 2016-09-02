@@ -15,9 +15,11 @@
  **/
 
 .root ul {
-  margin-right: 15px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
 }
 
-.root li {
-  margin: 1em 0;
+.root li + li {
+  margin-top: 1px;
 }

@@ -1,0 +1,189 @@
+/**
+ * Copyright 2016, RadiantBlue Technologies, Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ **/
+
+const styles = require('./CreateProductLine.css')
+
+import * as React from 'react'
+import * as moment from 'moment'
+import {AlgorithmList} from './AlgorithmList'
+import {CatalogSearchCriteria} from './CatalogSearchCriteria'
+import {NewProductLineDetails} from './NewProductLineDetails'
+import {create} from '../api/productLines'
+
+// FIXME -- request list of supported bands for each provider from image catalog
+const SUPPORTED_BANDS = {
+  LANDSAT: {
+    cirrus: true,
+    coastal: true,
+    green: true,
+    nir: true,
+    panchromatic: true,
+    red: true,
+    swir1: true,
+    swir2: true,
+    tirs1: true,
+    tirs2: true,
+  },
+}
+
+interface Props {
+  algorithms:        beachfront.Algorithm[]
+  bbox:              number[]
+  catalogApiKey:     string
+  eventTypeId:       string
+  executorServiceId: string
+  executorUrl:       string
+  filters:           {id: string, name: string}[]
+  sessionToken:      string
+
+  onCatalogApiKeyChange(apiKey: string)
+  onClearBbox()
+  onProductLineCreated(productLine: beachfront.ProductLine)
+}
+
+interface State {
+  algorithm?:              beachfront.algorithm
+  cloudCover?:             number
+  dateStart?:              string
+  dateStop?:               string
+  isCreating?:             boolean
+  filter?:                 string
+  name?:                   string
+  shouldAutogenerateName?: boolean
+}
+
+export class CreateProductLine extends React.Component<Props, State> {
+  constructor() {
+    super()
+    this.state = {
+      algorithm:  null,
+      cloudCover: 10,
+      dateStart:  moment().subtract(30, 'days').format('YYYY-MM-DD'),
+      dateStop:   moment().format('YYYY-MM-DD'),
+      isCreating: false,
+      filter:     '',
+      name:       '',
+      shouldAutogenerateName: true,
+    }
+    this._handleAlgorithmSelect = this._handleAlgorithmSelect.bind(this)
+    this._handleSubmit = this._handleSubmit.bind(this)
+  }
+
+  render() {
+    return (
+      <div className={`${styles.root} ${this._canSubmit ? styles.canSubmit : ''}`}>
+        <header>
+          <h1>Create Product Line</h1>
+        </header>
+        <ul>
+          {!this.props.bbox ? (
+            <li className={styles.placeholder}>
+              <h3>Draw bounding box to set AOI</h3>
+            </li>
+          ) : (
+            <li>
+              <h2>Source Imagery</h2>
+              <CatalogSearchCriteria
+                apiKey={this.props.catalogApiKey}
+                bbox={this.props.bbox}
+                cloudCover={this.state.cloudCover}
+                filter={this.state.filter}
+                filters={this.props.filters}
+                onApiKeyChange={this.props.onCatalogApiKeyChange}
+                onClearBbox={this.props.onClearBbox}
+                onCloudCoverChange={cloudCover => this.setState({ cloudCover })}
+                onFilterChange={filter => this.setState({ filter })}
+              />
+              <NewProductLineDetails
+                name={this.state.name}
+                dateStart={this.state.dateStart}
+                dateStop={this.state.dateStop}
+                onDateChange={(dateStart, dateStop) => this.setState({ dateStart, dateStop })}
+                onNameChange={name => this.setState({ name, shouldAutogenerateName: !name, })}
+              />
+              <AlgorithmList
+                algorithms={this.props.algorithms}
+                imageProperties={{
+                  cloudCover: this.state.cloudCover,
+                  bands: SUPPORTED_BANDS.LANDSAT,
+                }}
+                selectedId={this.state.algorithm ? this.state.algorithm.id : null}
+                onSelect={this._handleAlgorithmSelect}
+                warningHeading="Check Image Search Filters"
+                warningMessage={`
+                  Current image search filters may yield imagery that do not meet all of this
+                  algorithm's requirements.  You can continue anyway, but it may not produce
+                  the expected results.
+                `}
+              />
+            </li>
+          )}
+        </ul>
+        <div className={styles.controls}>
+          {this._canSubmit && (
+            <div className={styles.submitButton} onClick={this._handleSubmit}>
+              Create Product Line
+            </div>
+          )}
+        </div>
+      </div>
+    )
+  }
+
+  get _canSubmit() {
+    return this.props.bbox
+        && this.state.algorithm
+        && this.state.dateStart
+        && this.state.name
+  }
+
+  _handleAlgorithmSelect(algorithm) {
+    this.setState({
+      name: this.state.shouldAutogenerateName ? generateName(algorithm) : this.state.name,
+      algorithm,
+    })
+  }
+
+  _handleSubmit() {
+    create({
+      algorithm:         this.state.algorithm,
+      bbox:              this.props.bbox,
+      catalogApiKey:     this.props.catalogApiKey,
+      cloudCover:        this.state.cloudCover,
+      dateStart:         this.state.dateStart,
+      dateStop:          this.state.dateStop,
+      eventTypeId:       this.props.eventTypeId,
+      executorServiceId: this.props.executorServiceId,
+      executorUrl:       this.props.executorUrl,
+      filter:            this.state.filter,
+      name:              this.state.name,
+      sessionToken:      this.props.sessionToken,
+    })
+      .then(() => this.props.onProductLineCreated())
+      .catch(error => {
+        this.setState({ error })
+        throw error
+      })
+  }
+}
+
+//
+// Helpers
+//
+
+function generateName(algorithm) {
+  return `LANDSAT_${algorithm.name}`.toUpperCase()
+}

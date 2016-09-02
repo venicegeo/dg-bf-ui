@@ -16,7 +16,7 @@
 
 import {assert} from 'chai'
 import * as sinon from 'sinon'
-import {Client, STATUS_ERROR, STATUS_RUNNING, STATUS_SUCCESS} from 'app/utils/piazza-client'
+import {Client, STATUS_ERROR, STATUS_RUNNING, STATUS_SUCCESS} from '../../app/utils/piazza-client'
 import {
   ERROR_GENERIC,
   RESPONSE_DEPLOYMENT,
@@ -62,40 +62,36 @@ describe('Piazza Client', function () {
   })
 
   describe('getDeployment()', () => {
-    it('calls correct URL', (done) => {
+    it('calls correct URL', () => {
       const stub = fetchStub.returns(resolveJson(RESPONSE_DEPLOYMENT))
       const client = new Client('http://m', 'test-auth-token')
-      client.getDeployment('test-deployment-id')
+      return client.getDeployment('test-deployment-id')
         .then(() => {
           assert.equal(stub.firstCall.args[0], 'http://m/deployment/test-deployment-id')
-          done()
         })
-        .catch(done)
     })
 
-    it('properly deserializes GeoServer deployment descriptor', (done) => {
+    it('properly deserializes GeoServer deployment descriptor', () => {
       fetchStub.returns(resolveJson(RESPONSE_DEPLOYMENT))
       const client = new Client('http://m', 'test-auth-token')
-      client.getDeployment('test-deployment-id')
+      return client.getDeployment('test-deployment-id')
         .then(descriptor => {
           assert.equal(descriptor.dataId, 'test-data-id')
           assert.equal(descriptor.endpoint, 'http://test-capabilities-url/arbitrary/context/path')
           assert.equal(descriptor.layerId, 'test-layer-id')
-          done()
         })
-        .catch(done)
     })
 
-    it('handles HTTP errors gracefully', (done) => {
+    it('handles HTTP errors gracefully', () => {
       fetchStub.returns(resolveJson(RESPONSE_DEPLOYMENT_NOT_FOUND, 500))
       const client = new Client('http://m', 'test-auth-token')
-      client.getDeployment('nopenope')
-        .then(() => done(new Error('Should have thrown')))
-        .catch(err => {
-          assert.equal(err.status, 500)
-          done()
-        })
-        .catch(done)
+      return client.getDeployment('nopenope')
+        .then(
+          () => { throw new Error('Should have thrown') },
+          (err) => {
+            assert.equal(err.status, 500)
+          }
+        )
     })
   })
 
@@ -111,41 +107,35 @@ describe('Piazza Client', function () {
       server.restore()
     })
 
-    it('calls correct URL', (done) => {
+    it('calls correct URL', () => {
       server.respondWith([200, {}, RESPONSE_FILE])
       const client = new Client('http://m', 'test-auth-token')
-      client.getFile('test-id')
+      return client.getFile('test-id')
         .then(() => {
           assert.equal(server.requests[0].method, 'GET')
           assert.equal(server.requests[0].url, 'http://m/file/test-id')
-          done()
         })
-        .catch(done)
     })
 
-    it('can retrieve file', (done) => {
+    it('can retrieve file', () => {
       server.respondWith([200, {}, RESPONSE_FILE])
       const client = new Client('http://m', 'test-auth-token')
-      client.getFile('test-id')
+      return client.getFile('test-id')
         .then(content => {
           assert.ok(content)
-          done()
         })
-        .catch(done)
     })
 
-    it('does not modify payload', (done) => {
+    it('does not modify payload', () => {
       server.respondWith([200, {}, RESPONSE_FILE])
       const client = new Client('http://m', 'test-auth-token')
-      client.getFile('test-id')
+      return client.getFile('test-id')
         .then(actual => {
           assert.equal(actual, RESPONSE_FILE)
-          done()
         })
-        .catch(done)
     })
 
-    it.skip('handles HTTP errors gracefully', (done) => {
+    it.skip('handles HTTP errors gracefully', () => {
       /*
        Disabling this test due to a bug in the current version of sinon that causes the
        fake XHR to emit an error event on any non-200 HTTP status code.
@@ -154,247 +144,213 @@ describe('Piazza Client', function () {
        */
       server.respondWith([500, {}, ERROR_GENERIC])
       const client = new Client('http://m', 'test-auth-token')
-      client.getFile('test-id')
-        .then(() => done(new Error('Should have thrown')))
+      return client.getFile('test-id')
+        .then(() => { throw new Error('Should have thrown') })
         .catch(error => {
           assert.equal(error.status, 500)
-          done()
         })
-        .catch(done)
     })
 
-    it('notifies callers of progress', (done) => {
+    it('notifies callers of progress', () => {
       server.respondWith([200, {'content-length': RESPONSE_FILE.length}, RESPONSE_FILE])
       const client = new Client('http://m', 'test-auth-token')
       const stub = sinon.stub()
-      client.getFile('test-id', stub)
+      return client.getFile('test-id', stub)
         .then(() => {
           assert.isTrue(stub.called)
           assert.isTrue(stub.alwaysCalledWithMatch(sinon.match({
             loaded: sinon.match.number,
             total: sinon.match.number,
           })))
-          done()
         })
-        .catch(done)
     })
 
-    it('allows callers to cancel a retrieval', (done) => {
+    it('allows callers to cancel a retrieval', () => {
       server.respondWith([200, {}, RESPONSE_FILE])
       const stub = sinon.stub()
       const client = new Client('http://m', 'test-auth-token')
-      client.getFile('test-id', stub)
+      return client.getFile('test-id', stub)
         .then(() => {
           assert.isTrue(stub.alwaysCalledWithMatch({
             cancel: sinon.match.func,
           }))
-          done()
         })
-        .catch(done)
     })
 
-    it('on cancellation, rejects promise', (done) => {
+    it('on cancellation, rejects promise', () => {
       server.respondWith([200, {}, RESPONSE_FILE])
       const onProgress = ({cancel}) => cancel()
       const client = new Client('http://m', 'test-auth-token')
-      client.getFile('test-id', onProgress)
-        .then(() => done(new Error('Should have rejected')))
+      return client.getFile('test-id', onProgress)
+        .then(() => { throw new Error('Should have rejected') })
         .catch(err => {
           assert.deepEqual(err, {isCancellation: true})
-          done()
         })
-        .catch(done)
     })
 
-    it('on cancellation, halts the XHR', (done) => {
+    it('on cancellation, halts the XHR', () => {
       server.respondWith([200, {}, RESPONSE_FILE])
       const onProgress = ({cancel}) => cancel()
       const client = new Client('http://m', 'test-auth-token')
       client.getFile('test-id', onProgress)
         .catch(() => {
           assert.isTrue(server.requests[0].aborted)
-          done()
         })
-        .catch(done)
     })
   })
 
   describe('getServices()', () => {
-    it('calls correct URL', (done) => {
+    it('calls correct URL', () => {
       const stub = fetchStub.returns(resolve(RESPONSE_SERVICE_LIST))
       const client = new Client('http://m', 'test-auth-token')
-      client.getServices({pattern: 'test-pattern'})
+      return client.getServices({pattern: 'test-pattern'})
         .then(() => {
           assert.equal(stub.firstCall.args[0], 'http://m/service?keyword=test-pattern&per_page=100')
-          done()
         })
-        .catch(done)
     })
 
-    it('can list services', (done) => {
+    it('can list services', () => {
       fetchStub.returns(resolveJson(RESPONSE_SERVICE_LIST))
       const client = new Client('http://m', 'test-auth-token')
-      client.getServices({pattern: 'test-pattern'})
+      return client.getServices({pattern: 'test-pattern'})
         .then(services => {
           assert.instanceOf(services, Array)
           assert.equal(services.length, 2)
-          done()
         })
-        .catch(done)
     })
 
-    it('deserializes metadata', (done) => {
+    it('deserializes metadata', () => {
       fetchStub.returns(resolveJson(RESPONSE_SERVICE_LIST))
       const client = new Client('http://m', 'test-auth-token')
-      client.getServices({pattern: 'test-pattern'})
+      return client.getServices({pattern: 'test-pattern'})
         .then(([firstService]) => {
           assert.equal(firstService.serviceId, 'test-id-1')
           assert.deepEqual(firstService.resourceMetadata.classType, {classification: 'UNCLASSIFIED'})
           assert.equal(firstService.resourceMetadata.description, 'test-description')
           assert.equal(firstService.resourceMetadata.name, 'test-name')
           assert.equal(firstService.resourceMetadata.version, 'test-version')
-          done()
         })
-        .catch(done)
     })
 
-    it('handles HTTP errors gracefully', (done) => {
+    it('handles HTTP errors gracefully', () => {
       fetchStub.returns(resolve(ERROR_GENERIC, 500))
       const client = new Client('http://m', 'test-auth-token')
-      client.getServices({pattern: 'test-pattern'})
-        .then(() => done(new Error('Should have thrown')))
-        .catch(error => {
-          assert.equal(error.status, 500)
-          done()
-        })
-        .catch(done)
+      return client.getServices({pattern: 'test-pattern'})
+        .then(
+          () => { throw new Error('Should have thrown') },
+          (err) => {
+            assert.equal(err.status, 500)
+          })
     })
   })
 
   describe('getStatus()', () => {
-    it('calls correct URL', (done) => {
+    it('calls correct URL', () => {
       const stub = fetchStub.returns(resolve(RESPONSE_JOB_RUNNING))
       const client = new Client('http://m', 'test-auth-token')
-      client.getStatus('test-id')
+      return client.getStatus('test-id')
         .then(() => {
           assert.equal(stub.firstCall.args[0], 'http://m/job/test-id')
-          done()
         })
-        .catch(done)
     })
 
-    it('properly deserializes running job', (done) => {
+    it('properly deserializes running job', () => {
       fetchStub.returns(resolve(RESPONSE_JOB_RUNNING))
       const client = new Client('http://m', 'test-auth-token')
-      client.getStatus('test-id')
+      return client.getStatus('test-id')
         .then(status => {
           assert.equal(status.jobId, 'test-id')
           assert.equal(status.status, STATUS_RUNNING)
           assert.equal(status.result, null)
-          done()
         })
-        .catch(done)
     })
 
-    it('properly deserializes successful job', (done) => {
+    it('properly deserializes successful job', () => {
       fetchStub.returns(resolve(RESPONSE_JOB_SUCCESS))
       const client = new Client('http://m', 'test-auth-token')
-      client.getStatus('test-id')
+      return client.getStatus('test-id')
         .then(status => {
           assert.equal(status.jobId, 'test-id')
           assert.equal(status.status, STATUS_SUCCESS)
           assert.equal(status.result.dataId, 'test-data-id')
-          done()
         })
-        .catch(done)
     })
 
-    it('properly deserializes failed job', (done) => {
+    it('properly deserializes failed job', () => {
       fetchStub.returns(resolve(RESPONSE_JOB_ERROR))
       const client = new Client('http://m', 'test-auth-token')
-      client.getStatus('test-id')
+      return client.getStatus('test-id')
         .then(status => {
           assert.equal(status.jobId, 'test-id')
           assert.equal(status.status, STATUS_ERROR)
           assert.isUndefined(status.result.dataId)
-          done()
         })
-        .catch(done)
     })
 
-    it('properly handles non-existent job', (done) => {
+    it('properly handles non-existent job', () => {
       fetchStub.returns(resolve(RESPONSE_JOB_NOT_FOUND))
       const client = new Client('http://m', 'test-auth-token')
-      client.getStatus('test-id')
-        .then(() => done(new Error('Should have thrown')))
-        .catch(error => {
-          assert.instanceOf(error, Error)
-          assert.match(error.message, /^InvalidResponse: Job Not Found/i)
-          done()
-        })
-        .catch(done)
+      return client.getStatus('test-id')
+        .then(
+          () => { throw new Error('Should have thrown') },
+          (err) => {
+            assert.instanceOf(err, Error)
+            assert.match(err.message, /^InvalidResponse: Job Not Found/i)
+          })
     })
 
-    it('handles HTTP errors gracefully', (done) => {
+    it('handles HTTP errors gracefully', () => {
       fetchStub.returns(resolve(ERROR_GENERIC, 500))
       const client = new Client('http://m', 'test-auth-token')
-      client.getStatus('test-id')
-        .then(() => done(new Error('Should have thrown')))
-        .catch(error => {
-          assert.equal(error.status, 500)
-          done()
-        })
-        .catch(done)
+      return client.getStatus('test-id')
+        .then(
+          () => { throw new Error('Should have thrown') },
+          (err) => {
+            assert.equal(err.status, 500)
+          })
     })
   })
 
   describe('post()', () => {
-    it('calls correct URL', (done) => {
+    it('calls correct URL', () => {
       const stub = fetchStub.returns(resolve(RESPONSE_JOB_CREATED))
       const client = new Client('http://m', 'test-auth-token')
-      client.post('test-type', 'test-data')
+      return client.post('test-type', 'test-data')
         .then(() => {
           assert.equal(stub.firstCall.args[0], 'http://m/job')
-          done()
         })
-        .catch(done)
     })
 
-    it('returns new job ID', (done) => {
+    it('returns new job ID', () => {
       fetchStub.returns(resolve(RESPONSE_JOB_CREATED))
       const client = new Client('http://m', 'test-auth-token')
       client.post('test-type', 'test-data')
         .then(id => {
           assert.equal(id, 'test-id')
-          done()
         })
-        .catch(done)
     })
 
-    it('properly serializes message', (done) => {
+    it('properly serializes message', () => {
       const stub = fetchStub.returns(resolve(RESPONSE_JOB_CREATED))
       const client = new Client('http://m', 'test-auth-token')
-      client.post('test-type', 'test-data')
+      return client.post('test-type', 'test-data')
         .then(() => {
           const [, options] = stub.firstCall.args
           assert.equal(options.method, 'POST')
           assert.equal(options.headers['content-type'], 'application/json')
           assert.equal(options.body, '{"type":"test-type","data":"test-data"}')
-          done()
         })
-        .catch(done)
     })
 
-    it('handles HTTP errors gracefully', (done) => {
+    it('handles HTTP errors gracefully', () => {
       fetchStub.returns(resolve(ERROR_GENERIC, 500))
       const client = new Client('http://m', 'test-auth-token')
       client.post('test-type', 'test-data')
-        .then(() => done(new Error('Should have thrown')))
-        .catch(error => {
-          assert.equal(error.status, 500)
-          done()
-        })
-        .catch(done)
+        .then(
+          () => { throw new Error('Should have thrown') },
+          (err) => {
+            assert.equal(err.status, 500)
+          })
     })
   })
 })

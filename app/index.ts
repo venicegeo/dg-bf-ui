@@ -24,10 +24,11 @@ import './styles/menus.css'
 
 // Polyfills
 import 'core-js/es6/object'
-import 'core-js/es6/array'
+import 'core-js/es6/string'  // Polyfill
+import 'core-js/fn/array/includes'  // Polyfill
 
-import {bootstrap} from './router'
+import {createApplication} from './components/Application'
 
 const root = document.createElement('div')
 document.body.appendChild(root)
-bootstrap(root)
+createApplication(root)

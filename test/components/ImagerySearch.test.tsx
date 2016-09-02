@@ -15,10 +15,11 @@
  **/
 
 import * as React from 'react'
-import {mount} from 'enzyme'
+import {mount, shallow} from 'enzyme'
 import {assert} from 'chai'
 import * as sinon from 'sinon'
-import ImagerySearch from 'app/components/ImagerySearch'
+import {CatalogSearchCriteria} from '../../app/components/CatalogSearchCriteria'
+import {ImagerySearch} from '../../app/components/ImagerySearch'
 
 describe('<ImagerySearch/>', () => {
   let _props
@@ -43,7 +44,7 @@ describe('<ImagerySearch/>', () => {
   })
 
   it('renders', () => {
-    const wrapper = mount(
+    const wrapper = shallow(
       <ImagerySearch
         bbox={_props.bbox}
         catalogApiKey={_props.catalogApiKey}
@@ -61,95 +62,12 @@ describe('<ImagerySearch/>', () => {
         onSubmit={_props.onSubmit}
       />
     )
-    assert.equal((wrapper.find('.ImagerySearch__catalogApiKey input') as any).node.value, 'test-catalog-api-key')
-    assert.equal((wrapper.find('.ImagerySearch__cloudCover input') as any).node.value, '19')
-    assert.equal((wrapper.find('.ImagerySearch__captureDateFrom input') as any).node.value, '2016-01-01')
-    assert.equal((wrapper.find('.ImagerySearch__captureDateTo input') as any).node.value, '2016-02-01')
-    assert.equal((wrapper.find('.ImagerySearch__spatialFilter select') as any).node.value, '')
+    assert.equal(wrapper.find(CatalogSearchCriteria).length, 1)
+    assert.equal(wrapper.find('button[type="submit"]').length, 1)
   })
 
-  it('renders spatial filter options', () => {
-    const wrapper = mount(
-      <ImagerySearch
-        bbox={_props.bbox}
-        catalogApiKey={_props.catalogApiKey}
-        cloudCover={_props.cloudCover}
-        dateFrom={_props.dateFrom}
-        dateTo={_props.dateTo}
-        filter={'test-id'}
-        filters={[
-          {id: 'test-id', name: 'Testing'},
-        ]}
-        isSearching={_props.isSearching}
-        onApiKeyChange={_props.onApiKeyChange}
-        onClearBbox={_props.onClearBbox}
-        onCloudCoverChange={_props.onCloudCoverChange}
-        onDateChange={_props.onDateChange}
-        onFilterChange={_props.onFilterChange}
-        onSubmit={_props.onSubmit}
-      />
-    )
-    const options: any = wrapper.find('.ImagerySearch__spatialFilter option')
-    assert.equal((wrapper.find('.ImagerySearch__spatialFilter select') as any).node.value, 'test-id')
-    assert.equal(options.nodes[0].value, '')
-    assert.equal(options.at(0).text(), 'None')
-    assert.equal(options.nodes[1].value, 'test-id')
-    assert.equal(options.at(1).text(), 'Testing')
-  })
-
-  it('normalizes spatial filter names', () => {
-    const wrapper = mount(
-      <ImagerySearch
-        bbox={_props.bbox}
-        catalogApiKey={_props.catalogApiKey}
-        cloudCover={_props.cloudCover}
-        dateFrom={_props.dateFrom}
-        dateTo={_props.dateTo}
-        filter={_props.filter}
-        filters={[
-          {id: 'test-filter-1', name: 'lorem ipsum'},
-          {id: 'test-filter-2', name: 'dolor sit amet'},
-        ]}
-        isSearching={_props.isSearching}
-        onApiKeyChange={_props.onApiKeyChange}
-        onClearBbox={_props.onClearBbox}
-        onCloudCoverChange={_props.onCloudCoverChange}
-        onDateChange={_props.onDateChange}
-        onFilterChange={_props.onFilterChange}
-        onSubmit={_props.onSubmit}
-      />
-    )
-    assert.equal(wrapper.find('.ImagerySearch__spatialFilter option').at(1).text(), 'Lorem Ipsum')
-    assert.equal(wrapper.find('.ImagerySearch__spatialFilter option').at(2).text(), 'Dolor Sit Amet')
-  })
-
-  it('renders with correct initial spatial filter selection', () => {
-    const wrapper = mount(
-      <ImagerySearch
-        bbox={_props.bbox}
-        catalogApiKey={_props.catalogApiKey}
-        cloudCover={_props.cloudCover}
-        dateFrom={_props.dateFrom}
-        dateTo={_props.dateTo}
-        filter={'test-filter-1'}
-        filters={[
-          {id: 'test-filter-1', name: 'test-name'},
-          {id: 'test-filter-2', name: 'dolor sit amet'},
-        ]}
-        isSearching={_props.isSearching}
-        onApiKeyChange={_props.onApiKeyChange}
-        onClearBbox={_props.onClearBbox}
-        onCloudCoverChange={_props.onCloudCoverChange}
-        onDateChange={_props.onDateChange}
-        onFilterChange={_props.onFilterChange}
-        onSubmit={_props.onSubmit}
-      />
-    )
-    assert.equal((wrapper.find('.ImagerySearch__spatialFilter select') as any).node.value, 'test-filter-1')
-  })
-
-  it('emits api key change event', () => {
-    const wrapper = mount(
+  it('bubbles api key change event', () => {
+    const wrapper = shallow(
       <ImagerySearch
         bbox={_props.bbox}
         catalogApiKey={_props.catalogApiKey}
@@ -167,14 +85,12 @@ describe('<ImagerySearch/>', () => {
         onSubmit={_props.onSubmit}
       />
     )
-    const input: any = wrapper.find('.ImagerySearch__catalogApiKey input')
-    input.node.value = 'test-new-catalog-api-key'
-    input.simulate('change')
+    wrapper.find(CatalogSearchCriteria).props().onApiKeyChange('test-new-catalog-api-key')
     assert.isTrue(_props.onApiKeyChange.calledWithExactly('test-new-catalog-api-key'))
   })
 
-  it('emits bbox clear event', () => {
-    const wrapper = mount(
+  it('bubbles bbox clear event', () => {
+    const wrapper = shallow(
       <ImagerySearch
         bbox={_props.bbox}
         catalogApiKey={_props.catalogApiKey}
@@ -192,12 +108,12 @@ describe('<ImagerySearch/>', () => {
         onSubmit={_props.onSubmit}
       />
     )
-    wrapper.find('.ImagerySearch__clearBbox').simulate('click')
+    wrapper.find(CatalogSearchCriteria).props().onClearBbox()
     assert.equal(_props.onClearBbox.callCount, 1)
   })
 
-  it('emits cloud cover change event', () => {
-    const wrapper = mount(
+  it('bubbles cloud cover change event', () => {
+    const wrapper = shallow(
       <ImagerySearch
         bbox={_props.bbox}
         catalogApiKey={_props.catalogApiKey}
@@ -215,14 +131,12 @@ describe('<ImagerySearch/>', () => {
         onSubmit={_props.onSubmit}
       />
     )
-    const input: any = wrapper.find('.ImagerySearch__cloudCover input')
-    input.node.value = 42
-    input.simulate('change')
+    wrapper.find(CatalogSearchCriteria).props().onCloudCoverChange(42)
     assert.isTrue(_props.onCloudCoverChange.calledWithExactly(42))
   })
 
-  it('emits date change event (via "from" date)', () => {
-    const wrapper = mount(
+  it('bubbles date change event (via "from" date)', () => {
+    const wrapper = shallow(
       <ImagerySearch
         bbox={_props.bbox}
         catalogApiKey={_props.catalogApiKey}
@@ -240,14 +154,12 @@ describe('<ImagerySearch/>', () => {
         onSubmit={_props.onSubmit}
       />
     )
-    const input: any = wrapper.find('.ImagerySearch__captureDateFrom input')
-    input.node.value = '1999-12-31'
-    input.simulate('change')
+    wrapper.find(CatalogSearchCriteria).props().onDateChange('1999-12-31', _props.dateTo)
     assert.isTrue(_props.onDateChange.calledWithExactly('1999-12-31', _props.dateTo))
   })
 
-  it('emits date change event (via "to" date)', () => {
-    const wrapper = mount(
+  it('bubbles date change event (via "to" date)', () => {
+    const wrapper = shallow(
       <ImagerySearch
         bbox={_props.bbox}
         catalogApiKey={_props.catalogApiKey}
@@ -265,14 +177,12 @@ describe('<ImagerySearch/>', () => {
         onSubmit={_props.onSubmit}
       />
     )
-    const input: any = wrapper.find('.ImagerySearch__captureDateTo input')
-    input.node.value = '1999-12-31'
-    input.simulate('change')
+    wrapper.find(CatalogSearchCriteria).props().onDateChange(_props.dateFrom, '1999-12-31')
     assert.isTrue(_props.onDateChange.calledWithExactly(_props.dateFrom, '1999-12-31'))
   })
 
-  it('emits spatial filter change event', () => {
-    const wrapper = mount(
+  it('bubbles spatial filter change event', () => {
+    const wrapper = shallow(
       <ImagerySearch
         bbox={_props.bbox}
         catalogApiKey={_props.catalogApiKey}
@@ -292,14 +202,12 @@ describe('<ImagerySearch/>', () => {
         onSubmit={_props.onSubmit}
       />
     )
-    const dropdown: any = wrapper.find('.ImagerySearch__spatialFilter select')
-    dropdown.node.value = 'test-id'
-    dropdown.simulate('change')
+    wrapper.find(CatalogSearchCriteria).props().onFilterChange('test-id')
     assert.isTrue(_props.onFilterChange.calledWithExactly('test-id'))
   })
 
-  it('emits spatial filter change event (to empty)', () => {
-    const wrapper = mount(
+  it('bubbles spatial filter change event (to empty)', () => {
+    const wrapper = shallow(
       <ImagerySearch
         bbox={_props.bbox}
         catalogApiKey={_props.catalogApiKey}
@@ -319,14 +227,12 @@ describe('<ImagerySearch/>', () => {
         onSubmit={_props.onSubmit}
       />
     )
-    const dropdown: any = wrapper.find('.ImagerySearch__spatialFilter select')
-    dropdown.node.value = ''
-    dropdown.simulate('change')
+    wrapper.find(CatalogSearchCriteria).props().onFilterChange(null)
     assert.isTrue(_props.onFilterChange.calledWithExactly(null))
   })
 
   it('emits submission event', () => {
-    const wrapper = mount(
+    const wrapper = shallow(
       <ImagerySearch
         bbox={_props.bbox}
         catalogApiKey={_props.catalogApiKey}
@@ -344,11 +250,12 @@ describe('<ImagerySearch/>', () => {
         onSubmit={_props.onSubmit}
       />
     )
-    wrapper.find('form').simulate('submit')
+    const noop = () => {}
+    wrapper.find('form').simulate('submit', { preventDefault: noop, stopPropagation: noop })
     assert.equal(_props.onSubmit.callCount, 1)
   })
 
-  it('updates api key when props change', () => {
+  it('shows error message if exists', () => {
     const wrapper = mount(
       <ImagerySearch
         bbox={_props.bbox}
@@ -356,6 +263,11 @@ describe('<ImagerySearch/>', () => {
         cloudCover={_props.cloudCover}
         dateFrom={_props.dateFrom}
         dateTo={_props.dateTo}
+        error={{
+          message: 'oh noes',
+          stack: 'paper',
+          code: 123
+        }}
         filter={_props.filter}
         filters={_props.filters}
         isSearching={_props.isSearching}
@@ -367,12 +279,11 @@ describe('<ImagerySearch/>', () => {
         onSubmit={_props.onSubmit}
       />
     )
-    wrapper.setProps({catalogApiKey: 'test-new-catalog-api-key'})
-    assert.equal((wrapper.find('.ImagerySearch__catalogApiKey input') as any).node.value, 'test-new-catalog-api-key')
+    assert.equal(wrapper.find('.ImagerySearch-errorMessage').length, 1)
   })
 
-  it('updates cloud cover when props change', () => {
-    const wrapper = mount(
+  it('shows loading indicator while search is in flight', () => {
+    const wrapper = shallow(
       <ImagerySearch
         bbox={_props.bbox}
         catalogApiKey={_props.catalogApiKey}
@@ -381,7 +292,7 @@ describe('<ImagerySearch/>', () => {
         dateTo={_props.dateTo}
         filter={_props.filter}
         filters={_props.filters}
-        isSearching={_props.isSearching}
+        isSearching={true}
         onApiKeyChange={_props.onApiKeyChange}
         onClearBbox={_props.onClearBbox}
         onCloudCoverChange={_props.onCloudCoverChange}
@@ -390,12 +301,11 @@ describe('<ImagerySearch/>', () => {
         onSubmit={_props.onSubmit}
       />
     )
-    wrapper.setProps({cloudCover: 42})
-    assert.equal((wrapper.find('.ImagerySearch__cloudCover input') as any).node.value, '42')
+    assert.equal(wrapper.find('.ImagerySearch-loadingMask').length, 1)
   })
 
-  it('updates date when props change (via "from" date)', () => {
-    const wrapper = mount(
+  it('prevents button hammering while search is in flight', () => {
+    const wrapper = shallow(
       <ImagerySearch
         bbox={_props.bbox}
         catalogApiKey={_props.catalogApiKey}
@@ -404,7 +314,7 @@ describe('<ImagerySearch/>', () => {
         dateTo={_props.dateTo}
         filter={_props.filter}
         filters={_props.filters}
-        isSearching={_props.isSearching}
+        isSearching={true}
         onApiKeyChange={_props.onApiKeyChange}
         onClearBbox={_props.onClearBbox}
         onCloudCoverChange={_props.onCloudCoverChange}
@@ -413,60 +323,6 @@ describe('<ImagerySearch/>', () => {
         onSubmit={_props.onSubmit}
       />
     )
-    wrapper.setProps({dateFrom: '1999-12-31'})
-    assert.equal((wrapper.find('.ImagerySearch__captureDateFrom input') as any).node.value, '1999-12-31')
-    assert.equal((wrapper.find('.ImagerySearch__captureDateTo input') as any).node.value, _props.dateTo)
+    assert.isTrue(wrapper.find('button[type="submit"]').prop('disabled'))
   })
-
-  it('updates date when props change (via "to" date)', () => {
-    const wrapper = mount(
-      <ImagerySearch
-        bbox={_props.bbox}
-        catalogApiKey={_props.catalogApiKey}
-        cloudCover={_props.cloudCover}
-        dateFrom={_props.dateFrom}
-        dateTo={_props.dateTo}
-        filter={_props.filter}
-        filters={_props.filters}
-        isSearching={_props.isSearching}
-        onApiKeyChange={_props.onApiKeyChange}
-        onClearBbox={_props.onClearBbox}
-        onCloudCoverChange={_props.onCloudCoverChange}
-        onDateChange={_props.onDateChange}
-        onFilterChange={_props.onFilterChange}
-        onSubmit={_props.onSubmit}
-      />
-    )
-    wrapper.setProps({dateTo: '1999-12-31'})
-    assert.equal((wrapper.find('.ImagerySearch__captureDateFrom input') as any).node.value, _props.dateFrom)
-    assert.equal((wrapper.find('.ImagerySearch__captureDateTo input') as any).node.value, '1999-12-31')
-  })
-
-  it('updates spatial filter when props change', () => {
-    const wrapper = mount(
-      <ImagerySearch
-        bbox={_props.bbox}
-        catalogApiKey={_props.catalogApiKey}
-        cloudCover={_props.cloudCover}
-        dateFrom={_props.dateFrom}
-        dateTo={_props.dateTo}
-        filter={''}
-        filters={[
-          {id: 'test-id', name: 'Testing'},
-        ]}
-        isSearching={_props.isSearching}
-        onApiKeyChange={_props.onApiKeyChange}
-        onClearBbox={_props.onClearBbox}
-        onCloudCoverChange={_props.onCloudCoverChange}
-        onDateChange={_props.onDateChange}
-        onFilterChange={_props.onFilterChange}
-        onSubmit={_props.onSubmit}
-      />
-    )
-    wrapper.setProps({filter: 'test-id'})
-    assert.equal((wrapper.find('.ImagerySearch__spatialFilter select') as any).node.value, 'test-id')
-  })
-
-  it('shows loading indicator while search is in flight')
-  it('prevents button hammering while search is in flight')
 })

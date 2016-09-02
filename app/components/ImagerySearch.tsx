@@ -17,8 +17,8 @@
 const styles: any = require('./ImagerySearch.css')
 
 import * as React from 'react'
-import LoadingAnimation from './LoadingAnimation'
-import StaticMinimap from './StaticMinimap'
+import {CatalogSearchCriteria} from './CatalogSearchCriteria'
+import {LoadingAnimation} from './LoadingAnimation'
 
 interface Props {
   bbox: number[]
@@ -38,108 +38,49 @@ interface Props {
   onSubmit()
 }
 
-export default class ImagerySearch extends React.Component<Props, {}> {
-  refs: any
-
+export class ImagerySearch extends React.Component<Props, {}> {
   constructor() {
     super()
-    this.emitApiKeyChange     = this.emitApiKeyChange.bind(this)
-    this.emitCloudCoverChange = this.emitCloudCoverChange.bind(this)
-    this.emitDateChange       = this.emitDateChange.bind(this)
-    this.emitFilterChange     = this.emitFilterChange.bind(this)
-    this.handleSubmit         = this.handleSubmit.bind(this)
-  }
-
-  componentDidMount() {
-    this.refs.dateFrom.value = this.props.dateFrom
-    this.refs.dateTo.value = this.props.dateTo
-    this.refs.apiKey.value = this.props.catalogApiKey || ''
-    this.refs.cloudCover.value = this.props.cloudCover || '0'
-    this.refs.filter.value = this.props.filter || ''
-  }
-
-  componentDidUpdate(prevProps) {
-    if (prevProps.catalogApiKey !== this.props.catalogApiKey) {
-      this.refs.apiKey.value = this.props.catalogApiKey
-    }
-    if (prevProps.cloudCover !== this.props.cloudCover) {
-      this.refs.cloudCover.value = this.props.cloudCover
-    }
-    if (prevProps.dateFrom !== this.props.dateFrom) {
-      this.refs.dateFrom.value = this.props.dateFrom
-    }
-    if (prevProps.dateTo !== this.props.dateTo) {
-      this.refs.dateTo.value = this.props.dateTo
-    }
-    if (prevProps.filter !== this.props.filter) {
-      this.refs.filter.value = this.props.filter || ''
-    }
+    this.handleSubmit = this.handleSubmit.bind(this)
   }
 
   render() {
-    const {error, bbox, cloudCover, isSearching} = this.props
     return (
-      <form className={`${styles.root} ${isSearching ? styles.isSearching : ''}`} onSubmit={this.handleSubmit}>
-        <h2>Search for Imagery</h2>
-        <div className={styles.minimap}>
-          <StaticMinimap bbox={bbox}/>
-          <div className={styles.clearBbox} onClick={this.props.onClearBbox}>
-            <i className="fa fa-times-circle"/> Clear
-          </div>
-        </div>
+      <form className={`${styles.root} ${this.props.isSearching ? styles.isSearching : ''}`} onSubmit={this.handleSubmit}>
+        <h2>Source Imagery</h2>
 
-        {error && (
-          <div className={styles.errorMessage}>
-            <h4><i className="fa fa-warning"/> Search failed</h4>
-            <p>Could not search the image catalog because of an error.</p>
-            <pre>{error.stack}</pre>
-          </div>
-        )}
-        <h3>Catalog</h3>
-        <label className={styles.provider}>
-          <span>Provider</span>
-          <select disabled={true}>
-            <option>Planet Labs (LANDSAT)</option>
-          </select>
-        </label>
-        <label className={styles.catalogApiKey}>
-          <span>API Key</span>
-          <input ref="apiKey" type="password" disabled={isSearching} onChange={this.emitApiKeyChange} />
-        </label>
-
-        <h3>Date of Capture</h3>
-        <label className={styles.captureDateFrom}>
-          <span>From</span>
-          <input ref="dateFrom" type="date" disabled={isSearching} onChange={this.emitDateChange} />
-        </label>
-        <label className={styles.captureDateTo}>
-          <span>To</span>
-          <input ref="dateTo" type="date" disabled={isSearching} onChange={this.emitDateChange} />
-        </label>
-
-        <h3>Filters</h3>
-        <label className={styles.cloudCover}>
-          <span>Cloud Cover</span>
-          <input ref="cloudCover" type="range" min="0" max="100" onChange={this.emitCloudCoverChange}/>
-          <span className={styles.value}>{cloudCover > 0 && '< '}{cloudCover}%</span>
-        </label>
-        <label className={styles.spatialFilter}>
-          <span>Spatial Filter</span>
-          <select ref="filter" onChange={this.emitFilterChange}>
-            <option value="">None</option>
-            {this.props.filters.map(({id, name}) => (
-              <option key={id} value={id}>{titleCase(name)}</option>
-            ))}
-          </select>
-        </label>
+        <CatalogSearchCriteria
+          apiKey={this.props.catalogApiKey}
+          bbox={this.props.bbox}
+          cloudCover={this.props.cloudCover}
+          dateFrom={this.props.dateFrom}
+          dateTo={this.props.dateTo}
+          filter={this.props.filter}
+          filters={this.props.filters}
+          disabled={this.props.isSearching}
+          onApiKeyChange={this.props.onApiKeyChange}
+          onClearBbox={this.props.onClearBbox}
+          onCloudCoverChange={this.props.onCloudCoverChange}
+          onDateChange={this.props.onDateChange}
+          onFilterChange={this.props.onFilterChange}
+          errorElement={this.props.error && (
+            <div className={styles.errorMessage}>
+              <h4><i className="fa fa-warning"/> Search failed</h4>
+              <p>Could not search the image catalog because of an error.</p>
+              <pre>{this.props.error.stack}</pre>
+            </div>
+          )}
+        />
 
         <div className={styles.controls}>
           <button type="submit" disabled={!this.canSubmit}>Search for imagery</button>
         </div>
 
-        <div className={styles.loadingMask}>
-          <LoadingAnimation className={styles.loadingAnimation}/>
-        </div>
+        {this.props.isSearching && (
+          <div className={styles.loadingMask}>
+            <LoadingAnimation className={styles.loadingAnimation}/>
+          </div>
+        )}
       </form>
     )
   }
@@ -155,34 +96,9 @@ export default class ImagerySearch extends React.Component<Props, {}> {
         && this.props.dateTo
   }
 
-  private emitApiKeyChange() {
-    this.props.onApiKeyChange(this.refs.apiKey.value)
-  }
-
-  private emitCloudCoverChange() {
-    this.props.onCloudCoverChange(parseInt(this.refs.cloudCover.value, 10))
-  }
-
-  private emitDateChange() {
-    const {dateFrom, dateTo} = this.refs
-    this.props.onDateChange(dateFrom.value, dateTo.value)
-  }
-
-  private emitFilterChange() {
-    this.props.onFilterChange(this.refs.filter.value || null)
-  }
-
   private handleSubmit(event) {
     event.preventDefault()
     event.stopPropagation()
     this.props.onSubmit()
   }
-}
-
-//
-// Helpers
-//
-
-function titleCase(s) {
-  return s.replace(/((?:^|\s)[a-z])/g, c => c.toUpperCase())
 }

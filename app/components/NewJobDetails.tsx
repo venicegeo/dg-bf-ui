@@ -23,37 +23,12 @@ interface Props {
   onNameChange(value: string)
 }
 
-export default class NewJobDetails extends React.Component<Props, {}> {
-  refs: any
-
-  constructor() {
-    super()
-    this.emitNameChange = this.emitNameChange.bind(this)
-  }
-
-  componentDidMount() {
-    this.refs.name.value = this.props.name
-  }
-
-  componentWillReceiveProps(nextProps) {
-    if (this.refs.name.value !== nextProps.name) {
-      this.refs.name.value = nextProps.name
-    }
-  }
-
-  render() {
-    return (
-      <div className={styles.root}>
-        <h2>Job Details</h2>
-        <label className={styles.field}>
-          <span>Name</span>
-          <input ref="name" onChange={this.emitNameChange}/>
-        </label>
-      </div>
-    )
-  }
-
-  private emitNameChange() {
-    this.props.onNameChange(this.refs.name.value)
-  }
-}
+export const NewJobDetails = ({ name, onNameChange }: Props) => (
+  <div className={styles.root}>
+    <h2>Job Details</h2>
+    <label className={styles.field}>
+      <span>Name</span>
+      <input value={name} onChange={event => onNameChange((event.target as HTMLInputElement).value)}/>
+    </label>
+  </div>
+)

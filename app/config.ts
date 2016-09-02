@@ -25,10 +25,6 @@ export const JOBS_WORKER = {
   JOB_TTL:  10 * time.minute,
 }
 
-export const ALGORITHMS_WORKER = {
-  INTERVAL: 60 * time.minute,
-}
-
 export const TILE_PROVIDERS = [
   {
     name: 'Grey (Default)',

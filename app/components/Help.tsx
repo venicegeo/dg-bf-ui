@@ -17,32 +17,17 @@
 const styles: any = require('./Help.css')
 
 import * as React from 'react'
-import Modal from './Modal'
+import {Modal} from './Modal'
 
 interface Props {
-  location: any
+  onDismiss()
 }
 
-export default class Help extends React.Component<Props, {}> {
-  static contextTypes: React.ValidationMap<any> = {
-    router: React.PropTypes.object,
-  }
-
-  context: any
-
-  render() {
-    return (
-      <Modal className={styles.root} onDismiss={() => this.dismiss()}>
-        <h1>Help!</h1>
-        <p>Need help?  Let us know we do this stuff for a living... literally!</p>
-        <p><a href="mailto:venice@radiantblue.com">venice@radiantblue.com</a></p>
-      </Modal>
-    )
-  }
-
-  private dismiss() {
-    this.context.router.push(Object.assign({}, this.props.location, {
-      pathname: '/',
-    }))
-  }
-}
+export const Help = ({ onDismiss }: Props) => (
+  <Modal onDismiss={onDismiss}>
+    <div className={styles.root}></div>
+    <h1>Help!</h1>
+    <p>Need help?  Let us know we do this stuff for a living... literally!</p>
+    <p><a href="mailto:venice@radiantblue.com">venice@radiantblue.com</a></p>
+  </Modal>
+)

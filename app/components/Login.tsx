@@ -15,30 +15,24 @@
  **/
 
 const styles: any = require('./Login.css')
+const brand: string = require('../images/brand-small.svg')
 
 import * as React from 'react'
-import {connect} from 'react-redux'
-import Modal from './Modal'
-import {authenticate} from '../actions'
+import {Modal} from './Modal'
+import {createSession} from '../api/authentication'
 
 interface Props {
-  authenticating: boolean
-  error: any
-  location: any
-  authenticate(username: string, password: string)
+  onError(error: any)
+  onSuccess(sessionToken: string)
 }
 
-class Login extends React.Component<Props, {}> {
-  static contextTypes: React.ValidationMap<any> = {
-    router: React.PropTypes.object,
-  }
-
-  context: any
+export class Login extends React.Component<Props, {}> {
   refs: any
 
   constructor() {
     super()
-    this._handleSubmit = this._handleSubmit.bind(this)
+    this.state = {error: null, authenticating: false}
+    this.handleSubmit = this.handleSubmit.bind(this)
   }
 
   componentDidMount() {
@@ -47,40 +41,35 @@ class Login extends React.Component<Props, {}> {
 
   render() {
     return (
-      <Modal className={styles.root} onDismiss={() => {/* noop */}}>
-        <h1>Login</h1><br />
-        <form onSubmit={this._handleSubmit}>
-          <label><input ref="username" placeholder="username"/></label>&nbsp;&nbsp;
-          <label><input ref="pass" placeholder="password" type="password"/></label> <br /><br />
-          <button type="submit" disabled={this.props.authenticating}>login</button>
-          {this.props.error && (
-            <p>Bad login information</p>
+      <Modal onDismiss={() => {}}>
+        <form className={`${styles.root} ${this.state.error ? styles.failed : ''}`} onSubmit={this.handleSubmit}>
+          <img src={brand} alt="Beachfront"/>
+          <h1>Welcome to Beachfront!</h1>
+          <p>Please enter your username and password to login.</p>
+          {this.state.error && (
+            <div className={styles.errorMessage}>Oh no, login failed! ({this.state.error.message})</div>
           )}
+          <div className={styles.fields}>
+            <label><input ref="username" placeholder="username"/></label>
+            <label><input ref="pass" placeholder="password" type="password"/></label>
+          </div>
+          <button className={styles.submitButton} type="submit" disabled={this.state.authenticating}>login</button>
         </form>
       </Modal>
     )
   }
 
-  _handleSubmit(event) {
+  private handleSubmit(event) {
     event.preventDefault()
     const username = this.refs.username.value
     const password = this.refs.pass.value
-    this.props.authenticate(username, password)
-      .then(() => {
-        const {router} = this.context
-        const {location} = this.props
-        if (location.state && location.state.nextPathname) {
-          router.replace(location.state.nextPathname)
-        } else {
-          router.replace('/')
-        }
+    createSession(username, password)
+      .then(token => {
+        this.props.onSuccess(token)
+      })
+      .catch(err => {
+        console.error(err.stack)
+        this.setState({ error: err })
       })
   }
 }
-
-export default connect(state => ({
-  authenticating: state.authentication.authenticating,
-  error:          state.authentication.error,
-}), dispatch => ({
-  authenticate: (username, password) => dispatch(authenticate(username, password)),
-}))(Login)

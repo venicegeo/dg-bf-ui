@@ -41,7 +41,7 @@ module.exports = (config) => {
 
     files: [
       // Isolate "fat" libraries that might slow down each rebuild
-      require.resolve('openlayers/dist/ol-debug.js'),
+      require.resolve('openlayers/dist/ol.js'),
 
       'test/index.ts'
     ],
@@ -72,8 +72,13 @@ module.exports = (config) => {
           },
           {
             test: /\.css$/,
-            loader: 'style!css?module&localIdentName=[name]__[local]',
+            loader: 'style!css?module&localIdentName=[name]-[local]',
             exclude: /node_modules/
+          },
+          {
+            test: /\.css$/,
+            loader: 'style!css',
+            include: /node_modules/
           },
         ]
       },

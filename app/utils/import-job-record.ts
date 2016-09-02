@@ -35,17 +35,11 @@ import {
   TYPE_JOB,
 } from '../constants'
 
-export function importRecordById(client, id, algorithmNames) {
-  return client.getStatus(id)
-    .then(status => {
-      if (status.status !== STATUS_SUCCESS) {
-        throw new Error(`invalid job status '${status.status}'`)
-      }
-      return client.getFile(status.result.dataId)
-    })
+export function importByDataId(client, dataId, algorithmNames) {
+  return client.getFile(dataId)
     .then(parseString)
     .then(executionOutput => ({
-      id,
+      id: dataId,
       geometry: extractGeometry(executionOutput),
       properties: {
         __schemaVersion__: SCHEMA_VERSION,
@@ -64,7 +58,7 @@ export function importRecordById(client, id, algorithmNames) {
     } as beachfront.Job))
     .catch(err => {
       throw Object.assign(err, {
-        jobId:   id,
+        dataId,
         message: `ImportError: ${err.message}`,
         stack:   err.stack,
       })

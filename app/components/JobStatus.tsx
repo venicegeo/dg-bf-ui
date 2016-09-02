@@ -19,9 +19,8 @@ const styles: any = require('./JobStatus.css')
 import * as React from 'react'
 import * as moment from 'moment'
 import {Link} from 'react-router'
-import Timestamp from './Timestamp'
-import FileDownloadLink from './FileDownloadLink'
-import {featureToAnchor} from '../utils/map-anchor'
+import {FileDownloadLink} from './FileDownloadLink'
+import {Timestamp} from './Timestamp'
 
 import {
   STATUS_SUCCESS,
@@ -31,10 +30,12 @@ import {
 } from '../constants'
 
 interface Props {
+  authToken: string
   className?: string
   isActive: boolean
   job: beachfront.Job
   onForgetJob(jobId: string)
+  onNavigate(loc: {pathname: string, search: string, hash: string })
 }
 
 interface State {
@@ -44,7 +45,7 @@ interface State {
   isRemoving?: boolean
 }
 
-export default class JobStatus extends React.Component<Props, State> {
+export class JobStatus extends React.Component<Props, State> {
   constructor() {
     super()
     this.state = {
@@ -114,18 +115,17 @@ export default class JobStatus extends React.Component<Props, State> {
 
         <div className={styles.controls}>
           <Link
-            to={{
-              pathname: '/',
-              query: {jobId: id},
-              hash: featureToAnchor(this.props.job),
-            }}
+            pathname="/"
+            search={'?jobId=' + id}
             title="View on Map"
+            onClick={this.props.onNavigate}>
           >
             <i className="fa fa-globe"/>
           </Link>
           {canDownload && (
             <FileDownloadLink
-              dataId={properties.detectionsDataId}
+              authToken={this.props.authToken}
+              dataId={resultDataId}
               filename={properties.name + '.geojson'}
               className={styles.download}
               onProgress={this.handleDownloadProgress}

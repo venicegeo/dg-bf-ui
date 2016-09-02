@@ -28,28 +28,27 @@ describe('<CreateJob/>', () => {
       algorithms:               [],
       bbox:                     [0, 0, 0, 0],
       catalogApiKey:            'test-catalog-api-key',
-      cloudCover:               10,
-      dateFrom:                 '2016-01-01',
-      dateTo:                   '2016-12-31',
+      executorServiceId:        'test-executor-service-id',
+      sessionToken:             'test-session-token',
       filter:                   '',
       filters:                  [],
-      isCreating:               false,
       isSearching:              false,
-      jobName:                  'test-name',
-      searchError:              null,
-      selectedImage:            {
-        id:         'test-id',
+      searchCriteria: {
+        cloudCover: 10,
+        dateFrom:   '2016-01-01',
+        dateTo:     '2016-12-31',
+        filter:     '',
+      },
+      searchError: null,
+      selectedImage: {
+        id: 'test-id',
         properties: {},
       },
-      onCatalogApiKeyChange:    sinon.stub(),
-      onClearBbox:              sinon.stub(),
-      onJobSubmit:              sinon.stub(),
-      onNameChange:             sinon.stub(),
-      onResetName:              sinon.stub(),
-      onSearchCloudCoverChange: sinon.stub(),
-      onSearchDateChange:       sinon.stub(),
-      onSearchFilterChange:     sinon.stub(),
-      onSearchSubmit:           sinon.stub(),
+      onCatalogApiKeyChange:  sinon.stub(),
+      onClearBbox:            sinon.stub(),
+      onJobCreated:           sinon.stub(),
+      onSearchCriteriaChange: sinon.stub(),
+      onSearchSubmit:         sinon.stub(),
     }
   })
 
@@ -59,32 +58,26 @@ describe('<CreateJob/>', () => {
         algorithms={_props.algorithms}
         bbox={_props.bbox}
         catalogApiKey={_props.catalogApiKey}
-        cloudCover={_props.cloudCover}
-        dateFrom={_props.dateFrom}
-        dateTo={_props.dateTo}
-        searchError={_props.searchError}
+        executorServiceId={_props.executorServiceId}
+        sessionToken={_props.sessionToken}
         filter={_props.filter}
         filters={_props.filters}
-        isCreating={_props.isCreating}
         isSearching={_props.isSearching}
-        jobName={_props.jobName}
+        searchCriteria={_props.searchCriteria}
+        searchError={_props.searchError}
         selectedImage={_props.selectedImage}
         onCatalogApiKeyChange={_props.onCatalogApiKeyChange}
         onClearBbox={_props.onClearBbox}
-        onJobSubmit={_props.onJobSubmit}
-        onNameChange={_props.onNameChange}
-        onResetName={_props.onResetName}
-        onSearchCloudCoverChange={_props.onSearchCloudCoverChange}
-        onSearchDateChange={_props.onSearchDateChange}
-        onSearchFilterChange={_props.onSearchFilterChange}
+        onJobCreated={_props.onJobCreated}
+        onSearchCriteriaChange={_props.onSearchCriteriaChange}
         onSearchSubmit={_props.onSearchSubmit}
       />
     )
-    assert.equal(wrapper.find('.CreateJob__root').length, 1)
-    assert.equal(wrapper.find('.CreateJob__placeholder').length, 0)
-    assert.equal(wrapper.find('.CreateJob__search').length, 1)
-    assert.equal(wrapper.find('.CreateJob__details').length, 1)
-    assert.equal(wrapper.find('.CreateJob__algorithms').length, 1)
+    assert.equal(wrapper.find('.CreateJob-root').length, 1)
+    assert.equal(wrapper.find('.CreateJob-placeholder').length, 0)
+    assert.equal(wrapper.find('.CreateJob-search').length, 1)
+    assert.equal(wrapper.find('.CreateJob-details').length, 1)
+    assert.equal(wrapper.find('.CreateJob-algorithms').length, 1)
   })
 
   it('shows placeholder if bbox does not exist', () => {
@@ -93,28 +86,22 @@ describe('<CreateJob/>', () => {
         algorithms={_props.algorithms}
         bbox={null}
         catalogApiKey={_props.catalogApiKey}
-        cloudCover={_props.cloudCover}
-        dateFrom={_props.dateFrom}
-        dateTo={_props.dateTo}
-        searchError={_props.searchError}
+        executorServiceId={_props.executorServiceId}
+        sessionToken={_props.sessionToken}
         filter={_props.filter}
         filters={_props.filters}
-        isCreating={_props.isCreating}
         isSearching={_props.isSearching}
-        jobName={_props.jobName}
+        searchCriteria={_props.searchCriteria}
+        searchError={_props.searchError}
         selectedImage={null}
         onCatalogApiKeyChange={_props.onCatalogApiKeyChange}
         onClearBbox={_props.onClearBbox}
-        onJobSubmit={_props.onJobSubmit}
-        onNameChange={_props.onNameChange}
-        onResetName={_props.onResetName}
-        onSearchCloudCoverChange={_props.onSearchCloudCoverChange}
-        onSearchDateChange={_props.onSearchDateChange}
-        onSearchFilterChange={_props.onSearchFilterChange}
+        onJobCreated={_props.onJobCreated}
+        onSearchCriteriaChange={_props.onSearchCriteriaChange}
         onSearchSubmit={_props.onSearchSubmit}
       />
     )
-    assert.equal(wrapper.find('.CreateJob__placeholder').length, 1)
+    assert.equal(wrapper.find('.CreateJob-placeholder').length, 1)
   })
 
   it('hides imagery search if no bbox exists', () => {
@@ -123,28 +110,22 @@ describe('<CreateJob/>', () => {
         algorithms={_props.algorithms}
         bbox={null}
         catalogApiKey={_props.catalogApiKey}
-        cloudCover={_props.cloudCover}
-        dateFrom={_props.dateFrom}
-        dateTo={_props.dateTo}
-        searchError={_props.searchError}
+        executorServiceId={_props.executorServiceId}
+        sessionToken={_props.sessionToken}
         filter={_props.filter}
         filters={_props.filters}
-        isCreating={_props.isCreating}
         isSearching={_props.isSearching}
-        jobName={_props.jobName}
+        searchCriteria={_props.searchCriteria}
+        searchError={_props.searchError}
         selectedImage={null}
         onCatalogApiKeyChange={_props.onCatalogApiKeyChange}
         onClearBbox={_props.onClearBbox}
-        onJobSubmit={_props.onJobSubmit}
-        onNameChange={_props.onNameChange}
-        onResetName={_props.onResetName}
-        onSearchCloudCoverChange={_props.onSearchCloudCoverChange}
-        onSearchDateChange={_props.onSearchDateChange}
-        onSearchFilterChange={_props.onSearchFilterChange}
+        onJobCreated={_props.onJobCreated}
+        onSearchCriteriaChange={_props.onSearchCriteriaChange}
         onSearchSubmit={_props.onSearchSubmit}
       />
     )
-    assert.equal(wrapper.find('.CreateJob__search').length, 0)
+    assert.equal(wrapper.find('.CreateJob-search').length, 0)
   })
 
   it('hides job details if no image is selected', () => {
@@ -153,28 +134,22 @@ describe('<CreateJob/>', () => {
         algorithms={_props.algorithms}
         bbox={_props.bbox}
         catalogApiKey={_props.catalogApiKey}
-        cloudCover={_props.cloudCover}
-        dateFrom={_props.dateFrom}
-        dateTo={_props.dateTo}
-        searchError={_props.searchError}
+        executorServiceId={_props.executorServiceId}
+        sessionToken={_props.sessionToken}
         filter={_props.filter}
         filters={_props.filters}
-        isCreating={_props.isCreating}
         isSearching={_props.isSearching}
-        jobName={_props.jobName}
+        searchCriteria={_props.searchCriteria}
+        searchError={_props.searchError}
         selectedImage={null}
         onCatalogApiKeyChange={_props.onCatalogApiKeyChange}
         onClearBbox={_props.onClearBbox}
-        onJobSubmit={_props.onJobSubmit}
-        onNameChange={_props.onNameChange}
-        onResetName={_props.onResetName}
-        onSearchCloudCoverChange={_props.onSearchCloudCoverChange}
-        onSearchDateChange={_props.onSearchDateChange}
-        onSearchFilterChange={_props.onSearchFilterChange}
+        onJobCreated={_props.onJobCreated}
+        onSearchCriteriaChange={_props.onSearchCriteriaChange}
         onSearchSubmit={_props.onSearchSubmit}
       />
     )
-    assert.equal(wrapper.find('.CreateJob__details').length, 0)
+    assert.equal(wrapper.find('.CreateJob-details').length, 0)
   })
 
   it('hides algorithms if no image is selected', () => {
@@ -183,27 +158,27 @@ describe('<CreateJob/>', () => {
         algorithms={_props.algorithms}
         bbox={_props.bbox}
         catalogApiKey={_props.catalogApiKey}
-        cloudCover={_props.cloudCover}
-        dateFrom={_props.dateFrom}
-        dateTo={_props.dateTo}
-        searchError={_props.searchError}
+        executorServiceId={_props.executorServiceId}
+        sessionToken={_props.sessionToken}
         filter={_props.filter}
         filters={_props.filters}
-        isCreating={_props.isCreating}
         isSearching={_props.isSearching}
-        jobName={_props.jobName}
+        searchCriteria={_props.searchCriteria}
+        searchError={_props.searchError}
         selectedImage={null}
         onCatalogApiKeyChange={_props.onCatalogApiKeyChange}
         onClearBbox={_props.onClearBbox}
-        onJobSubmit={_props.onJobSubmit}
-        onNameChange={_props.onNameChange}
-        onResetName={_props.onResetName}
-        onSearchCloudCoverChange={_props.onSearchCloudCoverChange}
-        onSearchDateChange={_props.onSearchDateChange}
-        onSearchFilterChange={_props.onSearchFilterChange}
+        onJobCreated={_props.onJobCreated}
+        onSearchCriteriaChange={_props.onSearchCriteriaChange}
         onSearchSubmit={_props.onSearchSubmit}
       />
     )
-    assert.equal(wrapper.find('.CreateJob__algorithms').length, 0)
+    assert.equal(wrapper.find('.CreateJob-algorithms').length, 0)
   })
+
+  it('emits `onCatalogApiKeyChange` event')
+  it('emits `onClearBbox` event')
+  it('emits `onJobCreated` event')
+  it('emits `onSearchSubmit` event')
+  it('emits `onSearchCriteriaChange` event')
 })

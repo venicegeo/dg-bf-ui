@@ -15,7 +15,7 @@
  **/
 
 import {assert} from 'chai'
-import * as config from 'app/config'
+import * as config from '../app/config'
 
 describe('config', () => {
   it('reads gateway URL from environment', () => {
@@ -33,5 +33,13 @@ describe('config', () => {
 
   it('defines at least one scene preview tile provider', () => {
     assert.isAbove(config.SCENE_TILE_PROVIDERS.length, 0)
+  })
+
+  it('defines a schema version', () => {
+    assert.isNumber(config.SCHEMA_VERSION)
+  })
+
+  it('defines at least one tile provider', () => {
+    assert.isAbove(config.TILE_PROVIDERS.length, 0)
   })
 })

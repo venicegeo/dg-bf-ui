@@ -14,15 +14,17 @@
  * limitations under the License.
  **/
 
+const styles = require('./ActivityTable.css')
+
 import * as React from 'react'
 import * as moment from 'moment'
-import SinceDateSelect from './SinceDateSelect'
-
-const styles = require('./ActivityTable.css')
+import {SinceDateSelect} from './SinceDateSelect'
+import LoadingAnimation from './LoadingAnimation'
 
 interface Props {
   className?: string
   error?: any
+  isLoading: boolean
   jobs: beachfront.Job[]
   selectedJobIds: string[]
   sinceDate: string
@@ -33,10 +35,10 @@ interface Props {
   onSinceDateChange(value: string)
 }
 
-const PLACEHOLDER = <span className={styles.placeholder}/>
-
-const ActivityTable = ({
+export const ActivityTable = ({
   className,
+  isLoading,
+  error,
   jobs,
   selectedJobIds,
   sinceDate,
@@ -46,21 +48,19 @@ const ActivityTable = ({
   onRowClick,
   onSinceDateChange,
 }: Props) => (
-  <div className={`${styles.root} ${className}`}>
+  <div className={`${styles.root} ${isLoading ? styles.isLoading : ''} ${className}`}>
 
     <div className={styles.filter}>
-      Activity:{' '}
+      Activity:
       <SinceDateSelect
+        className={styles.filterDropdown}
         options={sinceDates}
         value={sinceDate}
         onChange={onSinceDateChange}
       />
     </div>
 
-    <div className={styles.loadingIndicator}>
-      <div className={styles.puck}/>
-    </div>
-
+    <div className={styles.shadowTop}/>
     <div className={styles.tableContainer}>
       <table>
         <thead>
@@ -79,47 +79,51 @@ const ActivityTable = ({
               onMouseEnter={() => job.properties && onHoverIn(job)}
               onMouseLeave={() => job.properties && onHoverOut(job)}
               >
-              <td>
-                {job.properties
-                  ? getImageId(job)
-                  : PLACEHOLDER
-                }
-              </td>
-              <td>
-                {job.properties
-                  ? getCapturedOn(job)
-                  : PLACEHOLDER
-                }
-              </td>
-              <td>
-                {job.properties
-                  ? getImageSensor(job)
-                  : PLACEHOLDER
-                }
-              </td>
+              <td>{getImageId(job)}</td>
+              <td>{getCapturedOn(job)}</td>
+              <td>{getImageSensor(job)}</td>
             </tr>
           ))}
+          {isLoading && generatePlaceholderRows(10)}
         </tbody>
       </table>
     </div>
+    <div className={styles.shadowBottom}/>
+    {isLoading && (
+      <div className={styles.loadingMask}>
+        <LoadingAnimation className={styles.loadingAnimation}/>
+      </div>
+    )}
   </div>
 )
-
-export default ActivityTable
 
 //
 // Helpers
 //
 
-function getCapturedOn({ properties }) {
+function generatePlaceholderRows(count) {
+  const rows = []
+  for (let i = 0; i < count; i++) {
+    rows.push(
+      <tr key={i} className={styles.placeholder}>
+        <td><span/></td>
+        <td><span/></td>
+        <td><span/></td>
+      </tr>
+    )
+  }
+  return rows
+}
+
+function getCapturedOn({ properties }: beachfront.Job) {
   const then = moment(properties.imageCaptureDatelol)
   return then.format(then.year() === new Date().getFullYear() ? 'MM/DD' : 'MM/DD/YYYY')
 }
 
-function getImageId({ properties }) {
+function getImageId({ properties }: beachfront.Job) {
   return properties.imageId.replace(/^landsat:/, '')
 }
 
-function getImageSensor({ properties }) {
+function getImageSensor({ properties }: beachfront.Job) {
   return properties.imageSensorName
 }

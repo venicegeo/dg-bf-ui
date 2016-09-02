@@ -19,7 +19,7 @@ const styles: any = require('./StaticMinimap.css')
 import * as React from 'react'
 import * as ol from 'openlayers'
 import {TILE_PROVIDERS} from '../config'
-import {deserialize} from '../utils/bbox'
+import {deserializeBbox} from '../utils/geometries'
 
 const [DEFAULT_TILE_PROVIDER] = TILE_PROVIDERS
 
@@ -27,13 +27,13 @@ interface Props {
   bbox: number[]
 }
 
-export default class StaticMinimap extends React.Component<Props, {}> {
+export class StaticMinimap extends React.Component<Props, {}> {
   refs: any
 
   private map: ol.Map
 
   componentDidMount() {
-    this._initializeMap()
+    this.initializeMap()
   }
 
   componentWillUnmount() {
@@ -50,8 +50,8 @@ export default class StaticMinimap extends React.Component<Props, {}> {
   // Internal API
   //
 
-  private _initializeMap() {
-    const bbox = deserialize(this.props.bbox)
+  private initializeMap() {
+    const bbox = deserializeBbox(this.props.bbox)
     const bboxGeometry = ol.geom.Polygon.fromExtent(bbox)
     this.map = new ol.Map({
       controls: [],
