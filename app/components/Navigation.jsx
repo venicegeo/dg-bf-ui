@@ -52,7 +52,7 @@ export const Navigation = ({ activeRoute, onClick }) => (
         </Link>
       </li>
       <li>
-        <Link pathname="/create-product-line" className={styles.link} activeClassName={styles.active} onClick={onClick}>
+        <Link pathname="/create-product-line" className={styles.linkCreateProductLine} activeClassName={styles.active} onClick={onClick}>
           <svg className={styles.icon} viewBox="0 0 40 40"><circle cx="20" cy="20" r="10"/></svg>
           <span className={styles.label}>Create Product Line</span>
         </Link>
