@@ -26,7 +26,12 @@ interface Props {
   onSuccess(sessionToken: string)
 }
 
-export class Login extends React.Component<Props, {}> {
+interface State {
+  authenticating?: boolean
+  error?: any
+}
+
+export class Login extends React.Component<Props, State> {
   refs: any
 
   constructor() {
@@ -41,7 +46,7 @@ export class Login extends React.Component<Props, {}> {
 
   render() {
     return (
-      <Modal onDismiss={() => {}}>
+      <Modal onDismiss={() => {/* noop */}}>
         <form className={`${styles.root} ${this.state.error ? styles.failed : ''}`} onSubmit={this.handleSubmit}>
           <img src={brand} alt="Beachfront"/>
           <h1>Welcome to Beachfront!</h1>

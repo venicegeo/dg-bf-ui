@@ -59,8 +59,8 @@ export function search({
   dateFrom,
   dateTo,
   filter,
-  startIndex = 0,
-  count = 100,
+  startIndex,
+  count,
 }) {
   console.debug('(catalog:search)')
   return fetch(`${catalogUrl}/discover?` + [
@@ -112,6 +112,6 @@ function includeFilters(catalog) {
       return response.json()
     })
     .then(hash => Object.assign(catalog, {
-      filters: Object.keys(hash).map(id => ({id, name: hash[id].name}))
+      filters: Object.keys(hash).map(id => ({id, name: hash[id].name})),
     }))
 }

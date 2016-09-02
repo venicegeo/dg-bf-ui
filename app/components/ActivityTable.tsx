@@ -19,7 +19,7 @@ const styles = require('./ActivityTable.css')
 import * as React from 'react'
 import * as moment from 'moment'
 import {SinceDateSelect} from './SinceDateSelect'
-import LoadingAnimation from './LoadingAnimation'
+import {LoadingAnimation} from './LoadingAnimation'
 
 interface Props {
   className?: string
@@ -116,7 +116,7 @@ function generatePlaceholderRows(count) {
 }
 
 function getCapturedOn({ properties }: beachfront.Job) {
-  const then = moment(properties.imageCaptureDatelol)
+  const then = moment(properties.imageCaptureDate)
   return then.format(then.year() === new Date().getFullYear() ? 'MM/DD' : 'MM/DD/YYYY')
 }
 

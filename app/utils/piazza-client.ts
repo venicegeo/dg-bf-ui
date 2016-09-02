@@ -30,7 +30,7 @@ export class Client {
     return fetch(`${gateway}/key`, {
       method:  'GET',
       headers: {
-        'Authorization': `Basic ${btoa(username + ':' + password)}`
+        'Authorization': `Basic ${btoa(username + ':' + password)}`,
       },
     })
       .then(asJson)

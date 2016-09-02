@@ -18,7 +18,7 @@ const styles: any = require('./JobStatus.css')
 
 import * as React from 'react'
 import * as moment from 'moment'
-import {Link} from 'react-router'
+import {Link} from './Link'
 import {FileDownloadLink} from './FileDownloadLink'
 import {Timestamp} from './Timestamp'
 
@@ -125,7 +125,7 @@ export class JobStatus extends React.Component<Props, State> {
           {canDownload && (
             <FileDownloadLink
               authToken={this.props.authToken}
-              dataId={resultDataId}
+              dataId={properties.detectionsDataId}
               filename={properties.name + '.geojson'}
               className={styles.download}
               onProgress={this.handleDownloadProgress}

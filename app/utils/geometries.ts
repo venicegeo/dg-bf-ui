@@ -47,13 +47,13 @@ export function serializeBbox(extent) {
 // Helpers
 //
 
-function truncate(number) {
-  return Math.round(number * 100) / 100
+function truncate(n: number) {
+  return Math.round(n * 100) / 100
 }
 
-function unwrapPoint([x, y]) {
+function unwrapPoint([x, y]: number[]) {
   return [
     x > 0 ? Math.min(180, x) : Math.max(-180, x),
-    y
+    y,
   ]
 }

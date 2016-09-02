@@ -35,7 +35,7 @@ import {
   TYPE_JOB,
 } from '../constants'
 
-export function importByDataId(client, dataId, algorithmNames) {
+export function importByDataId(client, dataId, algorithmNames): Promise<beachfront.Job> {
   return client.getFile(dataId)
     .then(parseString)
     .then(executionOutput => ({

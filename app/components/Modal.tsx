@@ -14,17 +14,17 @@
  * limitations under the License.
  **/
 
-const styles = require('./Modal.css')
+const styles: any = require('./Modal.css')
 
 import * as React from 'react'
 const ESCAPE = 27
 
 interface Props {
-  className: string
+  className?: string
   onDismiss(): void
 }
 
-export class Modal extends React.Component {
+export class Modal extends React.Component<Props, void> {
   constructor() {
     super()
     this._keypressed = this._keypressed.bind(this)

@@ -22,11 +22,9 @@ interface Props {
   className?: string
 }
 
-const LoadingAnimation = ({className}: Props) => (
+export const LoadingAnimation = ({className}: Props) => (
   <svg viewBox="0 0 100 100" className={`${styles.root} ${className || ''}`}>
     <path className={styles.waveDistant} d="M200,55 C175,55 175,35 150,35 C125,35 125,55 100,55 C75,55 75,35 50,35 C25,35 25,55 -2.66453527e-15,55 L-2.66453526e-15,100 L200,100"/>
     <path className={styles.waveClose} d="M100,55 C75,55 75,35 50,35 C25,35 25,55 8.52651283e-14,55 C-25,55 -25,35 -50,35 C-75,35 -75,55 -100,55 L-100,100 L100,100"/>
   </svg>
 )
-
-export default LoadingAnimation

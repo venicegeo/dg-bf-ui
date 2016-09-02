@@ -14,7 +14,7 @@
  * limitations under the License.
  **/
 
-import moment from 'moment'
+import * as moment from 'moment'
 import {Client} from '../utils/piazza-client'
 import * as worker from './workers/jobs'
 import {
@@ -24,23 +24,19 @@ import {
 } from '../config'
 
 import {
-  KEY_ALGORITHM_NAME,
-  KEY_CREATED_ON,
-  KEY_GEOJSON_DATA_ID,
-  KEY_WMS_LAYER_ID,
-  KEY_WMS_URL,
-  KEY_IMAGE_ID,
-  KEY_IMAGE_CAPTURED_ON,
-  KEY_IMAGE_SENSOR,
-  KEY_NAME,
-  KEY_SCHEMA_VERSION,
-  KEY_STATUS,
-  KEY_TYPE,
-  KEY_THUMBNAIL,
   REQUIREMENT_BANDS,
   STATUS_RUNNING,
   TYPE_JOB,
 } from '../constants'
+
+interface ParamsCreateJob {
+  algorithm: beachfront.Algorithm
+  catalogApiKey: string
+  executorServiceId: string
+  image: beachfront.Scene
+  name: string
+  sessionToken: string
+}
 
 export function createJob({
   catalogApiKey,
@@ -49,7 +45,7 @@ export function createJob({
   algorithm,
   image,
   sessionToken,
-}) {
+}: ParamsCreateJob): Promise<beachfront.Job> {
   const client = new Client(GATEWAY, sessionToken)
   return client.post('execute-service', {
     dataInputs: {
@@ -65,31 +61,30 @@ export function createJob({
           resultName:    name,
         }),
         type:     'body',
-        mimeType: 'application/json'
-      }
+        mimeType: 'application/json',
+      },
     },
     dataOutput: [
       {
         mimeType: 'application/json',
-        type:     'text'
-      }
+        type:     'text',
+      },
     ],
-    serviceId: executorServiceId
+    serviceId: executorServiceId,
   })
     .then(id => ({
       id,
       geometry: image.geometry,
       properties: {
-        [KEY_ALGORITHM_NAME]:    algorithm.name,
-        [KEY_CREATED_ON]:        moment().toISOString(),
-        [KEY_IMAGE_CAPTURED_ON]: moment(image.properties[KEY_IMAGE_CAPTURED_ON]).toISOString(),
-        [KEY_IMAGE_ID]:          image.id,
-        [KEY_IMAGE_SENSOR]:      image.properties[KEY_IMAGE_SENSOR],
-        [KEY_NAME]:              name,
-        [KEY_STATUS]:            STATUS_RUNNING,
-        [KEY_THUMBNAIL]:         image.properties[KEY_THUMBNAIL],
-        [KEY_TYPE]:              TYPE_JOB,
-        [KEY_SCHEMA_VERSION]:    SCHEMA_VERSION,
+        __schemaVersion__: SCHEMA_VERSION,
+        algorithmName:     algorithm.name,
+        createdOn:         moment().toISOString(),
+        imageCaptureDate:  moment(image.properties.acquiredDate).toISOString(),
+        imageId:           image.id,
+        imageSensorName:   image.properties.sensorName,
+        name:              name,
+        status:            STATUS_RUNNING,
+        type:              TYPE_JOB,
       },
       type: 'Feature',
     }))
@@ -99,13 +94,21 @@ export function createJob({
     })
 }
 
+interface ParamsStartWorker {
+  sessionToken: string
+  getRecords(): beachfront.Job[]
+  onTerminate(): void
+  onUpdate(job: beachfront.Job): void
+  onError(error: any): void
+}
+
 export function startWorker({
   sessionToken,
   getRecords,
   onTerminate,
   onUpdate,
   onError,
-}) {
+}: ParamsStartWorker) {
   worker.start({
     client:   new Client(GATEWAY, sessionToken),
     interval: JOBS_WORKER.INTERVAL,
@@ -114,18 +117,17 @@ export function startWorker({
     onTerminate,
 
     getRunningJobs() {
-      return getRecords().filter(j => j.properties[KEY_STATUS] === STATUS_RUNNING)
+      return getRecords().filter(j => j.properties.status === STATUS_RUNNING)
     },
 
     onUpdate(jobId, status, geojsonDataId, wmsLayerId, wmsUrl) {
       const record = getRecords().find(j => j.id === jobId)
       const updatedRecord = Object.assign({}, record, {
         properties: Object.assign({}, record.properties, {
-          [KEY_STATUS]:          status,
-          [KEY_GEOJSON_DATA_ID]: geojsonDataId,
-          [KEY_WMS_LAYER_ID]:    wmsLayerId,
-          [KEY_WMS_URL]:         wmsUrl,
-        })
+          detectionsDataId:  geojsonDataId,
+          detectionsLayerId: wmsLayerId,
+          status:            status,
+        }),
       })
       onUpdate(updatedRecord)
     },

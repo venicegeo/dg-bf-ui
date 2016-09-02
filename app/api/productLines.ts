@@ -14,24 +14,12 @@
  * limitations under the License.
  **/
 
-import moment from 'moment'
+import * as moment from 'moment'
 import {importByDataId} from '../utils/import-job-record'
 import {Client} from '../utils/piazza-client'
 import {GATEWAY} from '../config'
 
 import {
-  KEY_ALGORITHM_NAME,
-  KEY_CREATED_ON,
-  KEY_EXPIRES_ON,
-  KEY_IMAGE_CLOUDCOVER,
-  KEY_IMAGE_SENSOR,
-  KEY_EVENT_TYPE_ID,
-  KEY_NAME,
-  KEY_OWNER,
-  KEY_SPATIAL_FILTER_NAME,
-  KEY_STARTS_ON,
-  KEY_STATUS,
-  KEY_WMS_LAYER_ID,
   REQUIREMENT_BANDS,
   STATUS_ACTIVE,
   STATUS_INACTIVE,
@@ -103,7 +91,7 @@ export function fetchJobs({
       PerPage:   '200',  // HACK -- see explanation below
     }),
     headers: {'content-type': 'application/json'},
-    method: 'POST'
+    method: 'POST',
   })
     .then(checkResponse)
 
@@ -137,7 +125,7 @@ export function fetchProductLines({
       pzAddr:      GATEWAY,
     }),
     headers: {'content-type': 'application/json'},
-    method: 'POST'
+    method: 'POST',
   })
     .then(checkResponse)
     .then(extractRecords(algorithms, filters))
@@ -156,11 +144,11 @@ function checkResponse(response) {
     return response.json()
   }
   throw Object.assign(new Error(`HttpError: (code=${response.status})`), {
-    code: response.status
+    code: response.status,
   })
 }
 
-function extractRecords(algorithms, filters) {
+function extractRecords(algorithms, filters): (data: any) => beachfront.ProductLine[] {
   const algorithmNames = generateAlgorithmNamesHash(algorithms)
   const filterNames = generateFilterNamesHash(filters)
   return data => data.productLines.map(datum => ({
@@ -173,21 +161,21 @@ function extractRecords(algorithms, filters) {
         [datum.maxX, datum.maxY],
         [datum.maxX, datum.minY],
         [datum.minX, datum.minY],
-      ]]
+      ]],
     },
     properties: {
-      [KEY_OWNER]:               datum.createdBy,
-      [KEY_ALGORITHM_NAME]:      algorithmNames[datum.bfInputJSON.svcURL] || 'Unknown',
-      [KEY_CREATED_ON]:          datum.minDate,
-      [KEY_EVENT_TYPE_ID]:       datum.eventTypeId.pop(),
-      [KEY_EXPIRES_ON]:          datum.maxDate,
-      [KEY_IMAGE_CLOUDCOVER]:    datum.cloudCover,
-      [KEY_IMAGE_SENSOR]:        datum.sensorName,
-      [KEY_NAME]:                datum.name,
-      [KEY_STATUS]:              isActive(datum.maxDate) ? STATUS_ACTIVE : STATUS_INACTIVE,
-      [KEY_SPATIAL_FILTER_NAME]: filterNames[datum.spatialFilterId] || '',
-      [KEY_STARTS_ON]:           datum.minDate,
-      [KEY_WMS_LAYER_ID]:        datum.bfInputJSON.lGroupId,
+      algorithmName:     algorithmNames[datum.bfInputJSON.svcURL] || 'Unknown',
+      createdOn:         datum.minDate,
+      detectionsLayerId: datum.bfInputJSON.lGroupId,
+      eventTypeId:       datum.eventTypeId.pop(),
+      expiresOn:         datum.maxDate,
+      imageCloudCover:   datum.cloudCover,
+      imageSensorName:   datum.sensorName,
+      name:              datum.name,
+      owner:             datum.createdBy,
+      status:            isActive(datum.maxDate) ? STATUS_ACTIVE : STATUS_INACTIVE,
+      spatialFilterName: filterNames[datum.spatialFilterId] || '',
+      startsOn:          datum.minDate,
     },
     type: 'Feature',
   }))
@@ -237,14 +225,14 @@ function __keepFetchingJobRecordsUntilSinceDate__(client, ids, algorithmNames, p
     const records = []
     const cutoff = moment(sinceDate)
 
-    ;(function ___fetchNextBatch___(remainingIds) {
+    ;(function ___fetchNextBatch___(remainingIds: string[]) {  // tslint:disable-line
       console.debug('(productLines:__keepFetchingJobRecordsUntilSinceDate__) load %s jobs <%s>', count, sinceDate)
       const promises = remainingIds.slice(0, count).map(dataId => importByDataId(client, dataId, algorithmNames))
       return Promise.all(promises)
         .then(batch => {
           for (const record of batch) {
-            console.debug('(productLines:__keepFetchingJobRecordsUntilSinceDate__) inspect ', record.properties[KEY_CREATED_ON])
-            if (moment(record.properties[KEY_CREATED_ON]).isAfter(cutoff)) {
+            console.debug('(productLines:__keepFetchingJobRecordsUntilSinceDate__) inspect ', record.properties.createdOn)
+            if (moment(record.properties.createdOn).isAfter(cutoff)) {
               records.push(record)
             }
             else {
@@ -266,4 +254,3 @@ function __keepFetchingJobRecordsUntilSinceDate__(client, ids, algorithmNames, p
 // HACK HACK HACK HACK HACK HACK HACK HACK HACK HACK HACK HACK HACK HACK HACK
 // HACK HACK HACK HACK HACK HACK HACK HACK HACK HACK HACK HACK HACK HACK HACK
 // HACK HACK HACK HACK HACK HACK HACK HACK HACK HACK HACK HACK HACK HACK HACK
-

@@ -51,14 +51,15 @@ interface Props {
 
   onCatalogApiKeyChange(apiKey: string)
   onClearBbox()
-  onProductLineCreated(productLine: beachfront.ProductLine)
+  onProductLineCreated()
 }
 
 interface State {
-  algorithm?:              beachfront.algorithm
+  algorithm?:              beachfront.Algorithm
   cloudCover?:             number
   dateStart?:              string
   dateStop?:               string
+  error?:                  any
   isCreating?:             boolean
   filter?:                 string
   name?:                   string
@@ -112,14 +113,14 @@ export class CreateProductLine extends React.Component<Props, State> {
                 dateStart={this.state.dateStart}
                 dateStop={this.state.dateStop}
                 onDateChange={(dateStart, dateStop) => this.setState({ dateStart, dateStop })}
-                onNameChange={name => this.setState({ name, shouldAutogenerateName: !name, })}
+                onNameChange={name => this.setState({ name, shouldAutogenerateName: !name })}
               />
               <AlgorithmList
                 algorithms={this.props.algorithms}
                 imageProperties={{
                   cloudCover: this.state.cloudCover,
                   bands: SUPPORTED_BANDS.LANDSAT,
-                }}
+                } as any}
                 selectedId={this.state.algorithm ? this.state.algorithm.id : null}
                 onSelect={this._handleAlgorithmSelect}
                 warningHeading="Check Image Search Filters"

@@ -21,14 +21,16 @@ import {
 } from '../../utils/execution-output'
 
 import {
-  KEY_CREATED_ON,
   STATUS_ERROR,
   STATUS_RUNNING,
   STATUS_SUCCESS,
   STATUS_TIMED_OUT,
 } from '../../constants'
 
-let _client, _handlers, _instance, _ttl
+let _client,
+    _handlers: Handlers,
+    _instance: number,
+    _ttl: number
 
 export function start({
   client,
@@ -38,7 +40,7 @@ export function start({
   onError,
   onTerminate,
   onUpdate,
-}) {
+}: Params & Handlers) {
   if (typeof _instance === 'number') {
     throw new Error('Attempted to start while already running')
   }
@@ -69,7 +71,7 @@ export function terminate() {
 function work() {
   // TODO -- skip this cycle if already running
 
-  const jobs = _handlers.getRunningJobs()
+  const jobs: beachfront.Job[] = _handlers.getRunningJobs()
   if (!jobs.length) {
     console.debug('(jobs:worker) nothing to do')
     return
@@ -98,7 +100,7 @@ function exceededTTL(createdOn) {
   return (Date.now() - new Date(createdOn).getTime()) > _ttl
 }
 
-function fetchUpdates(job) {
+function fetchUpdates(job: beachfront.Job) {
   return _client.getStatus(job.id)
     .then(status => {
       console.debug('(jobs:worker) <%s> polled (%s)', status.jobId, status.status)
@@ -107,7 +109,7 @@ function fetchUpdates(job) {
         return resolveResultIdentifiers(status)
       }
 
-      else if (status.status === STATUS_RUNNING && exceededTTL(job.properties[KEY_CREATED_ON])) {
+      else if (status.status === STATUS_RUNNING && exceededTTL(job.properties.createdOn)) {
         console.warn('(jobs:worker) <%s> appears to have stalled and will no longer be tracked', status.jobId)
         return Object.assign(status, {status: STATUS_TIMED_OUT})
       }
@@ -139,4 +141,29 @@ function resolveResultIdentifiers(status) {
           wmsUrl:       deploymentDescriptor.endpoint,
         }))
     })
+}
+
+//
+// Types
+//
+
+interface Handlers {
+  getRunningJobs(): beachfront.Job[]
+  onError(error: any): void
+  onTerminate(): void
+  onUpdate(jobId: string, status: string, dataId: string, layerId: string, wmsUrl: string): void
+}
+
+interface Params {
+  client: any
+  interval: number
+  ttl: number
+}
+
+interface Update {
+  jobId: string
+  status: string
+  geojsonDataId?: string
+  wmsLayerId?: string
+  wmsUrl?: string
 }

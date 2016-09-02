@@ -18,7 +18,6 @@ const styles: any = require('./CreateJob.css')
 
 import * as React from 'react'
 import * as moment from 'moment'
-import {connect} from 'react-redux'
 import {AlgorithmList} from './AlgorithmList'
 import {ImagerySearch} from './ImagerySearch'
 import {NewJobDetails} from './NewJobDetails'
@@ -50,9 +49,9 @@ interface Props {
 }
 
 interface State {
-  isCreating: boolean
-  name: string
-  shouldAutogenerateName: boolean
+  isCreating?: boolean
+  name?: string
+  shouldAutogenerateName?: boolean
 }
 
 export const createSearchCriteria = (): SearchCriteria => ({
@@ -188,7 +187,6 @@ export class CreateJob extends React.Component<Props, State> {
     }))
   }
 
-
   _handleNameChange(name) {
     this.setState({
       name,
@@ -201,6 +199,6 @@ export class CreateJob extends React.Component<Props, State> {
 // Helpers
 //
 
-function generateName(imageId) {
+function generateName(imageId): string {
   return imageId.replace(/^landsat:/, '')
 }

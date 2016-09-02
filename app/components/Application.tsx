@@ -32,7 +32,7 @@ import {
   MODE_DRAW_BBOX,
   MODE_NORMAL,
   MODE_SELECT_IMAGERY,
-  MODE_PRODUCT_LINES
+  MODE_PRODUCT_LINES,
 } from './PrimaryMap'
 import {ProductLineList} from './ProductLineList'
 import * as algorithmsService from '../api/algorithms'
@@ -51,7 +51,7 @@ import {
 } from '../constants'
 
 interface Props {
-  serialize(func: (state: State) => void)
+  serialize(state: State)
   deserialize(): State
 }
 
@@ -262,7 +262,7 @@ export class Application extends React.Component<Props, State> {
   // Internals
   //
 
-  private get detectionsForCurrentMode() {
+  private get detectionsForCurrentMode(): (beachfront.Job|beachfront.ProductLine)[] {
     switch (this.state.route.pathname) {
       case '/create-product-line':
       case '/product-lines':
@@ -307,12 +307,12 @@ export class Application extends React.Component<Props, State> {
     return algorithmsService.discover(this.state.sessionToken)
       .then(algorithms => {
         this.setState({
-          algorithms: this.state.algorithms.$records(algorithms)
+          algorithms: this.state.algorithms.$records(algorithms),
         })
       })
       .catch(err => {
         this.setState({
-          algorithms: this.state.algorithms.$error(err)
+          algorithms: this.state.algorithms.$error(err),
         })
       })
   }
@@ -509,7 +509,7 @@ export class Application extends React.Component<Props, State> {
       onError: (err) => this.setState({
         jobs: this.state.jobs.$error(err),
       }),
-      onTerminate() {}
+      onTerminate() {/* noop */},
     })
   }
 

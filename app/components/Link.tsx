@@ -18,13 +18,14 @@ import * as React from 'react'
 
 interface Props {
   activeClassName?: string
+  children?: any
   className?: string
-  hash: string
+  hash?: string
   isActive?: boolean
   pathname: string
-  search: string
+  search?: string
   title?: string
-  onClick()
+  onClick(loc: { pathname: string, search: string, hash: string })
 }
 
 export const Link = ({

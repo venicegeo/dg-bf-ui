@@ -16,12 +16,12 @@
 
 const styles = require('./NewProductLineDetails.css')
 
-import React from 'react'
+import * as React from 'react'
 
 interface Props {
-  name: string
+  name:      string
   dateStart: string
-  dateStop: string
+  dateStop:  string
   onNameChange(name: string)
   onDateChange(dateFrom: string, dateTo: string)
 }
@@ -36,7 +36,7 @@ export const NewProductLineDetails = ({ name, dateStart, dateStop, onNameChange,
       <input
         type="text"
         value={name}
-        onChange={event => onNameChange(event.target.value)}
+        onChange={event => onNameChange((event.target as HTMLInputElement).value)}
       />
     </label>
     <label className={styles.field}>
@@ -52,7 +52,7 @@ export const NewProductLineDetails = ({ name, dateStart, dateStop, onNameChange,
       <input
         type="date"
         value={dateStart}
-        onChange={event => onDateChange(event.target.value, dateStop)}
+        onChange={event => onDateChange((event.target as HTMLInputElement).value, dateStop)}
       />
     </label>
     <label className={styles.field}>
@@ -60,7 +60,7 @@ export const NewProductLineDetails = ({ name, dateStart, dateStop, onNameChange,
       <input
         type="date"
         value={dateStop}
-        onChange={event => onDateChange(dateStart, event.target.value)}
+        onChange={event => onDateChange(dateStart, (event.target as HTMLInputElement).value)}
       />
     </label>
   </div>

@@ -20,21 +20,10 @@ import * as React from 'react'
 import * as moment from 'moment'
 import {ActivityTable} from './ActivityTable'
 
-import {
-  KEY_ALGORITHM_NAME,
-  KEY_CREATED_ON,
-  KEY_EXPIRES_ON,
-  KEY_IMAGE_CLOUDCOVER,
-  KEY_NAME,
-  KEY_OWNER,
-  KEY_SPATIAL_FILTER_NAME,
-  KEY_STARTS_ON,
-} from '../constants'
-
 interface Props {
   className?: string,
   productLine: beachfront.ProductLine
-  onFetchJobs(sinceDate: string)
+  onFetchJobs(productLineId: string, sinceDate: string)
   onJobHoverIn(job: beachfront.Job)
   onJobHoverOut(job: beachfront.Job)
   onJobSelect(job: beachfront.Job)
@@ -43,7 +32,11 @@ interface Props {
 }
 
 interface State {
+  error?: any
   isExpanded?: boolean
+  isFetchingJobs?: boolean
+  jobs?: beachfront.Job[]
+  selectedJobs?: beachfront.Job[]
   sinceDate?: string
 }
 

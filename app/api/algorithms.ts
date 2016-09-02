@@ -18,7 +18,7 @@ import {Client} from '../utils/piazza-client'
 import {GATEWAY} from '../config'
 import {
   REQUIREMENT_BANDS,
-  REQUIREMENT_CLOUDCOVER
+  REQUIREMENT_CLOUDCOVER,
 } from '../constants'
 
 const PATTERN_REQUIREMENT_PREFIX = /^ImgReq - /

@@ -93,7 +93,7 @@ export const CatalogSearchCriteria = (props: Props) => (
     <label className={styles.cloudCover}>
       <span>Cloud Cover</span>
       <input
-        value={props.cloudCover}
+        value={props.cloudCover.toString()}
         type="range"
         min="0"
         max="100"

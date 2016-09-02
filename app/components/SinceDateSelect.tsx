@@ -29,7 +29,7 @@ interface State {
   isOpen: boolean
 }
 
-export default class SinceDateSelect extends React.Component<Props, State> {
+export class SinceDateSelect extends React.Component<Props, State> {
   constructor() {
     super()
     this.state = {isOpen: false}

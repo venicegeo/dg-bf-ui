@@ -26,7 +26,7 @@ import ExportControl from '../utils/openlayers.ExportControl'
 import SearchControl from '../utils/openlayers.SearchControl'
 import BasemapSelect from './BasemapSelect'
 import FeatureDetails from './FeatureDetails'
-import LoadingAnimation from './LoadingAnimation'
+import {LoadingAnimation} from './LoadingAnimation'
 import ImagerySearchResults from './ImagerySearchResults'
 import {featureToBbox, deserializeBbox, serializeBbox} from '../utils/geometries'
 import {
@@ -198,7 +198,7 @@ export class PrimaryMap extends React.Component<Props, State> {
   render() {
     const basemapNames = TILE_PROVIDERS.map(b => b.name)
     return (
-      <main className={`${styles.root} ${this.state.loadingRefCount > 0 ? styles.isLoading : ''}`} ref="container" tabIndex="1">
+      <main className={`${styles.root} ${this.state.loadingRefCount > 0 ? styles.isLoading : ''}`} ref="container" tabIndex={1}>
         <BasemapSelect
           className={styles.basemapSelect}
           index={this.state.basemapIndex}
@@ -294,7 +294,7 @@ export class PrimaryMap extends React.Component<Props, State> {
 
   _handleLoadError() {
     this.setState({
-      loadingRefCount: Math.max(0, this.state.loadingRefCount - 1)
+      loadingRefCount: Math.max(0, this.state.loadingRefCount - 1),
     })
 
     if (!this.state.tileLoadError) {
@@ -856,9 +856,9 @@ function generateFrameLayer() {
               points: 4,
               radius: 5,
               fill: new ol.style.Fill({
-                color: 'black'
-              })
-            })
+                color: 'black',
+              }),
+            }),
           })
         case TYPE_DIVOT_OUTBOARD:
           return new ol.style.Style({
@@ -868,39 +868,39 @@ function generateFrameLayer() {
               radius: 10,
               stroke: new ol.style.Stroke({
                 color: 'black',
-                width: 1
+                width: 1,
               }),
               fill: new ol.style.Fill({
-                color: getColorForStatus(feature.get(KEY_STATUS))
-              })
-            })
+                color: getColorForStatus(feature.get(KEY_STATUS)),
+              }),
+            }),
           })
         case TYPE_STEM:
           return new ol.style.Style({
             stroke: new ol.style.Stroke({
               color: 'black',
-              width: 1
-            })
+              width: 1,
+            }),
           })
         case TYPE_LABEL_MAJOR:
           return new ol.style.Style({
             text: new ol.style.Text({
               fill: new ol.style.Fill({
-                color: 'black'
+                color: 'black',
               }),
               offsetX: 13,
               offsetY: 1,
               font: 'bold 17px Catamaran, Verdana, sans-serif',
               text: feature.get(KEY_NAME).toUpperCase(),
               textAlign: 'left',
-              textBaseline: 'middle'
-            })
+              textBaseline: 'middle',
+            }),
           })
         case TYPE_LABEL_MINOR:
           return new ol.style.Style({
             text: new ol.style.Text({
               fill: new ol.style.Fill({
-                color: 'rgba(0,0,0,.6)'
+                color: 'rgba(0,0,0,.6)',
               }),
               offsetX: 13,
               offsetY: 15,
@@ -910,18 +910,18 @@ function generateFrameLayer() {
                 feature.get(KEY_IMAGE_ID),
               ].filter(Boolean)).join(' // ').toUpperCase(),
               textAlign: 'left',
-              textBaseline: 'middle'
-            })
+              textBaseline: 'middle',
+            }),
           })
         default:
           return new ol.style.Style({
             stroke: new ol.style.Stroke({
               color: 'rgba(0, 0, 0, .4)',
-              lineDash: [10, 10]
+              lineDash: [10, 10],
             }),
             fill: new ol.style.Fill({
-              color: isClose ? 'transparent' : 'hsla(202, 100%, 85%, 0.5)'
-            })
+              color: isClose ? 'transparent' : 'hsla(202, 100%, 85%, 0.5)',
+            }),
           })
       }
     },

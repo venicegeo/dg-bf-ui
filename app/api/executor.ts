@@ -35,11 +35,10 @@ export function discover(sessionToken): Promise<ServiceDescriptor> {
       }
       return {
         serviceId: executor.serviceId,
-        url:       executor.url.replace(/\/execute$/, '')
+        url:       executor.url.replace(/\/execute$/, ''),
       }
     })
     .catch(err => {
       console.error('(executor:discover) discovery failed:', err)
     })
 }
-
