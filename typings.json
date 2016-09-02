@@ -10,10 +10,10 @@
   "globalDependencies": {
     "core-js": "registry:dt/core-js#0.0.0+20160725163759",
     "geojson": "registry:dt/geojson#0.0.0+20160619034323",
-    "lodash": "registry:dt/lodash#4.14.0+20160817155621",
+    "lodash": "registry:dt/lodash#4.14.0+20160830145422",
     "openlayers-3.14.2": "github:dbazile/DefinitelyTyped/openlayers/openlayers-3.14.2.d.ts#e111d2cc69b1e75cc844320ba788cacbb1eeb1c2",
-    "react": "registry:dt/react#0.14.0+20160817201227",
+    "react": "registry:dt/react#0.14.0+20160829191040",
     "react-dom": "registry:dt/react-dom#0.14.0+20160412154040",
-    "whatwg-fetch": "registry:dt/whatwg-fetch#0.0.0+20160728142841"
+    "whatwg-fetch": "registry:dt/whatwg-fetch#0.0.0+20160829180742"
   }
 }
