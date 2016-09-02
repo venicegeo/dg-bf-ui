@@ -8,9 +8,9 @@
   "exclude": [
     "node_modules"
   ],
-  "files": [
+  "include": [
     "./typings/index.d.ts",
-    "./app/globals.d.ts",
-    "./app/index.ts"
+    "./app/**/*.ts",
+    "./app/**/*.tsx"
   ]
 }
