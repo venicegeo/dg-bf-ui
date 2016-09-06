@@ -23,7 +23,6 @@ import {createSession} from '../api/authentication'
 
 export class Login extends Component {
   static propTypes = {
-    onError:   React.PropTypes.func.isRequired,
     onSuccess: React.PropTypes.func.isRequired,
   }
 

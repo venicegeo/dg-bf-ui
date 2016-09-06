@@ -132,7 +132,6 @@ export class Application extends Component {
     if (!this.state.sessionToken) {
       return (
         <Login
-          onError={err => this.setState({ error: err })}
           onSuccess={sessionToken => this.setState({ sessionToken })}
         />
       )
