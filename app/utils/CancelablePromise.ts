@@ -1,4 +1,7 @@
 export class CancelablePromise {
+  cancel: () => void
+  promise: Promise<any>
+
   constructor(callback) {
     let canceled
     this.cancel = () => canceled = true
