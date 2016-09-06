@@ -105,7 +105,7 @@ export class PrimaryMap extends Component {
 
   constructor() {
     super()
-    this.state = {basemapIndex: 0, loadingRefCount: 0, tileLoadError: false}
+    this.state = {basemapIndex: 0, loadingRefCount: 0}
     this._emitViewChange = debounce(this._emitViewChange.bind(this), 100)
     this._handleBasemapChange = this._handleBasemapChange.bind(this)
     this._handleDrawStart = this._handleDrawStart.bind(this)
@@ -278,14 +278,15 @@ export class PrimaryMap extends Component {
     this.props.onBoundingBoxChange(null)
   }
 
-  _handleLoadError() {
+  _handleLoadError(event) {
     this.setState({
       loadingRefCount: Math.max(0, this.state.loadingRefCount - 1)
     })
 
-    if (!this.state.tileLoadError) {
-      this.setState({ tileLoadError: true })
-      alert('One or more tiles failed to load!')
+    const tile = event.tile
+    if (!tile.loadingError) {
+      tile.loadingError = true
+      tile.load()
     }
   }
 
@@ -723,7 +724,7 @@ function featuresToImages(...features) {
 
 function generateBasemapLayers(providers) {
   return providers.map((provider, index) => {
-    const source = new ol.source.XYZ({...provider, crossOrigin: 'anonymous'})
+    const source = new ol.source.XYZ({...provider, crossOrigin: 'anonymous', tileLoadFunction: tileLoadFunction})
     const layer = new ol.layer.Tile({source})
     layer.setProperties({name: provider.name, visible: index === 0})
     return layer
@@ -768,7 +769,8 @@ function generateDetectionsSource() {
     crossOrigin: 'anonymous',
     params: {
       [KEY_LAYERS]: '',
-    }
+    },
+    tileLoadFunction: tileLoadFunction
   })
 }
 
@@ -962,6 +964,7 @@ function generateScenePreviewSource(provider, imageId, apiKey) {
   return new ol.source.XYZ({
     ...provider,
     crossOrigin: 'anonymous',
+    tileLoadFunction: tileLoadFunction,
     url: provider.url
            .replace('__IMAGE_ID__', imageId)
            .replace('__API_KEY__', apiKey),
@@ -991,6 +994,14 @@ function getColorForStatus(status) {
     case STATUS_ERROR: return 'hsl(349, 100%, 60%)'
     default: return 'magenta'
   }
+}
+
+function tileLoadFunction(imageTile, src) {
+  if (imageTile.loadingError) {
+    delete imageTile['loadingError']
+    imageTile.getImage().src = '/app/images/tile-error.png'
+  }
+  else { imageTile.getImage().src = src }
 }
 
 function toGeoJSON(feature) {
