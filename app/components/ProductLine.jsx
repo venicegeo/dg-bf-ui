@@ -35,6 +35,7 @@ export class ProductLine extends React.Component {
   static propTypes = {
     className:     React.PropTypes.string,
     productLine:   React.PropTypes.object.isRequired,
+    sessionToken:  React.PropTypes.string,
     onFetchJobs:   React.PropTypes.func.isRequired,
     onJobHoverIn:  React.PropTypes.func.isRequired,
     onJobHoverOut: React.PropTypes.func.isRequired,
@@ -107,10 +108,11 @@ export class ProductLine extends React.Component {
           </div>
           <ActivityTable
             className={styles.activityTable}
+            error={this.state.error}
             isLoading={this.state.isFetchingJobs}
             jobs={this.state.jobs.filter(jobFilter(sinceDate))}
             selectedJobIds={this.state.selectedJobs.map(j => j.id)}
-            error={this.state.error}
+            sessionToken={this.props.sessionToken}
             sinceDate={sinceDate}
             sinceDates={[
               {value: last24Hours(), label: 'Last 24 Hours'},

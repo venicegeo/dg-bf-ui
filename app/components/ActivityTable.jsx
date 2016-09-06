@@ -17,14 +17,17 @@
 import React from 'react'
 import moment from 'moment'
 import {SinceDateSelect} from './SinceDateSelect'
+import {FileDownloadLink} from './FileDownloadLink'
 import LoadingAnimation from './LoadingAnimation'
 
 const styles = require('./ActivityTable.css')
 
 import {
+  KEY_GEOJSON_DATA_ID,
   KEY_IMAGE_CAPTURED_ON,
   KEY_IMAGE_ID,
   KEY_IMAGE_SENSOR,
+  KEY_NAME,
 } from '../constants'
 
 export const ActivityTable = ({
@@ -32,6 +35,7 @@ export const ActivityTable = ({
   isLoading,
   jobs,
   selectedJobIds,
+  sessionToken,
   sinceDate,
   sinceDates,
   onHoverIn,
@@ -59,6 +63,7 @@ export const ActivityTable = ({
             <th>Image ID</th>
             <th>Captured On</th>
             <th>Sensor</th>
+            <td></td>
           </tr>
         </thead>
         <tbody>
@@ -67,12 +72,24 @@ export const ActivityTable = ({
               key={job.id}
               className={selectedJobIds.includes(job.id) ? styles.isActive : ''}
               onClick={() => onRowClick(job)}
-              onMouseEnter={() => job.properties && onHoverIn(job)}
-              onMouseLeave={() => job.properties && onHoverOut(job)}
+              onMouseEnter={() => onHoverIn(job)}
+              onMouseLeave={() => onHoverOut(job)}
               >
               <td>{getImageId(job)}</td>
               <td>{getCapturedOn(job)}</td>
               <td>{getImageSensor(job)}</td>
+              <td className={styles.downloadCell} onClick={e => e.stopPropagation()}>
+                <FileDownloadLink
+                  authToken={sessionToken}
+                  className={styles.downloadButton}
+                  dataId={job.properties[KEY_GEOJSON_DATA_ID]}
+                  filename={job.properties[KEY_NAME] + '.geojson'}
+                  onComplete={() => console.log('onComplete')}
+                  onError={() => console.log('onError')}
+                  onProgress={() => console.log('onProgress')}
+                  onStart={() => console.log('onStart')}
+                />
+              </td>
             </tr>
           ))}
           {isLoading && generatePlaceholderRows(10)}
@@ -94,6 +111,7 @@ ActivityTable.propTypes = {
   isLoading: React.PropTypes.bool.isRequired,
   jobs: React.PropTypes.array.isRequired,
   selectedJobIds: React.PropTypes.arrayOf(React.PropTypes.string),
+  sessionToken: React.PropTypes.string.isRequired,
   sinceDate: React.PropTypes.string.isRequired,
   sinceDates: React.PropTypes.array.isRequired,
   onHoverIn: React.PropTypes.func.isRequired,
@@ -111,6 +129,7 @@ function generatePlaceholderRows(count) {
   for (let i = 0; i < count; i++) {
     rows.push(
       <tr key={i} className={styles.placeholder}>
+        <td><span/></td>
         <td><span/></td>
         <td><span/></td>
         <td><span/></td>

@@ -60,6 +60,7 @@ export class ProductLineList extends React.Component {
               className={styles.listItem}
               key={productLine.id}
               productLine={productLine}
+              sessionToken={this.props.sessionToken}
               onFetchJobs={this.props.onFetchJobs}
               onJobHoverIn={this.props.onJobHoverIn}
               onJobHoverOut={this.props.onJobHoverOut}

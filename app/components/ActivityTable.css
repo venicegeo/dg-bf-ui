@@ -134,6 +134,21 @@
   opacity: .2;
 }
 
+.downloadCell {
+  width: 2em;
+  text-align: right;
+  opacity: .2;
+}
+
+.downloadCell:hover {
+  opacity: 1;
+}
+
+.downloadButton {
+  color: inherit;
+  text-decoration: none;
+}
+
 /* =========================================================================
    Loading State
    ========================================================================= */
