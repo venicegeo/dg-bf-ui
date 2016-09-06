@@ -35,9 +35,9 @@ export class Client {
       })
   }
 
-  constructor(gateway, authToken) {
+  constructor(gateway, sessionToken) {
     this.gateway   = gateway.replace(/\/+$/g, '')
-    this.authToken = authToken
+    this.sessionToken = sessionToken
   }
 
   getDeployment(id) {
@@ -50,7 +50,7 @@ export class Client {
     return new Promise((resolve, reject) => {
       const xhr = new XMLHttpRequest()
       xhr.open('GET', encodeURI(`${this.gateway}/file/${id}`))
-      xhr.setRequestHeader('authorization', this.authToken)
+      xhr.setRequestHeader('authorization', this.sessionToken)
       xhr.addEventListener('error', () => reject(new Error('Network error')))
       let canceled = false
       if (onProgress) {
@@ -113,7 +113,7 @@ export class Client {
   _fetch(endpoint, overrides = {}) {
     const options = Object.assign({}, overrides, {
       headers: Object.assign({}, overrides.headers, {
-        'authorization': this.authToken
+        'authorization': this.sessionToken
       })
     })
     return fetch(encodeURI(this.gateway + endpoint), options)

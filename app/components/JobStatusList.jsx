@@ -20,7 +20,7 @@ import styles from './JobStatusList.css'
 
 export const JobStatusList = ({
   activeIds,
-  authToken,
+  sessionToken,
   error,
   jobs,
   onDismissError,
@@ -46,7 +46,7 @@ export const JobStatusList = ({
       ) : jobs.map(job => (
         <JobStatus
           key={job.id}
-          authToken={authToken}
+          sessionToken={sessionToken}
           isActive={activeIds.includes(job.id)}
           job={job}
           onNavigate={onNavigateToJob}
@@ -58,7 +58,7 @@ export const JobStatusList = ({
 )
 
 JobStatusList.propTypes = {
-  authToken: React.PropTypes.string.isRequired,
+  sessionToken: React.PropTypes.string.isRequired,
   error: React.PropTypes.object,
   jobs: React.PropTypes.array.isRequired,
   activeIds: React.PropTypes.arrayOf(React.PropTypes.string).isRequired,

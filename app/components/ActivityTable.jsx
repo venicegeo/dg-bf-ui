@@ -80,7 +80,7 @@ export const ActivityTable = ({
               <td>{getImageSensor(job)}</td>
               <td className={styles.downloadCell} onClick={e => e.stopPropagation()}>
                 <FileDownloadLink
-                  authToken={sessionToken}
+                  sessionToken={sessionToken}
                   className={styles.downloadButton}
                   dataId={job.properties[KEY_GEOJSON_DATA_ID]}
                   filename={job.properties[KEY_NAME] + '.geojson'}

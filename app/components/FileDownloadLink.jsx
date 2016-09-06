@@ -22,7 +22,7 @@ const MB = 1024000
 
 export class FileDownloadLink extends React.Component {
   static propTypes = {
-    authToken:  React.PropTypes.string.isRequired,
+    sessionToken:  React.PropTypes.string.isRequired,
     className:  React.PropTypes.string,
     dataId:     React.PropTypes.string.isRequired,
     filename:   React.PropTypes.string.isRequired,
@@ -85,7 +85,7 @@ export class FileDownloadLink extends React.Component {
     })
     this.props.onStart()
 
-    const client = new Client(GATEWAY, this.props.authToken)
+    const client = new Client(GATEWAY, this.props.sessionToken)
     client.getFile(this.props.dataId, this._handleProgress)
       .then(this._handleComplete)
       .catch(this._handleError)

@@ -57,7 +57,7 @@ export function createJob({
         content: JSON.stringify({
           algoType:      algorithm.type,
           svcURL:        algorithm.url,
-          pzAuthToken:   client.authToken,
+          pzAuthToken:   client.sessionToken,
           pzAddr:        client.gateway,
           dbAuthToken:   catalogApiKey,
           bands:         algorithm.requirements.find(a => a.name === REQUIREMENT_BANDS).literal.split(','),

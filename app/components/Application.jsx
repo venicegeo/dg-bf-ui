@@ -188,7 +188,7 @@ export class Application extends Component {
       case '/jobs':
         return (
           <JobStatusList
-            authToken={this.state.sessionToken}
+            sessionToken={this.state.sessionToken}
             activeIds={this._detections.map(d => d.id)}
             error={this.state.jobs.error}
             jobs={this.state.jobs.records}
