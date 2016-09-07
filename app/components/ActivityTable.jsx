@@ -16,7 +16,7 @@
 
 import React from 'react'
 import moment from 'moment'
-import {SinceDateSelect} from './SinceDateSelect'
+import {Dropdown} from './Dropdown'
 import {FileDownloadLink} from './FileDownloadLink'
 import LoadingAnimation from './LoadingAnimation'
 
@@ -32,26 +32,26 @@ import {
 
 export const ActivityTable = ({
   className,
+  duration,
+  durations,
   isLoading,
   jobs,
   selectedJobIds,
   sessionToken,
-  sinceDate,
-  sinceDates,
   onHoverIn,
   onHoverOut,
   onRowClick,
-  onSinceDateChange,
+  onDurationChange,
 }) => (
   <div className={`${styles.root} ${isLoading ? styles.isLoading : ''} ${className}`}>
 
     <div className={styles.filter}>
       Activity:
-      <SinceDateSelect
+      <Dropdown
         className={styles.filterDropdown}
-        options={sinceDates}
-        value={sinceDate}
-        onChange={onSinceDateChange}
+        options={durations}
+        value={duration}
+        onChange={onDurationChange}
       />
     </div>
 
@@ -107,17 +107,17 @@ export const ActivityTable = ({
 
 ActivityTable.propTypes = {
   className: React.PropTypes.string,
+  duration: React.PropTypes.string.isRequired,
+  durations: React.PropTypes.array.isRequired,
   error: React.PropTypes.object,
   isLoading: React.PropTypes.bool.isRequired,
   jobs: React.PropTypes.array.isRequired,
   selectedJobIds: React.PropTypes.arrayOf(React.PropTypes.string),
   sessionToken: React.PropTypes.string.isRequired,
-  sinceDate: React.PropTypes.string.isRequired,
-  sinceDates: React.PropTypes.array.isRequired,
   onHoverIn: React.PropTypes.func.isRequired,
   onHoverOut: React.PropTypes.func.isRequired,
   onRowClick: React.PropTypes.func.isRequired,
-  onSinceDateChange: React.PropTypes.func.isRequired,
+  onDurationChange: React.PropTypes.func.isRequired,
 }
 
 //
