@@ -73,6 +73,10 @@ module.exports = (config) => {
             loader: 'style!css',
             include: /node_modules/
           },
+          {
+            test: /\.(png|jpg|gif)$/,
+            loader: 'file'
+          },
         ]
       },
       plugins: [
