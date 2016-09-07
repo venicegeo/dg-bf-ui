@@ -603,7 +603,6 @@ export class PrimaryMap extends Component {
       const layer = this._previewLayers[imageId]
       alreadyRendered[imageId] = true
       if (!shouldRender[imageId]) {
-        this._unsubscribeFromLoadEvents(layer)
         delete this._previewLayers[imageId]
         animateLayerExit(layer).then(() => {
           this._map.removeLayer(layer)
@@ -647,13 +646,6 @@ export class PrimaryMap extends Component {
     source.on('tileloadstart', this._handleLoadStart)
     source.on('tileloadend', this._handleLoadStop)
     source.on('tileloaderror', this._handleLoadError)
-  }
-
-  _unsubscribeFromLoadEvents(layer) {
-    const source = layer.getSource()
-    source.un('tileloadstart', this._handleLoadStart)
-    source.un('tileloadend', this._handleLoadStop)
-    source.un('tileloaderror', this._handleLoadError)
   }
 
   _updateBasemap() {
