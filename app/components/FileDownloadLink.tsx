@@ -21,10 +21,10 @@ import {GATEWAY} from '../config'
 const MB = 1024000
 
 interface Props {
-  authToken:  string
-  className?: string
-  dataId:     string
-  filename:   string
+  className?:   string
+  dataId:       string
+  filename:     string
+  sessionToken: string
   onComplete()
   onError(err: any)
   onProgress(loaded: number, total: number)
@@ -95,7 +95,7 @@ export class FileDownloadLink extends React.Component<Props, State> {
     })
     this.props.onStart()
 
-    const client = new Client(GATEWAY, this.props.authToken)
+    const client = new Client(GATEWAY, this.props.sessionToken)
     client.getFile(this.props.dataId, this.handleProgress)
       .then(this.handleComplete)
       .catch(this.handleError)

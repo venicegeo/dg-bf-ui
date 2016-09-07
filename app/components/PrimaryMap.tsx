@@ -16,6 +16,7 @@
 
 require('openlayers/dist/ol.css')
 const styles: any = require('./PrimaryMap.css')
+const tileErrorPlaceholder: string = require('../images/tile-error.png')
 
 import * as React from 'react'
 import {findDOMNode} from 'react-dom'
@@ -119,7 +120,7 @@ export class PrimaryMap extends React.Component<Props, State> {
 
   constructor() {
     super()
-    this.state = {basemapIndex: 0, loadingRefCount: 0, tileLoadError: false}
+    this.state = {basemapIndex: 0, loadingRefCount: 0}
     this._emitViewChange = debounce(this._emitViewChange.bind(this), 100)
     this._handleBasemapChange = this._handleBasemapChange.bind(this)
     this._handleDrawStart = this._handleDrawStart.bind(this)
@@ -292,14 +293,15 @@ export class PrimaryMap extends React.Component<Props, State> {
     this.props.onBoundingBoxChange(null)
   }
 
-  _handleLoadError() {
+  _handleLoadError(event) {
     this.setState({
       loadingRefCount: Math.max(0, this.state.loadingRefCount - 1),
     })
 
-    if (!this.state.tileLoadError) {
-      this.setState({ tileLoadError: true })
-      alert('One or more tiles failed to load!')
+    const tile = event.tile
+    if (!tile.loadingError) {
+      tile.loadingError = true
+      tile.load()
     }
   }
 
@@ -461,6 +463,7 @@ export class PrimaryMap extends React.Component<Props, State> {
     if (!incomingLayerIds && currentLayerIds) {
       layer.setExtent([0, 0, 0, 0])
       layer.setSource(generateDetectionsSource())
+      this._subscribeToLoadEvents(layer)
       return
     }
 
@@ -612,7 +615,6 @@ export class PrimaryMap extends React.Component<Props, State> {
       const layer = this._previewLayers[imageId]
       alreadyRendered[imageId] = true
       if (!shouldRender[imageId]) {
-        this._unsubscribeFromLoadEvents(layer)
         delete this._previewLayers[imageId]
         animateLayerExit(layer).then(() => {
           this._map.removeLayer(layer)
@@ -656,13 +658,6 @@ export class PrimaryMap extends React.Component<Props, State> {
     source.on('tileloadstart', this._handleLoadStart)
     source.on('tileloadend', this._handleLoadStop)
     source.on('tileloaderror', this._handleLoadError)
-  }
-
-  _unsubscribeFromLoadEvents(layer) {
-    const source = layer.getSource()
-    source.un('tileloadstart', this._handleLoadStart)
-    source.un('tileloadend', this._handleLoadStop)
-    source.un('tileloaderror', this._handleLoadError)
   }
 
   _updateBasemap() {
@@ -736,7 +731,7 @@ function featuresToImages(...features: (beachfront.Job|beachfront.Scene)[]) {
 
 function generateBasemapLayers(providers) {
   return providers.map((provider, index) => {
-    const source = new ol.source.XYZ(Object.assign({}, provider, {crossOrigin: 'anonymous'}))
+    const source = new ol.source.XYZ(Object.assign({}, provider, {crossOrigin: 'anonymous', tileLoadFunction}))
     const layer = new ol.layer.Tile({source})
     layer.setProperties({name: provider.name, visible: index === 0})
     return layer
@@ -780,6 +775,7 @@ function generateDetectionsLayer() {
 
 function generateDetectionsSource() {
   return new ol.source.TileWMS({
+    tileLoadFunction,
     crossOrigin: 'anonymous',
     params: {
       [KEY_LAYERS]: '',
@@ -978,6 +974,7 @@ function generateImageSearchResultsOverlay(componentRef) {
 function generateScenePreviewSource(provider, imageId, apiKey) {
   return new ol.source.XYZ(Object.assign({}, provider, {
     crossOrigin: 'anonymous',
+    tileLoadFunction,
     url: provider.url
            .replace('__IMAGE_ID__', imageId)
            .replace('__API_KEY__', apiKey),
@@ -1006,6 +1003,16 @@ function getColorForStatus(status) {
     case STATUS_TIMED_OUT:
     case STATUS_ERROR: return 'hsl(349, 100%, 60%)'
     default: return 'magenta'
+  }
+}
+
+function tileLoadFunction(imageTile, src) {
+  if (imageTile.loadingError) {
+    delete imageTile.loadingError
+    imageTile.getImage().src = tileErrorPlaceholder
+  }
+  else {
+    imageTile.getImage().src = src
   }
 }
 

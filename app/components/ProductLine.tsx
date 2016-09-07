@@ -20,9 +20,15 @@ import * as React from 'react'
 import * as moment from 'moment'
 import {ActivityTable} from './ActivityTable'
 
+const LAST_24_HOURS = {value: 'PT24H', label: 'Last 24 Hours'}
+const LAST_7_DAYS = {value: 'P7D', label: 'Last 7 Days'}
+const LAST_30_DAYS = {value: 'P30D', label: 'Last 30 Days'}
+const SINCE_CREATION = {value: 'P0D', label: 'All'}
+
 interface Props {
-  className?: string,
+  className?: string
   productLine: beachfront.ProductLine
+  sessionToken: string
   onFetchJobs(productLineId: string, sinceDate: string)
   onJobHoverIn(job: beachfront.Job)
   onJobHoverOut(job: beachfront.Job)
@@ -32,6 +38,7 @@ interface Props {
 }
 
 interface State {
+  duration?: string
   error?: any
   isExpanded?: boolean
   isFetchingJobs?: boolean
@@ -44,20 +51,20 @@ export class ProductLine extends React.Component<Props, State> {
   constructor() {
     super()
     this.state = {
+      duration: LAST_24_HOURS.value,
       error: null,
       isExpanded: false,
       isFetchingJobs: false,
       selectedJobs: [],
       jobs: [],
-      sinceDate: last24Hours(),
     }
+    this._handleDurationChange = this._handleDurationChange.bind(this)
     this._handleExpansionToggle = this._handleExpansionToggle.bind(this)
     this._handleJobRowClick = this._handleJobRowClick.bind(this)
-    this._handleSinceDateChange = this._handleSinceDateChange.bind(this)
   }
 
   componentDidUpdate(prevProps, prevState) {
-    if (this.state.isExpanded && (prevState.isExpanded !== this.state.isExpanded || prevState.sinceDate !== this.state.sinceDate)) {
+    if (this.state.isExpanded && (prevState.isExpanded !== this.state.isExpanded || prevState.duration !== this.state.duration)) {
       this._fetchJobs()
     }
     if (prevState.isExpanded && !this.state.isExpanded && this.state.selectedJobs.length) {
@@ -68,7 +75,7 @@ export class ProductLine extends React.Component<Props, State> {
   render() {
     const {className, productLine} = this.props
     const {properties} = productLine
-    const {isExpanded, sinceDate} = this.state
+    const {isExpanded, duration} = this.state
     return (
       <li className={`${styles.root} ${className || ''} ${isExpanded ? styles.isExpanded : ''}`}>
         <section className={styles.header} onClick={this._handleExpansionToggle}>
@@ -105,21 +112,22 @@ export class ProductLine extends React.Component<Props, State> {
           </div>
           <ActivityTable
             className={styles.activityTable}
-            isLoading={this.state.isFetchingJobs}
-            jobs={this.state.jobs.filter(jobFilter(sinceDate))}
-            selectedJobIds={this.state.selectedJobs.map(j => j.id)}
-            error={this.state.error}
-            sinceDate={sinceDate}
-            sinceDates={[
-              {value: last24Hours(), label: 'Last 24 Hours'},
-              {value: last7Days(), label: 'Last 7 Days'},
-              {value: last30Days(), label: 'Last 30 Days'},
-              {value: properties.createdOn, label: 'All'},
+            duration={duration}
+            durations={[
+              LAST_24_HOURS,
+              LAST_7_DAYS,
+              LAST_30_DAYS,
+              SINCE_CREATION,
             ]}
+            error={this.state.error}
+            isLoading={this.state.isFetchingJobs}
+            jobs={this.state.jobs}
+            selectedJobIds={this.state.selectedJobs.map(j => j.id)}
+            sessionToken={this.props.sessionToken}
+            onDurationChange={this._handleDurationChange}
             onHoverIn={this.props.onJobHoverIn}
             onHoverOut={this.props.onJobHoverOut}
             onRowClick={this._handleJobRowClick}
-            onSinceDateChange={this._handleSinceDateChange}
           />
         </section>
       </li>
@@ -128,9 +136,13 @@ export class ProductLine extends React.Component<Props, State> {
 
   _fetchJobs() {
     this.setState({ isFetchingJobs: true })
-    this.props.onFetchJobs(this.props.productLine.id, this.state.sinceDate)
+    this.props.onFetchJobs(this.props.productLine.id, generateSinceDate(this.state.duration, this.props.productLine))
       .then(jobs => this.setState({ jobs, isFetchingJobs: false }))
       .catch(error => this.setState({ error, isFetchingJobs: false }))
+  }
+
+  _handleDurationChange(duration) {
+    this.setState({ duration })
   }
 
   _handleExpansionToggle() {
@@ -148,10 +160,6 @@ export class ProductLine extends React.Component<Props, State> {
       this.setState({ selectedJobs: [job] })
     }
   }
-
-  _handleSinceDateChange(sinceDate) {
-    this.setState({ sinceDate })
-  }
 }
 
 //
@@ -166,20 +174,15 @@ function formatDate(input) {
   return null
 }
 
-function jobFilter(sinceDate) {
-  return job => job.loading || (job.properties && job.properties.createdOn > sinceDate)
-}
-
-function last24Hours() {
-  return moment().subtract(24, 'hours').startOf('hour').toISOString()
-}
-
-function last7Days() {
-  return moment().subtract(7, 'days').startOf('hour').toISOString()
-}
-
-function last30Days() {
-  return moment().subtract(30, 'days').startOf('hour').toISOString()
+function generateSinceDate(offset: string, productLine: beachfront.ProductLine) {
+  if (offset === SINCE_CREATION.value) {
+    return productLine.properties.createdOn
+  }
+  return moment()
+    .utc()
+    .subtract(moment.duration(offset))
+    .startOf(offset === LAST_24_HOURS.value ? 'hour' : 'day')
+    .toISOString()
 }
 
 function titleCase(s) {

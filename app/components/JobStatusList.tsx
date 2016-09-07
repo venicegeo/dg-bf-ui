@@ -21,9 +21,9 @@ import {JobStatus} from './JobStatus'
 
 interface Props {
   activeIds: string[]
-  authToken: string
   error: any
   jobs: beachfront.Job[]
+  sessionToken: string
   onDismissError()
   onForgetJob(jobId: string)
   onNavigateToJob(loc: { pathname: string, search: string, hash: string })
@@ -31,7 +31,7 @@ interface Props {
 
 export const JobStatusList = ({
   activeIds,
-  authToken,
+  sessionToken,
   error,
   jobs,
   onDismissError,
@@ -57,7 +57,7 @@ export const JobStatusList = ({
       ) : jobs.map(job => (
         <JobStatus
           key={job.id}
-          authToken={authToken}
+          sessionToken={sessionToken}
           isActive={activeIds.includes(job.id)}
           job={job}
           onNavigate={onNavigateToJob}

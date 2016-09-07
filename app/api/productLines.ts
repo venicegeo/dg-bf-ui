@@ -86,10 +86,10 @@ export function fetchJobs({
 }) {
   return fetch(`${executorUrl}/resultsByProductLine`, {
     body: JSON.stringify({
-      TriggerId: productLineId,
-      PzAuth:    sessionToken,
-      PzAddr:    GATEWAY,
-      PerPage:   '200',  // HACK -- see explanation below
+      TriggerId:   productLineId,
+      PzAuthToken: sessionToken,
+      PzAddr:      GATEWAY,
+      PerPage:     '200',  // HACK -- see explanation below
     }),
     headers: {'content-type': 'application/json'},
     method: 'POST',

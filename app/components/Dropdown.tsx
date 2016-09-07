@@ -14,7 +14,7 @@
  * limitations under the License.
  **/
 
-const styles = require('./SinceDateSelect.css')
+const styles: any = require('./Dropdown.css')
 
 import * as React from 'react'
 
@@ -22,14 +22,14 @@ interface Props {
   className?: string
   options: {value: string, label: string}[]
   value: string
-  onChange(value: string)
+  onChange(value: string): void
 }
 
 interface State {
-  isOpen: boolean
+  isOpen?: boolean
 }
 
-export class SinceDateSelect extends React.Component<Props, State> {
+export class Dropdown extends React.Component<Props, State> {
   constructor() {
     super()
     this.state = {isOpen: false}
@@ -58,7 +58,7 @@ export class SinceDateSelect extends React.Component<Props, State> {
     return (
       <div className={`${styles.root} ${className || ''} ${this.state.isOpen ? styles.isOpen : ''}`}>
         <div className={styles.button} onClick={this.handleToggleOpen}>
-          {current ? current.label : ''} <i className="fa fa-caret-down"/>
+          {current ? current.label : '???'} <i className="fa fa-caret-down"/>
         </div>
         <ul className={styles.options}>
           {options.map(option => (

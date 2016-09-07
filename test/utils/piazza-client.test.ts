@@ -57,7 +57,7 @@ describe('Piazza Client', function () {
 
     it('normalizes auth token', () => {
       const client = new Client('http://test-gateway', 'test-auth-token')
-      assert.equal(client.authToken, 'test-auth-token')
+      assert.equal(client.sessionToken, 'test-auth-token')
     })
   })
 

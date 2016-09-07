@@ -56,22 +56,22 @@ export function extractGeojsonDeploymentId({ shoreDeplID }) {
   return shoreDeplID
 }
 
-export function extractImageCaptureDate({ imageCaptureDate }) {
-  if (!imageCaptureDate) {
+export function extractSceneCaptureDate({ sceneCaptureDate }) {
+  if (!sceneCaptureDate) {
     throw new Error('missing image capture date')
   }
-  const date = new Date(imageCaptureDate)
+  const date = new Date(sceneCaptureDate)
   if (isNaN(date.getTime())) {
-    throw new Error(`invalid image capture date '${imageCaptureDate}'`)
+    throw new Error(`invalid image capture date '${sceneCaptureDate}'`)
   }
-  return imageCaptureDate
+  return sceneCaptureDate
 }
 
-export function extractImageId({ dbImageId }) {
-  if (!dbImageId) {
-    throw new Error('missing image ID')
+export function extractSceneId({ sceneId }) {
+  if (!sceneId) {
+    throw new Error('missing scene ID')
   }
-  return dbImageId
+  return sceneId
 }
 
 export function extractSensorName({ sensorName }) {
@@ -81,8 +81,8 @@ export function extractSensorName({ sensorName }) {
   return sensorName
 }
 
-export function extractName({ resultName }) {
-  return resultName || `Imported(${Math.random().toString(16).substr(2, 5)})`
+export function extractName({ jobName }) {
+  return jobName || `Imported(${Math.random().toString(16).substr(2, 5)})`
 }
 
 export function parseString(outputString) {

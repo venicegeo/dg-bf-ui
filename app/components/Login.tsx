@@ -22,7 +22,6 @@ import {Modal} from './Modal'
 import {createSession} from '../api/authentication'
 
 interface Props {
-  onError(error: any)
   onSuccess(sessionToken: string)
 }
 

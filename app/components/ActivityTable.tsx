@@ -18,45 +18,48 @@ const styles = require('./ActivityTable.css')
 
 import * as React from 'react'
 import * as moment from 'moment'
-import {SinceDateSelect} from './SinceDateSelect'
+import {Dropdown} from './Dropdown'
+import {FileDownloadLink} from './FileDownloadLink'
 import {LoadingAnimation} from './LoadingAnimation'
 
 interface Props {
   className?: string
+  duration: string
+  durations: {value: string, label: string}[]
   error?: any
   isLoading: boolean
   jobs: beachfront.Job[]
   selectedJobIds: string[]
-  sinceDate: string
-  sinceDates: {value: string, label: string}[]
+  sessionToken: string
+  onDurationChange(value: string)
   onHoverIn(job: beachfront.Job)
   onHoverOut(job: beachfront.Job)
   onRowClick(job: beachfront.Job)
-  onSinceDateChange(value: string)
 }
 
 export const ActivityTable = ({
   className,
+  duration,
+  durations,
   isLoading,
   error,
   jobs,
   selectedJobIds,
-  sinceDate,
-  sinceDates,
+  sessionToken,
+  onDurationChange,
   onHoverIn,
   onHoverOut,
   onRowClick,
-  onSinceDateChange,
 }: Props) => (
   <div className={`${styles.root} ${isLoading ? styles.isLoading : ''} ${className}`}>
 
     <div className={styles.filter}>
       Activity:
-      <SinceDateSelect
+      <Dropdown
         className={styles.filterDropdown}
-        options={sinceDates}
-        value={sinceDate}
-        onChange={onSinceDateChange}
+        options={durations}
+        value={duration}
+        onChange={onDurationChange}
       />
     </div>
 
@@ -68,6 +71,7 @@ export const ActivityTable = ({
             <th>Image ID</th>
             <th>Captured On</th>
             <th>Sensor</th>
+            <td></td>
           </tr>
         </thead>
         <tbody>
@@ -76,12 +80,24 @@ export const ActivityTable = ({
               key={job.id}
               className={selectedJobIds.includes(job.id) ? styles.isActive : ''}
               onClick={() => onRowClick(job)}
-              onMouseEnter={() => job.properties && onHoverIn(job)}
-              onMouseLeave={() => job.properties && onHoverOut(job)}
+              onMouseEnter={() => onHoverIn(job)}
+              onMouseLeave={() => onHoverOut(job)}
               >
               <td>{getImageId(job)}</td>
               <td>{getCapturedOn(job)}</td>
               <td>{getImageSensor(job)}</td>
+              <td className={styles.downloadCell} onClick={e => e.stopPropagation()}>
+                <FileDownloadLink
+                  sessionToken={sessionToken}
+                  className={styles.downloadButton}
+                  dataId={job.properties.detectionsDataId}
+                  filename={job.properties.name + '.geojson'}
+                  onComplete={() => console.log('onComplete')}
+                  onError={() => console.log('onError')}
+                  onProgress={() => console.log('onProgress')}
+                  onStart={() => console.log('onStart')}
+                />
+              </td>
             </tr>
           ))}
           {isLoading && generatePlaceholderRows(10)}
@@ -106,6 +122,7 @@ function generatePlaceholderRows(count) {
   for (let i = 0; i < count; i++) {
     rows.push(
       <tr key={i} className={styles.placeholder}>
+        <td><span/></td>
         <td><span/></td>
         <td><span/></td>
         <td><span/></td>

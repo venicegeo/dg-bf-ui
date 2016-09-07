@@ -168,7 +168,6 @@ export class Application extends React.Component<Props, State> {
     if (!this.state.sessionToken) {
       return (
         <Login
-          onError={err => this.setState({ error: err })}
           onSuccess={sessionToken => this.setState({ sessionToken })}
         />
       )
@@ -225,7 +224,7 @@ export class Application extends React.Component<Props, State> {
       case '/jobs':
         return (
           <JobStatusList
-            authToken={this.state.sessionToken}
+            sessionToken={this.state.sessionToken}
             activeIds={this.detectionsForCurrentMode.map(d => d.id)}
             error={this.state.jobs.error}
             jobs={this.state.jobs.records}
@@ -475,12 +474,16 @@ export class Application extends React.Component<Props, State> {
     const route = generateRoute(loc)
     history.pushState(null, null, route.href)
 
+    // Update selected feature if needed
     let {selectedFeature} = this.state
-    if (!route.jobIds.length && this.state.selectedFeature && this.state.selectedFeature.properties.type === TYPE_JOB) {
+    if (route.jobIds.length) {
+      selectedFeature = this.state.jobs.records.find(j => route.jobIds.includes(j.id))
+    }
+    if (!route.jobIds.length && selectedFeature && selectedFeature.properties.type === TYPE_JOB) {
       selectedFeature = null
     }
-    else if (route.jobIds.length) {
-      selectedFeature = this.state.jobs.records.find(j => route.jobIds.includes(j.id))
+    else if (route.pathname !== this.state.route.pathname && selectedFeature && selectedFeature.properties.type === TYPE_SCENE) {
+      selectedFeature = null
     }
 
     this.setState({
@@ -578,7 +581,6 @@ function deserialize() {
     mapView:        JSON.parse(sessionStorage.getItem('mapView')),
     searchCriteria: JSON.parse(sessionStorage.getItem('searchCriteria')),
     searchResults:  JSON.parse(sessionStorage.getItem('searchResults')),
-    selectedFeature: JSON.parse(sessionStorage.getItem('selectedFeature')),
     sessionToken:   sessionStorage.getItem('sessionToken') || null,
     catalogApiKey:  localStorage.getItem('catalog_apiKey') || '',  // HACK
   }
@@ -597,7 +599,6 @@ function serialize(state) {
   sessionStorage.setItem('mapView', JSON.stringify(state.mapView))
   sessionStorage.setItem('searchCriteria', JSON.stringify(state.searchCriteria))
   sessionStorage.setItem('searchResults', JSON.stringify(state.searchResults))
-  sessionStorage.setItem('selectedFeature', JSON.stringify(state.selectedFeature))
   sessionStorage.setItem('sessionToken', state.sessionToken || '')
   localStorage.setItem('catalog_apiKey', state.catalogApiKey)  // HACK
 }

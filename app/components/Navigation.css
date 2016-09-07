@@ -101,10 +101,12 @@
 .link .icon {
   display: inline-block;
   fill: #9BDBFF;
-  width: 50%;
+  width: 70%;
   vertical-align: middle;
-  filter: drop-shadow(0 2px rgba(0,0,0,.1));
-  -webkit-filter: drop-shadow(0 2px rgba(0,0,0,.1));
+}
+
+.iconShadow {
+  fill: color(black alpha(7%));
 }
 
 .atHome .link .icon {
@@ -112,12 +114,17 @@
 }
 
 .link:hover .icon {
-  width: 75%;
+  width: 90%;
   fill: white;
 }
 
 .active .icon {
+  width: 90%;
   fill: #555 !important;
+}
+
+.active .iconShadow {
+  fill: transparent;
 }
 
 /* Link: Label
