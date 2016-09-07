@@ -69,8 +69,11 @@ declare namespace beachfront {
       [key: string]: string
     }
     cloudCover: number
+    path: string
+    resolution: number
     sensorName: string
     thumb_large: string
+    thumb_small: string
   }
 
   interface ImageryCatalogPage {

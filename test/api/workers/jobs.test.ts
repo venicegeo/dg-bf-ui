@@ -14,10 +14,11 @@
  * limitations under the License.
  **/
 
-import expect, {spyOn, restoreSpies, createSpy} from 'expect'
+import {assert} from 'chai'
+import * as sinon from 'sinon'
 import * as worker from '../../../app/api/workers/jobs'
 import {
-  SCHEMA_VERSION
+  SCHEMA_VERSION,
 } from '../../../app/config'
 import {
   RESPONSE_JOB_ERROR,
@@ -25,14 +26,6 @@ import {
   RESPONSE_JOB_SUCCESS,
 } from '../../fixtures/piazza-responses'
 import {
-  KEY_IMAGE_ID,
-  KEY_ALGORITHM_NAME,
-  KEY_CREATED_ON,
-  KEY_NAME,
-  KEY_STATUS,
-  KEY_TYPE,
-  KEY_SCHEMA_VERSION,
-  KEY_THUMBNAIL,
   TYPE_JOB,
   STATUS_ERROR,
   STATUS_RUNNING,
@@ -40,31 +33,68 @@ import {
   STATUS_TIMED_OUT,
 } from '../../../app/constants'
 
+interface Client {
+  getDeployment: Sinon.SinonStub
+  getFile: Sinon.SinonStub
+  getStatus: Sinon.SinonStub
+}
+
+interface Handlers {
+  getRunningJobs: Sinon.SinonStub
+  onError: Sinon.SinonStub
+  onTerminate: Sinon.SinonStub
+  onUpdate: Sinon.SinonStub
+}
+
+interface GlobalStubs {
+  setInterval: Sinon.SinonStub
+  clearInterval: Sinon.SinonStub
+  debug: Sinon.SinonStub
+  error: Sinon.SinonStub
+  warn: Sinon.SinonStub
+}
+
 describe('Jobs Worker', () => {
-  let client, handlers
+  let client: Client, handlers: Handlers, globalStubs: GlobalStubs
 
   beforeEach(() => {
-    client = generateClientSpy()
-    handlers = generateHandlerSpies()
+    client = {
+      getDeployment: sinon.stub(),
+      getFile:       sinon.stub(),
+      getStatus:     sinon.stub(),
+    }
 
-    // Short circuit async operations by default
-    spyOn(window, 'setInterval').andReturn(-1)
-    spyOn(window, 'clearInterval')
+    handlers = {
+      getRunningJobs: sinon.stub().returns([]),
+      onError:        sinon.stub(),
+      onTerminate:    sinon.stub(),
+      onUpdate:       sinon.stub(),
+    }
 
-    // Silence the console logging
-    spyOn(console, 'debug')
-    spyOn(console, 'error')
-    spyOn(console, 'warn')
+    globalStubs = {
+      // Short circuit async operations
+      setInterval: sinon.stub(window, 'setInterval').returns(-1),
+      clearInterval: sinon.stub(window, 'clearInterval'),
+
+      // Silence the console logging
+      debug: sinon.stub(console, 'debug'),
+      error: sinon.stub(console, 'error'),
+      warn: sinon.stub(console, 'warn'),
+    }
   })
 
   afterEach(() => {
     worker.terminate()
-    restoreSpies()
+    globalStubs.setInterval.restore()
+    globalStubs.clearInterval.restore()
+    globalStubs.debug.restore()
+    globalStubs.error.restore()
+    globalStubs.warn.restore()
   })
 
   describe('start()', () => {
     it('can start worker instance', () => {
-      expect(() => {
+      assert.doesNotThrow(() => {
         worker.start({
           client,
           interval:       0,
@@ -74,7 +104,7 @@ describe('Jobs Worker', () => {
           onTerminate:    handlers.onTerminate,
           onUpdate:       handlers.onUpdate,
         })
-      }).toNotThrow()
+      })
     })
 
     it('honors `interval` configuration', () => {
@@ -87,7 +117,7 @@ describe('Jobs Worker', () => {
         onTerminate:    handlers.onTerminate,
         onUpdate:       handlers.onUpdate,
       })
-      expect(window.setInterval.calls[0].arguments[1]).toEqual(1234)
+      assert.equal(globalStubs.setInterval.firstCall.args[1], 1234)
     })
 
     it('throws if started twice', () => {
@@ -100,7 +130,7 @@ describe('Jobs Worker', () => {
         onTerminate:    handlers.onTerminate,
         onUpdate:       handlers.onUpdate,
       })
-      expect(() => {
+      assert.throws(() => {
         worker.start({
           client,
           interval:       0,
@@ -110,7 +140,7 @@ describe('Jobs Worker', () => {
           onTerminate:    handlers.onTerminate,
           onUpdate:       handlers.onUpdate,
         })
-      }).toThrow(/already running/)
+      }, /already running/)
     })
 
     it('starts cycle immediately', () => {
@@ -123,213 +153,211 @@ describe('Jobs Worker', () => {
         onTerminate:    handlers.onTerminate,
         onUpdate:       handlers.onUpdate,
       })
-      expect(handlers.getRunningJobs).toHaveBeenCalled()
+      assert.isTrue(handlers.getRunningJobs.called)
     })
   })
 
   describe('work cycle', () => {
     it('yields appropriate status for running jobs', (done) => {
-      client.getStatus.andReturn(Promise.resolve(generateStatusRunning()))
+      client.getStatus.returns(Promise.resolve(generateStatusRunning()))
       worker.start({
         client,
         interval:       0,
         ttl:            1000,
-        getRunningJobs: handlers.getRunningJobs.andReturn([generateJob()]),
+        getRunningJobs: handlers.getRunningJobs.returns([generateJob()]),
         onError:        handlers.onError,
         onTerminate:    handlers.onTerminate,
         onUpdate:       handlers.onUpdate,
       })
       defer(() => {
-        expect(handlers.onUpdate.calls[0].arguments).toEqual(['test-id', STATUS_RUNNING, null, null, null])
+        assert.deepEqual(handlers.onUpdate.firstCall.args, ['test-id', STATUS_RUNNING, null, null, null])
       }, done)
     })
 
     it('yields appropriate status for stalled jobs', (done) => {
       const job = generateJob('test-stalled', STATUS_RUNNING)
-      job.properties[KEY_CREATED_ON] -= 2000
-      client.getStatus.andReturn(Promise.resolve(generateStatusRunning('test-stalled')))
+      job.properties.createdOn -= 2000
+      client.getStatus.returns(Promise.resolve(generateStatusRunning('test-stalled')))
       worker.start({
         client,
         interval:       0,
         ttl:            1000,
-        getRunningJobs: handlers.getRunningJobs.andReturn([job]),
+        getRunningJobs: handlers.getRunningJobs.returns([job]),
         onError:        handlers.onError,
         onTerminate:    handlers.onTerminate,
         onUpdate:       handlers.onUpdate,
       })
       defer(() => {
-        expect(handlers.onUpdate.calls[0].arguments).toEqual(['test-stalled', STATUS_TIMED_OUT, null, null, null])
+        assert.deepEqual(handlers.onUpdate.firstCall.args, ['test-stalled', STATUS_TIMED_OUT, null, null, null])
       }, done)
     })
 
     it('yields appropriate status for failed jobs', (done) => {
-      client.getStatus.andReturn(Promise.resolve(generateStatusError()))
+      client.getStatus.returns(Promise.resolve(generateStatusError()))
       worker.start({
         client,
         interval:       0,
         ttl:            1000,
-        getRunningJobs: handlers.getRunningJobs.andReturn([generateJob()]),
+        getRunningJobs: handlers.getRunningJobs.returns([generateJob()]),
         onError:        handlers.onError,
         onTerminate:    handlers.onTerminate,
         onUpdate:       handlers.onUpdate,
       })
       defer(() => {
-        expect(handlers.onUpdate.calls[0].arguments).toEqual(['test-id', STATUS_ERROR, null, null, null])
+        assert.deepEqual(handlers.onUpdate.firstCall.args, ['test-id', STATUS_ERROR, null, null, null])
       }, done)
     })
 
     it('yields appropriate status for successful jobs', (done) => {
-      client.getStatus.andReturn(Promise.resolve(generateStatusSuccess()))
-      client.getFile.andReturn(Promise.resolve('{"shoreDataID":"test-vector-data-id","shoreDeplID":"test-deployment-id","rgbLoc":"","error":""}'))
-      client.getDeployment.andReturn(Promise.resolve(generateDeploymentDescriptor()))
+      client.getStatus.returns(Promise.resolve(generateStatusSuccess()))
+      client.getFile.returns(Promise.resolve('{"shoreDataID":"test-vector-data-id","shoreDeplID":"test-deployment-id","rgbLoc":"","error":""}'))
+      client.getDeployment.returns(Promise.resolve(generateDeploymentDescriptor()))
       worker.start({
         client,
         interval:       0,
         ttl:            1000,
-        getRunningJobs: handlers.getRunningJobs.andReturn([generateJob()]),
+        getRunningJobs: handlers.getRunningJobs.returns([generateJob()]),
         onError:        handlers.onError,
         onTerminate:    handlers.onTerminate,
         onUpdate:       handlers.onUpdate,
       })
       defer(() => {
-        expect(handlers.onUpdate.calls[0].arguments).toEqual(['test-id', STATUS_SUCCESS, 'test-vector-data-id', 'test-layer-id', 'test-endpoint'])
+        assert.deepEqual(handlers.onUpdate.firstCall.args, ['test-id', STATUS_SUCCESS, 'test-vector-data-id', 'test-layer-id', 'test-endpoint'])
       }, done)
     })
 
     it('yields appropriate status for ambiguous execution metadata', (done) => {
-      client.getStatus.andReturn(Promise.resolve(generateStatusSuccess()))
-      client.getFile.andReturn(Promise.resolve('clearly invalid execution metadata'))
+      client.getStatus.returns(Promise.resolve(generateStatusSuccess()))
+      client.getFile.returns(Promise.resolve('clearly invalid execution metadata'))
       worker.start({
         client,
         interval:       0,
         ttl:            1000,
-        getRunningJobs: handlers.getRunningJobs.andReturn([generateJob()]),
+        getRunningJobs: handlers.getRunningJobs.returns([generateJob()]),
         onError:        handlers.onError,
         onTerminate:    handlers.onTerminate,
         onUpdate:       handlers.onUpdate,
       })
       defer(() => {
-        expect(handlers.onUpdate.calls[0].arguments).toEqual(['test-id', STATUS_ERROR, null, null, null])
+        assert.deepEqual(handlers.onUpdate.firstCall.args, ['test-id', STATUS_ERROR, null, null, null])
       }, done)
     })
 
     it('does not trainwreck on server error (getStatus)', (done) => {
-      client.getStatus.andCall(jobId => (jobId === 'test-will-explode') ?
-        Promise.reject(new Error('test-error')) :
-        Promise.resolve(generateStatusRunning(jobId))
-      )
+      client.getStatus
+        .withArgs('test-everything-is-okay').returns(Promise.resolve(generateStatusRunning('test-everything-is-okay')))
+        .withArgs('test-will-explode').returns(Promise.reject(new Error('test-error')))
       worker.start({
         client,
         interval:       0,
         ttl:            1000,
-        getRunningJobs: handlers.getRunningJobs.andReturn([
+        getRunningJobs: handlers.getRunningJobs.returns([
           generateJob('test-will-explode'),
-          generateJob('test-everything-is-okay')
+          generateJob('test-everything-is-okay'),
         ]),
         onError:        handlers.onError,
         onTerminate:    handlers.onTerminate,
         onUpdate:       handlers.onUpdate,
       })
       defer(() => {
-        expect(handlers.onUpdate.calls[0].arguments).toEqual(['test-will-explode', STATUS_ERROR, null, null, null])
-        expect(handlers.onUpdate.calls[1].arguments).toEqual(['test-everything-is-okay', STATUS_RUNNING, null, null, null])
+        assert.deepEqual(handlers.onUpdate.firstCall.args, ['test-will-explode', STATUS_ERROR, null, null, null])
+        assert.deepEqual(handlers.onUpdate.secondCall.args, ['test-everything-is-okay', STATUS_RUNNING, null, null, null])
       }, done)
     })
 
     it('does not trainwreck on server error (getFile)', (done) => {
-      client.getStatus.andCall(jobId => (jobId === 'test-will-explode') ?
-        Promise.resolve(generateStatusSuccess(jobId)) :
-        Promise.resolve(generateStatusRunning(jobId))
-      )
-      client.getFile.andReturn(jobId => (jobId === 'test-will-explode') ?
-        Promise.reject(new Error('test-error')) :
-        Promise.resolve('{"shoreDataID":"0123456789abcdef"}')
-      )
+      client.getStatus
+        .withArgs('test-everything-is-okay').returns(Promise.resolve(generateStatusRunning('test-everything-is-okay')))
+        .withArgs('test-will-explode').returns(Promise.resolve(generateStatusSuccess('test-will-explode')))
+      client.getFile
+        .withArgs('test-will-explode').returns(Promise.reject(new Error('test-error')))
       worker.start({
         client,
         interval:       0,
         ttl:            1000,
-        getRunningJobs: handlers.getRunningJobs.andReturn([
+        getRunningJobs: handlers.getRunningJobs.returns([
           generateJob('test-will-explode'),
-          generateJob('test-everything-is-okay')
+          generateJob('test-everything-is-okay'),
         ]),
         onError:        handlers.onError,
         onTerminate:    handlers.onTerminate,
         onUpdate:       handlers.onUpdate,
       })
       defer(() => {
-        expect(handlers.onUpdate.calls[0].arguments).toEqual(['test-will-explode', STATUS_ERROR, null, null, null])
-        expect(handlers.onUpdate.calls[1].arguments).toEqual(['test-everything-is-okay', STATUS_RUNNING, null, null, null])
+        assert.deepEqual(handlers.onUpdate.firstCall.args, ['test-will-explode', STATUS_ERROR, null, null, null])
+        assert.deepEqual(handlers.onUpdate.secondCall.args, ['test-everything-is-okay', STATUS_RUNNING, null, null, null])
       }, done)
     })
 
     it('halts on javascript error', (done) => {
-      client.getStatus.andCall(jobId => Promise.resolve(generateStatusRunning(jobId)))
+      client.getStatus
+        .onFirstCall().returns(Promise.resolve(generateStatusRunning('test-id-1')))
+        .onSecondCall().returns(Promise.resolve(generateStatusRunning('test-id-2')))
       worker.start({
         client,
         interval:       0,
         ttl:            1000,
-        getRunningJobs: handlers.getRunningJobs.andReturn([
+        getRunningJobs: handlers.getRunningJobs.returns([
           generateJob('test-id-1'),
           generateJob('test-id-2'),
         ]),
         onError:        handlers.onError,
         onTerminate:    handlers.onTerminate,
-        onUpdate:       handlers.onUpdate.andThrow(new Error('test-error')),
+        onUpdate:       handlers.onUpdate.throws(new Error('test-error')),
       })
       defer(() => {
-        expect(handlers.onUpdate.calls.length).toEqual(1)
+        assert.equal(handlers.onUpdate.callCount, 1)
       }, done)
     })
 
     it('emits cycle info via console', (done) => {
-      client.getStatus.andReturn(Promise.resolve(generateStatusRunning()))
+      client.getStatus.returns(Promise.resolve(generateStatusRunning()))
       worker.start({
         client,
         interval:       0,
         ttl:            1000,
-        getRunningJobs: handlers.getRunningJobs.andReturn([generateJob()]),
+        getRunningJobs: handlers.getRunningJobs.returns([generateJob()]),
         onError:        handlers.onError,
         onTerminate:    handlers.onTerminate,
         onUpdate:       handlers.onUpdate,
       })
       defer(() => {
-        expect(console.debug).toHaveBeenCalledWith('(jobs:worker) cycle started')
+        assert.isTrue(globalStubs.debug.calledWith('(jobs:worker) cycle started'))
       }, done)
     })
 
     it('emits errors via console', (done) => {
       const err = new Error('test-error')
-      client.getStatus.andReturn(Promise.resolve(generateStatusRunning()))
+      client.getStatus.returns(Promise.resolve(generateStatusRunning()))
       worker.start({
         client,
         interval:       0,
         ttl:            1000,
-        getRunningJobs: handlers.getRunningJobs.andReturn([generateJob()]),
+        getRunningJobs: handlers.getRunningJobs.returns([generateJob()]),
         onError:        handlers.onError,
         onTerminate:    handlers.onTerminate,
-        onUpdate:       handlers.onUpdate.andThrow(err),
+        onUpdate:       handlers.onUpdate.throws(err),
       })
       defer(() => {
-        expect(console.error).toHaveBeenCalledWith('(jobs:worker) cycle failed; terminating.', err)
+        assert.isTrue(globalStubs.error.calledWithExactly('(jobs:worker) cycle failed; terminating.', err))
       }, done)
     })
 
     it('emits timeout warnings via console', (done) => {
       const job = generateJob('test-stalled', STATUS_RUNNING)
-      job.properties[KEY_CREATED_ON] -= 2000
-      client.getStatus.andReturn(Promise.resolve(generateStatusRunning('test-stalled')))
+      job.properties.createdOn -= 2000
+      client.getStatus.returns(Promise.resolve(generateStatusRunning('test-stalled')))
       worker.start({
         client,
         interval:       0,
         ttl:            1000,
-        getRunningJobs: handlers.getRunningJobs.andReturn([job]),
+        getRunningJobs: handlers.getRunningJobs.returns([job]),
         onError:        handlers.onError,
         onTerminate:    handlers.onTerminate,
         onUpdate:       handlers.onUpdate,
       })
       defer(() => {
-        expect(console.warn).toHaveBeenCalledWith('(jobs:worker) <%s> appears to have stalled and will no longer be tracked', 'test-stalled')
+        assert.isTrue(globalStubs.warn.calledWithExactly('(jobs:worker) <%s> appears to have stalled and will no longer be tracked', 'test-stalled'))
       }, done)
     })
 
@@ -344,28 +372,28 @@ describe('Jobs Worker', () => {
         onUpdate:       handlers.onUpdate,
       })
       defer(() => {
-        expect(handlers.onUpdate).toNotHaveBeenCalled()
+        assert.isFalse(handlers.onUpdate.called)
       }, done)
     })
   })
 
   describe('event hooks', () => {
     it('fire on normal cycle', (done) => {
-      client.getStatus.andReturn(Promise.resolve(generateStatusRunning()))
+      client.getStatus.returns(Promise.resolve(generateStatusRunning()))
       worker.start({
         client,
         interval:       0,
         ttl:            1000,
-        getRunningJobs: handlers.getRunningJobs.andReturn([generateJob()]),
+        getRunningJobs: handlers.getRunningJobs.returns([generateJob()]),
         onError:        handlers.onError,
         onTerminate:    handlers.onTerminate,
         onUpdate:       handlers.onUpdate,
       })
       defer(() => {
-        expect(handlers.getRunningJobs).toHaveBeenCalled()
-        expect(handlers.onUpdate).toHaveBeenCalled()
-        expect(handlers.onError).toNotHaveBeenCalled()
-        expect(handlers.onTerminate).toNotHaveBeenCalled()
+        assert.isTrue(handlers.getRunningJobs.called)
+        assert.isTrue(handlers.onUpdate.called)
+        assert.isFalse(handlers.onError.called)
+        assert.isFalse(handlers.onTerminate.called)
       }, done)
     })
 
@@ -380,68 +408,68 @@ describe('Jobs Worker', () => {
         onUpdate:       handlers.onUpdate,
       })
       defer(() => {
-        expect(handlers.getRunningJobs).toHaveBeenCalled()
-        expect(handlers.onError).toNotHaveBeenCalled()
-        expect(handlers.onTerminate).toNotHaveBeenCalled()
-        expect(handlers.onUpdate).toNotHaveBeenCalled()
+        assert.isTrue(handlers.getRunningJobs.called)
+        assert.isFalse(handlers.onError.called)
+        assert.isFalse(handlers.onTerminate.called)
+        assert.isFalse(handlers.onUpdate.called)
       }, done)
     })
 
     it('fire on service call failure', (done) => {
-      client.getStatus.andReturn(Promise.reject(new Error('test-error')))
+      client.getStatus.returns(Promise.reject(new Error('test-error')))
       worker.start({
         client,
         interval:       0,
         ttl:            1000,
-        getRunningJobs: handlers.getRunningJobs.andReturn([generateJob()]),
+        getRunningJobs: handlers.getRunningJobs.returns([generateJob()]),
         onError:        handlers.onError,
         onTerminate:    handlers.onTerminate,
         onUpdate:       handlers.onUpdate,
       })
       defer(() => {
-        expect(handlers.getRunningJobs).toHaveBeenCalled()
-        expect(handlers.onUpdate).toHaveBeenCalled()
-        expect(handlers.onError).toNotHaveBeenCalled()
-        expect(handlers.onTerminate).toNotHaveBeenCalled()
+        assert.isTrue(handlers.getRunningJobs.called)
+        assert.isTrue(handlers.onUpdate.called)
+        assert.isFalse(handlers.onError.called)
+        assert.isFalse(handlers.onTerminate.called)
       }, done)
     })
 
     it('fire on javascript error', (done) => {
-      client.getStatus.andReturn(Promise.resolve(generateStatusRunning()))
+      client.getStatus.returns(Promise.resolve(generateStatusRunning()))
       worker.start({
         client,
         interval:       0,
         ttl:            1000,
-        getRunningJobs: handlers.getRunningJobs.andReturn([generateJob()]),
+        getRunningJobs: handlers.getRunningJobs.returns([generateJob()]),
         onError:        handlers.onError,
         onTerminate:    handlers.onTerminate,
-        onUpdate:       handlers.onUpdate.andThrow(new Error('test-error')),
+        onUpdate:       handlers.onUpdate.throws(new Error('test-error')),
       })
       defer(() => {
-        expect(handlers.getRunningJobs).toHaveBeenCalled()
-        expect(handlers.onUpdate).toHaveBeenCalled()
-        expect(handlers.onError).toHaveBeenCalled()
-        expect(handlers.onTerminate).toHaveBeenCalled()
+        assert.isTrue(handlers.getRunningJobs.called)
+        assert.isTrue(handlers.onUpdate.called)
+        assert.isTrue(handlers.onError.called)
+        assert.isTrue(handlers.onTerminate.called)
       }, done)
     })
 
     it('fire on resolution failure', (done) => {
-      client.getStatus.andReturn(Promise.resolve(generateStatusSuccess()))
-      client.getFile.andReturn(Promise.resolve('clearly invalid execution metadata'))
+      client.getStatus.returns(Promise.resolve(generateStatusSuccess()))
+      client.getFile.returns(Promise.resolve('clearly invalid execution metadata'))
       worker.start({
         client,
         interval:       0,
         ttl:            1000,
-        getRunningJobs: handlers.getRunningJobs.andReturn([generateJob()]),
+        getRunningJobs: handlers.getRunningJobs.returns([generateJob()]),
         onError:        handlers.onError,
         onTerminate:    handlers.onTerminate,
         onUpdate:       handlers.onUpdate,
       })
       defer(() => {
-        expect(handlers.getRunningJobs).toHaveBeenCalled()
-        expect(handlers.onUpdate).toHaveBeenCalled()
-        expect(handlers.onError).toNotHaveBeenCalled()
-        expect(handlers.onTerminate).toNotHaveBeenCalled()
+        assert.isTrue(handlers.getRunningJobs.called)
+        assert.isTrue(handlers.onUpdate.called)
+        assert.isFalse(handlers.onError.called)
+        assert.isFalse(handlers.onTerminate.called)
       }, done)
     })
 
@@ -457,17 +485,17 @@ describe('Jobs Worker', () => {
       })
       worker.terminate()
       defer(() => {
-        expect(handlers.getRunningJobs).toHaveBeenCalled()
-        expect(handlers.onTerminate).toHaveBeenCalled()
-        expect(handlers.onError).toNotHaveBeenCalled()
-        expect(handlers.onUpdate).toNotHaveBeenCalled()
+        assert.isTrue(handlers.getRunningJobs.called)
+        assert.isTrue(handlers.onTerminate.called)
+        assert.isFalse(handlers.onError.called)
+        assert.isFalse(handlers.onUpdate.called)
       }, done)
     })
   })
 
   describe('terminate()', function () {
     it('stops worker', () => {
-      window.setInterval.andReturn(-1234)
+      globalStubs.setInterval.returns(-1234)
       worker.start({
         client,
         interval:       0,
@@ -478,23 +506,23 @@ describe('Jobs Worker', () => {
         onUpdate:       handlers.onUpdate,
       })
       worker.terminate()
-      expect(clearInterval).toHaveBeenCalledWith(-1234)
+      assert.isTrue(globalStubs.clearInterval.calledWithExactly(-1234))
     })
 
     it('does not throw if called when worker is not started', () => {
-      expect(() => {
+      assert.doesNotThrow(() => {
         worker.terminate()
-      }).toNotThrow()
+      })
     })
 
     it('can handle gratuitous invocations', () => {
-      expect(() => {
+      assert.doesNotThrow(() => {
         worker.terminate()
         worker.terminate()
         worker.terminate()
         worker.terminate()
         worker.terminate()
-      }).toNotThrow()
+      })
     })
   })
 })
@@ -502,14 +530,6 @@ describe('Jobs Worker', () => {
 //
 // Helpers
 //
-
-function generateClientSpy() {
-  return {
-    getDeployment: createSpy(),
-    getFile: createSpy(),
-    getStatus: createSpy(),
-  }
-}
 
 function generateDeploymentDescriptor() {
   return {
@@ -519,27 +539,17 @@ function generateDeploymentDescriptor() {
   }
 }
 
-function generateHandlerSpies() {
-  return {
-    getRunningJobs: createSpy().andReturn([]),
-    onError:        createSpy(),
-    onTerminate:    createSpy(),
-    onUpdate:       createSpy(),
-  }
-}
-
 function generateJob(id = 'test-id', status = STATUS_RUNNING) {
   return {
     id,
     properties: {
-      [KEY_ALGORITHM_NAME]: 'test-algo-name',
-      [KEY_IMAGE_ID]:       'test-image-id',
-      [KEY_CREATED_ON]:     Date.now(),
-      [KEY_NAME]:           'test-name',
-      [KEY_STATUS]:         status,
-      [KEY_TYPE]:           TYPE_JOB,
-      [KEY_SCHEMA_VERSION]: SCHEMA_VERSION,
-      [KEY_THUMBNAIL]:      'test-thumbnail',
+      __schemaVersion__: SCHEMA_VERSION,
+      algorithmName:     'test-algo-name',
+      sceneId:           'test-scene-id',
+      createdOn:         Date.now(),
+      name:              'test-name',
+      status:            status,
+      type:              TYPE_JOB,
     },
     geometry: {},
     type: 'Feature',
@@ -547,24 +557,15 @@ function generateJob(id = 'test-id', status = STATUS_RUNNING) {
 }
 
 function generateStatusError(jobId = 'test-id') {
-  return {
-    ...JSON.parse(RESPONSE_JOB_ERROR).data,
-    jobId,
-  }
+  return Object.assign(JSON.parse(RESPONSE_JOB_ERROR).data, { jobId })
 }
 
 function generateStatusRunning(jobId = 'test-id') {
-  return {
-    ...JSON.parse(RESPONSE_JOB_RUNNING).data,
-    jobId,
-  }
+  return Object.assign(JSON.parse(RESPONSE_JOB_RUNNING).data, { jobId })
 }
 
 function generateStatusSuccess(jobId = 'test-id') {
-  return {
-    ...JSON.parse(RESPONSE_JOB_SUCCESS).data,
-    jobId,
-  }
+  return Object.assign(JSON.parse(RESPONSE_JOB_SUCCESS).data, { jobId })
 }
 
 function defer(func, done, duration = 0) {

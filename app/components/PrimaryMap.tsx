@@ -102,52 +102,51 @@ declare var window: { ol: any, primaryMap: any }  // DEBUG
 
 export class PrimaryMap extends React.Component<Props, State> {
   refs: any
-  private _map: ol.Map
-  private _basemapLayers: ol.layer.Tile[]
 
-  private _drawLayer: ol.layer.Vector
-  private _drawInteraction: ol.interaction.Draw
-  private _frameLayer: ol.layer.Vector
-  private _detectionsLayer: ol.layer.Tile
-  private _highlightLayer: ol.layer.Vector
-  private _imageryLayer: ol.layer.Vector
-  private _selectInteraction: ol.interaction.Select
-  private _skipNextViewUpdate: boolean
-  private _featureDetailsOverlay: ol.Overlay
-  private _imageSearchResultsOverlay: ol.Overlay
-
-  private _previewLayers: any
+  private basemapLayers: ol.layer.Tile[]
+  private detectionsLayer: ol.layer.Tile
+  private drawLayer: ol.layer.Vector
+  private drawInteraction: ol.interaction.Draw
+  private featureDetailsOverlay: ol.Overlay
+  private frameLayer: ol.layer.Vector
+  private highlightLayer: ol.layer.Vector
+  private imageSearchResultsOverlay: ol.Overlay
+  private imageryLayer: ol.layer.Vector
+  private map: ol.Map
+  private previewLayers: {[key: string]: ol.layer.Tile}
+  private selectInteraction: ol.interaction.Select
+  private skipNextViewUpdate: boolean
 
   constructor() {
     super()
     this.state = {basemapIndex: 0, loadingRefCount: 0}
-    this._emitViewChange = debounce(this._emitViewChange.bind(this), 100)
-    this._handleBasemapChange = this._handleBasemapChange.bind(this)
-    this._handleDrawStart = this._handleDrawStart.bind(this)
-    this._handleDrawEnd = this._handleDrawEnd.bind(this)
-    this._handleLoadError = this._handleLoadError.bind(this)
-    this._handleLoadStart = this._handleLoadStart.bind(this)
-    this._handleLoadStop = this._handleLoadStop.bind(this)
-    this._handleMouseMove = throttle(this._handleMouseMove.bind(this), 15)
-    this._handleSelect = this._handleSelect.bind(this)
-    this._updateView = debounce(this._updateView.bind(this), 100)
-    this._renderImagerySearchBbox = debounce(this._renderImagerySearchBbox.bind(this))
+    this.emitViewChange = debounce(this.emitViewChange.bind(this), 100)
+    this.handleBasemapChange = this.handleBasemapChange.bind(this)
+    this.handleDrawStart = this.handleDrawStart.bind(this)
+    this.handleDrawEnd = this.handleDrawEnd.bind(this)
+    this.handleLoadError = this.handleLoadError.bind(this)
+    this.handleLoadStart = this.handleLoadStart.bind(this)
+    this.handleLoadStop = this.handleLoadStop.bind(this)
+    this.handleMouseMove = throttle(this.handleMouseMove.bind(this), 15)
+    this.handleSelect = this.handleSelect.bind(this)
+    this.updateView = debounce(this.updateView.bind(this), 100)
+    this.renderImagerySearchBbox = debounce(this.renderImagerySearchBbox.bind(this))
   }
 
   componentDidMount() {
-    this._initializeOpenLayers()
-    this._renderSelectionPreview()
-    this._renderDetections()
-    this._renderFrames()
-    this._renderImagery()
-    this._renderImagerySearchResultsOverlay()
-    this._updateView()
+    this.initializeOpenLayers()
+    this.renderSelectionPreview()
+    this.renderDetections()
+    this.renderFrames()
+    this.renderImagery()
+    this.renderImagerySearchResultsOverlay()
+    this.updateView()
     if (this.props.bbox) {
-      this._renderImagerySearchBbox()
+      this.renderImagerySearchBbox()
     }
-    this._updateInteractions()
+    this.updateInteractions()
     if (this.props.selectedFeature) {
-      this._updateSelectedFeature()
+      this.updateSelectedFeature()
     }
 
     // DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG
@@ -160,39 +159,39 @@ export class PrimaryMap extends React.Component<Props, State> {
 
   componentDidUpdate(previousProps, previousState) {
     if (!this.props.selectedFeature) {
-      this._clearSelection()
+      this.clearSelection()
     }
     if (previousProps.selectedFeature !== this.props.selectedFeature) {
-      this._renderSelectionPreview()
-      this._updateSelectedFeature()
+      this.renderSelectionPreview()
+      this.updateSelectedFeature()
     }
     if (previousProps.detections !== this.props.detections) {
-      this._renderDetections()
+      this.renderDetections()
     }
     if (previousProps.highlightedFeature !== this.props.highlightedFeature) {
-      this._renderHighlight()
+      this.renderHighlight()
     }
     if (previousProps.frames !== this.props.frames) {
-      this._renderFrames()
+      this.renderFrames()
     }
     if (previousProps.imagery !== this.props.imagery) {
-      this._renderImagery()
+      this.renderImagery()
     }
     if (previousProps.isSearching !== this.props.isSearching) {
-      this._clearSelection()
-      this._renderImagerySearchResultsOverlay()
+      this.clearSelection()
+      this.renderImagerySearchResultsOverlay()
     }
     if (previousProps.bbox !== this.props.bbox) {
-      this._renderImagerySearchBbox()
+      this.renderImagerySearchBbox()
     }
     if (previousState.basemapIndex !== this.state.basemapIndex) {
-      this._updateBasemap()
+      this.updateBasemap()
     }
     if (previousProps.view !== this.props.view && this.props.view) {
-      this._updateView()
+      this.updateView()
     }
     if (previousProps.mode !== this.props.mode) {
-      this._updateInteractions()
+      this.updateInteractions()
     }
   }
 
@@ -204,7 +203,7 @@ export class PrimaryMap extends React.Component<Props, State> {
           className={styles.basemapSelect}
           index={this.state.basemapIndex}
           basemaps={basemapNames}
-          onChange={this._handleBasemapChange}
+          onChange={this.handleBasemapChange}
         />
         <FeatureDetails
           ref="featureDetails"
@@ -227,38 +226,38 @@ export class PrimaryMap extends React.Component<Props, State> {
   // Internals
   //
 
-  _activateDrawInteraction() {
-    this._drawInteraction.setActive(true)
+  private activateDrawInteraction() {
+    this.drawInteraction.setActive(true)
   }
 
-  _activateSelectInteraction() {
-    this._selectInteraction.setActive(true)
+  private activateSelectInteraction() {
+    this.selectInteraction.setActive(true)
   }
 
-  _clearDraw() {
-    this._drawLayer.getSource().clear()
+  private clearDraw() {
+    this.drawLayer.getSource().clear()
   }
 
-  _clearFrames() {
-    this._frameLayer.getSource().clear()
+  private clearFrames() {
+    this.frameLayer.getSource().clear()
   }
 
-  _clearSelection() {
-    this._selectInteraction.getFeatures().clear()
+  private clearSelection() {
+    this.selectInteraction.getFeatures().clear()
   }
 
-  _deactivateDrawInteraction() {
-    this._drawInteraction.setActive(false)
+  private deactivateDrawInteraction() {
+    this.drawInteraction.setActive(false)
   }
 
-  _deactivateSelectInteraction() {
-    this._clearSelection()
-    this._emitDeselectAll()
-    this._selectInteraction.setActive(false)
+  private deactivateSelectInteraction() {
+    this.clearSelection()
+    this.emitDeselectAll()
+    this.selectInteraction.setActive(false)
   }
 
-  _emitViewChange() {
-    const view = this._map.getView()
+  private emitViewChange() {
+    const view = this.map.getView()
     const {basemapIndex} = this.state
     const center = ol.proj.transform(view.getCenter(), 'EPSG:3857', 'EPSG:4326')
     const zoom = view.getZoom() || MIN_ZOOM  // HACK -- sometimes getZoom returns undefined...
@@ -268,32 +267,32 @@ export class PrimaryMap extends React.Component<Props, State> {
       || this.props.view.center[1] !== center[1]
       || this.props.view.zoom !== zoom
       || this.props.view.basemapIndex !== basemapIndex) {
-      this._skipNextViewUpdate = true
+      this.skipNextViewUpdate = true
       this.props.onViewChange({ basemapIndex, center, zoom })
     }
   }
 
-  _emitDeselectAll() {
+  private emitDeselectAll() {
     this.props.onSelectFeature(null)
   }
 
-  _handleBasemapChange(index) {
+  private handleBasemapChange(index) {
     this.setState({basemapIndex: index})
-    this._emitViewChange()
+    this.emitViewChange()
   }
 
-  _handleDrawEnd(event) {
+  private handleDrawEnd(event) {
     const geometry = event.feature.getGeometry()
     const bbox = serializeBbox(geometry.getExtent())
     this.props.onBoundingBoxChange(bbox)
   }
 
-  _handleDrawStart() {
-    this._clearDraw()
+  private handleDrawStart() {
+    this.clearDraw()
     this.props.onBoundingBoxChange(null)
   }
 
-  _handleLoadError(event) {
+  private handleLoadError(event) {
     this.setState({
       loadingRefCount: Math.max(0, this.state.loadingRefCount - 1),
     })
@@ -305,22 +304,22 @@ export class PrimaryMap extends React.Component<Props, State> {
     }
   }
 
-  _handleLoadStart() {
+  private handleLoadStart() {
     this.setState({
       loadingRefCount: this.state.loadingRefCount + 1,
     })
   }
 
-  _handleLoadStop() {
+  private handleLoadStop() {
     this.setState({
       loadingRefCount: Math.max(0, this.state.loadingRefCount - 1),
     })
   }
 
-  _handleMouseMove(event) {
-    const layerFilter = l => l === this._frameLayer || l === this._imageryLayer
+  private handleMouseMove(event) {
+    const layerFilter = l => l === this.frameLayer || l === this.imageryLayer
     let foundFeature = false
-    this._map.forEachFeatureAtPixel(event.pixel, (feature) => {
+    this.map.forEachFeatureAtPixel(event.pixel, (feature) => {
       switch (feature.get(KEY_TYPE)) {
         case TYPE_DIVOT_INBOARD:
         case TYPE_JOB:
@@ -337,7 +336,7 @@ export class PrimaryMap extends React.Component<Props, State> {
     }
   }
 
-  _handleSelect(event) {
+  private handleSelect(event) {
     if (event.selected.length === 0 && event.deselected.length === 0) {
       return  // Disregard spurious select event
     }
@@ -349,14 +348,14 @@ export class PrimaryMap extends React.Component<Props, State> {
       type = feature.get(KEY_TYPE)
     }
 
-    this._featureDetailsOverlay.setPosition(position)
-    const selections = this._selectInteraction.getFeatures()
+    this.featureDetailsOverlay.setPosition(position)
+    const selections = this.selectInteraction.getFeatures()
     switch (type) {
       case TYPE_DIVOT_INBOARD:
       case TYPE_STEM:
         // Proxy clicks on "inner" decorations out to the job frame itself
         const jobId = feature.get(KEY_OWNER_ID)
-        const jobFeature = this._frameLayer.getSource().getFeatureById(jobId)
+        const jobFeature = this.frameLayer.getSource().getFeatureById(jobId)
         selections.clear()
         selections.push(jobFeature)
         this.props.onSelectFeature(toGeoJSON(jobFeature) as beachfront.Job)
@@ -367,43 +366,43 @@ export class PrimaryMap extends React.Component<Props, State> {
         break
       default:
         // Not a valid "selectable" feature
-        this._clearSelection()
-        this._emitDeselectAll()
+        this.clearSelection()
+        this.emitDeselectAll()
         break
     }
   }
 
-  _initializeOpenLayers() {
-    this._basemapLayers = generateBasemapLayers(TILE_PROVIDERS)
-    this._detectionsLayer = generateDetectionsLayer()
-    this._drawLayer = generateDrawLayer()
-    this._highlightLayer = generateHighlightLayer()
-    this._frameLayer = generateFrameLayer()
-    this._imageryLayer = generateImageryLayer()
-    this._previewLayers = {}  // FIXME -- Use a Map instead?
-    this._subscribeToLoadEvents(this._detectionsLayer)
+  private initializeOpenLayers() {
+    this.basemapLayers = generateBasemapLayers(TILE_PROVIDERS)
+    this.detectionsLayer = generateDetectionsLayer()
+    this.drawLayer = generateDrawLayer()
+    this.highlightLayer = generateHighlightLayer()
+    this.frameLayer = generateFrameLayer()
+    this.imageryLayer = generateImageryLayer()
+    this.previewLayers = {}  // FIXME -- Use a Map instead?
+    this.subscribeToLoadEvents(this.detectionsLayer)
 
-    this._drawInteraction = generateDrawInteraction(this._drawLayer)
-    this._drawInteraction.on('drawstart', this._handleDrawStart)
-    this._drawInteraction.on('drawend', this._handleDrawEnd)
+    this.drawInteraction = generateDrawInteraction(this.drawLayer)
+    this.drawInteraction.on('drawstart', this.handleDrawStart)
+    this.drawInteraction.on('drawend', this.handleDrawEnd)
 
-    this._selectInteraction = generateSelectInteraction(this._frameLayer, this._imageryLayer)
-    this._selectInteraction.on('select', this._handleSelect)
+    this.selectInteraction = generateSelectInteraction(this.frameLayer, this.imageryLayer)
+    this.selectInteraction.on('select', this.handleSelect)
 
-    this._featureDetailsOverlay = generateFeatureDetailsOverlay(this.refs.featureDetails)
-    this._imageSearchResultsOverlay = generateImageSearchResultsOverlay(this.refs.imageSearchResults)
+    this.featureDetailsOverlay = generateFeatureDetailsOverlay(this.refs.featureDetails)
+    this.imageSearchResultsOverlay = generateImageSearchResultsOverlay(this.refs.imageSearchResults)
 
-    this._map = new ol.Map({
+    this.map = new ol.Map({
       controls: generateControls(),
-      interactions: generateBaseInteractions().extend([this._drawInteraction, this._selectInteraction]),
+      interactions: generateBaseInteractions().extend([this.drawInteraction, this.selectInteraction]),
       layers: [
         // Order matters here
-        ...this._basemapLayers,
-        this._frameLayer,
-        this._drawLayer,
-        this._imageryLayer,
-        this._detectionsLayer,
-        this._highlightLayer,
+        ...this.basemapLayers,
+        this.frameLayer,
+        this.drawLayer,
+        this.imageryLayer,
+        this.detectionsLayer,
+        this.highlightLayer,
       ],
       target: this.refs.container,
       view: new ol.View({
@@ -422,17 +421,17 @@ export class PrimaryMap extends React.Component<Props, State> {
           Reference:
               https://github.com/openlayers/ol3/issues/5456
     */
-    this._map.renderSync()
-    this._map.addOverlay(this._imageSearchResultsOverlay)
-    this._map.addOverlay(this._featureDetailsOverlay)
+    this.map.renderSync()
+    this.map.addOverlay(this.imageSearchResultsOverlay)
+    this.map.addOverlay(this.featureDetailsOverlay)
 
-    this._map.on('pointermove', this._handleMouseMove)
-    this._map.on('moveend', this._emitViewChange)
+    this.map.on('pointermove', this.handleMouseMove)
+    this.map.on('moveend', this.emitViewChange)
   }
 
-  _updateView() {
-    if (this._skipNextViewUpdate) {
-      this._skipNextViewUpdate = false
+  private updateView() {
+    if (this.skipNextViewUpdate) {
+      this.skipNextViewUpdate = false
       return
     }
     if (!this.props.view) {
@@ -440,14 +439,14 @@ export class PrimaryMap extends React.Component<Props, State> {
     }
     const {basemapIndex, zoom, center} = this.props.view
     this.setState({basemapIndex})
-    const view = this._map.getView()
+    const view = this.map.getView()
     view.setCenter(view.constrainCenter(ol.proj.transform(center, 'EPSG:4326', 'EPSG:3857')))
     view.setZoom(zoom)
   }
 
-  _renderDetections() {
+  private renderDetections() {
     const {detections, geoserverUrl} = this.props
-    const layer = this._detectionsLayer
+    const layer = this.detectionsLayer
     const source = layer.getSource() as ol.source.TileWMS
     const currentLayerIds = source.getParams()[KEY_LAYERS]
     const incomingLayerIds = detections.map(d => d.properties.detectionsLayerId).sort().join(',')
@@ -463,7 +462,7 @@ export class PrimaryMap extends React.Component<Props, State> {
     if (!incomingLayerIds && currentLayerIds) {
       layer.setExtent([0, 0, 0, 0])
       layer.setSource(generateDetectionsSource())
-      this._subscribeToLoadEvents(layer)
+      this.subscribeToLoadEvents(layer)
       return
     }
 
@@ -477,10 +476,10 @@ export class PrimaryMap extends React.Component<Props, State> {
     source.setUrl(`${geoserverUrl}/wms`)
   }
 
-  _renderFrames() {
-    this._clearFrames()
+  private renderFrames() {
+    this.clearFrames()
 
-    const source = this._frameLayer.getSource()
+    const source = this.frameLayer.getSource()
     const reader = new ol.format.GeoJSON()
     this.props.frames.forEach(raw => {
       const frame = reader.readFeature(raw, {featureProjection: WEB_MERCATOR})
@@ -535,8 +534,8 @@ export class PrimaryMap extends React.Component<Props, State> {
     })
   }
 
-  _renderHighlight() {
-    const source = this._highlightLayer.getSource()
+  private renderHighlight() {
+    const source = this.highlightLayer.getSource()
     source.clear()
 
     const geojson = this.props.highlightedFeature
@@ -550,10 +549,10 @@ export class PrimaryMap extends React.Component<Props, State> {
     source.addFeature(feature)
   }
 
-  _renderImagery() {
+  private renderImagery() {
     const {imagery} = this.props
     const reader = new ol.format.GeoJSON()
-    const source = this._imageryLayer.getSource()
+    const source = this.imageryLayer.getSource()
     source.setAttributions(undefined)
     source.clear()
     if (imagery) {
@@ -567,8 +566,8 @@ export class PrimaryMap extends React.Component<Props, State> {
     }
   }
 
-  _renderImagerySearchResultsOverlay() {
-    this._imageSearchResultsOverlay.setPosition(undefined)
+  private renderImagerySearchResultsOverlay() {
+    this.imageSearchResultsOverlay.setPosition(undefined)
     // HACK HACK HACK HACK HACK HACK HACK HACK
     const bbox = deserializeBbox(this.props.bbox)
     if (!bbox) {
@@ -580,19 +579,19 @@ export class PrimaryMap extends React.Component<Props, State> {
 
     if (this.props.imagery.count) {
       // Pager
-      this._imageSearchResultsOverlay.setPosition(ol.extent.getBottomRight(bbox))
-      this._imageSearchResultsOverlay.setPositioning('top-right')
+      this.imageSearchResultsOverlay.setPosition(ol.extent.getBottomRight(bbox))
+      this.imageSearchResultsOverlay.setPositioning('top-right')
     }
     else {
       // No results
-      this._imageSearchResultsOverlay.setPosition(ol.extent.getCenter(bbox))
-      this._imageSearchResultsOverlay.setPositioning('center-center')
+      this.imageSearchResultsOverlay.setPosition(ol.extent.getCenter(bbox))
+      this.imageSearchResultsOverlay.setPositioning('center-center')
     }
     // HACK HACK HACK HACK HACK HACK HACK HACK
   }
 
-  _renderImagerySearchBbox() {
-    this._clearDraw()
+  private renderImagerySearchBbox() {
+    this.clearDraw()
     const bbox = deserializeBbox(this.props.bbox)
     if (!bbox) {
       return
@@ -600,10 +599,10 @@ export class PrimaryMap extends React.Component<Props, State> {
     const feature = new ol.Feature({
       geometry: ol.geom.Polygon.fromExtent(bbox),
     })
-    this._drawLayer.getSource().addFeature(feature)
+    this.drawLayer.getSource().addFeature(feature)
   }
 
-  _renderSelectionPreview() {
+  private renderSelectionPreview() {
     const images = featuresToImages(this.props.selectedFeature)
     const shouldRender = {}
     const alreadyRendered = {}
@@ -611,19 +610,19 @@ export class PrimaryMap extends React.Component<Props, State> {
     images.forEach(i => shouldRender[i.id] = true)
 
     // Removals
-    Object.keys(this._previewLayers).forEach(imageId => {
-      const layer = this._previewLayers[imageId]
+    Object.keys(this.previewLayers).forEach(imageId => {
+      const layer = this.previewLayers[imageId]
       alreadyRendered[imageId] = true
       if (!shouldRender[imageId]) {
-        delete this._previewLayers[imageId]
+        delete this.previewLayers[imageId]
         animateLayerExit(layer).then(() => {
-          this._map.removeLayer(layer)
+          this.map.removeLayer(layer)
         })
       }
     })
 
     // Additions
-    const insertionIndex = this._basemapLayers.length
+    const insertionIndex = this.basemapLayers.length
     images.filter(i => shouldRender[i.id] && !alreadyRendered[i.id]).forEach(image => {
       const chunks = image.id.match(/^(\w+):(.*)$/)
       if (!chunks) {
@@ -647,42 +646,42 @@ export class PrimaryMap extends React.Component<Props, State> {
         source: generateScenePreviewSource(provider, externalImageId, apiKey),
       })
 
-      this._subscribeToLoadEvents(layer)
-      this._previewLayers[image.id] = layer
-      this._map.getLayers().insertAt(insertionIndex, layer)
+      this.subscribeToLoadEvents(layer)
+      this.previewLayers[image.id] = layer
+      this.map.getLayers().insertAt(insertionIndex, layer)
     })
   }
 
-  _subscribeToLoadEvents(layer) {
+  private subscribeToLoadEvents(layer) {
     const source = layer.getSource()
-    source.on('tileloadstart', this._handleLoadStart)
-    source.on('tileloadend', this._handleLoadStop)
-    source.on('tileloaderror', this._handleLoadError)
+    source.on('tileloadstart', this.handleLoadStart)
+    source.on('tileloadend', this.handleLoadStop)
+    source.on('tileloaderror', this.handleLoadError)
   }
 
-  _updateBasemap() {
-    this._basemapLayers.forEach((layer, i) => layer.setVisible(i === this.state.basemapIndex))
+  private updateBasemap() {
+    this.basemapLayers.forEach((layer, i) => layer.setVisible(i === this.state.basemapIndex))
   }
 
-  _updateInteractions() {
+  private updateInteractions() {
     switch (this.props.mode) {
       case MODE_SELECT_IMAGERY:
-        this._deactivateDrawInteraction()
-        this._activateSelectInteraction()
+        this.deactivateDrawInteraction()
+        this.activateSelectInteraction()
         break
       case MODE_DRAW_BBOX:
-        this._activateDrawInteraction()
-        this._deactivateSelectInteraction()
+        this.activateDrawInteraction()
+        this.deactivateSelectInteraction()
         break
       case MODE_NORMAL:
-        this._clearDraw()
-        this._deactivateDrawInteraction()
-        this._activateSelectInteraction()
+        this.clearDraw()
+        this.deactivateDrawInteraction()
+        this.activateSelectInteraction()
         break
       case MODE_PRODUCT_LINES:
-        this._clearDraw()
-        this._deactivateDrawInteraction()
-        this._activateSelectInteraction()
+        this.clearDraw()
+        this.deactivateDrawInteraction()
+        this.activateSelectInteraction()
         break
       default:
         console.warn('wat mode=%s', this.props.mode)
@@ -690,8 +689,8 @@ export class PrimaryMap extends React.Component<Props, State> {
     }
   }
 
-  _updateSelectedFeature() {
-    const features = this._selectInteraction.getFeatures()
+  private updateSelectedFeature() {
+    const features = this.selectInteraction.getFeatures()
     features.clear()
     const {selectedFeature} = this.props
     if (!selectedFeature) {
@@ -701,7 +700,7 @@ export class PrimaryMap extends React.Component<Props, State> {
     const feature = reader.readFeature(selectedFeature, {dataProjection: WGS84, featureProjection: WEB_MERCATOR})
     const center = ol.extent.getCenter(feature.getGeometry().getExtent())
     features.push(feature)
-    this._featureDetailsOverlay.setPosition(center)
+    this.featureDetailsOverlay.setPosition(center)
   }
 }
 

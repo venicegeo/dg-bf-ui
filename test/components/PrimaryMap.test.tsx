@@ -22,10 +22,14 @@ import * as sinon from 'sinon'
 import {
   PrimaryMap,
   MODE_NORMAL,
-  MODE_DRAW_BBOX,
-  MODE_PRODUCT_LINES,
-  MODE_SELECT_IMAGERY,
 } from '../../app/components/PrimaryMap'
+
+interface Internals {
+  detectionsLayer: ol.layer.Tile
+  drawLayer: ol.layer.Vector
+  map: ol.Map
+  previewLayers: {[key: string]: ol.layer.Tile}
+}
 
 describe('<PrimaryMap/>', () => {
   let _props
@@ -93,8 +97,8 @@ describe('<PrimaryMap/>', () => {
         onViewChange={_props.onViewChange}
       />
     )
-    assert.instanceOf(wrapper.instance()._map, ol.Map)
-    assert.instanceOf(wrapper.ref('container').node.querySelector('canvas'), HTMLCanvasElement)
+    assert.instanceOf((wrapper.instance() as any as Internals).map, ol.Map)
+    assert.instanceOf((wrapper.ref('container') as any).node.querySelector('canvas'), HTMLCanvasElement)
   })
 
   describe('view', () => {
@@ -121,15 +125,15 @@ describe('<PrimaryMap/>', () => {
     it('has correct center on init', () => {
       const wrapper = getComponent({ basemapIndex: 0, center: [0, 0], zoom: 5.5 })
       return awaitMap(() => {
-        const view = wrapper.instance()._map.getView()
-        assert.equal(ol.proj.toLonLat(view.getCenter()), [0, 0])
+        const view = (wrapper.instance() as any as Internals).map.getView()
+        assert.deepEqual(ol.proj.toLonLat(view.getCenter()), [0, 0])
       })
     })
 
     it('has correct zoom on init', () => {
       const wrapper = getComponent({ basemapIndex: 0, center: [0, 0], zoom: 5.5 })
       return awaitMap(() => {
-        const view = wrapper.instance()._map.getView()
+        const view = (wrapper.instance() as any as Internals).map.getView()
         assert.equal(view.getZoom(), 5.5)
       })
     })
@@ -145,8 +149,8 @@ describe('<PrimaryMap/>', () => {
       const wrapper = getComponent({ basemapIndex: 0, center: [0, 0], zoom: 5.5 })
       wrapper.setProps({ view: { basemapIndex: 0, center: [30, 30], zoom: 5.5 } })
       return awaitMap(() => {
-        const view = wrapper.instance()._map.getView()
-        assert.equal(ol.proj.toLonLat(view.getCenter()).map(Math.round), [30, 30])
+        const view = (wrapper.instance() as any as Internals).map.getView()
+        assert.deepEqual(ol.proj.toLonLat(view.getCenter()).map(Math.round), [30, 30])
       })
     })
 
@@ -154,7 +158,7 @@ describe('<PrimaryMap/>', () => {
       const wrapper = getComponent({ basemapIndex: 0, center: [0, 0], zoom: 5.5 })
       wrapper.setProps({ view: { basemapIndex: 0, center: [0, 0], zoom: 10.5 } })
       return awaitMap(() => {
-        const view = wrapper.instance()._map.getView()
+        const view = (wrapper.instance() as any as Internals).map.getView()
         assert.equal(view.getZoom(), 10.5)
       })
     })
@@ -171,7 +175,7 @@ describe('<PrimaryMap/>', () => {
       const wrapper = getComponent({ basemapIndex: 0, center: [0, 0], zoom: 5.5 })
       wrapper.setProps({ view: { basemapIndex: 2, center: [30, 30], zoom: 10.5 } })
       return awaitMap(() => {
-        expect(wrapper.prop('onViewChange')).toNotHaveBeenCalled()
+        assert.isFalse(wrapper.prop('onViewChange').called)
       }, 300)  // wait for debounce to complete
     })
   })
@@ -200,11 +204,11 @@ describe('<PrimaryMap/>', () => {
     it('can render bbox', () => {
       const wrapper = getComponent([0, 0, 30, 30])
       return awaitMap(() => {
-        const layerSource = wrapper.instance()._drawLayer.getSource()
+        const layerSource = (wrapper.instance() as any as Internals).drawLayer.getSource()
         const features = layerSource.getFeatures()
-        const points = features[0].getGeometry().getCoordinates()[0].map(p => ol.proj.toLonLat(p).map(Math.round))
+        const points = (features[0].getGeometry() as ol.geom.Polygon).getCoordinates()[0].map(p => ol.proj.toLonLat(p).map(Math.round))
         assert.equal(features.length, 1)
-        assert.equal(points, [[0, 0], [0, 30], [30, 30], [30, 0], [0, 0]])
+        assert.deepEqual(points, [[0, 0], [0, 30], [30, 30], [30, 0], [0, 0]])
       }, 0)
     })
 
@@ -212,11 +216,11 @@ describe('<PrimaryMap/>', () => {
       const wrapper = getComponent([0, 0, 30, 30])
       wrapper.setProps({ bbox: [-30, -30, 0, 0] })
       return awaitMap(() => {
-        const layerSource = wrapper.instance()._drawLayer.getSource()
+        const layerSource = (wrapper.instance() as any as Internals).drawLayer.getSource()
         const features = layerSource.getFeatures()
-        const points = features[0].getGeometry().getCoordinates()[0].map(p => ol.proj.toLonLat(p).map(Math.round))
+        const points = (features[0].getGeometry() as ol.geom.Polygon).getCoordinates()[0].map(p => ol.proj.toLonLat(p).map(Math.round))
         assert.equal(features.length, 1)
-        assert.equal(points, [[-30, -30], [-30, 0], [0, 0], [0, -30], [-30, -30]])
+        assert.deepEqual(points, [[-30, -30], [-30, 0], [0, 0], [0, -30], [-30, -30]])
       }, 0)
     })
 
@@ -254,9 +258,9 @@ describe('<PrimaryMap/>', () => {
 
     it('sends correct catalog API key via XYZ', () => {
       const wrapper = getComponent('test-catalog-api-key')
-      const imageId = wrapper.prop('selectedFeature').id
-      const urls = wrapper.instance()._previewLayers[imageId].getSource().getUrls()
-      expect(urls.every(s => s.includes('test-catalog-api-key'))).toBe(true)
+      const sceneId = wrapper.prop('selectedFeature').id
+      const urls = ((wrapper.instance() as any as Internals).previewLayers[sceneId].getSource() as ol.source.TileWMS).getUrls()
+      assert.isTrue(urls.every(s => s.includes('test-catalog-api-key')))
     })
   })
 
@@ -283,8 +287,8 @@ describe('<PrimaryMap/>', () => {
 
     it('sends correct layer IDs to WMS server (single)', () => {
       const wrapper = getComponent([generateCompletedJob()])
-      const source = wrapper.instance()._detectionsLayer.getSource()
-      assert.equal(source.getParams(), {LAYERS: 'test-data-id'})
+      const source = (wrapper.instance() as any as Internals).detectionsLayer.getSource() as ol.source.TileWMS
+      assert.deepEqual(source.getParams(), {LAYERS: 'test-data-id'})
     })
 
     it('sends correct layer IDs to WMS server (multiple)', () => {
@@ -293,13 +297,13 @@ describe('<PrimaryMap/>', () => {
         generateCompletedJob('job-2', 'test-data-id-2'),
         generateCompletedJob('job-3', 'test-data-id-3'),
       ])
-      const source = wrapper.instance()._detectionsLayer.getSource()
-      assert.equal(source.getParams(), {LAYERS: 'test-data-id-1,test-data-id-2,test-data-id-3'})
+      const source = (wrapper.instance() as any as Internals).detectionsLayer.getSource() as ol.source.TileWMS
+      assert.deepEqual(source.getParams(), {LAYERS: 'test-data-id-1,test-data-id-2,test-data-id-3'})
     })
 
     it('set appropriate bbox for layer (single)', () => {
       const wrapper = getComponent([generateCompletedJob()])
-      assert.equal(layerExtent(wrapper.instance()._detectionsLayer), [114, -31, 117, -29])
+      assert.deepEqual(layerExtent((wrapper.instance() as any as Internals).detectionsLayer), [114, -31, 117, -29])
     })
 
     it('sets appropriate bbox for layer (multiple)', () => {
@@ -310,7 +314,7 @@ describe('<PrimaryMap/>', () => {
       job2.geometry.coordinates = [[[-10, 35], [-10, 25], [0, 25], [0, 35], [-10, 35]]]
       job3.geometry.coordinates = [[[-30, -30], [-30, 0], [0, 0], [0, -30], [-30, -30]]]
       const wrapper = getComponent([job1, job2, job3])
-      assert.equal(layerExtent(wrapper.instance()._detectionsLayer), [-30, -30, 30, 35])
+      assert.deepEqual(layerExtent((wrapper.instance() as any as Internals).detectionsLayer), [-30, -30, 30, 35])
     })
   })
 
@@ -385,18 +389,16 @@ function layerExtent(layer) {
   return ol.proj.transformExtent(layer.getExtent(), 'EPSG:3857', 'EPSG:4326').map(Math.round)
 }
 
-function generateCompletedJob(jobId, dataId = 'test-data-id') {
+function generateCompletedJob(jobId?, dataId = 'test-data-id') {
   const job = generateRunningJob(jobId)
-  job.properties['beachfront:status'] = 'Success'
-  job.properties['beachfront:geojsonDataId'] = dataId
-  job.properties['beachfront:rasterDataId'] = 'test-deployment-data-id'
-  job.properties['beachfront:wmsLayerId'] = dataId
-  job.properties['beachfront:wmsUrl'] = 'http://ows.terrestris.de/osm/service'
+  job.properties.status = 'Success'
+  job.properties.detectionsDataId = dataId
+  job.properties.detectionsLayerId = dataId
   return job
 }
 
-function generateRunningJob(id = 'test-job-id') {
-  /* eslint-disable */
+function generateRunningJob(id = 'test-job-id'): beachfront.Job {
+  /* tslint:disable */
   return {
     "id": id,
     "geometry": {
@@ -427,24 +429,26 @@ function generateRunningJob(id = 'test-job-id') {
       ]
     },
     "properties": {
-      "beachfront:algorithmName": "BF_Algo_NDWI",
-      "beachfront:createdOn": "2016-08-19T22:41:27.713Z",
-      "acquiredDate": "2016-07-01T02:11:05.604Z",
-      "beachfront:imageId": "landsat:LC81130812016183LGN00",
-      "sensorName": "Landsat8",
-      "beachfront:name": "BF_19AUG2016",
-      "beachfront:status": "Running",
-      "thumb_large": "https://landsat-pds.s3.amazonaws.com/L8/113/081/LC81130812016183LGN00/LC81130812016183LGN00_thumb_large.jpg",
-      "beachfront:type": "JOB",
-      "beachfront:schemaVersion": 3,
+      "algorithmName": "BF_Algo_NDWI",
+      "createdOn": "2016-08-19T22:41:27.713Z",
+      "detectionsDataId": null,
+      "detectionsLayerId": null,
+      "sceneCaptureDate": "2016-07-01T02:11:05.604Z",
+      "sceneCloudCover": 10,
+      "sceneId": "landsat:LC81130812016183LGN00",
+      "sceneSensorName": "Landsat8",
+      "name": "BF_19AUG2016",
+      "status": "Running",
+      "type": "JOB",
+      "__schemaVersion__": 3,
     },
     "type": "Feature"
   }
-  /* eslint-enable */
+  /* tslint:enable */
 }
 
-function generateScene() {
-  /* eslint-disable */
+function generateScene(): beachfront.Scene {
+  /* tslint:disable */
   return {
     "type": "Feature",
     "geometry": {
@@ -494,7 +498,8 @@ function generateScene() {
       "resolution": 30,
       "sensorName": "Landsat8",
       "thumb_large": "https://landsat-pds.s3.amazonaws.com/L8/118/056/LC81180562016186LGN00/LC81180562016186LGN00_thumb_large.jpg",
-      "thumb_small": "https://landsat-pds.s3.amazonaws.com/L8/118/056/LC81180562016186LGN00/LC81180562016186LGN00_thumb_small.jpg"
+      "thumb_small": "https://landsat-pds.s3.amazonaws.com/L8/118/056/LC81180562016186LGN00/LC81180562016186LGN00_thumb_small.jpg",
+      "type": "SCENE",
     },
     "id": "landsat:LC81180562016186LGN00",
     "bbox": [
@@ -504,5 +509,5 @@ function generateScene() {
       6.82770182318587
     ]
   }
-  /* eslint-enable */
+  /* tslint:enable */
 }
