@@ -92,11 +92,11 @@ export class JobStatus extends React.Component<Props, State> {
               <dt>Algorithm</dt>
               <dd>{properties.algorithmName}</dd>
               <dt>Image ID</dt>
-              <dd>{normalizeImageId(properties.imageId)}</dd>
+              <dd>{normalizeSceneId(properties.sceneId)}</dd>
               <dt>Captured On</dt>
-              <dd>{moment(properties.imageCaptureDate).utc().format('MM/DD/YYYY HH:mm z')}</dd>
+              <dd>{moment(properties.sceneCaptureDate).utc().format('MM/DD/YYYY HH:mm z')}</dd>
               <dt>Sensor</dt>
-              <dd>{properties.imageSensorName}</dd>
+              <dd>{properties.sceneSensorName}</dd>
             </dl>
             <div className={styles.removeToggle}>
               <button onClick={this.handleForgetToggle}>
@@ -222,6 +222,6 @@ export class JobStatus extends React.Component<Props, State> {
 // Helpers
 //
 
-function normalizeImageId(imageId) {
-  return imageId.replace(/^landsat:/, '')
+function normalizeSceneId(sceneId) {
+  return sceneId.replace(/^landsat:/, '')
 }

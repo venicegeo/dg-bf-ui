@@ -46,10 +46,10 @@ function upgradeFromV3(legacyRecord) {
       __schemaVersion__: SCHEMA_VERSION,
       algorithmName:     legacyRecord.properties['beachfront:algorithmName'],
       createdOn:         legacyRecord.properties['beachfront:createdOn'],
-      imageId:           legacyRecord.properties['beachfront:imageId'],
-      imageCaptureDate:  legacyRecord.properties['acquiredDate'],  // tslint:disable-line
-      imageSensorName:   legacyRecord.properties['sensorName'],  // tslint:disable-line
       name:              legacyRecord.properties['beachfront:name'],
+      sceneId:           legacyRecord.properties['beachfront:imageId'],
+      sceneCaptureDate:  legacyRecord.properties['acquiredDate'],  // tslint:disable-line
+      sceneSensorName:   legacyRecord.properties['sensorName'],  // tslint:disable-line
       type:              TYPE_JOB,
 
       // Force a re-fetch to populate the detections fields
@@ -65,13 +65,13 @@ function upgradeFromV2(legacyRecord) {
       __schemaVersion__: SCHEMA_VERSION,
       algorithmName:     legacyRecord.properties['beachfront:algorithmName'],
       createdOn:         legacyRecord.properties['beachfront:createdOn'],
-      imageId:           legacyRecord.properties['beachfront:imageId'],
       name:              legacyRecord.properties['beachfront:name'],
+      sceneId:           legacyRecord.properties['beachfront:imageId'],
       type:              TYPE_JOB,
 
       // Deduce image metadata
-      imageCaptureDate:  extractLandsatCaptureDate(legacyRecord.properties['beachfront:imageId']),
-      imageSensorName:   extractLandsatSensor(legacyRecord.properties['beachfront:imageId']),
+      sceneCaptureDate:  extractLandsatCaptureDate(legacyRecord.properties['beachfront:imageId']),
+      sceneSensorName:   extractLandsatSensor(legacyRecord.properties['beachfront:imageId']),
 
       // Force a re-fetch to populate the detections fields
       status:            STATUS_RUNNING,
@@ -86,13 +86,13 @@ function upgradeFromV1(legacyRecord) {
       __schemaVersion__: SCHEMA_VERSION,
       algorithmName:     legacyRecord.properties['beachfront:algorithmName'],
       createdOn:         legacyRecord.properties['beachfront:createdOn'],
-      imageId:           legacyRecord.properties['beachfront:imageId'],
+      sceneId:           legacyRecord.properties['beachfront:imageId'],
       name:              legacyRecord.properties['beachfront:name'],
       type:              TYPE_JOB,
 
       // Deduce image metadata
-      imageCaptureDate:  extractLandsatCaptureDate(legacyRecord.properties['beachfront:imageId']),
-      imageSensorName:   extractLandsatSensor(legacyRecord.properties['beachfront:imageId']),
+      sceneCaptureDate:  extractLandsatCaptureDate(legacyRecord.properties['beachfront:imageId']),
+      sceneSensorName:   extractLandsatSensor(legacyRecord.properties['beachfront:imageId']),
 
       // Force a re-fetch to populate the detections fields
       status:            STATUS_RUNNING,

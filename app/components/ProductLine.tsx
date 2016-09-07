@@ -97,7 +97,7 @@ export class ProductLine extends React.Component<Props, State> {
               <dt>Algorithm</dt>
               <dd>{properties.algorithmName}</dd>
               <dt>Cloud Cover</dt>
-              <dd>{properties.imageCloudCover}% or less</dd>
+              <dd>{properties.sceneCloudCover}% or less</dd>
               {/*
               <dt>Compute Mask</dt>
               <dd>{computeMask}</dd>

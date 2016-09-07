@@ -199,6 +199,6 @@ export class CreateJob extends React.Component<Props, State> {
 // Helpers
 //
 
-function generateName(imageId): string {
-  return imageId.replace(/^landsat:/, '')
+function generateName(sceneId): string {
+  return sceneId.replace(/^landsat:/, '')
 }

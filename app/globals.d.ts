@@ -6,10 +6,10 @@ declare namespace beachfront {
       detectionsLayerId: string
       eventTypeId: string
       expiresOn: string
-      imageCloudCover: number
-      imageSensorName: string
       name: string
       owner: string
+      sceneCloudCover: number
+      sceneSensorName: string
       spatialFilterName: string
       startsOn: string
       status: string
@@ -22,11 +22,11 @@ declare namespace beachfront {
       createdOn: string
       detectionsDataId: string
       detectionsLayerId: string
-      imageCaptureDate: string
-      imageCloudCover: number
-      imageId: string
-      imageSensorName: string
       name: string
+      sceneCaptureDate: string
+      sceneCloudCover: number
+      sceneId: string
+      sceneSensorName: string
       status: string
       type: 'JOB'
     }

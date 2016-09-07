@@ -530,7 +530,7 @@ export class PrimaryMap extends React.Component<Props, State> {
       status.set(KEY_TYPE, TYPE_LABEL_MINOR)
       status.set(KEY_OWNER_ID, id)
       status.set(KEY_STATUS, raw.properties.status)
-      status.set(KEY_IMAGE_ID, (raw as beachfront.Job).properties.imageId)
+      status.set(KEY_IMAGE_ID, (raw as beachfront.Job).properties.sceneId)
       source.addFeature(status)
     })
   }
@@ -725,7 +725,7 @@ function animateLayerExit(layer) {
 function featuresToImages(...features: (beachfront.Job|beachfront.Scene)[]) {
   return features.filter(Boolean).map(feature => ({
     extent: featureToBbox(feature),
-    id:     (feature as beachfront.Job).properties.imageId || feature.id,
+    id:     (feature as beachfront.Job).properties.sceneId || feature.id,
   }))
 }
 

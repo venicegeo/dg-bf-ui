@@ -68,7 +68,7 @@ export const ActivityTable = ({
       <table>
         <thead>
           <tr>
-            <th>Image ID</th>
+            <th>Scene ID</th>
             <th>Captured On</th>
             <th>Sensor</th>
             <td></td>
@@ -83,7 +83,7 @@ export const ActivityTable = ({
               onMouseEnter={() => onHoverIn(job)}
               onMouseLeave={() => onHoverOut(job)}
               >
-              <td>{getImageId(job)}</td>
+              <td>{getSceneId(job)}</td>
               <td>{getCapturedOn(job)}</td>
               <td>{getImageSensor(job)}</td>
               <td className={styles.downloadCell} onClick={e => e.stopPropagation()}>
@@ -133,14 +133,14 @@ function generatePlaceholderRows(count) {
 }
 
 function getCapturedOn({ properties }: beachfront.Job) {
-  const then = moment(properties.imageCaptureDate)
+  const then = moment(properties.sceneCaptureDate)
   return then.format(then.year() === new Date().getFullYear() ? 'MM/DD' : 'MM/DD/YYYY')
 }
 
-function getImageId({ properties }: beachfront.Job) {
-  return properties.imageId.replace(/^landsat:/, '')
+function getSceneId({ properties }: beachfront.Job) {
+  return properties.sceneId.replace(/^landsat:/, '')
 }
 
 function getImageSensor({ properties }: beachfront.Job) {
-  return properties.imageSensorName
+  return properties.sceneSensorName
 }
