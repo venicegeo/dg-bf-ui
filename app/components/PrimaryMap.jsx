@@ -451,6 +451,7 @@ export class PrimaryMap extends Component {
     if (!incomingLayerIds && currentLayerIds) {
       layer.setExtent([0, 0, 0, 0])
       layer.setSource(generateDetectionsSource())
+      this._subscribeToLoadEvents(layer)
       return
     }
 
