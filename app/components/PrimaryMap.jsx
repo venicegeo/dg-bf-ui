@@ -14,6 +14,8 @@
  * limitations under the License.
  **/
 
+const tileErrorPlaceholder = require('../images/tile-error.png')
+
 import 'openlayers/dist/ol.css'
 import React, {Component} from 'react'
 import {findDOMNode} from 'react-dom'
@@ -999,7 +1001,7 @@ function getColorForStatus(status) {
 function tileLoadFunction(imageTile, src) {
   if (imageTile.loadingError) {
     delete imageTile['loadingError']
-    imageTile.getImage().src = '/app/images/tile-error.png'
+    imageTile.getImage().src = tileErrorPlaceholder
   }
   else { imageTile.getImage().src = src }
 }
