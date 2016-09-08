@@ -15,6 +15,7 @@
  **/
 
 import React from 'react'
+import LoadingAnimation from './LoadingAnimation'
 import {ProductLine} from './ProductLine'
 
 const styles = require('./ProductLineList.css')
@@ -39,8 +40,9 @@ export class ProductLineList extends React.Component {
   }
 
   render() {
+    const isEmpty = !this.props.productLines.length && !this.props.isFetching && !this.props.error
     return (
-      <div className={styles.root}>
+      <div className={`${styles.root} ${isEmpty ? styles.isEmpty : ''}`}>
         <header>
           <h1>Product Lines</h1>
         </header>
@@ -69,9 +71,12 @@ export class ProductLineList extends React.Component {
               onPanTo={this.props.onPanTo}
             />
           ))}
+          {isEmpty && (
+            <li className={styles.placeholder}>No product lines currently exist</li>
+          )}
           {this.props.isFetching && (
-            <li className={styles.placeholder}>
-              Loading Product Lines
+            <li className={styles.loadingMask}>
+              <LoadingAnimation className={styles.loadingAnimation}/>
             </li>
           )}
         </ul>

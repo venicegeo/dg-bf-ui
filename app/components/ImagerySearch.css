@@ -44,7 +44,6 @@
 }
 
 .loadingMask {
-  display: none;
   position: absolute;
   top: 0;
   left: 0;
@@ -55,10 +54,6 @@
   background-color: var(--COLOR_BRAND);
   text-align: center;
   opacity: .6;
-}
-
-.isSearching .loadingMask {
-  display: block;
 }
 
 .loadingAnimation {
