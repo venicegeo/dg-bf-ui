@@ -210,7 +210,7 @@ function generateFilterNamesHash(filters) {
 }
 
 function isActive(maxDate) {
-  return !maxDate || moment(maxDate).isBefore(moment())
+  return !maxDate || moment(maxDate).isAfter(moment())
 }
 
 // HACK HACK HACK HACK HACK HACK HACK HACK HACK HACK HACK HACK HACK HACK HACK
