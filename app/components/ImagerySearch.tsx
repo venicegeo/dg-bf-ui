@@ -46,7 +46,7 @@ export class ImagerySearch extends React.Component<Props, {}> {
 
   render() {
     return (
-      <form className={`${styles.root} ${this.props.isSearching ? styles.isSearching : ''}`} onSubmit={this.handleSubmit}>
+      <form className={styles.root} onSubmit={this.handleSubmit}>
         <h2>Source Imagery</h2>
 
         <CatalogSearchCriteria

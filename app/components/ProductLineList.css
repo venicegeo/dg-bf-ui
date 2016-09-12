@@ -39,3 +39,35 @@
   color: inherit;
   font-size: 1.3em;
 }
+
+.placeholder {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding-top: 10vh;
+  font-size: 1.2em;
+  font-weight: 100;
+  text-align: center;
+  background-color: white;
+  color: #ddd;
+}
+
+.loadingMask {
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
+  padding-top: 10vh;
+  cursor: wait;
+  background-color: var(--COLOR_BRAND);
+  text-align: center;
+  opacity: .6;
+}
+
+.loadingAnimation {
+  width: 100px;
+  height: 100px;
+}
