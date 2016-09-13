@@ -18,8 +18,8 @@ import * as React from 'react'
 import {shallow} from 'enzyme'
 import {assert} from 'chai'
 import * as sinon from 'sinon'
-import {AlgorithmList} from '../../app/components/AlgorithmList'
-import {Algorithm} from '../../app/components/Algorithm'
+import {AlgorithmList} from '../../src/components/AlgorithmList'
+import {Algorithm} from '../../src/components/Algorithm'
 
 describe('<AlgorithmListList/>', () => {
   let _props

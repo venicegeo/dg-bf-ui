@@ -29,7 +29,7 @@ module.exports = {
 
   context: __dirname,
   entry: {
-    'app': './app/index.ts',
+    'src': './src/index.ts',
     'vendor': [
       'isomorphic-fetch',
       'moment',
@@ -104,8 +104,8 @@ module.exports = {
       'process.env.GATEWAY': process.env.GATEWAY ? JSON.stringify(process.env.GATEWAY) : (__environment__ === 'development') ? JSON.stringify('http://localhost:3000') : "location.protocol + '//' + location.hostname.replace('.int.', '.stage.').replace(/beachfront[^\\.]*\\./, 'pz-gateway.')",
     }),
     new HtmlWebpackPlugin({
-      template: 'app/index.ejs',
-      favicon: __environment__ === 'production' ? 'app/images/favicon.png' : 'app/images/favicon-dev.png',
+      template: 'src/index.html',
+      favicon: __environment__ === 'production' ? 'src/images/favicon.png' : 'src/images/favicon-dev.png',
       hash: true,
       xhtml: true
     }),

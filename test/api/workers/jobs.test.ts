@@ -16,10 +16,10 @@
 
 import {assert} from 'chai'
 import * as sinon from 'sinon'
-import * as worker from '../../../app/api/workers/jobs'
+import * as worker from '../../../src/api/workers/jobs'
 import {
   SCHEMA_VERSION,
-} from '../../../app/config'
+} from '../../../src/config'
 import {
   RESPONSE_JOB_ERROR,
   RESPONSE_JOB_RUNNING,
@@ -31,7 +31,7 @@ import {
   STATUS_RUNNING,
   STATUS_SUCCESS,
   STATUS_TIMED_OUT,
-} from '../../../app/constants'
+} from '../../../src/constants'
 
 interface Client {
   getDeployment: Sinon.SinonStub

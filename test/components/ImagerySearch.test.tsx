@@ -18,8 +18,8 @@ import * as React from 'react'
 import {mount, shallow} from 'enzyme'
 import {assert} from 'chai'
 import * as sinon from 'sinon'
-import {CatalogSearchCriteria} from '../../app/components/CatalogSearchCriteria'
-import {ImagerySearch} from '../../app/components/ImagerySearch'
+import {CatalogSearchCriteria} from '../../src/components/CatalogSearchCriteria'
+import {ImagerySearch} from '../../src/components/ImagerySearch'
 
 describe('<ImagerySearch/>', () => {
   let _props

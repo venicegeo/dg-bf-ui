@@ -18,7 +18,7 @@ import * as React from 'react'
 import {mount} from 'enzyme'
 import {assert} from 'chai'
 import * as sinon from 'sinon'
-import {NewJobDetails} from '../../app/components/NewJobDetails'
+import {NewJobDetails} from '../../src/components/NewJobDetails'
 
 describe('<NewJobDetails/>', () => {
   let _props

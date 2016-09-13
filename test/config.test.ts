@@ -15,7 +15,7 @@
  **/
 
 import {assert} from 'chai'
-import * as config from '../app/config'
+import * as config from '../src/config'
 
 describe('config', () => {
   it('reads gateway URL from environment', () => {

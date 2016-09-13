@@ -16,7 +16,7 @@
 
 import {assert} from 'chai'
 import * as sinon from 'sinon'
-import {Client, STATUS_ERROR, STATUS_RUNNING, STATUS_SUCCESS} from '../../app/utils/piazza-client'
+import {Client, STATUS_ERROR, STATUS_RUNNING, STATUS_SUCCESS} from '../../src/utils/piazza-client'
 import {
   ERROR_GENERIC,
   RESPONSE_DEPLOYMENT,

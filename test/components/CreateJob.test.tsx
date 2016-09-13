@@ -18,7 +18,7 @@ import * as React from 'react'
 import {shallow} from 'enzyme'
 import {assert} from 'chai'
 import * as sinon from 'sinon'
-import {CreateJob} from '../../app/components/CreateJob'
+import {CreateJob} from '../../src/components/CreateJob'
 
 describe('<CreateJob/>', () => {
   let _props

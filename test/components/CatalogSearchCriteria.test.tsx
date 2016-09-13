@@ -18,7 +18,7 @@ import * as React from 'react'
 import * as sinon from 'sinon'
 import {shallow} from 'enzyme'
 import {assert} from 'chai'
-import {CatalogSearchCriteria} from '../../app/components/CatalogSearchCriteria'
+import {CatalogSearchCriteria} from '../../src/components/CatalogSearchCriteria'
 
 describe('<CatalogSearchCriteria/>', () => {
   let _props

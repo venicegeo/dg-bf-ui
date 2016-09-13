@@ -22,7 +22,7 @@ import * as sinon from 'sinon'
 import {
   PrimaryMap,
   MODE_NORMAL,
-} from '../../app/components/PrimaryMap'
+} from '../../src/components/PrimaryMap'
 
 interface Internals {
   detectionsLayer: ol.layer.Tile

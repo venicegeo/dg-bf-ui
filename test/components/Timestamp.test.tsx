@@ -17,7 +17,7 @@
 import * as React from 'react'
 import {shallow} from 'enzyme'
 import {assert} from 'chai'
-import {Timestamp} from '../../app/components/Timestamp'
+import {Timestamp} from '../../src/components/Timestamp'
 
 const MILLISECOND = 1
 const SECOND = 1000 * MILLISECOND
