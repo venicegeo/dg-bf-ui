@@ -18,6 +18,7 @@
 
 const path = require('path')
 const webpack = require('webpack')
+const CopyWebpackPlugin = require('copy-webpack-plugin')
 const HtmlWebpackPlugin = require('html-webpack-plugin')
 const cssnext = require('postcss-cssnext')
 const cssimport = require('postcss-import')
@@ -25,22 +26,16 @@ const cssimport = require('postcss-import')
 const __environment__ = process.env.NODE_ENV || 'development'
 
 module.exports = {
-  devtool: 'source-map',
+  devtool: 'cheap-module-eval-source-map',
 
   context: __dirname,
-  entry: {
-    'src': './src/index.ts',
-    'vendor': [
-      'isomorphic-fetch',
-      'moment',
-      'openlayers',
-      'react',
-      'react-dom',
-    ]
+  entry: './src/index.ts',
+
+  externals: {
+    'openlayers': 'ol'
   },
 
   resolve: {
-    alias: __environment__ === 'production' ? {} : {/* openlayers$: 'openlayers/dist/ol-debug.js' */},
     extensions: ['', '.tsx', '.ts', '.js'],
     root: __dirname,
   },
@@ -51,7 +46,6 @@ module.exports = {
   },
 
   module: {
-    noParse: /\bol(-debug)?\.js$/,
     preLoaders: [
       {
         test: /\.js$/,
@@ -97,8 +91,11 @@ module.exports = {
   ]),
 
   plugins: [
+    new CopyWebpackPlugin([{
+      from: require.resolve('openlayers/dist/ol-debug.js'),
+      to: 'ol.js',
+    }]),
     new webpack.IgnorePlugin(/^\.\/locale$/, /moment$/),
-    new webpack.optimize.CommonsChunkPlugin('vendor', 'vendor.bundle.js'),
     new webpack.DefinePlugin({
       'process.env.NODE_ENV': JSON.stringify(__environment__),
       'process.env.GATEWAY': process.env.GATEWAY ? JSON.stringify(process.env.GATEWAY) : (__environment__ === 'development') ? JSON.stringify('http://localhost:3000') : "location.protocol + '//' + location.hostname.replace('.int.', '.stage.').replace(/beachfront[^\\.]*\\./, 'pz-gateway.')",

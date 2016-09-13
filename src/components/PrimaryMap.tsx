@@ -98,8 +98,6 @@ export interface MapView {
   zoom: number
 }
 
-declare var window: { ol: any, primaryMap: any }  // DEBUG
-
 export class PrimaryMap extends React.Component<Props, State> {
   refs: any
 
@@ -150,10 +148,7 @@ export class PrimaryMap extends React.Component<Props, State> {
     }
 
     // DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG
-    // DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG
-    window.ol = ol
-    window.primaryMap = this
-    // DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG
+    window['primaryMap'] = this  // tslint:disable-line
     // DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG
   }
 
