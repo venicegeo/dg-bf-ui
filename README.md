@@ -6,6 +6,7 @@ User interface for the Beachfront project.
 
 ```
 $ npm install
+$ npm run typings:install
 $ npm run watch
 ```
 
