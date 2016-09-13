@@ -587,9 +587,6 @@ function deserialize() {
 }
 
 function serialize(state) {
-  console.groupCollapsed('(Application:serialize)')
-  console.debug(JSON.stringify(state, null, 2))
-  console.groupEnd()
   sessionStorage.setItem('algorithms_records', JSON.stringify(state.algorithms.records))
   sessionStorage.setItem('bbox', JSON.stringify(state.bbox))
   sessionStorage.setItem('catalog', JSON.stringify(state.catalog))

@@ -94,21 +94,19 @@ export function createJob({
     })
 }
 
-interface ParamsStartWorker {
-  sessionToken: string
-  getRecords(): beachfront.Job[]
-  onTerminate(): void
-  onUpdate(job: beachfront.Job): void
-  onError(error: any): void
-}
-
 export function startWorker({
   sessionToken,
   getRecords,
   onTerminate,
   onUpdate,
   onError,
-}: ParamsStartWorker) {
+}: {
+  sessionToken: string
+  getRecords(): beachfront.Job[]
+  onTerminate(): void
+  onUpdate(job: beachfront.Job): void
+  onError(error: any): void
+}) {
   worker.start({
     client:   new Client(GATEWAY, sessionToken),
     interval: JOBS_WORKER.INTERVAL,
