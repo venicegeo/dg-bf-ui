@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "User interface for the Beachfront project",
   "scripts": {
-    "build": "webpack --colors --progress",
+    "build": "webpack",
     "clean": "rimraf dist",
     "lint": "tslint '{src,test}/**/*.{ts,tsx}' -t verbose",
     "test": "karma start",
