@@ -6,12 +6,23 @@ popd > /dev/null
 
 source $root/ci/vars.sh
 
-#
-# Build
-#
+
+## Install Dependencies ########################################################
 
 npm install
-xvfb-run npm run test:ci
+npm run typings:install
+
+
+## Run Tests ###################################################################
+
+if [ $(uname) == Darwin ]
+  then npm run test:ci           # Local development
+  else xvfb-run npm run test:ci  # Jenkins
+fi
+
+
+## Build #######################################################################
+
 NODE_ENV=production npm run build
 echo "pushstate: enabled" > dist/Staticfile
 

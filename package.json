@@ -4,10 +4,11 @@
   "description": "User interface for the Beachfront project",
   "scripts": {
     "build": "webpack",
-    "clean": "rimraf dist",
+    "clean": "rimraf dist beachfront.zip",
     "lint": "tslint '{src,test}/**/*.{ts,tsx}' -t verbose",
     "test": "karma start",
     "test:ci": "karma start --single-run --browsers gs_firefox_38",
+    "typings:install": "typings install",
     "watch": "webpack-dev-server --inline --colors --history-api-fallback"
   },
   "author": "RadiantBlue Technologies",
