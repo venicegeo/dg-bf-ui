@@ -43,24 +43,31 @@ module.exports = (config) => {
       // Isolate "fat" libraries that might slow down each rebuild
       require.resolve('openlayers/dist/ol.js'),
 
-      'test/index.js'
+      'test/index.ts'
     ],
 
     preprocessors: {
-      'test/index.js': ['webpack', 'sourcemap']
+      'test/index.ts': ['webpack', 'sourcemap']
     },
 
     webpack: {
       devtool: 'inline-source-map',
       resolve: {
-        extensions: ['', '.js', '.jsx'],
+        extensions: ['', '.tsx', '.ts', '.jsx', '.js'],
         root: __dirname,
       },
       module: {
+        preLoaders: [
+          {
+            test: /\.js$/,
+            loader: 'source-map',
+            exclude: /node_modules/
+          },
+        ],
         loaders: [
           {
-            test: /\.jsx?$/,
-            loader: 'babel',
+            test: /\.tsx?$/,
+            loader: 'ts',
             exclude: /node_modules/
           },
           {
@@ -105,7 +112,15 @@ module.exports = (config) => {
     },
 
     webpackMiddleware: {
-      noInfo: true
+      stats: 'error-only'
+    },
+
+    //
+    // Misc
+    //
+
+    mochaReporter: {
+      showDiff: true,
     }
   })
 }

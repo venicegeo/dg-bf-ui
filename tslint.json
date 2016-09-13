@@ -1,0 +1,53 @@
+{
+  "rules": {
+    "member-ordering": [true,
+      "public-before-private",
+      "variables-before-functions"
+    ],
+    "no-internal-module": true,
+    "typedef-whitespace": [true, {
+      "call-signature": "nospace",
+      "index-signature": "nospace",
+      "parameter": "nospace",
+      "property-declaration": "nospace",
+      "variable-declaration": "nospace"
+    }],
+
+    "curly": true,
+    "no-duplicate-variable": true,
+    "no-empty": true,
+    "no-eval": true,
+    "no-shadowed-variable": true,
+    "no-string-literal": true,
+    "no-unreachable": true,
+    "no-unused-expression": true,
+    "no-unused-variable": [true, "react"],
+    "no-use-before-declare": true,
+    "no-var-keyword": true,
+    "triple-equals": [true, "allow-null-check"],
+
+    "class-name": true,
+    "indent": [true, "spaces"],
+    "no-consecutive-blank-lines": true,
+    "no-trailing-whitespace": true,
+    "one-line": [true, "check-open-brace", "check-whitespace"],
+    "quotemark": [true,
+      "single",
+      "jsx-double",
+      "avoid-escape"
+    ],
+    "semicolon": [true, "never"],
+    "trailing-comma": [true, {"multiline": "always", "singleline": "never"}],
+    "variable-name": [true,
+      "ban-keywords",
+      "allow-leading-underscore"
+    ],
+    "whitespace": [true,
+      "check-branch",
+      "check-decl",
+      "check-operator",
+      "check-separator",
+      "check-type"
+    ]
+  }
+}

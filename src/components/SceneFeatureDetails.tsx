@@ -1,0 +1,56 @@
+/**
+ * Copyright 2016, RadiantBlue Technologies, Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ **/
+
+const styles: any = require('./SceneFeatureDetails.css')
+
+import * as React from 'react'
+import * as moment from 'moment'
+
+interface Props {
+  className?: string
+  feature: beachfront.Scene
+}
+
+const SceneFeatureDetails = ({className, feature}: Props) => (
+  <div className={`${styles.root} ${className || ''}`}>
+    <h1 title={normalizeId(feature.id)}>{normalizeId(feature.id)}</h1>
+
+    <dl>
+      <dt>Thumbnail</dt>
+      <dd><a className={styles.thumbnailLink} href={feature.properties.thumb_large} target="_blank">Click here to open</a></dd>
+      <dt>Date Captured</dt>
+      <dd>{moment(feature.properties.acquiredDate).utc().format('MM/DD/YYYY HH:mm z')}</dd>
+
+      <dt>Bands</dt>
+      <dd>{Object.keys(feature.properties.bands).join(', ')}</dd>
+
+      <dt>Cloud Cover</dt>
+      <dd>{feature.properties.cloudCover}%</dd>
+
+      <dt>Sensor Name</dt>
+      <dd>{feature.properties.sensorName}</dd>
+    </dl>
+  </div>
+)
+
+export default SceneFeatureDetails
+
+function normalizeId(featureId) {
+  if (!featureId) {
+    return 'nil'
+  }
+  return featureId.replace(/^(pl:)?landsat:/i, '')
+}
