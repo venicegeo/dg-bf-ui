@@ -347,6 +347,7 @@ export class Application extends React.Component<Props, State> {
     this.setState({
       bbox: null,
       searchResults: null,
+      selectedFeature: null,
     })
   }
 
