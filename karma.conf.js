@@ -113,6 +113,14 @@ module.exports = (config) => {
 
     webpackMiddleware: {
       stats: 'error-only'
+    },
+
+    //
+    // Misc
+    //
+
+    mochaReporter: {
+      showDiff: true,
     }
   })
 }
