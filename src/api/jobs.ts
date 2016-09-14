@@ -16,6 +16,7 @@
 
 import * as moment from 'moment'
 import {Client} from '../utils/piazza-client'
+import {importByDataId} from '../utils/import-job-record'
 import * as worker from './workers/jobs'
 import {
   GATEWAY,
@@ -94,6 +95,20 @@ export function createJob({
     })
 }
 
+export function importJob({
+  dataId,
+  algorithms,
+  sessionToken,
+}) {
+  const client = new Client(GATEWAY, sessionToken)
+  const algorithmNames = generateAlgorithmNamesHash(algorithms)
+  return importByDataId(client, dataId, algorithmNames)
+    .catch(err => {
+      console.error('(jobs:importJob) failed:', err)
+      throw err
+    })
+}
+
 export function startWorker({
   sessionToken,
   getRecords,
@@ -130,4 +145,12 @@ export function startWorker({
       onUpdate(updatedRecord)
     },
   })
+}
+
+function generateAlgorithmNamesHash(algorithms) {
+  const hash = {}
+  for (const algorithm of algorithms) {
+    hash[algorithm.url] = algorithm.name
+  }
+  return hash
 }
