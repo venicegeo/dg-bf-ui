@@ -47,7 +47,7 @@
   transition: width .3s linear;
 }
 
-.isHoveringFeature {
+.isHoveringFeature canvas {
   cursor: pointer;
 }
 
