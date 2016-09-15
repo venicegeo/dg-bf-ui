@@ -72,8 +72,8 @@ export class CreateProductLine extends React.Component<Props, State> {
     this.state = {
       algorithm:  null,
       cloudCover: 10,
-      dateStart:  moment().subtract(30, 'days').format('YYYY-MM-DD'),
-      dateStop:   moment().format('YYYY-MM-DD'),
+      dateStart:  moment().format('YYYY-MM-DD'),
+      dateStop:   '',
       isCreating: false,
       filter:     '',
       name:       '',
