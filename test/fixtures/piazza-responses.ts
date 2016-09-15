@@ -9,6 +9,17 @@ export const ERROR_GENERIC = `{
   "path": "/any/where"
 }`
 
+export const RESPONSE_AUTH_SUCCESS = `{
+  "type": "uuid",
+  "uuid": "test-some-uuid"
+}`
+
+export const RESPONSE_AUTH_FAILED = `{
+  "type": "error",
+  "message": "Authentication failed for user jdoe",
+  "origin": "Security"
+}`
+
 export const RESPONSE_DEPLOYMENT = `{
   "data": {
     "deployment": {

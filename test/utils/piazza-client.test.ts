@@ -19,6 +19,8 @@ import * as sinon from 'sinon'
 import {Client, STATUS_ERROR, STATUS_RUNNING, STATUS_SUCCESS} from '../../src/utils/piazza-client'
 import {
   ERROR_GENERIC,
+  RESPONSE_AUTH_FAILED,
+  RESPONSE_AUTH_SUCCESS,
   RESPONSE_DEPLOYMENT,
   RESPONSE_DEPLOYMENT_NOT_FOUND,
   RESPONSE_FILE,
@@ -58,6 +60,54 @@ describe('Piazza Client', function () {
     it('normalizes auth token', () => {
       const client = new Client('http://test-gateway', 'test-auth-token')
       assert.equal(client.sessionToken, 'test-auth-token')
+    })
+  })
+
+  describe('createSessionToken()', () => {
+    it('calls correct URL', () => {
+      fetchStub.returns(resolveJson(RESPONSE_AUTH_SUCCESS, 201))
+      return Client.createSessionToken('http://m', 'test-username', 'test-password')
+        .then(token => {
+          assert.equal(fetchStub.firstCall.args[0], 'http://m/key')
+        })
+    })
+
+    it('passes correct credentials', () => {
+      fetchStub.returns(resolveJson(RESPONSE_AUTH_SUCCESS, 201))
+      return Client.createSessionToken('http://m', 'test-username', 'test-password')
+        .then(token => {
+          assert.equal(fetchStub.firstCall.args[1].headers['Authorization'], 'Basic dGVzdC11c2VybmFtZTp0ZXN0LXBhc3N3b3Jk')
+        })
+    })
+
+    it('yields a valid token', () => {
+      fetchStub.returns(resolveJson(RESPONSE_AUTH_SUCCESS, 201))
+      return Client.createSessionToken('http://m', 'test-username', 'test-password')
+        .then(token => {
+          assert.equal(token, 'Basic dGVzdC1zb21lLXV1aWQ6')
+        })
+    })
+
+    it('throws if credentials are rejected', () => {
+      fetchStub.returns(resolveJson(RESPONSE_AUTH_FAILED, 401))
+      return Client.createSessionToken('http://m', 'test-username', 'test-password')
+        .then(
+          () => { throw new Error('Should have thrown') },
+          (err) => {
+            assert.instanceOf(err, Error)
+            assert.equal(err.status, 401)
+        })
+    })
+
+    it('handles HTTP errors gracefully', () => {
+      fetchStub.returns(resolveJson(ERROR_GENERIC, 500))
+      return Client.createSessionToken('http://m', 'test-username', 'test-password')
+        .then(
+          () => { throw new Error('Should have thrown') },
+          (err) => {
+            assert.instanceOf(err, Error)
+            assert.equal(err.status, 500)
+        })
     })
   })
 
