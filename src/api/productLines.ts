@@ -44,11 +44,11 @@ export function create({
     method: 'POST',
     body: JSON.stringify({
       cloudCover:      cloudCover,
-      eventTypeId:     [eventTypeId],
-      minX:            bbox[0],
-      minY:            bbox[1],
-      maxX:            bbox[2],
-      maxY:            bbox[3],
+      eventTypeId:     eventTypeId,
+      minx:            bbox[0],
+      miny:            bbox[1],
+      maxx:            bbox[2],
+      maxy:            bbox[3],
       minDate:         dateStart,
       maxDate:         dateStop,
       name:            name,
@@ -61,6 +61,7 @@ export function create({
         pzAddr:      GATEWAY,
         pzAuthToken: sessionToken,
         svcURL:      algorithm.url,
+        tideURL:     'https://tideprediction.stage.geointservices.io/',  // HACK
       },
     }),
   })
@@ -86,10 +87,10 @@ export function fetchJobs({
 }) {
   return fetch(`${executorUrl}/resultsByProductLine`, {
     body: JSON.stringify({
-      TriggerId:   productLineId,
-      PzAuthToken: sessionToken,
-      PzAddr:      GATEWAY,
-      PerPage:     '200',  // HACK -- see explanation below
+      triggerId:   productLineId,
+      pzAuthToken: sessionToken,
+      pzAddr:      GATEWAY,
+      perPage:     '200',  // HACK -- see explanation below
     }),
     headers: {'content-type': 'application/json'},
     method: 'POST',
@@ -117,7 +118,7 @@ export function fetchProductLines({
   filters,
   serviceId,
   sessionToken,
-}) {
+}): Promise<beachfront.ProductLine[]> {
   return fetch(`${executorUrl}/getProductLines`, {
     body: JSON.stringify({
       eventTypeId,
@@ -149,7 +150,7 @@ function checkResponse(response) {
   })
 }
 
-function extractRecords(algorithms, filters): (data: any) => beachfront.ProductLine[] {
+function extractRecords(algorithms, filters) {
   const algorithmNames = generateAlgorithmNamesHash(algorithms)
   const filterNames = generateFilterNamesHash(filters)
   return data => data.productLines.map(datum => ({
@@ -157,30 +158,30 @@ function extractRecords(algorithms, filters): (data: any) => beachfront.ProductL
     geometry: {
       type: 'Polygon',
       coordinates: [[
-        [datum.minX, datum.minY],
-        [datum.minX, datum.maxY],
-        [datum.maxX, datum.maxY],
-        [datum.maxX, datum.minY],
-        [datum.minX, datum.minY],
+        [datum.minx, datum.miny],
+        [datum.minx, datum.maxy],
+        [datum.maxx, datum.maxy],
+        [datum.maxx, datum.miny],
+        [datum.minx, datum.miny],
       ]],
     },
     properties: {
       algorithmName:     algorithmNames[datum.bfInputJSON.svcURL] || 'Unknown',
       createdOn:         datum.minDate,
-      detectionsLayerId: datum.bfInputJSON.lGroupId,
-      eventTypeId:       datum.eventTypeId.pop(),
+      detectionsLayerId: 'piazza:' + datum.bfInputJSON.lGroupId,
+      eventTypeId:       datum.eventTypeId,
       expiresOn:         datum.maxDate,
-      imageCloudCover:   datum.cloudCover,
-      imageSensorName:   datum.sensorName,
       name:              datum.name,
       owner:             datum.createdBy,
-      status:            isActive(datum.maxDate) ? STATUS_ACTIVE : STATUS_INACTIVE,
+      sceneCloudCover:   datum.cloudCover,
+      sceneSensorName:   datum.sensorName,
       spatialFilterName: filterNames[datum.spatialFilterId] || '',
       startsOn:          datum.minDate,
+      status:            isActive(datum.maxDate) ? STATUS_ACTIVE : STATUS_INACTIVE,
       type:              TYPE_PRODUCT_LINE,
     },
     type: 'Feature',
-  }))
+  } as beachfront.ProductLine))
 }
 
 function generateAlgorithmNamesHash(algorithms) {

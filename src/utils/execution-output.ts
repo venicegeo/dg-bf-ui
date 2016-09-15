@@ -14,11 +14,11 @@
  * limitations under the License.
  **/
 
-export function extractAlgorithmUrl({ svcUrl }) {
-  if (!svcUrl) {
+export function extractAlgorithmUrl({ svcUrl, svcURL }) {
+  if (!svcUrl && !svcURL) {
     throw new Error('missing algorithm URL')
   }
-  return svcUrl
+  return svcUrl || svcURL
 }
 
 export function extractDateCreated({ dateCreated }) {
