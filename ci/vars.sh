@@ -1,4 +1,4 @@
 #!/bin/bash
 
-APP=beachfront
-EXT=zip
+export APP=beachfront
+export EXT=zip
