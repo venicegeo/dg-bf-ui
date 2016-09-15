@@ -19,8 +19,11 @@ import * as sinon from 'sinon'
 import {Client, STATUS_ERROR, STATUS_RUNNING, STATUS_SUCCESS} from '../../src/utils/piazza-client'
 import {
   ERROR_GENERIC,
-  RESPONSE_AUTH_FAILED,
+  RESPONSE_AUTH_REJECTED,
   RESPONSE_AUTH_SUCCESS,
+  RESPONSE_AUTH_ACTIVE,
+  ERROR_AUTH,
+  RESPONSE_AUTH_EXPIRED,
   RESPONSE_DEPLOYMENT,
   RESPONSE_DEPLOYMENT_NOT_FOUND,
   RESPONSE_FILE,
@@ -65,18 +68,18 @@ describe('Piazza Client', function () {
 
   describe('createSessionToken()', () => {
     it('calls correct URL', () => {
-      fetchStub.returns(resolveJson(RESPONSE_AUTH_SUCCESS, 201))
+      const stub = fetchStub.returns(resolveJson(RESPONSE_AUTH_SUCCESS, 201))
       return Client.createSessionToken('http://m', 'test-username', 'test-password')
         .then(token => {
-          assert.equal(fetchStub.firstCall.args[0], 'http://m/key')
+          assert.equal(stub.firstCall.args[0], 'http://m/key')
         })
     })
 
     it('passes correct credentials', () => {
-      fetchStub.returns(resolveJson(RESPONSE_AUTH_SUCCESS, 201))
+      const stub = fetchStub.returns(resolveJson(RESPONSE_AUTH_SUCCESS, 201))
       return Client.createSessionToken('http://m', 'test-username', 'test-password')
         .then(token => {
-          assert.equal(fetchStub.firstCall.args[1].headers['Authorization'], 'Basic dGVzdC11c2VybmFtZTp0ZXN0LXBhc3N3b3Jk')
+          assert.equal(stub.firstCall.args[1].headers['Authorization'], 'Basic dGVzdC11c2VybmFtZTp0ZXN0LXBhc3N3b3Jk')
         })
     })
 
@@ -89,7 +92,7 @@ describe('Piazza Client', function () {
     })
 
     it('throws if credentials are rejected', () => {
-      fetchStub.returns(resolveJson(RESPONSE_AUTH_FAILED, 401))
+      fetchStub.returns(resolveJson(RESPONSE_AUTH_REJECTED, 401))
       return Client.createSessionToken('http://m', 'test-username', 'test-password')
         .then(
           () => { throw new Error('Should have thrown') },
@@ -107,6 +110,56 @@ describe('Piazza Client', function () {
           (err) => {
             assert.instanceOf(err, Error)
             assert.equal(err.status, 500)
+        })
+    })
+  })
+
+  describe('isSessionActive', () => {
+    it('calls correct URL', () => {
+      const stub = fetchStub.returns(resolveJson(RESPONSE_AUTH_ACTIVE))
+      const client = new Client('http://pz-gateway.m', 'Basic dGVzdC1hdXRoLXRva2VuOg==')
+      return client.isSessionActive()
+        .then(() => {
+          assert.equal(stub.firstCall.args[0], 'http://pz-security.m/v2/verification')
+        })
+    })
+
+    it('sends correct payload', () => {
+      const stub = fetchStub.returns(resolveJson(RESPONSE_AUTH_ACTIVE))
+      const client = new Client('http://pz-gateway.m', 'Basic dGVzdC1hdXRoLXRva2VuOg==')
+      return client.isSessionActive()
+        .then(() => {
+          assert.equal(stub.firstCall.args[1].body, '{"uuid":"test-auth-token"}')
+        })
+    })
+
+    it('returns false if expired', () => {
+      fetchStub.returns(resolveJson(RESPONSE_AUTH_EXPIRED))
+      const client = new Client('http://pz-gateway.m', 'Basic dGVzdC1hdXRoLXRva2VuOg==')
+      return client.isSessionActive()
+        .then(isActive => {
+          assert.isFalse(isActive)
+        })
+    })
+
+    it('returns true if not expired', () => {
+      fetchStub.returns(resolveJson(RESPONSE_AUTH_ACTIVE))
+      const client = new Client('http://pz-gateway.m', 'Basic dGVzdC1hdXRoLXRva2VuOg==')
+      return client.isSessionActive()
+        .then(isActive => {
+          assert.isTrue(isActive)
+        })
+    })
+
+    it('handles HTTP errors gracefully', () => {
+      fetchStub.returns(resolveJson(ERROR_AUTH, 500))
+      const client = new Client('http://pz-gateway.m', 'Basic dGVzdC1hdXRoLXRva2VuOg==')
+      return client.isSessionActive()
+        .then(
+          () => { throw new Error('Should have thrown') },
+          (err) => {
+          assert.instanceOf(err, Error)
+          assert.equal(err.status, 500)
         })
     })
   })

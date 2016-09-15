@@ -117,6 +117,18 @@ export class Client {
       .then(normalizePostMetadata)
   }
 
+  isSessionActive() {
+    const baseUrl = this.gateway.replace('pz-gateway', 'pz-security')
+    const uuid = atob(this.sessionToken.replace('Basic ', '')).replace(':', '')
+    return fetch(baseUrl + '/v2/verification', {
+      method: 'POST',
+      headers: {'content-type': 'application/json'},
+      body: JSON.stringify({ uuid }),
+    })
+      .then(asJson)
+      .then(auth => auth.authenticated === true)
+  }
+
   private fetch(endpoint, overrides: any = {}) {
     const options = Object.assign({}, overrides, {
       headers: Object.assign({}, overrides.headers, {

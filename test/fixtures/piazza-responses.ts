@@ -1,5 +1,11 @@
 export const ERROR_UNAUTHORIZED = 'HTTP Status 401 - pz-gateway is unable to authenticate the provided user'
 
+export const ERROR_AUTH = `{
+  "type": "error",
+  "message": "UUID is null!",
+  "origin": "Security"
+}`
+
 export const ERROR_GENERIC = `{
   "timestamp": 1461978715800,
   "status": 500,
@@ -9,15 +15,25 @@ export const ERROR_GENERIC = `{
   "path": "/any/where"
 }`
 
-export const RESPONSE_AUTH_SUCCESS = `{
-  "type": "uuid",
-  "uuid": "test-some-uuid"
+export const RESPONSE_AUTH_ACTIVE = `{
+  "type": "auth",
+  "authenticated": true
 }`
 
-export const RESPONSE_AUTH_FAILED = `{
+export const RESPONSE_AUTH_EXPIRED = `{
+  "type": "auth",
+  "authenticated": false
+}`
+
+export const RESPONSE_AUTH_REJECTED = `{
   "type": "error",
   "message": "Authentication failed for user jdoe",
   "origin": "Security"
+}`
+
+export const RESPONSE_AUTH_SUCCESS = `{
+  "type": "uuid",
+  "uuid": "test-some-uuid"
 }`
 
 export const RESPONSE_DEPLOYMENT = `{
