@@ -25,9 +25,10 @@ interface Props {
 
 export const Help = ({ onDismiss }: Props) => (
   <Modal onDismiss={onDismiss}>
-    <div className={styles.root}></div>
-    <h1>Help!</h1>
-    <p>Need help?  Let us know we do this stuff for a living... literally!</p>
-    <p><a href="mailto:venice@radiantblue.com">venice@radiantblue.com</a></p>
+    <div className={styles.root}>
+      <h1>Help!</h1>
+      <p>Need help?  Let us know we do this stuff for a living... literally!</p>
+      <p><a href="mailto:venice@radiantblue.com">venice@radiantblue.com</a></p>
+    </div>
   </Modal>
 )

@@ -27,17 +27,17 @@ interface Props {
 export class Modal extends React.Component<Props, void> {
   constructor() {
     super()
-    this._keypressed = this._keypressed.bind(this)
+    this.handleKeyPress = this.handleKeyPress.bind(this)
   }
 
   componentDidMount() {
     document.addEventListener('click', this.props.onDismiss)
-    document.addEventListener('keyup', this._keypressed)
+    document.addEventListener('keyup', this.handleKeyPress)
   }
 
   componentWillUnmount() {
     document.removeEventListener('click', this.props.onDismiss)
-    document.removeEventListener('keyup', this._keypressed)
+    document.removeEventListener('keyup', this.handleKeyPress)
   }
 
   render() {
@@ -48,7 +48,7 @@ export class Modal extends React.Component<Props, void> {
     )
   }
 
-  _keypressed(event) {
+  private handleKeyPress(event) {
     if (event.keyCode === ESCAPE) {
       this.props.onDismiss()
     }

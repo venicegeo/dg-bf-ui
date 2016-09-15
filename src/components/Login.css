@@ -14,6 +14,8 @@
  * limitations under the License.
  **/
 
+@import '../styles/constants.css';
+
 .root {
   width: 500px;
   margin: 0 auto;
@@ -39,17 +41,17 @@
 .errorMessage {
   composes: heading from '../styles/typography.css';
   font-size: .8em;
-  color: hsl(349, 100%, 55%);
+  color: var(--COLOR_RED);
 }
 
 .submitButton {
   composes: heading from '../styles/typography.css';
   display: block;
-  padding: 1em 2em;
-  margin-top: 1em;
-  background-color: #3aa243;
+  padding: .7em 2em;
+  margin-top: 1.5em;
+  background-color: var(--COLOR_GREEN);
+  border: none;
+  border-radius: 4px;
   color: white;
   font-size: inherit;
-  border: 2px solid white;
-  border-radius: 4px;
 }
