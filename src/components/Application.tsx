@@ -35,6 +35,7 @@ import {
   MODE_PRODUCT_LINES,
 } from './PrimaryMap'
 import {ProductLineList} from './ProductLineList'
+import {SessionExpired} from './SessionExpired'
 import * as algorithmsService from '../api/algorithms'
 import * as jobsService from '../api/jobs'
 import * as catalogService from '../api/catalog'
@@ -59,6 +60,7 @@ interface Props {
 interface State {
   catalogApiKey?: string
   error?: any
+  sessionExpired?: boolean
   sessionToken?: string
   route?: Route
 
@@ -120,10 +122,17 @@ export class Application extends React.Component<Props, State> {
   }
 
   componentDidUpdate(_, prevState) {
+    // Logged In
     if (!prevState.sessionToken && this.state.sessionToken) {
       this.autodiscoverServices()
       this.startJobsWorker()
     }
+
+    // Session Invalidated
+    if (prevState.sessionToken && !this.state.sessionToken) {
+      this.stopJobsWorker()
+    }
+
     this.props.serialize(this.state)
   }
 
@@ -160,6 +169,17 @@ export class Application extends React.Component<Props, State> {
           onViewChange={mapView => this.setState({ mapView })}
         />
         {this.renderRoute()}
+        {this.state.sessionExpired && (
+          <SessionExpired
+            onDismiss={() => {
+              sessionStorage.clear()
+              this.setState({
+                sessionExpired: false,
+                sessionToken: null,
+              })
+            }}
+          />
+        )}
       </div>
     )
   }
@@ -516,6 +536,10 @@ export class Application extends React.Component<Props, State> {
       }),
       onTerminate() {/* noop */},
     })
+  }
+
+  private stopJobsWorker() {
+    jobsService.stopWorker()
   }
 
   private subscribeToHistoryEvents() {
