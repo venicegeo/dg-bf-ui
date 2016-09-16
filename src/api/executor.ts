@@ -39,5 +39,6 @@ export function discover(): Promise<ServiceDescriptor> {
     })
     .catch(err => {
       console.error('(executor:discover) discovery failed:', err)
+      throw err
     })
 }
