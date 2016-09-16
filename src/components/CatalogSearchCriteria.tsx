@@ -72,7 +72,7 @@ export const CatalogSearchCriteria = (props: Props) => (
           <span>From</span>
           <input
             value={props.dateFrom}
-            type="date"
+            type="text"
             disabled={props.disabled}
             onChange={event => props.onDateChange((event.target as HTMLInputElement).value, props.dateTo)}
           />
@@ -81,7 +81,7 @@ export const CatalogSearchCriteria = (props: Props) => (
           <span>To</span>
           <input
             value={props.dateTo}
-            type="date"
+            type="text"
             disabled={props.disabled}
             onChange={event => props.onDateChange(props.dateFrom, (event.target as HTMLInputElement).value)}
           />

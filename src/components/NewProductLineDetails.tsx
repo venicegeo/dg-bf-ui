@@ -50,7 +50,7 @@ export const NewProductLineDetails = ({ name, dateStart, dateStop, onNameChange,
     <label className={styles.field}>
       <span>Start Date</span>
       <input
-        type="date"
+        type="text"
         value={dateStart}
         onChange={event => onDateChange((event.target as HTMLInputElement).value, dateStop)}
       />
@@ -58,7 +58,7 @@ export const NewProductLineDetails = ({ name, dateStart, dateStop, onNameChange,
     <label className={styles.field}>
       <span>Stop Date</span>
       <input
-        type="date"
+        type="text"
         value={dateStop}
         onChange={event => onDateChange(dateStart, (event.target as HTMLInputElement).value)}
       />
