@@ -26,7 +26,7 @@ describe('Session Worker', function () {
 
   beforeEach(() => {
     client = {
-      isSessionActive: sinon.stub(),
+      isSessionActive: sinon.stub().returns(Promise.resolve(true)),
     }
 
     globalStubs = {
@@ -50,7 +50,6 @@ describe('Session Worker', function () {
 
   describe('start()', () => {
     it('can start worker instance', () => {
-      client.isSessionActive.returns(Promise.resolve(true))
       assert.doesNotThrow(() => {
         worker.start({
           client,
@@ -70,14 +69,16 @@ describe('Session Worker', function () {
       assert.equal(stub.firstCall.args[1], -1234)
     })
 
-    it('does not being cycle immediately', () => {
-      const stub = sinon.stub()
+    it('begins cycle immediately', () => {
+      const stub = client.isSessionActive
       worker.start({
         client,
         interval:  0,
         onExpired: stub,
       })
-      assert.isFalse(stub.called)
+      return defer(() => {
+        assert.isTrue(stub.called)
+      })
     })
 
     it('throws if started twice', () => {
@@ -105,7 +106,6 @@ describe('Session Worker', function () {
         interval:    0,
         onExpired:   sinon.stub(),
       })
-      globalStubs.setInterval.callArg(0)  // Manually invoke tick
       return defer(() => {
         assert.equal(stub.firstCall.args[0], '(session:worker) failed:')
         assert.instanceOf(stub.firstCall.args[1], Error)
@@ -122,7 +122,6 @@ describe('Session Worker', function () {
         interval:    0,
         onExpired:   stub,
       })
-      globalStubs.setInterval.callArg(0)  // Manually invoke tick
       return defer(() => {
         assert.isTrue(stub.calledOnce)
       })
@@ -130,13 +129,11 @@ describe('Session Worker', function () {
 
     it('does not fire if session is active', () => {
       const stub = sinon.stub()
-      client.isSessionActive.returns(Promise.resolve(true))
       worker.start({
         client:      (client as any),
         interval:    0,
         onExpired:   stub,
       })
-      globalStubs.setInterval.callArg(0)  // Manually invoke tick
       return defer(() => {
         assert.isFalse(stub.calledOnce)
       })

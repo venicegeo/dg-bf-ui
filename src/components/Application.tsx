@@ -130,7 +130,7 @@ export class Application extends React.Component<Props, State> {
       this.autodiscoverServices()
       this.startWorkers()
     }
-    if (!prevState.isSessionActive && this.state.isSessionExpired) {
+    if (!prevState.isSessionExpired && this.state.isSessionExpired || prevState.isLoggedIn && !this.state.isLoggedIn) {
       this.stopWorkers()
     }
     this.props.serialize(this.state)
@@ -138,7 +138,7 @@ export class Application extends React.Component<Props, State> {
 
   componentWillMount() {
     this.subscribeToHistoryEvents()
-    if (this.state.isLoggedIn) {
+    if (this.state.isLoggedIn && !this.state.isSessionExpired) {
       this.autodiscoverServices()
       this.startWorkers()
     }
@@ -611,16 +611,17 @@ function generateInitialState(): State {
 
 function deserialize(): State {
   return {
-    algorithms:     createCollection(JSON.parse(sessionStorage.getItem('algorithms_records')) || []),
-    bbox:           JSON.parse(sessionStorage.getItem('bbox')),
-    catalog:        JSON.parse(sessionStorage.getItem('catalog')),
-    executor:       JSON.parse(sessionStorage.getItem('executor')),
-    geoserver:      JSON.parse(sessionStorage.getItem('geoserver')),
-    jobs:           createCollection((JSON.parse(localStorage.getItem('jobs_records')) || []).map(upgradeIfNeeded).filter(Boolean)),
-    mapView:        JSON.parse(sessionStorage.getItem('mapView')),
-    searchCriteria: JSON.parse(sessionStorage.getItem('searchCriteria')),
-    searchResults:  JSON.parse(sessionStorage.getItem('searchResults')),
-    catalogApiKey:  localStorage.getItem('catalog_apiKey') || '',  // HACK
+    algorithms:       createCollection(JSON.parse(sessionStorage.getItem('algorithms_records')) || []),
+    bbox:             JSON.parse(sessionStorage.getItem('bbox')),
+    catalog:          JSON.parse(sessionStorage.getItem('catalog')),
+    executor:         JSON.parse(sessionStorage.getItem('executor')),
+    geoserver:        JSON.parse(sessionStorage.getItem('geoserver')),
+    isSessionExpired: JSON.parse(sessionStorage.getItem('isSessionExpired')),
+    jobs:             createCollection((JSON.parse(localStorage.getItem('jobs_records')) || []).map(upgradeIfNeeded).filter(Boolean)),
+    mapView:          JSON.parse(sessionStorage.getItem('mapView')),
+    searchCriteria:   JSON.parse(sessionStorage.getItem('searchCriteria')),
+    searchResults:    JSON.parse(sessionStorage.getItem('searchResults')),
+    catalogApiKey:    localStorage.getItem('catalog_apiKey') || '',  // HACK
   }
 }
 
@@ -630,6 +631,7 @@ function serialize(state: State) {
   sessionStorage.setItem('catalog', JSON.stringify(state.catalog))
   sessionStorage.setItem('executor', JSON.stringify(state.executor))
   sessionStorage.setItem('geoserver', JSON.stringify(state.geoserver))
+  sessionStorage.setItem('isSessionExpired', JSON.stringify(state.isSessionExpired))
   localStorage.setItem('jobs_records', JSON.stringify(state.jobs.records))
   sessionStorage.setItem('mapView', JSON.stringify(state.mapView))
   sessionStorage.setItem('searchCriteria', JSON.stringify(state.searchCriteria))

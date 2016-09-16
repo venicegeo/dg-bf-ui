@@ -25,14 +25,17 @@ export function start({
     throw new Error('Cannot start heartbeat twice')
   }
 
-  instance = setInterval(() => {
+  const work = () => {
     console.debug('(session:worker) validating session')
     client.isSessionActive()
       .then(active => !active && onExpired())
       .catch(err => {
         console.error('(session:worker) failed:', err)
       })
-  }, interval)
+  }
+
+  instance = setInterval(work, interval)
+  work()
 }
 
 export function terminate() {
