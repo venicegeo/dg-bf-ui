@@ -33,27 +33,6 @@ import {
   STATUS_TIMED_OUT,
 } from '../../../src/constants'
 
-interface Client {
-  getDeployment: Sinon.SinonStub
-  getFile: Sinon.SinonStub
-  getStatus: Sinon.SinonStub
-}
-
-interface Handlers {
-  getRunningJobs: Sinon.SinonStub
-  onError: Sinon.SinonStub
-  onTerminate: Sinon.SinonStub
-  onUpdate: Sinon.SinonStub
-}
-
-interface GlobalStubs {
-  setInterval: Sinon.SinonStub
-  clearInterval: Sinon.SinonStub
-  debug: Sinon.SinonStub
-  error: Sinon.SinonStub
-  warn: Sinon.SinonStub
-}
-
 describe('Jobs Worker', () => {
   let client: Client, handlers: Handlers, globalStubs: GlobalStubs
 
@@ -526,6 +505,31 @@ describe('Jobs Worker', () => {
     })
   })
 })
+
+//
+// Types
+//
+
+interface Client {
+  getDeployment: Sinon.SinonStub
+  getFile: Sinon.SinonStub
+  getStatus: Sinon.SinonStub
+}
+
+interface Handlers {
+  getRunningJobs: Sinon.SinonStub
+  onError: Sinon.SinonStub
+  onTerminate: Sinon.SinonStub
+  onUpdate: Sinon.SinonStub
+}
+
+interface GlobalStubs {
+  setInterval: Sinon.SinonStub
+  clearInterval: Sinon.SinonStub
+  debug: Sinon.SinonStub
+  error: Sinon.SinonStub
+  warn: Sinon.SinonStub
+}
 
 //
 // Helpers
