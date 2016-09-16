@@ -24,7 +24,6 @@ interface Props {
   error: { message: string, code?: number }
   isFetching: boolean
   productLines: beachfront.ProductLine[]
-  sessionToken: string
   onFetch()
   onFetchJobs(productLineId: string, sinceDate: string)
   onJobHoverIn(job: beachfront.Job)
@@ -62,7 +61,6 @@ export class ProductLineList extends React.Component<Props, {}> {
               className={styles.listItem}
               key={productLine.id}
               productLine={productLine}
-              sessionToken={this.props.sessionToken}
               onFetchJobs={this.props.onFetchJobs}
               onJobHoverIn={this.props.onJobHoverIn}
               onJobHoverOut={this.props.onJobHoverOut}

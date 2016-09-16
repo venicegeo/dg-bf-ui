@@ -14,8 +14,7 @@
  * limitations under the License.
  **/
 
-import {Client} from '../utils/piazza-client'
-import {GATEWAY} from '../config'
+import {getClient} from './session'
 import {
   REQUIREMENT_BANDS,
   REQUIREMENT_CLOUDCOVER,
@@ -24,9 +23,9 @@ import {
 const PATTERN_REQUIREMENT_PREFIX = /^ImgReq - /
 const PATTERN_NAME_PREFIX = /^BF_Algo_/
 
-export function discover(sessionToken): Promise<beachfront.Algorithm[]> {
+export function discover(): Promise<beachfront.Algorithm[]> {
   console.debug('(algorithms:discover)')
-  const client = new Client(GATEWAY, sessionToken)
+  const client = getClient()
   return client.getServices({pattern: PATTERN_NAME_PREFIX.source})
     .then(algorithms => algorithms.map(normalizeAlgorithm))
     .catch(err => {

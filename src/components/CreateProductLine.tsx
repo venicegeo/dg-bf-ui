@@ -47,7 +47,6 @@ interface Props {
   executorServiceId: string
   executorUrl:       string
   filters:           {id: string, name: string}[]
-  sessionToken:      string
 
   onCatalogApiKeyChange(apiKey: string)
   onClearBbox()
@@ -171,7 +170,6 @@ export class CreateProductLine extends React.Component<Props, State> {
       executorUrl:       this.props.executorUrl,
       filter:            this.state.filter,
       name:              this.state.name,
-      sessionToken:      this.props.sessionToken,
     })
       .then(() => this.props.onProductLineCreated())
       .catch(error => {

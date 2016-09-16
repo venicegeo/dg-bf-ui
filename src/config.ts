@@ -20,7 +20,13 @@ export const GATEWAY = process.env.GATEWAY
 
 const time = {millisecond: 1, second: 1000, minute: 60000}
 
-export const HEARTBEAT_INTERVAL = 1 * time.minute
+export const SESSION_WORKER = {
+  INTERVAL: 1 * time.minute,
+}
+
+export const UPDATE_WORKER = {
+  INTERVAL: 10 * time.second,
+}
 
 export const JOBS_WORKER = {
   INTERVAL: 20 * time.second,

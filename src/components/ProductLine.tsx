@@ -28,7 +28,6 @@ const SINCE_CREATION = {value: 'P0D', label: 'All'}
 interface Props {
   className?: string
   productLine: beachfront.ProductLine
-  sessionToken: string
   onFetchJobs(productLineId: string, sinceDate: string)
   onJobHoverIn(job: beachfront.Job)
   onJobHoverOut(job: beachfront.Job)
@@ -123,7 +122,6 @@ export class ProductLine extends React.Component<Props, State> {
             isLoading={this.state.isFetchingJobs}
             jobs={this.state.jobs}
             selectedJobIds={this.state.selectedJobs.map(j => j.id)}
-            sessionToken={this.props.sessionToken}
             onDurationChange={this._handleDurationChange}
             onHoverIn={this.props.onJobHoverIn}
             onHoverOut={this.props.onJobHoverOut}

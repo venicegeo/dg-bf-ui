@@ -15,9 +15,8 @@
  **/
 
 import * as moment from 'moment'
+import {getClient} from './session'
 import {importByDataId} from '../utils/import-job-record'
-import {Client} from '../utils/piazza-client'
-import {GATEWAY} from '../config'
 
 import {
   REQUIREMENT_BANDS,
@@ -38,8 +37,8 @@ export function create({
   executorUrl,
   filter,
   name,
-  sessionToken,
 }) {
+  const {gateway, sessionToken} = getClient()
   return fetch(`${executorUrl}/newProductLine`, {
     method: 'POST',
     body: JSON.stringify({
@@ -58,7 +57,7 @@ export function create({
         algoType:    algorithm.type,
         bands:       algorithm.requirements.find(a => a.name === REQUIREMENT_BANDS).literal.split(','),
         dbAuthToken: catalogApiKey,
-        pzAddr:      GATEWAY,
+        pzAddr:      gateway,
         pzAuthToken: sessionToken,
         svcURL:      algorithm.url,
         tideURL:     'https://tideprediction.stage.geointservices.io/',  // HACK
@@ -83,13 +82,13 @@ export function fetchJobs({
   sinceDate,
   algorithms,
   executorUrl,
-  sessionToken,
 }) {
+  const {gateway, sessionToken} = getClient()
   return fetch(`${executorUrl}/resultsByProductLine`, {
     body: JSON.stringify({
       triggerId:   productLineId,
       pzAuthToken: sessionToken,
-      pzAddr:      GATEWAY,
+      pzAddr:      gateway,
       perPage:     '200',  // HACK -- see explanation below
     }),
     headers: {'content-type': 'application/json'},
@@ -99,7 +98,7 @@ export function fetchJobs({
 
     // HACK HACK HACK HACK HACK HACK HACK
     .then(ids => {
-      const client = new Client(GATEWAY, sessionToken)
+      const client = getClient()
       const algorithmNames = generateAlgorithmNamesHash(algorithms)
       return __keepFetchingJobRecordsUntilSinceDate__(client, ids, algorithmNames, productLineId, sinceDate)
     })
@@ -117,14 +116,14 @@ export function fetchProductLines({
   executorUrl,
   filters,
   serviceId,
-  sessionToken,
 }): Promise<beachfront.ProductLine[]> {
+  const {gateway, sessionToken} = getClient()
   return fetch(`${executorUrl}/getProductLines`, {
     body: JSON.stringify({
       eventTypeId,
       serviceId,
       pzAuthToken: sessionToken,
-      pzAddr:      GATEWAY,
+      pzAddr:      gateway,
     }),
     headers: {'content-type': 'application/json'},
     method: 'POST',

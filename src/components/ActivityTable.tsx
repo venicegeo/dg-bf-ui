@@ -30,7 +30,6 @@ interface Props {
   isLoading: boolean
   jobs: beachfront.Job[]
   selectedJobIds: string[]
-  sessionToken: string
   onDurationChange(value: string)
   onHoverIn(job: beachfront.Job)
   onHoverOut(job: beachfront.Job)
@@ -45,7 +44,6 @@ export const ActivityTable = ({
   error,
   jobs,
   selectedJobIds,
-  sessionToken,
   onDurationChange,
   onHoverIn,
   onHoverOut,
@@ -88,7 +86,6 @@ export const ActivityTable = ({
               <td>{getImageSensor(job)}</td>
               <td className={styles.downloadCell} onClick={e => e.stopPropagation()}>
                 <FileDownloadLink
-                  sessionToken={sessionToken}
                   className={styles.downloadButton}
                   dataId={job.properties.detectionsDataId}
                   filename={job.properties.name + '.geojson'}
