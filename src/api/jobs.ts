@@ -19,7 +19,8 @@ import {getClient} from './session'
 import {importByDataId} from '../utils/import-job-record'
 import * as worker from './workers/jobs'
 import {
-  JOBS_WORKER,
+  JOBS_WORKER_INTERVAL,
+  JOBS_WORKER_JOB_TTL,
   SCHEMA_VERSION,
 } from '../config'
 
@@ -119,8 +120,8 @@ export function startWorker({
 }) {
   worker.start({
     client:   getClient(),
-    interval: JOBS_WORKER.INTERVAL,
-    ttl:      JOBS_WORKER.JOB_TTL,
+    interval: JOBS_WORKER_INTERVAL,
+    ttl:      JOBS_WORKER_JOB_TTL,
     onError,
     onTerminate,
 

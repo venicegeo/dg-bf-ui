@@ -15,11 +15,11 @@
  **/
 
 import * as worker from './workers/update'
-import {UPDATE_WORKER} from '../config'
+import {UPDATE_WORKER_INTERVAL} from '../config'
 
 export function startWorker({ onAvailable }) {
   worker.start({
-    interval: UPDATE_WORKER.INTERVAL,
+    interval: UPDATE_WORKER_INTERVAL,
     onAvailable,
   })
 }

@@ -16,7 +16,7 @@
 
 import {Client} from '../utils/piazza-client'
 import * as worker from './workers/session'
-import {GATEWAY, SESSION_WORKER} from '../config'
+import {GATEWAY, SESSION_WORKER_INTERVAL} from '../config'
 
 let client: Client
 
@@ -58,7 +58,7 @@ export function getClient(): Client {
 export function startWorker({ onExpired }) {
   worker.start({
     client:   getClient(),
-    interval: SESSION_WORKER.INTERVAL,
+    interval: SESSION_WORKER_INTERVAL,
     onExpired,
   })
 }

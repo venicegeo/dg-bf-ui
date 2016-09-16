@@ -23,16 +23,16 @@ describe('config', () => {
   })
 
   it('defines jobs worker timing properties', () => {
-    assert.isNumber(config.JOBS_WORKER.INTERVAL)
-    assert.isNumber(config.JOBS_WORKER.JOB_TTL)
+    assert.isNumber(config.JOBS_WORKER_INTERVAL)
+    assert.isNumber(config.JOBS_WORKER_JOB_TTL)
   })
 
   it('defines session worker timing properties', () => {
-    assert.isNumber(config.SESSION_WORKER.INTERVAL)
+    assert.isNumber(config.SESSION_WORKER_INTERVAL)
   })
 
   it('defines update worker timing properties', () => {
-    assert.isNumber(config.UPDATE_WORKER.INTERVAL)
+    assert.isNumber(config.UPDATE_WORKER_INTERVAL)
   })
 
   it('defines at least one basemap tile provider', () => {
