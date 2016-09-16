@@ -147,6 +147,10 @@ export function startWorker({
   })
 }
 
+export function stopWorker() {
+  worker.terminate()
+}
+
 function generateAlgorithmNamesHash(algorithms) {
   const hash = {}
   for (const algorithm of algorithms) {

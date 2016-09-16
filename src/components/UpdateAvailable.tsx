@@ -14,7 +14,7 @@
  * limitations under the License.
  **/
 
-const styles = require('./SessionExpired.css')
+const styles = require('./UpdateAvailable.css')
 
 import * as React from 'react'
 import {Modal} from './Modal'
@@ -23,13 +23,19 @@ interface Props {
   onDismiss()
 }
 
-export const SessionExpired = ({ onDismiss }: Props) => (
+export const UpdateAvailable = ({ onDismiss }: Props) => (
   <Modal onDismiss={onDismiss}>
     <div className={styles.root}>
-      <h1><i className="fa fa-lock"/> Your session has expired</h1>
-      <p>This may have happened because you logged in from another location.</p>
+      <h1><i className="fa fa-ship"/> Beachfront has been updated!</h1>
+      <p>
+        A new version of Beachfront is available.  Reload the page to see the latest version.
+      </p>
+
       <p className={styles.instructions}>
-        Click anywhere or press <kbd>ESC</kbd> to close this message
+        <a className={styles.updateButton} href="/" onClick={(e) => e.stopPropagation()}>
+          <i className="fa fa-refresh"/> Update Now
+        </a>
+        …or click anywhere or press <kbd>ESC</kbd> to close this message
       </p>
     </div>
   </Modal>

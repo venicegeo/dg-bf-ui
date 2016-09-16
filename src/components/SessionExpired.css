@@ -20,8 +20,6 @@
 
 .instructions {
   composes: heading from '../styles/typography.css';
-  font-size: 1.2em;
-  color: inherit;
-  opacity: .6;
   margin-top: 5em;
+  color: color(var(--COLOR_TEXT) lightness(+15%));
 }

@@ -14,23 +14,18 @@
  * limitations under the License.
  **/
 
-const styles = require('./SessionExpired.css')
+describe('Heartbeat', () => {
+  it('can start')
+  it('can terminate')
+  it('schedules recurrences')
 
-import * as React from 'react'
-import {Modal} from './Modal'
+  describe('session expiration', () => {
+    it('checks for session expiration')
+    it('gracefully handles errors')
+  })
 
-interface Props {
-  onDismiss()
-}
-
-export const SessionExpired = ({ onDismiss }: Props) => (
-  <Modal onDismiss={onDismiss}>
-    <div className={styles.root}>
-      <h1><i className="fa fa-lock"/> Your session has expired</h1>
-      <p>This may have happened because you logged in from another location.</p>
-      <p className={styles.instructions}>
-        Click anywhere or press <kbd>ESC</kbd> to close this message
-      </p>
-    </div>
-  </Modal>
-)
+  describe('for application updates', () => {
+    it('checks for updated app version')
+    it('gracefully handles errors')
+  })
+})

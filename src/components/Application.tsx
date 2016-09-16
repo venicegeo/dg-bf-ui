@@ -36,6 +36,7 @@ import {
 } from './PrimaryMap'
 import {ProductLineList} from './ProductLineList'
 import {SessionExpired} from './SessionExpired'
+import {UpdateAvailable} from './UpdateAvailable'
 import * as algorithmsService from '../api/algorithms'
 import * as jobsService from '../api/jobs'
 import * as catalogService from '../api/catalog'
@@ -44,6 +45,7 @@ import * as geoserverService from '../api/geoserver'
 import * as productLinesService from '../api/productLines'
 import {createCollection, Collection} from '../utils/collections'
 import {getFeatureCenter} from '../utils/geometries'
+import * as heartbeat from '../utils/heartbeat'
 import {upgradeIfNeeded} from '../utils/upgrade-job-record'
 
 import {
@@ -61,6 +63,7 @@ interface State {
   catalogApiKey?: string
   error?: any
   sessionExpired?: boolean
+  updateAvailable?: boolean
   sessionToken?: string
   route?: Route
 
@@ -107,6 +110,8 @@ export class Application extends React.Component<Props, State> {
     this.handleFetchProductLineJobs = this.handleFetchProductLineJobs.bind(this)
     this.handleForgetJob = this.handleForgetJob.bind(this)
     this.handleJobCreated = this.handleJobCreated.bind(this)
+    this.handleNavigateToJob = this.handleNavigateToJob.bind(this)
+    this.handlePanToProductLine = this.handlePanToProductLine.bind(this)
     this.handleProductLineCreated = this.handleProductLineCreated.bind(this)
     this.handleProductLineJobHoverIn = this.handleProductLineJobHoverIn.bind(this)
     this.handleProductLineJobHoverOut = this.handleProductLineJobHoverOut.bind(this)
@@ -115,8 +120,6 @@ export class Application extends React.Component<Props, State> {
     this.handleSearchCriteriaChange = this.handleSearchCriteriaChange.bind(this)
     this.handleSearchSubmit = this.handleSearchSubmit.bind(this)
     this.handleSelectFeature = this.handleSelectFeature.bind(this)
-    this.handleNavigateToJob = this.handleNavigateToJob.bind(this)
-    this.handlePanToProductLine = this.handlePanToProductLine.bind(this)
     this.navigateTo = this.navigateTo.bind(this)
     this.panTo = this.panTo.bind(this)
   }
@@ -126,11 +129,13 @@ export class Application extends React.Component<Props, State> {
     if (!prevState.sessionToken && this.state.sessionToken) {
       this.autodiscoverServices()
       this.startJobsWorker()
+      this.startHeartbeat()
     }
 
     // Session Invalidated
-    if (prevState.sessionToken && !this.state.sessionToken) {
+    if (!prevState.sessionExpired && this.state.sessionExpired) {
       this.stopJobsWorker()
+      this.stopHeartbeat()
     }
 
     this.props.serialize(this.state)
@@ -141,6 +146,7 @@ export class Application extends React.Component<Props, State> {
     if (this.state.sessionToken) {
       this.autodiscoverServices()
       this.startJobsWorker()
+      this.startHeartbeat()
     }
   }
 
@@ -176,6 +182,15 @@ export class Application extends React.Component<Props, State> {
               this.setState({
                 sessionExpired: false,
                 sessionToken: null,
+              })
+            }}
+          />
+        )}
+        {this.state.updateAvailable && (
+          <UpdateAvailable
+            onDismiss={() => {
+              this.setState({
+                updateAvailable: false,
               })
             }}
           />
@@ -542,6 +557,18 @@ export class Application extends React.Component<Props, State> {
     jobsService.stopWorker()
   }
 
+  private startHeartbeat() {
+    heartbeat.start({
+      sessionToken: this.state.sessionToken,
+      onSessionExpired: () => this.setState({ sessionExpired: true }),
+      onUpdateAvailable: () => this.setState({ updateAvailable: true }),
+    })
+  }
+
+  private stopHeartbeat() {
+    heartbeat.stop()
+  }
+
   private subscribeToHistoryEvents() {
     window.addEventListener('popstate', () => {
       if (this.state.route.href !== location.pathname + location.search + location.hash) {
@@ -564,6 +591,8 @@ function generateInitialState(): State {
     catalogApiKey: '',
     route: generateRoute(location),
     sessionToken: null,
+    sessionExpired: false,
+    updateAvailable: false,
 
     // Services
     catalog: {},

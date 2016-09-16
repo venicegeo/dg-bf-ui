@@ -14,23 +14,30 @@
  * limitations under the License.
  **/
 
-const styles = require('./SessionExpired.css')
+@import '../styles/constants.css';
 
-import * as React from 'react'
-import {Modal} from './Modal'
+.root {}
 
-interface Props {
-  onDismiss()
+.instructions {
+  composes: heading from '../styles/typography.css';
+  margin-top: 5em;
+  color: color(var(--COLOR_TEXT) lightness(+15%));
 }
 
-export const SessionExpired = ({ onDismiss }: Props) => (
-  <Modal onDismiss={onDismiss}>
-    <div className={styles.root}>
-      <h1><i className="fa fa-lock"/> Your session has expired</h1>
-      <p>This may have happened because you logged in from another location.</p>
-      <p className={styles.instructions}>
-        Click anywhere or press <kbd>ESC</kbd> to close this message
-      </p>
-    </div>
-  </Modal>
-)
+.updateButton {
+  composes: heading from '../styles/typography.css';
+  display: inline-block;
+  margin-right: 1em;
+  padding: .25em 1em;
+  color: var(--COLOR_GREEN);
+  text-decoration: none;
+  border: 2px solid;
+  border-radius: 4px;
+  transition: all .1s ease;
+}
+
+.updateButton:hover {
+  color: white;
+  background-color: var(--COLOR_GREEN);
+  border-color: var(--COLOR_GREEN);
+}
