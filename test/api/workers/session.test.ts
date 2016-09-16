@@ -194,6 +194,6 @@ interface GlobalStubs {
 // Helpers
 //
 
-function defer(func, delay = 0) {
+function defer(func, delay = 1) {
   return new Promise(resolve => setTimeout(resolve, delay)).then(func)
 }
