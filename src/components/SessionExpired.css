@@ -16,42 +16,10 @@
 
 @import '../styles/constants.css';
 
-.root {
-  width: 500px;
-  margin: 0 auto;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  font-size: 14px;
-}
+.root {}
 
-.root img {
-  height: 100px;
-  margin: 0 auto;
-}
-
-.root h1 {
-  margin: 1em 0 .25em;
-}
-
-.root p {
-  margin: 0 0 1em;
-}
-
-.errorMessage {
+.instructions {
   composes: heading from '../styles/typography.css';
-  font-size: .8em;
-  color: var(--COLOR_RED);
-}
-
-.submitButton {
-  composes: heading from '../styles/typography.css';
-  display: block;
-  padding: .7em 2em;
-  margin-top: 1.5em;
-  background-color: var(--COLOR_GREEN);
-  border: none;
-  border-radius: 4px;
-  color: white;
-  font-size: inherit;
+  margin-top: 5em;
+  color: color(var(--COLOR_TEXT) lightness(+15%));
 }

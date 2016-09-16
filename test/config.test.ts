@@ -27,6 +27,14 @@ describe('config', () => {
     assert.isNumber(config.JOBS_WORKER.JOB_TTL)
   })
 
+  it('defines session worker timing properties', () => {
+    assert.isNumber(config.SESSION_WORKER.INTERVAL)
+  })
+
+  it('defines update worker timing properties', () => {
+    assert.isNumber(config.UPDATE_WORKER.INTERVAL)
+  })
+
   it('defines at least one basemap tile provider', () => {
     assert.isAbove(config.TILE_PROVIDERS.length, 0)
   })

@@ -14,7 +14,7 @@
  * limitations under the License.
  **/
 
-const styles: any = require('./Help.css')
+const styles = require('./UpdateAvailable.css')
 
 import * as React from 'react'
 import {Modal} from './Modal'
@@ -23,12 +23,20 @@ interface Props {
   onDismiss()
 }
 
-export const Help = ({ onDismiss }: Props) => (
+export const UpdateAvailable = ({ onDismiss }: Props) => (
   <Modal onDismiss={onDismiss}>
     <div className={styles.root}>
-      <h1>Help!</h1>
-      <p>Need help?  Let us know we do this stuff for a living... literally!</p>
-      <p><a href="mailto:venice@radiantblue.com">venice@radiantblue.com</a></p>
+      <h1><i className="fa fa-ship"/> Beachfront has been updated!</h1>
+      <p>
+        A new version of Beachfront is available.  Reload the page to see the latest version.
+      </p>
+
+      <p className={styles.instructions}>
+        <a className={styles.updateButton} href="/" onClick={(e) => e.stopPropagation()}>
+          <i className="fa fa-refresh"/> Update Now
+        </a>
+        …or click anywhere or press <kbd>ESC</kbd> to close this message
+      </p>
     </div>
   </Modal>
 )

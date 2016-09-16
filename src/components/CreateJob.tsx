@@ -40,7 +40,6 @@ interface Props {
   searchError: any
   searchCriteria: SearchCriteria
   selectedImage: beachfront.Scene
-  sessionToken: string
   onCatalogApiKeyChange(apiKey: string)
   onClearBbox()
   onJobCreated(job: beachfront.Job)
@@ -157,7 +156,6 @@ export class CreateJob extends React.Component<Props, State> {
       executorServiceId: this.props.executorServiceId,
       image:             this.props.selectedImage,
       name:              this.state.name,
-      sessionToken:      this.props.sessionToken,
     })
       .then(job => {
         // Reset Search Criteria

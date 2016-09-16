@@ -30,7 +30,6 @@ import {
 } from '../constants'
 
 interface Props {
-  sessionToken: string
   className?: string
   isActive: boolean
   job: beachfront.Job
@@ -123,7 +122,6 @@ export class JobStatus extends React.Component<Props, State> {
           </Link>
           {canDownload && (
             <FileDownloadLink
-              sessionToken={this.props.sessionToken}
               dataId={properties.detectionsDataId}
               filename={properties.name + '.geojson'}
               className={styles.download}

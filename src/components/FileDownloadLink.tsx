@@ -15,8 +15,7 @@
  **/
 
 import * as React from 'react'
-import {Client} from '../utils/piazza-client'
-import {GATEWAY} from '../config'
+import {getClient} from '../api/session'
 
 const MB = 1024000
 
@@ -24,7 +23,6 @@ interface Props {
   className?:   string
   dataId:       string
   filename:     string
-  sessionToken: string
   onComplete()
   onError(err: any)
   onProgress(loaded: number, total: number)
@@ -95,7 +93,7 @@ export class FileDownloadLink extends React.Component<Props, State> {
     })
     this.props.onStart()
 
-    const client = new Client(GATEWAY, this.props.sessionToken)
+    const client = getClient()
     client.getFile(this.props.dataId, this.handleProgress)
       .then(this.handleComplete)
       .catch(this.handleError)

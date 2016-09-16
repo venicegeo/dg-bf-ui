@@ -14,21 +14,13 @@
  * limitations under the License.
  **/
 
-const styles: any = require('./Help.css')
-
-import * as React from 'react'
-import {Modal} from './Modal'
-
-interface Props {
-  onDismiss()
-}
-
-export const Help = ({ onDismiss }: Props) => (
-  <Modal onDismiss={onDismiss}>
-    <div className={styles.root}>
-      <h1>Help!</h1>
-      <p>Need help?  Let us know we do this stuff for a living... literally!</p>
-      <p><a href="mailto:venice@radiantblue.com">venice@radiantblue.com</a></p>
-    </div>
-  </Modal>
-)
+describe('Executor Service', () => {
+  describe('discover()', () => {
+    it('looks for service by name')
+    it('extracts URL')
+    it('extracts service ID')
+    it('throws if service not found')
+    it('throws if not logged in')
+    it('handles client errors gracefully')
+  })
+})

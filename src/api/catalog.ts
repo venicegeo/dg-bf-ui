@@ -14,8 +14,7 @@
  * limitations under the License.
  **/
 
-import {Client} from '../utils/piazza-client'
-import {GATEWAY} from '../config'
+import {getClient} from './session'
 
 const PATTERN_NAME_PREFIX = /^pzsvc-image-catalog/
 
@@ -26,16 +25,16 @@ export interface ServiceDescriptor {
   url?: string
 }
 
-export function discover(sessionToken): Promise<ServiceDescriptor> {
+export function discover(): Promise<ServiceDescriptor> {
   console.debug('(catalog:discover)')
-  const client = new Client(GATEWAY, sessionToken)
+  const client = getClient()
   return client.getServices({pattern: PATTERN_NAME_PREFIX.source})
     .then(([catalog]) => {
       if (!catalog) {
         throw new Error('Could not find image catalog service')
       }
       return {
-        sessionToken,
+        sessionToken: client.sessionToken,
         url: catalog.url,
       }
     })
@@ -89,9 +88,10 @@ export function search({
 //
 
 function includeEventTypeId(catalog) {
-  return fetch(`${catalog.url}/eventTypeID?pzGateway=${encodeURIComponent(GATEWAY)}`, {
+  const {gateway, sessionToken} = getClient()
+  return fetch(`${catalog.url}/eventTypeID?pzGateway=${encodeURIComponent(gateway)}`, {
     headers: {
-      'Authorization': catalog.sessionToken,
+      'Authorization': sessionToken,
     },
   })
     .then(response => {

@@ -19,10 +19,10 @@ const brand: string = require('../images/brand-small.svg')
 
 import * as React from 'react'
 import {Modal} from './Modal'
-import {createSession} from '../api/authentication'
+import {create as createSession} from '../api/session'
 
 interface Props {
-  onSuccess(sessionToken: string)
+  onSuccess(): void
 }
 
 interface State {
@@ -68,8 +68,8 @@ export class Login extends React.Component<Props, State> {
     const username = this.refs.username.value
     const password = this.refs.pass.value
     createSession(username, password)
-      .then(token => {
-        this.props.onSuccess(token)
+      .then(() => {
+        this.props.onSuccess()
       })
       .catch(err => {
         console.error(err.stack)

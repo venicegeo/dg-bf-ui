@@ -14,8 +14,7 @@
  * limitations under the License.
  **/
 
-import {Client} from '../utils/piazza-client'
-import {GATEWAY} from '../config'
+import {getClient} from './session'
 
 const PATTERN_NAME_PREFIX = /^bf-geoserver/
 
@@ -25,9 +24,9 @@ export interface ServiceDescriptor {
   baselineLayerId?: string
 }
 
-export function discover(sessionToken): Promise<ServiceDescriptor> {
+export function discover(): Promise<ServiceDescriptor> {
   console.debug('(geoserver:discover)')
-  const client = new Client(GATEWAY, sessionToken)
+  const client = getClient()
   return client.getServices({pattern: PATTERN_NAME_PREFIX.source})
     .then(([geoserver]) => {
       if (!geoserver) {

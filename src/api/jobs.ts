@@ -15,11 +15,10 @@
  **/
 
 import * as moment from 'moment'
-import {Client} from '../utils/piazza-client'
+import {getClient} from './session'
 import {importByDataId} from '../utils/import-job-record'
 import * as worker from './workers/jobs'
 import {
-  GATEWAY,
   JOBS_WORKER,
   SCHEMA_VERSION,
 } from '../config'
@@ -36,7 +35,6 @@ interface ParamsCreateJob {
   executorServiceId: string
   image: beachfront.Scene
   name: string
-  sessionToken: string
 }
 
 export function createJob({
@@ -45,9 +43,8 @@ export function createJob({
   name,
   algorithm,
   image,
-  sessionToken,
 }: ParamsCreateJob): Promise<beachfront.Job> {
-  const client = new Client(GATEWAY, sessionToken)
+  const client = getClient()
   return client.post('execute-service', {
     dataInputs: {
       body: {
@@ -98,9 +95,8 @@ export function createJob({
 export function importJob({
   dataId,
   algorithms,
-  sessionToken,
 }) {
-  const client = new Client(GATEWAY, sessionToken)
+  const client = getClient()
   const algorithmNames = generateAlgorithmNamesHash(algorithms)
   return importByDataId(client, dataId, algorithmNames)
     .catch(err => {
@@ -110,20 +106,18 @@ export function importJob({
 }
 
 export function startWorker({
-  sessionToken,
   getRecords,
   onTerminate,
   onUpdate,
   onError,
 }: {
-  sessionToken: string
   getRecords(): beachfront.Job[]
   onTerminate(): void
   onUpdate(job: beachfront.Job): void
   onError(error: any): void
 }) {
   worker.start({
-    client:   new Client(GATEWAY, sessionToken),
+    client:   getClient(),
     interval: JOBS_WORKER.INTERVAL,
     ttl:      JOBS_WORKER.JOB_TTL,
     onError,
@@ -145,6 +139,10 @@ export function startWorker({
       onUpdate(updatedRecord)
     },
   })
+}
+
+export function stopWorker() {
+  worker.terminate()
 }
 
 function generateAlgorithmNamesHash(algorithms) {

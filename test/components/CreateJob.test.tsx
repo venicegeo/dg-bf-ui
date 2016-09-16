@@ -29,7 +29,6 @@ describe('<CreateJob/>', () => {
       bbox:                     [0, 0, 0, 0],
       catalogApiKey:            'test-catalog-api-key',
       executorServiceId:        'test-executor-service-id',
-      sessionToken:             'test-session-token',
       filter:                   '',
       filters:                  [],
       isSearching:              false,
@@ -59,7 +58,6 @@ describe('<CreateJob/>', () => {
         bbox={_props.bbox}
         catalogApiKey={_props.catalogApiKey}
         executorServiceId={_props.executorServiceId}
-        sessionToken={_props.sessionToken}
         filters={_props.filters}
         isSearching={_props.isSearching}
         searchCriteria={_props.searchCriteria}
@@ -86,7 +84,6 @@ describe('<CreateJob/>', () => {
         bbox={null}
         catalogApiKey={_props.catalogApiKey}
         executorServiceId={_props.executorServiceId}
-        sessionToken={_props.sessionToken}
         filters={_props.filters}
         isSearching={_props.isSearching}
         searchCriteria={_props.searchCriteria}
@@ -109,7 +106,6 @@ describe('<CreateJob/>', () => {
         bbox={null}
         catalogApiKey={_props.catalogApiKey}
         executorServiceId={_props.executorServiceId}
-        sessionToken={_props.sessionToken}
         filters={_props.filters}
         isSearching={_props.isSearching}
         searchCriteria={_props.searchCriteria}
@@ -132,7 +128,6 @@ describe('<CreateJob/>', () => {
         bbox={_props.bbox}
         catalogApiKey={_props.catalogApiKey}
         executorServiceId={_props.executorServiceId}
-        sessionToken={_props.sessionToken}
         filters={_props.filters}
         isSearching={_props.isSearching}
         searchCriteria={_props.searchCriteria}
@@ -155,7 +150,6 @@ describe('<CreateJob/>', () => {
         bbox={_props.bbox}
         catalogApiKey={_props.catalogApiKey}
         executorServiceId={_props.executorServiceId}
-        sessionToken={_props.sessionToken}
         filters={_props.filters}
         isSearching={_props.isSearching}
         searchCriteria={_props.searchCriteria}

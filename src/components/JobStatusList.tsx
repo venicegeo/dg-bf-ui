@@ -23,7 +23,6 @@ interface Props {
   activeIds: string[]
   error: any
   jobs: beachfront.Job[]
-  sessionToken: string
   onDismissError()
   onForgetJob(jobId: string)
   onNavigateToJob(loc: { pathname: string, search: string, hash: string })
@@ -31,7 +30,6 @@ interface Props {
 
 export const JobStatusList = ({
   activeIds,
-  sessionToken,
   error,
   jobs,
   onDismissError,
@@ -57,7 +55,6 @@ export const JobStatusList = ({
       ) : jobs.map(job => (
         <JobStatus
           key={job.id}
-          sessionToken={sessionToken}
           isActive={activeIds.includes(job.id)}
           job={job}
           onNavigate={onNavigateToJob}

@@ -26,7 +26,7 @@ export class Client {
   gateway: string
   sessionToken: string
 
-  static createSessionToken(gateway, username, password) {
+  static create(gateway, username, password) {
     return fetch(`${gateway}/key`, {
       method:  'GET',
       headers: {
@@ -38,7 +38,7 @@ export class Client {
         if (!auth.uuid) {
           throw new Error('Credentials rejected')
         }
-        return `Basic ${btoa(auth.uuid + ':')}`
+        return new Client(gateway, `Basic ${btoa(auth.uuid + ':')}`)
       })
   }
 
@@ -115,6 +115,18 @@ export class Client {
     })
       .then(asJson)
       .then(normalizePostMetadata)
+  }
+
+  isSessionActive() {
+    const baseUrl = this.gateway.replace('pz-gateway', 'pz-security')
+    const uuid = atob(this.sessionToken.replace('Basic ', '')).replace(':', '')
+    return fetch(baseUrl + '/v2/verification', {
+      method: 'POST',
+      headers: {'content-type': 'application/json'},
+      body: JSON.stringify({ uuid }),
+    })
+      .then(asJson)
+      .then(auth => auth.authenticated === true)
   }
 
   private fetch(endpoint, overrides: any = {}) {

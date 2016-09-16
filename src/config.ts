@@ -20,6 +20,14 @@ export const GATEWAY = process.env.GATEWAY
 
 const time = {millisecond: 1, second: 1000, minute: 60000}
 
+export const SESSION_WORKER = {
+  INTERVAL: 1 * time.minute,
+}
+
+export const UPDATE_WORKER = {
+  INTERVAL: 15 * time.minute,
+}
+
 export const JOBS_WORKER = {
   INTERVAL: 20 * time.second,
   JOB_TTL:  10 * time.minute,

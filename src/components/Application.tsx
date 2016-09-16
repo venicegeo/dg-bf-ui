@@ -35,12 +35,16 @@ import {
   MODE_PRODUCT_LINES,
 } from './PrimaryMap'
 import {ProductLineList} from './ProductLineList'
+import {SessionExpired} from './SessionExpired'
+import {UpdateAvailable} from './UpdateAvailable'
 import * as algorithmsService from '../api/algorithms'
 import * as jobsService from '../api/jobs'
 import * as catalogService from '../api/catalog'
 import * as executorService from '../api/executor'
 import * as geoserverService from '../api/geoserver'
 import * as productLinesService from '../api/productLines'
+import * as sessionService from '../api/session'
+import * as updateService from '../api/update'
 import {createCollection, Collection} from '../utils/collections'
 import {getFeatureCenter} from '../utils/geometries'
 import {upgradeIfNeeded} from '../utils/upgrade-job-record'
@@ -59,7 +63,9 @@ interface Props {
 interface State {
   catalogApiKey?: string
   error?: any
-  sessionToken?: string
+  isLoggedIn?: boolean
+  isSessionExpired?: boolean
+  isUpdateAvailable?: boolean
   route?: Route
 
   // Services
@@ -105,6 +111,8 @@ export class Application extends React.Component<Props, State> {
     this.handleFetchProductLineJobs = this.handleFetchProductLineJobs.bind(this)
     this.handleForgetJob = this.handleForgetJob.bind(this)
     this.handleJobCreated = this.handleJobCreated.bind(this)
+    this.handleNavigateToJob = this.handleNavigateToJob.bind(this)
+    this.handlePanToProductLine = this.handlePanToProductLine.bind(this)
     this.handleProductLineCreated = this.handleProductLineCreated.bind(this)
     this.handleProductLineJobHoverIn = this.handleProductLineJobHoverIn.bind(this)
     this.handleProductLineJobHoverOut = this.handleProductLineJobHoverOut.bind(this)
@@ -113,25 +121,26 @@ export class Application extends React.Component<Props, State> {
     this.handleSearchCriteriaChange = this.handleSearchCriteriaChange.bind(this)
     this.handleSearchSubmit = this.handleSearchSubmit.bind(this)
     this.handleSelectFeature = this.handleSelectFeature.bind(this)
-    this.handleNavigateToJob = this.handleNavigateToJob.bind(this)
-    this.handlePanToProductLine = this.handlePanToProductLine.bind(this)
     this.navigateTo = this.navigateTo.bind(this)
     this.panTo = this.panTo.bind(this)
   }
 
   componentDidUpdate(_, prevState) {
-    if (!prevState.sessionToken && this.state.sessionToken) {
+    if (!prevState.isLoggedIn && this.state.isLoggedIn) {
       this.autodiscoverServices()
-      this.startJobsWorker()
+      this.startWorkers()
+    }
+    if (!prevState.isSessionActive && this.state.isSessionExpired) {
+      this.stopWorkers()
     }
     this.props.serialize(this.state)
   }
 
   componentWillMount() {
     this.subscribeToHistoryEvents()
-    if (this.state.sessionToken) {
+    if (this.state.isLoggedIn) {
       this.autodiscoverServices()
-      this.startJobsWorker()
+      this.startWorkers()
     }
   }
 
@@ -160,15 +169,35 @@ export class Application extends React.Component<Props, State> {
           onViewChange={mapView => this.setState({ mapView })}
         />
         {this.renderRoute()}
+        {this.state.isSessionExpired && (
+          <SessionExpired
+            onDismiss={() => {
+              sessionStorage.clear()
+              this.setState({
+                isLoggedIn: false,
+                isSessionExpired: false,
+              })
+            }}
+          />
+        )}
+        {this.state.isUpdateAvailable && (
+          <UpdateAvailable
+            onDismiss={() => {
+              this.setState({
+                isUpdateAvailable: false,
+              })
+            }}
+          />
+        )}
       </div>
     )
   }
 
   renderRoute() {
-    if (!this.state.sessionToken) {
+    if (!this.state.isLoggedIn) {
       return (
         <Login
-          onSuccess={sessionToken => this.setState({ sessionToken })}
+          onSuccess={() => this.setState({ isLoggedIn: true })}
         />
       )
     }
@@ -186,7 +215,6 @@ export class Application extends React.Component<Props, State> {
             bbox={this.state.bbox}
             catalogApiKey={this.state.catalogApiKey}
             executorServiceId={this.state.executor.serviceId}
-            sessionToken={this.state.sessionToken}
             filters={this.state.catalog.filters || []}
             isSearching={this.state.isSearching}
             searchError={this.state.searchError}
@@ -209,7 +237,6 @@ export class Application extends React.Component<Props, State> {
             executorServiceId={this.state.executor.serviceId}
             executorUrl={this.state.executor.url}
             filters={this.state.catalog.filters || []}
-            sessionToken={this.state.sessionToken}
             onCatalogApiKeyChange={this.handleCatalogApiKeyChange}
             onClearBbox={this.handleClearBbox}
             onProductLineCreated={this.handleProductLineCreated}
@@ -224,7 +251,6 @@ export class Application extends React.Component<Props, State> {
       case '/jobs':
         return (
           <JobStatusList
-            sessionToken={this.state.sessionToken}
             activeIds={this.detectionsForCurrentMode.map(d => d.id)}
             error={this.state.jobs.error}
             jobs={this.state.jobs.records}
@@ -239,7 +265,6 @@ export class Application extends React.Component<Props, State> {
             error={this.state.productLines.error}
             isFetching={this.state.productLines.fetching}
             productLines={this.state.productLines.records}
-            sessionToken={this.state.sessionToken}
             onFetch={this.handleFetchProductLines}
             onFetchJobs={this.handleFetchProductLineJobs}
             onJobHoverIn={this.handleProductLineJobHoverIn}
@@ -304,7 +329,7 @@ export class Application extends React.Component<Props, State> {
     this.setState({
       algorithms: this.state.algorithms.$fetching(),
     })
-    return algorithmsService.discover(this.state.sessionToken)
+    return algorithmsService.discover()
       .then(algorithms => {
         this.setState({
           algorithms: this.state.algorithms.$records(algorithms),
@@ -318,19 +343,19 @@ export class Application extends React.Component<Props, State> {
   }
 
   private discoverCatalog() {
-    return catalogService.discover(this.state.sessionToken)
+    return catalogService.discover()
       .then(catalog => this.setState({ catalog }))
       .catch(error => this.setState({ catalog: { error }}))
   }
 
   private discoverExecutor() {
-    return executorService.discover(this.state.sessionToken)
+    return executorService.discover()
       .then(executor => this.setState({ executor }))
       .catch(error => this.setState({ executor: { error }}))
   }
 
   private discoverGeoserver() {
-    return geoserverService.discover(this.state.sessionToken)
+    return geoserverService.discover()
       .then(geoserver => this.setState({ geoserver }))
       .catch(error => this.setState({ geoserver: { error }}))
   }
@@ -368,7 +393,6 @@ export class Application extends React.Component<Props, State> {
         executorUrl:  this.state.executor.url,
         filters:      this.state.catalog.filters,
         serviceId:    this.state.executor.serviceId,
-        sessionToken: this.state.sessionToken,
       })
         .then(records => {
           this.setState({
@@ -384,7 +408,6 @@ export class Application extends React.Component<Props, State> {
       sinceDate,
       algorithms:   this.state.algorithms.records,
       executorUrl:  this.state.executor.url,
-      sessionToken: this.state.sessionToken,
     })
   }
 
@@ -504,9 +527,8 @@ export class Application extends React.Component<Props, State> {
     })
   }
 
-  private startJobsWorker() {
+  private startWorkers() {
     jobsService.startWorker({
-      sessionToken: this.state.sessionToken,
       getRecords: () => this.state.jobs.records,
       onUpdate: (updatedRecord) => this.setState({
         jobs: this.state.jobs.$map(j => j.id === updatedRecord.id ? updatedRecord : j),
@@ -516,6 +538,20 @@ export class Application extends React.Component<Props, State> {
       }),
       onTerminate() {/* noop */},
     })
+
+    sessionService.startWorker({
+      onExpired: () => this.setState({ isSessionExpired: true }),
+    })
+
+    updateService.startWorker({
+      onAvailable: () => this.setState({ isUpdateAvailable: true }),
+    })
+  }
+
+  private stopWorkers() {
+    jobsService.stopWorker()
+    sessionService.stopWorker()
+    updateService.stopWorker()
   }
 
   private subscribeToHistoryEvents() {
@@ -539,7 +575,9 @@ function generateInitialState(): State {
   const state: State = {
     catalogApiKey: '',
     route: generateRoute(location),
-    sessionToken: null,
+    isLoggedIn: sessionService.exists(),
+    isSessionExpired: false,
+    isUpdateAvailable: false,
 
     // Services
     catalog: {},
@@ -582,7 +620,6 @@ function deserialize() {
     mapView:        JSON.parse(sessionStorage.getItem('mapView')),
     searchCriteria: JSON.parse(sessionStorage.getItem('searchCriteria')),
     searchResults:  JSON.parse(sessionStorage.getItem('searchResults')),
-    sessionToken:   sessionStorage.getItem('sessionToken') || null,
     catalogApiKey:  localStorage.getItem('catalog_apiKey') || '',  // HACK
   }
 }
@@ -597,7 +634,6 @@ function serialize(state) {
   sessionStorage.setItem('mapView', JSON.stringify(state.mapView))
   sessionStorage.setItem('searchCriteria', JSON.stringify(state.searchCriteria))
   sessionStorage.setItem('searchResults', JSON.stringify(state.searchResults))
-  sessionStorage.setItem('sessionToken', state.sessionToken || '')
   localStorage.setItem('catalog_apiKey', state.catalogApiKey)  // HACK
 }
 

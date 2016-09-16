@@ -18,10 +18,12 @@
 
 const path = require('path')
 const webpack = require('webpack')
+const childProcess = require('child_process')
 const CopyWebpackPlugin = require('copy-webpack-plugin')
 const HtmlWebpackPlugin = require('html-webpack-plugin')
 const cssnext = require('postcss-cssnext')
 const cssimport = require('postcss-import')
+const pkg = require('./package')
 
 const __environment__ = process.env.NODE_ENV || 'development'
 
@@ -104,7 +106,11 @@ module.exports = {
       template: 'src/index.html',
       favicon: __environment__ === 'production' ? 'src/images/favicon.png' : 'src/images/favicon-dev.png',
       hash: true,
-      xhtml: true
+      xhtml: true,
+      build: [
+        pkg.version,
+        childProcess.execSync('git rev-parse HEAD').toString().trim(),
+      ].join(':')
     }),
     new webpack.ProvidePlugin({fetch:'isomorphic-fetch'})
   ]

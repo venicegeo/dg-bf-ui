@@ -14,21 +14,16 @@
  * limitations under the License.
  **/
 
-const styles: any = require('./Help.css')
+import * as worker from './workers/update'
+import {UPDATE_WORKER} from '../config'
 
-import * as React from 'react'
-import {Modal} from './Modal'
-
-interface Props {
-  onDismiss()
+export function startWorker({ onAvailable }) {
+  worker.start({
+    interval: UPDATE_WORKER.INTERVAL,
+    onAvailable,
+  })
 }
 
-export const Help = ({ onDismiss }: Props) => (
-  <Modal onDismiss={onDismiss}>
-    <div className={styles.root}>
-      <h1>Help!</h1>
-      <p>Need help?  Let us know we do this stuff for a living... literally!</p>
-      <p><a href="mailto:venice@radiantblue.com">venice@radiantblue.com</a></p>
-    </div>
-  </Modal>
-)
+export function stopWorker() {
+  worker.terminate()
+}

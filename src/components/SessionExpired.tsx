@@ -14,9 +14,23 @@
  * limitations under the License.
  **/
 
-import {Client} from '../utils/piazza-client'
-import {GATEWAY} from '../config'
+const styles = require('./SessionExpired.css')
 
-export function createSession(username, password) {
-  return Client.createSessionToken(GATEWAY, username, password)
+import * as React from 'react'
+import {Modal} from './Modal'
+
+interface Props {
+  onDismiss()
 }
+
+export const SessionExpired = ({ onDismiss }: Props) => (
+  <Modal onDismiss={onDismiss}>
+    <div className={styles.root}>
+      <h1><i className="fa fa-lock"/> Your session has expired</h1>
+      <p>This may have happened because you logged in from another location.</p>
+      <p className={styles.instructions}>
+        Click anywhere or press <kbd>ESC</kbd> to close this message
+      </p>
+    </div>
+  </Modal>
+)
