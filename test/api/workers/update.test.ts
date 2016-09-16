@@ -82,7 +82,7 @@ describe('Update Worker', function () {
       })
     })
 
-    it('does not being cycle immediately', () => {
+    it('does not begin cycle immediately', () => {
       const stub = globalStubs.fetch
       document.documentElement.setAttribute('data-build', 'test-build-id')
       worker.start({

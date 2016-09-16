@@ -32,6 +32,15 @@ export function create(username, password): Promise<void> {
     })
 }
 
+export function destroy() {
+  client = null
+  sessionStorage.clear()
+}
+
+export function exists() {
+  return !!client || !!sessionStorage.getItem('token')
+}
+
 export function getClient(): Client {
   if (client) {
      return client
@@ -44,15 +53,6 @@ export function getClient(): Client {
   }
 
   throw new Error('No session exists')
-}
-
-export function exists() {
-  return !!client || !!sessionStorage.getItem('token')
-}
-
-export function destroy() {
-  client = null
-  sessionStorage.clear()
 }
 
 export function startWorker({ onExpired }) {

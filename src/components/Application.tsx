@@ -125,7 +125,7 @@ export class Application extends React.Component<Props, State> {
     this.panTo = this.panTo.bind(this)
   }
 
-  componentDidUpdate(_, prevState) {
+  componentDidUpdate(_, prevState: State) {
     if (!prevState.isLoggedIn && this.state.isLoggedIn) {
       this.autodiscoverServices()
       this.startWorkers()
@@ -609,7 +609,7 @@ function generateInitialState(): State {
   return state
 }
 
-function deserialize() {
+function deserialize(): State {
   return {
     algorithms:     createCollection(JSON.parse(sessionStorage.getItem('algorithms_records')) || []),
     bbox:           JSON.parse(sessionStorage.getItem('bbox')),
@@ -624,7 +624,7 @@ function deserialize() {
   }
 }
 
-function serialize(state) {
+function serialize(state: State) {
   sessionStorage.setItem('algorithms_records', JSON.stringify(state.algorithms.records))
   sessionStorage.setItem('bbox', JSON.stringify(state.bbox))
   sessionStorage.setItem('catalog', JSON.stringify(state.catalog))

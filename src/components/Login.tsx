@@ -72,7 +72,7 @@ export class Login extends React.Component<Props, State> {
         this.props.onSuccess()
       })
       .catch(err => {
-        console.error(err.stack)
+        console.error(err)
         this.setState({ error: err })
       })
   }
