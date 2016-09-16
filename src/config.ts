@@ -25,7 +25,7 @@ export const SESSION_WORKER = {
 }
 
 export const UPDATE_WORKER = {
-  INTERVAL: 10 * time.second,
+  INTERVAL: 15 * time.minute,
 }
 
 export const JOBS_WORKER = {

@@ -44,9 +44,9 @@ import * as executorService from '../api/executor'
 import * as geoserverService from '../api/geoserver'
 import * as productLinesService from '../api/productLines'
 import * as sessionService from '../api/session'
+import * as updateService from '../api/update'
 import {createCollection, Collection} from '../utils/collections'
 import {getFeatureCenter} from '../utils/geometries'
-import * as heartbeat from '../utils/heartbeat'
 import {upgradeIfNeeded} from '../utils/upgrade-job-record'
 
 import {
@@ -63,9 +63,9 @@ interface Props {
 interface State {
   catalogApiKey?: string
   error?: any
-  updateAvailable?: boolean
   isLoggedIn?: boolean
   isSessionExpired?: boolean
+  isUpdateAvailable?: boolean
   route?: Route
 
   // Services
@@ -180,11 +180,11 @@ export class Application extends React.Component<Props, State> {
             }}
           />
         )}
-        {this.state.updateAvailable && (
+        {this.state.isUpdateAvailable && (
           <UpdateAvailable
             onDismiss={() => {
               this.setState({
-                updateAvailable: false,
+                isUpdateAvailable: false,
               })
             }}
           />
@@ -543,17 +543,15 @@ export class Application extends React.Component<Props, State> {
       onExpired: () => this.setState({ isSessionExpired: true }),
     })
 
-  private startHeartbeat() {
-    heartbeat.start({
-      sessionToken: this.state.sessionToken,
-      onSessionExpired: () => this.setState({ sessionExpired: true }),
-      onUpdateAvailable: () => this.setState({ updateAvailable: true }),
+    updateService.startWorker({
+      onAvailable: () => this.setState({ isUpdateAvailable: true }),
     })
   }
 
   private stopWorkers() {
     jobsService.stopWorker()
     sessionService.stopWorker()
+    updateService.stopWorker()
   }
 
   private subscribeToHistoryEvents() {
@@ -579,7 +577,7 @@ function generateInitialState(): State {
     route: generateRoute(location),
     isLoggedIn: sessionService.exists(),
     isSessionExpired: false,
-    updateAvailable: false,
+    isUpdateAvailable: false,
 
     // Services
     catalog: {},

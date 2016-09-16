@@ -14,18 +14,16 @@
  * limitations under the License.
  **/
 
-describe('Heartbeat', () => {
-  it('can start')
-  it('can terminate')
-  it('schedules recurrences')
+import * as worker from './workers/update'
+import {UPDATE_WORKER} from '../config'
 
-  describe('session expiration', () => {
-    it('checks for session expiration')
-    it('gracefully handles errors')
+export function startWorker({ onAvailable }) {
+  worker.start({
+    interval: UPDATE_WORKER.INTERVAL,
+    onAvailable,
   })
+}
 
-  describe('for application updates', () => {
-    it('checks for updated app version')
-    it('gracefully handles errors')
-  })
-})
+export function stopWorker() {
+  worker.terminate()
+}
