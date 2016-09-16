@@ -24,7 +24,7 @@ export function create(username, password): Promise<void> {
   return Client.create(GATEWAY, username, password)
     .then(instance => {
       client = instance
-      serializeToken(client.sessionToken)
+      sessionStorage.setItem('token', client.sessionToken)
     })
     .catch(err => {
       console.error('(session:create) authentication failed')
@@ -37,26 +37,27 @@ export function getClient(): Client {
      return client
   }
 
-  const token = deserializeToken()
+  const token = sessionStorage.getItem('token')
   if (token) {
-    return client = new Client(GATEWAY, token)
+    client = new Client(GATEWAY, token)
+    return client
   }
 
   throw new Error('No session exists')
 }
 
 export function exists() {
-  return !!client || !!deserializeToken()
+  return !!client || !!sessionStorage.getItem('token')
 }
 
 export function destroy() {
   client = null
-  serializeToken(null)
+  sessionStorage.clear()
 }
 
 export function startWorker({ onExpired }) {
   worker.start({
-    client,
+    client:   getClient(),
     interval: SESSION_WORKER.INTERVAL,
     onExpired,
   })
@@ -64,16 +65,4 @@ export function startWorker({ onExpired }) {
 
 export function stopWorker() {
   worker.terminate()
-}
-
-//
-// Internals
-//
-
-function serializeToken(token) {
-  sessionStorage.setItem('token', token || '')
-}
-
-function deserializeToken() {
-  return sessionStorage.getItem('token') || null
 }

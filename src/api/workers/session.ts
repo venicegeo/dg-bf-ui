@@ -14,8 +14,6 @@
  * limitations under the License.
  **/
 
-import {Client} from '../../utils/piazza-client'
-
 let instance
 
 export function start({
@@ -29,7 +27,11 @@ export function start({
 
   instance = setInterval(() => {
     console.debug('(session:worker) validating session')
-    client.isSessionActive().then(active => !active && onExpired())
+    client.isSessionActive()
+      .then(active => !active && onExpired())
+      .catch(err => {
+        console.error('(session:worker) failed:', err)
+      })
   }, interval)
 }
 
@@ -43,8 +45,16 @@ export function terminate() {
   instance = null
 }
 
+//
+// Types
+//
+
 interface Params {
   client: Client
   interval: number
   onExpired(): void
+}
+
+interface Client {
+  isSessionActive(): Promise<boolean>
 }

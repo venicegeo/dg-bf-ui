@@ -33,6 +33,9 @@ export function start({
           onAvailable()
         }
       })
+      .catch(err => {
+        console.error('(update:worker) failed:', err)
+      })
   }, interval)
 }
 

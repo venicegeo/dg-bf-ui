@@ -66,10 +66,10 @@ describe('Piazza Client', function () {
     })
   })
 
-  describe('createSessionToken()', () => {
+  describe('create()', () => {
     it('calls correct URL', () => {
       const stub = fetchStub.returns(resolveJson(RESPONSE_AUTH_SUCCESS, 201))
-      return Client.createSessionToken('http://m', 'test-username', 'test-password')
+      return Client.create('http://m', 'test-username', 'test-password')
         .then(token => {
           assert.equal(stub.firstCall.args[0], 'http://m/key')
         })
@@ -77,23 +77,25 @@ describe('Piazza Client', function () {
 
     it('passes correct credentials', () => {
       const stub = fetchStub.returns(resolveJson(RESPONSE_AUTH_SUCCESS, 201))
-      return Client.createSessionToken('http://m', 'test-username', 'test-password')
+      return Client.create('http://m', 'test-username', 'test-password')
         .then(token => {
           assert.equal(stub.firstCall.args[1].headers['Authorization'], 'Basic dGVzdC11c2VybmFtZTp0ZXN0LXBhc3N3b3Jk')
         })
     })
 
-    it('yields a valid token', () => {
+    it('yields a valid client instance', () => {
       fetchStub.returns(resolveJson(RESPONSE_AUTH_SUCCESS, 201))
-      return Client.createSessionToken('http://m', 'test-username', 'test-password')
-        .then(token => {
-          assert.equal(token, 'Basic dGVzdC1zb21lLXV1aWQ6')
+      return Client.create('http://m', 'test-username', 'test-password')
+        .then(instance => {
+          assert.instanceOf(instance, Client)
+          assert.equal(instance.gateway, 'http://m')
+          assert.equal(instance.sessionToken, 'Basic dGVzdC1zb21lLXV1aWQ6')
         })
     })
 
     it('throws if credentials are rejected', () => {
       fetchStub.returns(resolveJson(RESPONSE_AUTH_REJECTED, 401))
-      return Client.createSessionToken('http://m', 'test-username', 'test-password')
+      return Client.create('http://m', 'test-username', 'test-password')
         .then(
           () => { throw new Error('Should have thrown') },
           (err) => {
@@ -104,7 +106,7 @@ describe('Piazza Client', function () {
 
     it('handles HTTP errors gracefully', () => {
       fetchStub.returns(resolveJson(ERROR_GENERIC, 500))
-      return Client.createSessionToken('http://m', 'test-username', 'test-password')
+      return Client.create('http://m', 'test-username', 'test-password')
         .then(
           () => { throw new Error('Should have thrown') },
           (err) => {
