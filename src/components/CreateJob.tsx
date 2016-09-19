@@ -39,7 +39,7 @@ interface Props {
   isSearching: boolean
   searchError: any
   searchCriteria: SearchCriteria
-  selectedImage: beachfront.Scene
+  selectedScene: beachfront.Scene
   onCatalogApiKeyChange(apiKey: string)
   onClearBbox()
   onJobCreated(job: beachfront.Job)
@@ -61,11 +61,11 @@ export const createSearchCriteria = (): SearchCriteria => ({
 })
 
 export class CreateJob extends React.Component<Props, State> {
-  constructor(props) {
+  constructor(props: Props) {
     super(props)
     this.state = {
       isCreating: false,
-      name: props.selectedImage ? generateName(props.selectedImage.id) : '',
+      name: props.selectedScene ? generateName(props.selectedScene.id) : '',
       shouldAutogenerateName: true,
     }
     this._handleCreateJob = this._handleCreateJob.bind(this)
@@ -82,9 +82,9 @@ export class CreateJob extends React.Component<Props, State> {
     }
   }
 
-  componentWillReceiveProps(nextProps) {
-    if (this.state.shouldAutogenerateName && nextProps.selectedImage && nextProps.selectedImage !== this.props.selectedImage) {
-      this.setState({ name: generateName(nextProps.selectedImage.id) })
+  componentWillReceiveProps(nextProps: Props) {
+    if (this.state.shouldAutogenerateName && nextProps.selectedScene && nextProps.selectedScene !== this.props.selectedScene) {
+      this.setState({ name: generateName(nextProps.selectedScene.id) })
     }
   }
 
@@ -116,7 +116,7 @@ export class CreateJob extends React.Component<Props, State> {
               />
             </li>
           )}
-          {this.props.bbox && this.props.selectedImage && (
+          {this.props.bbox && this.props.selectedScene && (
             <li className={styles.details}>
               <NewJobDetails
                 name={this.state.name}
@@ -124,11 +124,11 @@ export class CreateJob extends React.Component<Props, State> {
               />
             </li>
           )}
-          {this.props.bbox && this.props.selectedImage && (
+          {this.props.bbox && this.props.selectedScene && (
             <li className={styles.algorithms}>
               <AlgorithmList
                 algorithms={this.props.algorithms}
-                imageProperties={this.props.selectedImage.properties}
+                imageProperties={this.props.selectedScene.properties}
                 isSubmitting={this.state.isCreating}
                 onSubmit={this._handleCreateJob}
               />
@@ -154,7 +154,7 @@ export class CreateJob extends React.Component<Props, State> {
       algorithm,
       catalogApiKey:     this.props.catalogApiKey,
       executorServiceId: this.props.executorServiceId,
-      image:             this.props.selectedImage,
+      scene:             this.props.selectedScene,
       name:              this.state.name,
     })
       .then(job => {

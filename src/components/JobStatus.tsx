@@ -90,7 +90,7 @@ export class JobStatus extends React.Component<Props, State> {
             <dl>
               <dt>Algorithm</dt>
               <dd>{properties.algorithmName}</dd>
-              <dt>Image ID</dt>
+              <dt>Scene ID</dt>
               <dd>{normalizeSceneId(properties.sceneId)}</dd>
               <dt>Captured On</dt>
               <dd>{moment(properties.sceneCaptureDate).utc().format('MM/DD/YYYY HH:mm z')}</dd>

@@ -219,7 +219,7 @@ export class Application extends React.Component<Props, State> {
             isSearching={this.state.isSearching}
             searchError={this.state.searchError}
             searchCriteria={this.state.searchCriteria}
-            selectedImage={this.state.selectedFeature && this.state.selectedFeature.properties.type === TYPE_SCENE ? this.state.selectedFeature as beachfront.Scene : null}
+            selectedScene={this.state.selectedFeature && this.state.selectedFeature.properties.type === TYPE_SCENE ? this.state.selectedFeature as beachfront.Scene : null}
             onCatalogApiKeyChange={this.handleCatalogApiKeyChange}
             onClearBbox={this.handleClearBbox}
             onJobCreated={this.handleJobCreated}

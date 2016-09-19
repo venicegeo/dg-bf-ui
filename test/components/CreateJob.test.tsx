@@ -39,8 +39,8 @@ describe('<CreateJob/>', () => {
         filter:     '',
       },
       searchError: null,
-      selectedImage: {
-        id: 'test-id',
+      selectedScene: {
+        id: 'test-scene-id',
         properties: {},
       },
       onCatalogApiKeyChange:  sinon.stub(),
@@ -62,7 +62,7 @@ describe('<CreateJob/>', () => {
         isSearching={_props.isSearching}
         searchCriteria={_props.searchCriteria}
         searchError={_props.searchError}
-        selectedImage={_props.selectedImage}
+        selectedScene={_props.selectedScene}
         onCatalogApiKeyChange={_props.onCatalogApiKeyChange}
         onClearBbox={_props.onClearBbox}
         onJobCreated={_props.onJobCreated}
@@ -88,7 +88,7 @@ describe('<CreateJob/>', () => {
         isSearching={_props.isSearching}
         searchCriteria={_props.searchCriteria}
         searchError={_props.searchError}
-        selectedImage={null}
+        selectedScene={null}
         onCatalogApiKeyChange={_props.onCatalogApiKeyChange}
         onClearBbox={_props.onClearBbox}
         onJobCreated={_props.onJobCreated}
@@ -110,7 +110,7 @@ describe('<CreateJob/>', () => {
         isSearching={_props.isSearching}
         searchCriteria={_props.searchCriteria}
         searchError={_props.searchError}
-        selectedImage={null}
+        selectedScene={null}
         onCatalogApiKeyChange={_props.onCatalogApiKeyChange}
         onClearBbox={_props.onClearBbox}
         onJobCreated={_props.onJobCreated}
@@ -132,7 +132,7 @@ describe('<CreateJob/>', () => {
         isSearching={_props.isSearching}
         searchCriteria={_props.searchCriteria}
         searchError={_props.searchError}
-        selectedImage={null}
+        selectedScene={null}
         onCatalogApiKeyChange={_props.onCatalogApiKeyChange}
         onClearBbox={_props.onClearBbox}
         onJobCreated={_props.onJobCreated}
@@ -154,7 +154,7 @@ describe('<CreateJob/>', () => {
         isSearching={_props.isSearching}
         searchCriteria={_props.searchCriteria}
         searchError={_props.searchError}
-        selectedImage={null}
+        selectedScene={null}
         onCatalogApiKeyChange={_props.onCatalogApiKeyChange}
         onClearBbox={_props.onClearBbox}
         onJobCreated={_props.onJobCreated}

@@ -34,8 +34,8 @@ interface ParamsCreateJob {
   algorithm: beachfront.Algorithm
   catalogApiKey: string
   executorServiceId: string
-  image: beachfront.Scene
   name: string
+  scene: beachfront.Scene
 }
 
 export function createJob({
@@ -43,7 +43,7 @@ export function createJob({
   executorServiceId,
   name,
   algorithm,
-  image,
+  scene,
 }: ParamsCreateJob): Promise<beachfront.Job> {
   const client = getClient()
   return client.post('execute-service', {
@@ -54,7 +54,7 @@ export function createJob({
           bands:         algorithm.requirements.find(a => a.name === REQUIREMENT_BANDS).literal.split(','),
           dbAuthToken:   catalogApiKey,
           jobName:       name,
-          metaDataJSON:  image,
+          metaDataJSON:  scene,
           pzAuthToken:   client.sessionToken,
           pzAddr:        client.gateway,
           svcURL:        algorithm.url,
@@ -74,15 +74,15 @@ export function createJob({
   })
     .then(id => ({
       id,
-      geometry: image.geometry,
+      geometry: scene.geometry,
       properties: {
         __schemaVersion__: SCHEMA_VERSION,
         algorithmName:     algorithm.name,
         createdOn:         moment().toISOString(),
         name:              name,
-        sceneCaptureDate:  moment(image.properties.acquiredDate).toISOString(),
-        sceneId:           image.id,
-        sceneSensorName:   image.properties.sensorName,
+        sceneCaptureDate:  moment(scene.properties.acquiredDate).toISOString(),
+        sceneId:           scene.id,
+        sceneSensorName:   scene.properties.sensorName,
         status:            STATUS_RUNNING,
         type:              TYPE_JOB,
       },
