@@ -14,6 +14,4 @@
  * limitations under the License.
  **/
 
-const JobFeatureDetails = () => null
-
-export default JobFeatureDetails
+export const JobFeatureDetails = () => null

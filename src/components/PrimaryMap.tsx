@@ -23,12 +23,12 @@ import {findDOMNode} from 'react-dom'
 import * as ol from 'openlayers'
 import debounce = require('lodash/debounce')
 import throttle = require('lodash/throttle')
-import ExportControl from '../utils/openlayers.ExportControl'
-import SearchControl from '../utils/openlayers.SearchControl'
-import BasemapSelect from './BasemapSelect'
-import FeatureDetails from './FeatureDetails'
+import {ExportControl} from '../utils/openlayers.ExportControl'
+import {SearchControl} from '../utils/openlayers.SearchControl'
+import {BasemapSelect} from './BasemapSelect'
+import {FeatureDetails} from './FeatureDetails'
 import {LoadingAnimation} from './LoadingAnimation'
-import ImagerySearchResults from './ImagerySearchResults'
+import {ImagerySearchResults} from './ImagerySearchResults'
 import {featureToBbox, deserializeBbox, serializeBbox} from '../utils/geometries'
 import {
   TILE_PROVIDERS,
@@ -70,16 +70,16 @@ export const MODE_SELECT_IMAGERY = 'MODE_SELECT_IMAGERY'
 
 interface Props {
   bbox: number[]
-  catalogApiKey: string
-  detections: (beachfront.Job|beachfront.ProductLine)[]
-  frames: (beachfront.Job|beachfront.ProductLine)[]
-  geoserverUrl: string
+  catalogApiKey:      string
+  detections:         (beachfront.Job | beachfront.ProductLine)[]
+  frames:             (beachfront.Job | beachfront.ProductLine)[]
+  geoserverUrl:       string
   highlightedFeature: beachfront.Job
-  imagery: beachfront.ImageryCatalogPage
-  isSearching: boolean
-  mode: string
-  selectedFeature: beachfront.Job | beachfront.Scene
-  view: MapView
+  imagery:            beachfront.ImageryCatalogPage
+  isSearching:        boolean
+  mode:               string
+  selectedFeature:    beachfront.Job | beachfront.Scene
+  view:               MapView
   onBoundingBoxChange(bbox: number[])
   onSearchPageChange(page: {count: number, startIndex: number})
   onSelectFeature(feature: beachfront.Job | beachfront.Scene)

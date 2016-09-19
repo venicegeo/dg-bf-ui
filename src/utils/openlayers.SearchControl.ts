@@ -46,7 +46,7 @@ const TEMPLATE_DIALOG = `
   </dl>
 </div>`
 
-export default class SearchControl extends ol.control.Control {
+export class SearchControl extends ol.control.Control {
   private _dialog: any
 
   constructor(className) {

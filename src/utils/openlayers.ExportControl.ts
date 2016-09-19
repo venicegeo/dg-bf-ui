@@ -17,7 +17,7 @@
 import * as ol from 'openlayers'
 import * as moment from 'moment'
 
-export default class ExportControl extends ol.control.Control {
+export class ExportControl extends ol.control.Control {
   constructor(className) {
     const element = document.createElement('div')
     super({element})

@@ -29,7 +29,7 @@ interface State {
   isOpen: boolean
 }
 
-export default class BasemapSelect extends React.Component<Props, State> {
+export class BasemapSelect extends React.Component<Props, State> {
   constructor() {
     super()
     this.state            = {isOpen: false}

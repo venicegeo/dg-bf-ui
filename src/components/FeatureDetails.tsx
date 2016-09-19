@@ -17,8 +17,8 @@
 const styles: any = require('./FeatureDetails.css')
 
 import * as React from 'react'
-import JobFeatureDetails from './JobFeatureDetails'
-import SceneFeatureDetails from './SceneFeatureDetails'
+import {JobFeatureDetails} from './JobFeatureDetails'
+import {SceneFeatureDetails} from './SceneFeatureDetails'
 
 import {
   TYPE_JOB,
@@ -29,7 +29,7 @@ interface Props {
   feature: beachfront.Job | beachfront.Scene
 }
 
-export default class FeatureDetails extends React.Component<Props, {}> {
+export class FeatureDetails extends React.Component<Props, {}> {
   render() {
     const {feature} = this.props
     if (!feature) {

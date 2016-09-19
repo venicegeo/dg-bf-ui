@@ -24,7 +24,7 @@ interface Props {
   feature: beachfront.Scene
 }
 
-const SceneFeatureDetails = ({className, feature}: Props) => (
+export const SceneFeatureDetails = ({className, feature}: Props) => (
   <div className={`${styles.root} ${className || ''}`}>
     <h1 title={normalizeId(feature.id)}>{normalizeId(feature.id)}</h1>
 
@@ -45,8 +45,6 @@ const SceneFeatureDetails = ({className, feature}: Props) => (
     </dl>
   </div>
 )
-
-export default SceneFeatureDetails
 
 function normalizeId(featureId) {
   if (!featureId) {

@@ -26,7 +26,7 @@ interface Props {
   onPageChange(page: {count: number, startIndex: number})
 }
 
-export default class ImagerySearchResults extends React.Component<Props, {}> {
+export class ImagerySearchResults extends React.Component<Props, void> {
   constructor() {
     super()
     this.emitPageBack    = this.emitPageBack.bind(this)
