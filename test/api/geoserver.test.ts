@@ -42,7 +42,7 @@ describe('GeoServer Service', () => {
       const stub = client.getServices.returns(Promise.resolve(generateServiceListing()))
       return service.discover()
         .then(() => {
-          assert.equal(stub.firstCall.args[0].pattern, '^bf-geoserver')
+          assert.equal(stub.firstCall.args[0].pattern, '^bf-geoserver$')
         })
     })
 
