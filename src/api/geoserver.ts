@@ -16,7 +16,7 @@
 
 import {getClient} from './session'
 
-const PATTERN_NAME_PREFIX = /^bf-geoserver/
+const PATTERN_NAME_PREFIX = /^bf-geoserver$/
 
 export interface ServiceDescriptor {
   error?: any

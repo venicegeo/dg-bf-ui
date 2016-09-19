@@ -16,7 +16,7 @@
 
 import {getClient} from './session'
 
-const PATTERN_NAME_PREFIX = /^bf-handle/
+const PATTERN_NAME_PREFIX = /^bf-handle$/
 
 export interface ServiceDescriptor {
   error?: any

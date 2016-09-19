@@ -16,7 +16,7 @@
 
 import {getClient} from './session'
 
-const PATTERN_NAME_PREFIX = /^pzsvc-image-catalog/
+const PATTERN_NAME_PREFIX = /^pzsvc-image-catalog$/
 
 export interface ServiceDescriptor {
   error?: any
