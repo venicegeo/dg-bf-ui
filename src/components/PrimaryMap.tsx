@@ -337,21 +337,16 @@ export class PrimaryMap extends React.Component<Props, State> {
       return  // Disregard spurious select event
     }
 
-    const [feature] = event.selected
-    let position, type
-    if (feature) {
-      position = ol.extent.getCenter(feature.getGeometry().getExtent())
-      type = feature.get(KEY_TYPE)
-    }
+    const [feature]: ol.Feature[] = event.selected
+    const type = feature ? feature.get(KEY_TYPE) : null
 
-    this.featureDetailsOverlay.setPosition(position)
-    const selections = this.selectInteraction.getFeatures()
     switch (type) {
       case TYPE_DIVOT_INBOARD:
       case TYPE_STEM:
         // Proxy clicks on "inner" decorations out to the job frame itself
         const jobId = feature.get(KEY_OWNER_ID)
         const jobFeature = this.frameLayer.getSource().getFeatureById(jobId)
+        const selections = this.selectInteraction.getFeatures()
         selections.clear()
         selections.push(jobFeature)
         this.props.onSelectFeature(toGeoJSON(jobFeature) as beachfront.Job)
@@ -695,7 +690,7 @@ export class PrimaryMap extends React.Component<Props, State> {
     }
     const reader = new ol.format.GeoJSON()
     const feature = reader.readFeature(selectedFeature, {dataProjection: WGS84, featureProjection: WEB_MERCATOR})
-    const center = ol.extent.getCenter(feature.getGeometry().getExtent())
+    const center = calculateCenter(feature.getGeometry())
     features.push(feature)
     this.featureDetailsOverlay.setPosition(center)
   }
@@ -716,6 +711,16 @@ function animateLayerExit(layer) {
     }
     requestAnimationFrame(tick)
   })
+}
+
+function calculateCenter(geometry: ol.geom.Geometry) {
+  const getExtent = g => ol.proj.transformExtent(g.getExtent(), WEB_MERCATOR, WGS84)
+  const [minX, , maxX] = getExtent(geometry)
+  if (geometry instanceof ol.geom.MultiPolygon && minX === -180 && maxX === 180) {
+    const leftmostChunk = geometry.getPolygons().find(p => getExtent(p)[2] === 180)
+    return ol.extent.getCenter(leftmostChunk.getExtent())
+  }
+  return ol.extent.getCenter(geometry.getExtent())
 }
 
 function featuresToImages(...features: (beachfront.Job|beachfront.Scene)[]) {
