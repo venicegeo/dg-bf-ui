@@ -429,6 +429,7 @@ function generateRunningJob(id = 'test-job-id'): beachfront.Job {
       ]
     },
     "properties": {
+      "__schemaVersion__": 4,
       "algorithmName": "BF_Algo_NDWI",
       "createdOn": "2016-08-19T22:41:27.713Z",
       "detectionsDataId": null,
@@ -440,7 +441,6 @@ function generateRunningJob(id = 'test-job-id'): beachfront.Job {
       "name": "BF_19AUG2016",
       "status": "Running",
       "type": "JOB",
-      "__schemaVersion__": 3,
     },
     "type": "Feature"
   }
@@ -494,6 +494,7 @@ function generateScene(): beachfront.Scene {
         "tirs2": "https://landsat-pds.s3.amazonaws.com/L8/118/056/LC81180562016186LGN00/LC81180562016186LGN00_B11.TIF"
       },
       "cloudCover": 11.11,
+      "link": "test-link",
       "path": "https://landsat-pds.s3.amazonaws.com/L8/118/056/LC81180562016186LGN00/index.html",
       "resolution": 30,
       "sensorName": "Landsat8",
