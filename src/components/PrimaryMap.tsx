@@ -45,7 +45,8 @@ import {
   TYPE_JOB,
 } from '../constants'
 
-const DEFAULT_CENTER = [110, 0]
+const DEFAULT_CENTER = [-10, 0]
+const DEFAULT_EXTENT = [-170, -75, 170, 75]
 const MIN_ZOOM = 2.5
 const MAX_ZOOM = 22
 const RESOLUTION_CLOSE = 1000
@@ -402,6 +403,7 @@ export class PrimaryMap extends React.Component<Props, State> {
       target: this.refs.container,
       view: new ol.View({
         center: ol.proj.fromLonLat(DEFAULT_CENTER),
+        extent: ol.proj.transformExtent(DEFAULT_EXTENT, WGS84, WEB_MERCATOR),
         minZoom: MIN_ZOOM,
         maxZoom: MAX_ZOOM,
         zoom: MIN_ZOOM,
