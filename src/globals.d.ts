@@ -69,6 +69,7 @@ declare namespace beachfront {
       [key: string]: string
     }
     cloudCover: number
+    link: string  // HACK -- Can be removed after Redmine #7621 is resolved
     path: string
     resolution: number
     sensorName: string

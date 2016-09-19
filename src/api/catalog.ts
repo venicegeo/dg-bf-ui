@@ -60,7 +60,7 @@ export function search({
   filter,
   startIndex,
   count,
-}) {
+}): Promise<beachfront.ImageryCatalogPage> {
   console.debug('(catalog:search)')
   return fetch(`${catalogUrl}/discover?` + [
     `acquiredDate=${new Date(dateFrom).toISOString()}`,
@@ -77,6 +77,17 @@ export function search({
       }
       return response.json()
     })
+
+    // HACK HACK HACK HACK HACK HACK HACK HACK HACK HACK HACK HACK HACK HACK
+    // This can be removed after Redmine #7621 is resolved
+    .then((imagery: beachfront.ImageryCatalogPage) => {
+      for (const feature of imagery.images.features) {
+        feature.properties.link = `${catalogUrl}/image/${feature.id}`
+      }
+      return imagery
+    })
+    // HACK HACK HACK HACK HACK HACK HACK HACK HACK HACK HACK HACK HACK HACK
+
     .catch(err => {
       console.error('(catalog:search) discovery failed:', err)
       throw err

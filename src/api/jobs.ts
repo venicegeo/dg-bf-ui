@@ -54,7 +54,7 @@ export function createJob({
           bands:         algorithm.requirements.find(a => a.name === REQUIREMENT_BANDS).literal.split(','),
           dbAuthToken:   catalogApiKey,
           jobName:       name,
-          metaDataJSON:  scene,
+          metaDataURL:   scene.properties.link,
           pzAuthToken:   client.sessionToken,
           pzAddr:        client.gateway,
           svcURL:        algorithm.url,
