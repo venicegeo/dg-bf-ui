@@ -152,7 +152,7 @@ export class PrimaryMap extends React.Component<Props, State> {
     // DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG
   }
 
-  componentDidUpdate(previousProps, previousState) {
+  componentDidUpdate(previousProps: Props, previousState: State) {
     if (!this.props.selectedFeature) {
       this.clearSelection()
     }

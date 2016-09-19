@@ -57,14 +57,14 @@ export class ProductLine extends React.Component<Props, State> {
       selectedJobs: [],
       jobs: [],
     }
-    this._handleDurationChange = this._handleDurationChange.bind(this)
-    this._handleExpansionToggle = this._handleExpansionToggle.bind(this)
-    this._handleJobRowClick = this._handleJobRowClick.bind(this)
+    this.handleDurationChange = this.handleDurationChange.bind(this)
+    this.handleExpansionToggle = this.handleExpansionToggle.bind(this)
+    this.handleJobRowClick = this.handleJobRowClick.bind(this)
   }
 
   componentDidUpdate(prevProps, prevState) {
     if (this.state.isExpanded && (prevState.isExpanded !== this.state.isExpanded || prevState.duration !== this.state.duration)) {
-      this._fetchJobs()
+      this.fetchJobs()
     }
     if (prevState.isExpanded && !this.state.isExpanded && this.state.selectedJobs.length) {
       this.props.onJobDeselect()
@@ -77,7 +77,7 @@ export class ProductLine extends React.Component<Props, State> {
     const {isExpanded, duration} = this.state
     return (
       <li className={`${styles.root} ${className || ''} ${isExpanded ? styles.isExpanded : ''}`}>
-        <section className={styles.header} onClick={this._handleExpansionToggle}>
+        <section className={styles.header} onClick={this.handleExpansionToggle}>
           <h3 className={styles.title}>
             <i className={`fa fa-chevron-right ${styles.caret}`}/>
             <span>{properties.name}</span>
@@ -122,33 +122,33 @@ export class ProductLine extends React.Component<Props, State> {
             isLoading={this.state.isFetchingJobs}
             jobs={this.state.jobs}
             selectedJobIds={this.state.selectedJobs.map(j => j.id)}
-            onDurationChange={this._handleDurationChange}
+            onDurationChange={this.handleDurationChange}
             onHoverIn={this.props.onJobHoverIn}
             onHoverOut={this.props.onJobHoverOut}
-            onRowClick={this._handleJobRowClick}
+            onRowClick={this.handleJobRowClick}
           />
         </section>
       </li>
     )
   }
 
-  _fetchJobs() {
+  private fetchJobs() {
     this.setState({ isFetchingJobs: true })
     this.props.onFetchJobs(this.props.productLine.id, generateSinceDate(this.state.duration, this.props.productLine))
       .then(jobs => this.setState({ jobs, isFetchingJobs: false }))
       .catch(error => this.setState({ error, isFetchingJobs: false }))
   }
 
-  _handleDurationChange(duration) {
+  private handleDurationChange(duration) {
     this.setState({ duration })
   }
 
-  _handleExpansionToggle() {
+  private handleExpansionToggle() {
     this.setState({ isExpanded: !this.state.isExpanded })
     // TODO -- scroll to positioning
   }
 
-  _handleJobRowClick(job) {
+  private handleJobRowClick(job) {
     if (this.state.selectedJobs.some(j => j.id === job.id)) {
       this.props.onJobDeselect()
       this.setState({ selectedJobs: [] })

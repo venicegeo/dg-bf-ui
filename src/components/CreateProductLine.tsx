@@ -78,13 +78,13 @@ export class CreateProductLine extends React.Component<Props, State> {
       name:       '',
       shouldAutogenerateName: true,
     }
-    this._handleAlgorithmSelect = this._handleAlgorithmSelect.bind(this)
-    this._handleSubmit = this._handleSubmit.bind(this)
+    this.handleAlgorithmSelect = this.handleAlgorithmSelect.bind(this)
+    this.handleSubmit = this.handleSubmit.bind(this)
   }
 
   render() {
     return (
-      <div className={`${styles.root} ${this._canSubmit ? styles.canSubmit : ''}`}>
+      <div className={`${styles.root} ${this.canSubmit ? styles.canSubmit : ''}`}>
         <header>
           <h1>Create Product Line</h1>
         </header>
@@ -121,7 +121,7 @@ export class CreateProductLine extends React.Component<Props, State> {
                   bands: SUPPORTED_BANDS.LANDSAT,
                 } as any}
                 selectedId={this.state.algorithm ? this.state.algorithm.id : null}
-                onSelect={this._handleAlgorithmSelect}
+                onSelect={this.handleAlgorithmSelect}
                 warningHeading="Check Image Search Filters"
                 warningMessage={`
                   Current image search filters may yield imagery that do not meet all of this
@@ -133,8 +133,8 @@ export class CreateProductLine extends React.Component<Props, State> {
           )}
         </ul>
         <div className={styles.controls}>
-          {this._canSubmit && (
-            <div className={styles.submitButton} onClick={this._handleSubmit}>
+          {this.canSubmit && (
+            <div className={styles.submitButton} onClick={this.handleSubmit}>
               Create Product Line
             </div>
           )}
@@ -143,21 +143,21 @@ export class CreateProductLine extends React.Component<Props, State> {
     )
   }
 
-  get _canSubmit() {
+  private get canSubmit() {
     return this.props.bbox
         && this.state.algorithm
         && this.state.dateStart
         && this.state.name
   }
 
-  _handleAlgorithmSelect(algorithm) {
+  private handleAlgorithmSelect(algorithm) {
     this.setState({
       name: this.state.shouldAutogenerateName ? generateName(algorithm) : this.state.name,
       algorithm,
     })
   }
 
-  _handleSubmit() {
+  private handleSubmit() {
     create({
       algorithm:         this.state.algorithm,
       bbox:              this.props.bbox,

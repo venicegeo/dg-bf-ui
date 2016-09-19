@@ -68,17 +68,17 @@ export class CreateJob extends React.Component<Props, State> {
       name: props.selectedScene ? generateName(props.selectedScene.id) : '',
       shouldAutogenerateName: true,
     }
-    this._handleCreateJob = this._handleCreateJob.bind(this)
-    this._handleNameChange = this._handleNameChange.bind(this)
-    this._handleSearchCloudCoverChange = this._handleSearchCloudCoverChange.bind(this)
-    this._handleSearchDateChange = this._handleSearchDateChange.bind(this)
-    this._handleSearchFilterChange = this._handleSearchFilterChange.bind(this)
+    this.handleCreateJob = this.handleCreateJob.bind(this)
+    this.handleNameChange = this.handleNameChange.bind(this)
+    this.handleSearchCloudCoverChange = this.handleSearchCloudCoverChange.bind(this)
+    this.handleSearchDateChange = this.handleSearchDateChange.bind(this)
+    this.handleSearchFilterChange = this.handleSearchFilterChange.bind(this)
   }
 
   componentDidMount() {
     const shorelineFilter = this.props.filters.find(f => /(coast|shore)line/i.test(f.name))
     if (shorelineFilter) {
-      this._handleSearchFilterChange(shorelineFilter.id)
+      this.handleSearchFilterChange(shorelineFilter.id)
     }
   }
 
@@ -109,9 +109,9 @@ export class CreateJob extends React.Component<Props, State> {
                 isSearching={this.props.isSearching}
                 onApiKeyChange={this.props.onCatalogApiKeyChange}
                 onClearBbox={this.props.onClearBbox}
-                onCloudCoverChange={this._handleSearchCloudCoverChange}
-                onDateChange={this._handleSearchDateChange}
-                onFilterChange={this._handleSearchFilterChange}
+                onCloudCoverChange={this.handleSearchCloudCoverChange}
+                onDateChange={this.handleSearchDateChange}
+                onFilterChange={this.handleSearchFilterChange}
                 onSubmit={this.props.onSearchSubmit}
               />
             </li>
@@ -120,7 +120,7 @@ export class CreateJob extends React.Component<Props, State> {
             <li className={styles.details}>
               <NewJobDetails
                 name={this.state.name}
-                onNameChange={this._handleNameChange}
+                onNameChange={this.handleNameChange}
               />
             </li>
           )}
@@ -130,7 +130,7 @@ export class CreateJob extends React.Component<Props, State> {
                 algorithms={this.props.algorithms}
                 imageProperties={this.props.selectedScene.properties}
                 isSubmitting={this.state.isCreating}
-                onSubmit={this._handleCreateJob}
+                onSubmit={this.handleCreateJob}
               />
             </li>
           )}
@@ -149,7 +149,7 @@ export class CreateJob extends React.Component<Props, State> {
     )
   }
 
-  _handleCreateJob(algorithm) {
+  private handleCreateJob(algorithm) {
     createJob({
       algorithm,
       catalogApiKey:     this.props.catalogApiKey,
@@ -166,26 +166,26 @@ export class CreateJob extends React.Component<Props, State> {
       })
   }
 
-  _handleSearchCloudCoverChange(cloudCover) {
+  private handleSearchCloudCoverChange(cloudCover) {
     this.props.onSearchCriteriaChange(Object.assign({}, this.props.searchCriteria, {
       cloudCover: parseInt(cloudCover, 10),
     }))
   }
 
-  _handleSearchDateChange(dateFrom, dateTo) {
+  private handleSearchDateChange(dateFrom, dateTo) {
     this.props.onSearchCriteriaChange(Object.assign({}, this.props.searchCriteria, {
       dateFrom,
       dateTo,
     }))
   }
 
-  _handleSearchFilterChange(filter) {
+  private handleSearchFilterChange(filter) {
     this.props.onSearchCriteriaChange(Object.assign({}, this.props.searchCriteria, {
       filter,
     }))
   }
 
-  _handleNameChange(name) {
+  private handleNameChange(name) {
     this.setState({
       name,
       shouldAutogenerateName: !name,
