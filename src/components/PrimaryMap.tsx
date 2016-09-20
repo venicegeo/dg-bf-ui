@@ -477,7 +477,7 @@ export class PrimaryMap extends React.Component<Props, State> {
       const frame = reader.readFeature(raw, {featureProjection: WEB_MERCATOR})
       source.addFeature(frame)
 
-      const frameExtent = frame.getGeometry().getExtent()
+      const frameExtent = calculateExtent(frame.getGeometry())
       const topRight = ol.extent.getTopRight(ol.extent.buffer(frameExtent, STEM_OFFSET))
       const center = ol.extent.getCenter(frameExtent)
       const id = frame.getId()
@@ -690,7 +690,7 @@ export class PrimaryMap extends React.Component<Props, State> {
     }
     const reader = new ol.format.GeoJSON()
     const feature = reader.readFeature(selectedFeature, {dataProjection: WGS84, featureProjection: WEB_MERCATOR})
-    const center = calculateCenter(feature.getGeometry())
+    const center = ol.extent.getCenter(calculateExtent(feature.getGeometry()))
     features.push(feature)
     this.featureDetailsOverlay.setPosition(center)
   }
@@ -713,14 +713,26 @@ function animateLayerExit(layer) {
   })
 }
 
-function calculateCenter(geometry: ol.geom.Geometry) {
-  const getExtent = g => ol.proj.transformExtent(g.getExtent(), WEB_MERCATOR, WGS84)
-  const [minX, , maxX] = getExtent(geometry)
-  if (geometry instanceof ol.geom.MultiPolygon && minX === -180 && maxX === 180) {
-    const leftmostChunk = geometry.getPolygons().find(p => getExtent(p)[2] === 180)
-    return ol.extent.getCenter(leftmostChunk.getExtent())
+function calculateExtent(geometry: ol.geom.Geometry) {
+  if (geometry instanceof ol.geom.MultiPolygon && crossesDateline(geometry)) {
+    const extents = geometry.getPolygons().map(g => ol.proj.transformExtent(g.getExtent(), WEB_MERCATOR, WGS84))
+    let [, minY, , maxY] = ol.proj.transformExtent(geometry.getExtent(), WEB_MERCATOR, WGS84)
+    let width = 0
+    let minX = 180
+    for (const [polygonMinX, , polygonMaxX] of extents) {
+      width += polygonMaxX - polygonMinX
+      if (polygonMaxX > 0) {
+        minX -= polygonMaxX - polygonMinX
+      }
+    }
+    return ol.proj.transformExtent([minX, minY, minX + width, maxY], WGS84, WEB_MERCATOR)
   }
-  return ol.extent.getCenter(geometry.getExtent())
+  return geometry.getExtent()  // Use as-is
+}
+
+function crossesDateline(geometry: ol.geom.Geometry) {
+  const [minX, , maxX] = ol.proj.transformExtent(geometry.getExtent(), WEB_MERCATOR, WGS84)
+  return minX === -180 && maxX === 180
 }
 
 function featuresToImages(...features: (beachfront.Job|beachfront.Scene)[]) {
