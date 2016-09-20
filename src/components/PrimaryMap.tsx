@@ -45,10 +45,11 @@ import {
   TYPE_JOB,
 } from '../constants'
 
-const DEFAULT_CENTER = [110, 0]
+const DEFAULT_CENTER = [-10, 0]
 const MIN_ZOOM = 2.5
 const MAX_ZOOM = 22
 const RESOLUTION_CLOSE = 1000
+const VIEW_BOUNDS = [-170, -75, 170, 75]
 const STEM_OFFSET = 10000
 const KEY_IMAGE_ID = 'imageId'
 const KEY_LAYERS = 'LAYERS'
@@ -336,21 +337,16 @@ export class PrimaryMap extends React.Component<Props, State> {
       return  // Disregard spurious select event
     }
 
-    const [feature] = event.selected
-    let position, type
-    if (feature) {
-      position = ol.extent.getCenter(feature.getGeometry().getExtent())
-      type = feature.get(KEY_TYPE)
-    }
+    const [feature]: ol.Feature[] = event.selected
+    const type = feature ? feature.get(KEY_TYPE) : null
 
-    this.featureDetailsOverlay.setPosition(position)
-    const selections = this.selectInteraction.getFeatures()
     switch (type) {
       case TYPE_DIVOT_INBOARD:
       case TYPE_STEM:
         // Proxy clicks on "inner" decorations out to the job frame itself
         const jobId = feature.get(KEY_OWNER_ID)
         const jobFeature = this.frameLayer.getSource().getFeatureById(jobId)
+        const selections = this.selectInteraction.getFeatures()
         selections.clear()
         selections.push(jobFeature)
         this.props.onSelectFeature(toGeoJSON(jobFeature) as beachfront.Job)
@@ -402,6 +398,7 @@ export class PrimaryMap extends React.Component<Props, State> {
       target: this.refs.container,
       view: new ol.View({
         center: ol.proj.fromLonLat(DEFAULT_CENTER),
+        extent: ol.proj.transformExtent(VIEW_BOUNDS, WGS84, WEB_MERCATOR),
         minZoom: MIN_ZOOM,
         maxZoom: MAX_ZOOM,
         zoom: MIN_ZOOM,
@@ -480,7 +477,7 @@ export class PrimaryMap extends React.Component<Props, State> {
       const frame = reader.readFeature(raw, {featureProjection: WEB_MERCATOR})
       source.addFeature(frame)
 
-      const frameExtent = frame.getGeometry().getExtent()
+      const frameExtent = calculateExtent(frame.getGeometry())
       const topRight = ol.extent.getTopRight(ol.extent.buffer(frameExtent, STEM_OFFSET))
       const center = ol.extent.getCenter(frameExtent)
       const id = frame.getId()
@@ -693,7 +690,7 @@ export class PrimaryMap extends React.Component<Props, State> {
     }
     const reader = new ol.format.GeoJSON()
     const feature = reader.readFeature(selectedFeature, {dataProjection: WGS84, featureProjection: WEB_MERCATOR})
-    const center = ol.extent.getCenter(feature.getGeometry().getExtent())
+    const center = ol.extent.getCenter(calculateExtent(feature.getGeometry()))
     features.push(feature)
     this.featureDetailsOverlay.setPosition(center)
   }
@@ -714,6 +711,28 @@ function animateLayerExit(layer) {
     }
     requestAnimationFrame(tick)
   })
+}
+
+function calculateExtent(geometry: ol.geom.Geometry) {
+  if (geometry instanceof ol.geom.MultiPolygon && crossesDateline(geometry)) {
+    const extents = geometry.getPolygons().map(g => ol.proj.transformExtent(g.getExtent(), WEB_MERCATOR, WGS84))
+    let [, minY, , maxY] = ol.proj.transformExtent(geometry.getExtent(), WEB_MERCATOR, WGS84)
+    let width = 0
+    let minX = 180
+    for (const [polygonMinX, , polygonMaxX] of extents) {
+      width += polygonMaxX - polygonMinX
+      if (polygonMaxX > 0) {
+        minX -= polygonMaxX - polygonMinX
+      }
+    }
+    return ol.proj.transformExtent([minX, minY, minX + width, maxY], WGS84, WEB_MERCATOR)
+  }
+  return geometry.getExtent()  // Use as-is
+}
+
+function crossesDateline(geometry: ol.geom.Geometry) {
+  const [minX, , maxX] = ol.proj.transformExtent(geometry.getExtent(), WEB_MERCATOR, WGS84)
+  return minX === -180 && maxX === 180
 }
 
 function featuresToImages(...features: (beachfront.Job|beachfront.Scene)[]) {
