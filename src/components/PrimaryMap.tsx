@@ -45,7 +45,7 @@ import {
   TYPE_JOB,
 } from '../constants'
 
-const DEFAULT_CENTER = [-10, 0]
+const DEFAULT_CENTER = [110, 0]
 const MIN_ZOOM = 2.5
 const MAX_ZOOM = 22
 const RESOLUTION_CLOSE = 1000
