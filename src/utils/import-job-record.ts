@@ -14,10 +14,7 @@
  * limitations under the License.
  **/
 
-import {
-  SCHEMA_VERSION,
-} from '../config'
-
+import {Client} from './piazza-client'
 import {
   extractAlgorithmUrl,
   extractDateCreated,
@@ -31,11 +28,15 @@ import {
 } from './execution-output'
 
 import {
+  SCHEMA_VERSION,
+} from '../config'
+
+import {
   STATUS_SUCCESS,
   TYPE_JOB,
 } from '../constants'
 
-export function importByDataId(client, dataId, algorithmNames): Promise<beachfront.Job> {
+export function importByDataId(client: Client, dataId: string, algorithmNames: Map<string, string>): Promise<beachfront.Job> {
   return client.getFile(dataId)
     .then(parseString)
     .then(executionOutput => ({

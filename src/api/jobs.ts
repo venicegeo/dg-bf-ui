@@ -147,8 +147,8 @@ export function stopWorker() {
   worker.terminate()
 }
 
-function generateAlgorithmNamesHash(algorithms) {
-  const hash = {}
+function generateAlgorithmNamesHash(algorithms): Map<string, string> {
+  const hash = new Map<string, string>()
   for (const algorithm of algorithms) {
     hash[algorithm.url] = algorithm.name
   }
