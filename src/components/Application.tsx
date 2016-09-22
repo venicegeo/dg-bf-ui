@@ -129,6 +129,7 @@ export class Application extends React.Component<Props, State> {
     if (!prevState.isLoggedIn && this.state.isLoggedIn) {
       this.autodiscoverServices()
       this.startWorkers()
+      this.checkForImports()
     }
     if (!prevState.isSessionExpired && this.state.isSessionExpired || prevState.isLoggedIn && !this.state.isLoggedIn) {
       this.stopWorkers()
@@ -141,6 +142,7 @@ export class Application extends React.Component<Props, State> {
     if (this.state.isLoggedIn && !this.state.isSessionExpired) {
       this.autodiscoverServices()
       this.startWorkers()
+      this.checkForImports()
     }
   }
 
@@ -323,6 +325,31 @@ export class Application extends React.Component<Props, State> {
       this.discoverExecutor(),
       this.discoverGeoserver(),
     ])
+  }
+
+  private checkForImports() {
+    this.autodiscoveryPromise.then(() => {
+      const knownIds = this.state.jobs.records.map(j => j.id)
+      const missingIds = this.state.route.jobIds.filter(id => !knownIds.includes(id))
+      const algorithms = this.state.algorithms.records
+      missingIds.forEach(jobId => {
+        console.debug('Attempting import <%s>', jobId)
+        jobsService.importJob({ jobId, algorithms })
+          .then(record => {
+            this.setState({
+              jobs: this.state.jobs.$append(record),
+              selectedFeature: this.state.selectedFeature || record,
+            })
+          })
+          .catch(err => {
+            console.warn('Import failed <%s>:', jobId, err)
+            this.navigateTo({
+              pathname: '/jobs',
+              search:   this.state.route.search.replace(new RegExp('(\\?|&)?jobId=' + jobId), ''),
+            })
+          })
+      })
+    })
   }
 
   private discoverAlgorithms() {
@@ -558,10 +585,10 @@ export class Application extends React.Component<Props, State> {
     window.addEventListener('popstate', () => {
       if (this.state.route.href !== location.pathname + location.search + location.hash) {
         const route = generateRoute(location)
-        this.setState({
-          route,
-          selectedFeature: route.jobIds.length ? this.state.jobs.records.find(j => route.jobIds.includes(j.id)) : this.state.selectedFeature,
-        })
+        const nextJobIds = route.jobIds.join(',')
+        const prevJobIds = this.state.route.jobIds.join(',')
+        const selectedFeature = prevJobIds !== nextJobIds ? this.state.jobs.records.find(j => route.jobIds.includes(j.id)) : this.state.selectedFeature
+        this.setState({ route, selectedFeature })
       }
     })
   }
@@ -604,6 +631,11 @@ function generateInitialState(): State {
   const deserializedState = deserialize()
   for (const key in deserializedState) {
     state[key] = deserializedState[key] || state[key]
+  }
+
+  const [jobId] = state.route.jobIds
+  if (jobId) {
+    state.selectedFeature = state.jobs.records.find(j => j.id === jobId) || null
   }
 
   return state

@@ -16,7 +16,7 @@
 
 import * as moment from 'moment'
 import {getClient} from './session'
-import {importByDataId} from '../utils/import-job-record'
+import {importByDataId, importByJobId} from '../utils/import-job-record'
 import * as worker from './workers/jobs'
 import {
   JOBS_WORKER_INTERVAL,
@@ -94,13 +94,23 @@ export function createJob({
     })
 }
 
+interface ParamsImportJob {
+  jobId?: string
+  dataId?: string
+  algorithms: beachfront.Algorithm[]
+}
+
 export function importJob({
+  jobId,
   dataId,
   algorithms,
-}) {
+}: ParamsImportJob) {
   const client = getClient()
   const algorithmNames = generateAlgorithmNamesHash(algorithms)
-  return importByDataId(client, dataId, algorithmNames)
+  const promise = dataId
+    ? importByDataId(client, dataId, algorithmNames)
+    : importByJobId(client, jobId, algorithmNames)
+  return promise
     .catch(err => {
       console.error('(jobs:importJob) failed:', err)
       throw err
