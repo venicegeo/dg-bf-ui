@@ -24,7 +24,6 @@ declare namespace beachfront {
       detectionsLayerId: string
       name: string
       sceneCaptureDate: string
-      sceneCloudCover: number
       sceneId: string
       sceneSensorName: string
       status: string
