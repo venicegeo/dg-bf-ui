@@ -435,7 +435,6 @@ function generateRunningJob(id = 'test-job-id'): beachfront.Job {
       "detectionsDataId": null,
       "detectionsLayerId": null,
       "sceneCaptureDate": "2016-07-01T02:11:05.604Z",
-      "sceneCloudCover": 10,
       "sceneId": "landsat:LC81130812016183LGN00",
       "sceneSensorName": "Landsat8",
       "name": "BF_19AUG2016",
