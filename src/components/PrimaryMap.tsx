@@ -46,7 +46,7 @@ import {
 } from '../constants'
 
 
-const DEFAULT_CENTER = [110, 0]; console.warn('Default map center should be -10,0 -- this can be reverted whenever QA fixes their test');  // tslint:disable-line
+const DEFAULT_CENTER = [-10, 0]
 const MIN_ZOOM = 2.5
 const MAX_ZOOM = 22
 const RESOLUTION_CLOSE = 1000
