@@ -118,7 +118,7 @@ export class Client {
   }
 
   isSessionActive() {
-    const baseUrl = this.gateway.replace('pz-gateway', 'pz-security')
+    const baseUrl = this.gateway.replace('pz-gateway', 'pz-idam')
     const uuid = atob(this.sessionToken.replace('Basic ', '')).replace(':', '')
     return fetch(baseUrl + '/v2/verification', {
       method: 'POST',

@@ -122,7 +122,7 @@ describe('Piazza Client', function () {
       const client = new Client('http://pz-gateway.m', 'Basic dGVzdC1hdXRoLXRva2VuOg==')
       return client.isSessionActive()
         .then(() => {
-          assert.equal(stub.firstCall.args[0], 'http://pz-security.m/v2/verification')
+          assert.equal(stub.firstCall.args[0], 'http://pz-idam.m/v2/verification')
         })
     })
 
