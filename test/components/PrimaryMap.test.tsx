@@ -25,7 +25,7 @@ import {
 } from '../../src/components/PrimaryMap'
 
 interface Internals {
-  detectionsLayer: ol.layer.Tile
+  detectionsLayers: {[key: string]: ol.layer.Tile}
   drawLayer: ol.layer.Vector
   map: ol.Map
   previewLayers: {[key: string]: ol.layer.Tile}
@@ -285,36 +285,34 @@ describe('<PrimaryMap/>', () => {
       />
     )
 
-    it('sends correct layer IDs to WMS server (single)', () => {
+    it('adds detections layer to map', () => {
       const wrapper = getComponent([generateCompletedJob()])
-      const source = (wrapper.instance() as any as Internals).detectionsLayer.getSource() as ol.source.TileWMS
-      assert.deepEqual(source.getParams(), {LAYERS: 'test-data-id'})
+      const layer = (wrapper.instance() as any as Internals).detectionsLayers['test-job-id']
+      assert.include(getLayers(wrapper), layer)
     })
 
-    it('sends correct layer IDs to WMS server (multiple)', () => {
+    it('creates one layer per detection', () => {
       const wrapper = getComponent([
         generateCompletedJob('job-1', 'test-data-id-1'),
         generateCompletedJob('job-2', 'test-data-id-2'),
         generateCompletedJob('job-3', 'test-data-id-3'),
       ])
-      const source = (wrapper.instance() as any as Internals).detectionsLayer.getSource() as ol.source.TileWMS
-      assert.deepEqual(source.getParams(), {LAYERS: 'test-data-id-1,test-data-id-2,test-data-id-3'})
+      const layer1 = (wrapper.instance() as any as Internals).detectionsLayers['job-1']
+      const layer2 = (wrapper.instance() as any as Internals).detectionsLayers['job-2']
+      const layer3 = (wrapper.instance() as any as Internals).detectionsLayers['job-3']
+      assert.includeMembers(getLayers(wrapper), [layer1, layer2, layer3])
     })
 
-    it('set appropriate bbox for layer (single)', () => {
+    it('sends correct layer ID to WMS server', () => {
       const wrapper = getComponent([generateCompletedJob()])
-      assert.deepEqual(layerExtent((wrapper.instance() as any as Internals).detectionsLayer), [114, -31, 117, -29])
+      const source = (wrapper.instance() as any as Internals).detectionsLayers['test-job-id'].getSource() as ol.source.TileWMS
+      assert.deepEqual(source.getParams(), {LAYERS: 'test-data-id'})
     })
 
-    it('sets appropriate bbox for layer (multiple)', () => {
-      const job1 = generateCompletedJob('job-1', 'test-data-id-1')
-      const job2 = generateCompletedJob('job-2', 'test-data-id-2')
-      const job3 = generateCompletedJob('job-3', 'test-data-id-3')
-      job1.geometry.coordinates = [[[0, 0], [0, 30], [30, 30], [30, 0], [0, 0]]]
-      job2.geometry.coordinates = [[[-10, 35], [-10, 25], [0, 25], [0, 35], [-10, 35]]]
-      job3.geometry.coordinates = [[[-30, -30], [-30, 0], [0, 0], [0, -30], [-30, -30]]]
-      const wrapper = getComponent([job1, job2, job3])
-      assert.deepEqual(layerExtent((wrapper.instance() as any as Internals).detectionsLayer), [-30, -30, 30, 35])
+    it('set appropriate bbox for layer', () => {
+      const wrapper = getComponent([generateCompletedJob()])
+      const layer = (wrapper.instance() as any as Internals).detectionsLayers['test-job-id']
+      assert.deepEqual(layerExtent(layer), [114, -31, 117, -29])
     })
   })
 
@@ -510,4 +508,8 @@ function generateScene(): beachfront.Scene {
     ]
   }
   /* tslint:enable */
+}
+
+function getLayers(wrapper): ol.layer.Base[] {
+  return (wrapper.instance() as any as Internals).map.getLayers().getArray()
 }
