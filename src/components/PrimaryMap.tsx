@@ -104,7 +104,7 @@ export class PrimaryMap extends React.Component<Props, State> {
   refs: any
 
   private basemapLayers: ol.layer.Tile[]
-  private detectionsLayer: ol.layer.Tile
+  private detectionsLayers: {[key: string]: ol.layer.Tile}
   private drawLayer: ol.layer.Vector
   private drawInteraction: ol.interaction.Draw
   private featureDetailsOverlay: ol.Overlay
@@ -366,13 +366,12 @@ export class PrimaryMap extends React.Component<Props, State> {
 
   private initializeOpenLayers() {
     this.basemapLayers = generateBasemapLayers(TILE_PROVIDERS)
-    this.detectionsLayer = generateDetectionsLayer()
     this.drawLayer = generateDrawLayer()
     this.highlightLayer = generateHighlightLayer()
     this.frameLayer = generateFrameLayer()
     this.imageryLayer = generateImageryLayer()
-    this.previewLayers = {}  // FIXME -- Use a Map instead?
-    this.subscribeToLoadEvents(this.detectionsLayer)
+    this.detectionsLayers = {}
+    this.previewLayers = {}
 
     this.drawInteraction = generateDrawInteraction(this.drawLayer)
     this.drawInteraction.on('drawstart', this.handleDrawStart)
@@ -393,7 +392,6 @@ export class PrimaryMap extends React.Component<Props, State> {
         this.frameLayer,
         this.drawLayer,
         this.imageryLayer,
-        this.detectionsLayer,
         this.highlightLayer,
       ],
       target: this.refs.container,
@@ -439,34 +437,35 @@ export class PrimaryMap extends React.Component<Props, State> {
 
   private renderDetections() {
     const {detections, geoserverUrl} = this.props
-    const layer = this.detectionsLayer
-    const source = layer.getSource() as ol.source.TileWMS
-    const currentLayerIds = source.getParams()[KEY_LAYERS]
-    const incomingLayerIds = detections.map(d => d.properties.detectionsLayerId).sort().join(',')
+    const shouldRender = {}
+    const alreadyRendered = {}
 
-    if (!geoserverUrl) {
-      return  // No server to point to
-    }
-    if (currentLayerIds === incomingLayerIds) {
-      return  // Nothing to do
-    }
+    detections.forEach(d => shouldRender[d.id] = true)
 
     // Removals
-    if (!incomingLayerIds && currentLayerIds) {
-      layer.setExtent([0, 0, 0, 0])
-      layer.setSource(generateDetectionsSource())
-      this.subscribeToLoadEvents(layer)
-      return
-    }
+    Object.keys(this.detectionsLayers).forEach(layerId => {
+      const layer = this.detectionsLayers[layerId]
+      alreadyRendered[layerId] = true
+      if (!shouldRender[layerId]) {
+        delete this.detectionsLayers[layerId]
+        animateLayerExit(layer).then(() => {
+          this.map.removeLayer(layer)
+        })
+      }
+    })
 
     // Additions/Updates
-    const extent = ol.extent.createEmpty()
-    detections.forEach(d => ol.extent.extend(extent, featureToBbox(d)))
-    layer.setExtent(extent)
-    source.updateParams({
-      [KEY_LAYERS]: incomingLayerIds,
+    const insertionIndex = this.map.getLayers().getArray().indexOf(this.frameLayer)
+    detections.filter(d => shouldRender[d.id] && !alreadyRendered[d.id]).forEach(detection => {
+      const layer = new ol.layer.Tile({
+        extent: featureToBbox(detection),
+        source: generateDetectionsSource(geoserverUrl, detection.properties.detectionsLayerId),
+      })
+
+      this.subscribeToLoadEvents(layer)
+      this.detectionsLayers[detection.id] = layer
+      this.map.getLayers().insertAt(insertionIndex, layer)
     })
-    source.setUrl(`${geoserverUrl}/wms`)
   }
 
   private renderFrames() {
@@ -781,18 +780,13 @@ function generateControls() {
   ])
 }
 
-function generateDetectionsLayer() {
-  return new ol.layer.Tile({
-    source: generateDetectionsSource(),
-  })
-}
-
-function generateDetectionsSource() {
+function generateDetectionsSource(geoserverUrl, layerId) {
   return new ol.source.TileWMS({
     tileLoadFunction,
     crossOrigin: 'anonymous',
+    url: `${geoserverUrl}/wms`,
     params: {
-      [KEY_LAYERS]: '',
+      [KEY_LAYERS]: layerId,
     },
   })
 }
