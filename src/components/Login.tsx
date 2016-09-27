@@ -57,7 +57,9 @@ export class Login extends React.Component<Props, State> {
             <label><input ref="username" placeholder="username"/></label>
             <label><input ref="pass" placeholder="password" type="password"/></label>
           </div>
-          <button className={styles.submitButton} type="submit" disabled={this.state.authenticating}>login</button>
+          <button className={styles.submitButton} type="submit" disabled={this.state.authenticating}>
+            {this.state.authenticating ? 'Logging In...' : 'Log In'}
+          </button>
         </form>
       </Modal>
     )

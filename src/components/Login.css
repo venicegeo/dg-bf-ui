@@ -55,3 +55,7 @@
   color: white;
   font-size: inherit;
 }
+
+.submitButton:disabled {
+  background-color: grey;
+}
