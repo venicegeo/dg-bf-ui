@@ -34,6 +34,7 @@ import {
   MODE_SELECT_IMAGERY,
   MODE_PRODUCT_LINES,
 } from './PrimaryMap'
+import {ClassificationBanner} from './ClassificationBanner'
 import {ProductLineList} from './ProductLineList'
 import {SessionExpired} from './SessionExpired'
 import {UpdateAvailable} from './UpdateAvailable'
@@ -149,6 +150,7 @@ export class Application extends React.Component<Props, State> {
   render() {
     return (
       <div className={styles.root}>
+        <ClassificationBanner anchor="top"/>
         <Navigation
           activeRoute={this.state.route}
           onClick={this.navigateTo}
@@ -191,6 +193,7 @@ export class Application extends React.Component<Props, State> {
             }}
           />
         )}
+        <ClassificationBanner anchor="bottom"/>
       </div>
     )
   }

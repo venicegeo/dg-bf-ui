@@ -16,6 +16,10 @@
 
 export const SCHEMA_VERSION = 4
 
+export const CLASSIFICATION_BANNER_BACKGROUND = process.env.CLASSIFICATION_BANNER_BACKGROUND
+export const CLASSIFICATION_BANNER_FOREGROUND = process.env.CLASSIFICATION_BANNER_FOREGROUND
+export const CLASSIFICATION_BANNER_TEXT       = process.env.CLASSIFICATION_BANNER_TEXT
+
 export const GATEWAY = process.env.GATEWAY
 
 const time = {millisecond: 1, second: 1000, minute: 60000}

@@ -21,9 +21,12 @@ npm run build
 
 ### Environment Variables
 
-| Variable  | Description                                           |
-|-----------|-------------------------------------------------------|
-| `GATEWAY` | A URL pointing at a specific Piazza Gateway instance. |
+| Variable                           | Description                                           |
+|------------------------------------|-------------------------------------------------------|
+| `GATEWAY`                          | A URL pointing at a specific Piazza Gateway instance. |
+| `CLASSIFICATION_BANNER_BACKGROUND` | A color value (e.g., `red`, `green`, `blue`) for the classification banner background. |
+| `CLASSIFICATION_BANNER_FOREGROUND` | A color value (e.g., `red`, `green`, `blue`) for the classification banner foreground. |
+| `CLASSIFICATION_BANNER_TEXT`       | A text value for the classification banner. |
 
 
 ## Testing

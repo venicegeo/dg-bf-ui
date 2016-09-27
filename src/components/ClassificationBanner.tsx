@@ -14,19 +14,27 @@
  * limitations under the License.
  **/
 
-@import '../styles/constants.css';
+const styles: any = require('./ClassificationBanner.css')
 
-.root {
-  z-index: calc(var(--CLASSIFICATION_BANNER_Z) - 1);
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  padding: 20vh 0;
-  font-size: 1.5em;
-  line-height: 1.5em;
-  background-color: rgba(255, 255, 255, 0.9);
-  box-shadow: 0 0 0 1px rgba(0,0,0,.3), 0 0 0 20px rgba(0,0,0,.3);
-  bottom: 0;
-  text-align: center;
+import * as React from 'react'
+import {
+  CLASSIFICATION_BANNER_BACKGROUND,
+  CLASSIFICATION_BANNER_FOREGROUND,
+  CLASSIFICATION_BANNER_TEXT,
+} from '../config'
+
+interface Props {
+  anchor: 'top'|'bottom'
 }
+
+export const ClassificationBanner = ({ anchor }: Props) => (
+  <div
+    className={styles.root}
+   style={{
+    [anchor]: 0,
+    backgroundColor: CLASSIFICATION_BANNER_BACKGROUND,
+    color: CLASSIFICATION_BANNER_FOREGROUND,
+  }}>
+    {CLASSIFICATION_BANNER_TEXT}
+  </div>
+)
