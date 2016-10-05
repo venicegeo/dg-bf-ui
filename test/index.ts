@@ -1,5 +1,4 @@
-require('core-js/fn/array/includes')
-require('core-js/fn/string/includes')
+import '../src/polyfills'
 
-let testsContext = require.context('.', true, /\.test$/)
+const testsContext = require.context('.', true, /\.test$/)
 testsContext.keys().forEach(testsContext)

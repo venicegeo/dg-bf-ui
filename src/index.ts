@@ -22,10 +22,7 @@ import './styles/typography.css'
 import './styles/forms.css'
 import './styles/menus.css'
 
-// Polyfills
-import 'core-js/es6/object'
-import 'core-js/es6/string'  // Polyfill
-import 'core-js/fn/array/includes'  // Polyfill
+import './polyfills'
 
 import {createApplication} from './components/Application'
 

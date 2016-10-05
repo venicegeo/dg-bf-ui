@@ -14,9 +14,12 @@
  * limitations under the License.
  **/
 
+const path = require('path')
 const webpack = require('webpack')
+const webpackConfig = require('./webpack.config')
 
 module.exports = (config) => {
+  const isCoverageRequested = config.reporters.includes('coverage')
   config.set({
     //
     // Base Config
@@ -52,40 +55,13 @@ module.exports = (config) => {
 
     webpack: {
       devtool: 'inline-source-map',
-      resolve: {
-        extensions: ['', '.tsx', '.ts', '.jsx', '.js'],
-        root: __dirname,
-      },
+      context: __dirname,
+      resolve: webpackConfig.resolve,
       module: {
-        preLoaders: [
-          {
-            test: /\.js$/,
-            loader: 'source-map',
-            exclude: /node_modules/
-          },
-        ],
-        loaders: [
-          {
-            test: /\.tsx?$/,
-            loader: 'ts',
-            exclude: /node_modules/
-          },
-          {
-            test: /\.css$/,
-            loader: 'style!css?module&localIdentName=[name]-[local]',
-            exclude: /node_modules/
-          },
-          {
-            test: /\.css$/,
-            loader: 'style!css',
-            include: /node_modules/
-          },
-          {
-            test: /\.(png|jpg|gif)$/,
-            loader: 'file'
-          },
-        ]
+        preLoaders: webpackConfig.module.preLoaders,
+        loaders: webpackConfig.module.loaders,
       },
+      postcss: webpackConfig.postcss,
       plugins: [
         new webpack.IgnorePlugin(/^\.\/locale$/, /moment$/),
         new webpack.DefinePlugin({
@@ -93,7 +69,6 @@ module.exports = (config) => {
           'process.env.GATEWAY': JSON.stringify('/test-gateway')
         })
       ],
-
       externals: {
         'openlayers': 'ol',
 
@@ -108,7 +83,6 @@ module.exports = (config) => {
         'react/lib/ExecutionEnvironment': true,
         'react/lib/ReactContext': true
       }
-
     },
 
     webpackMiddleware: {
@@ -121,6 +95,6 @@ module.exports = (config) => {
 
     mochaReporter: {
       showDiff: true,
-    }
+    },
   })
 }
