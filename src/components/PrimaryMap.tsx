@@ -50,9 +50,10 @@ const DEFAULT_CENTER = [-10, 0]
 const MIN_ZOOM = 2.5
 const MAX_ZOOM = 22
 const RESOLUTION_CLOSE = 1000
+const RESOLUTION_DISTANT = 13000
 const VIEW_BOUNDS = [-170, -75, 170, 75]
 const STEM_OFFSET = 10000
-const KEY_IMAGE_ID = 'imageId'
+const KEY_SCENE_ID = 'SCENE_ID'
 const KEY_LAYERS = 'LAYERS'
 const KEY_NAME = 'name'
 const KEY_OWNER_ID = 'OWNER_ID'
@@ -521,7 +522,7 @@ export class PrimaryMap extends React.Component<Props, State> {
       status.set(KEY_TYPE, TYPE_LABEL_MINOR)
       status.set(KEY_OWNER_ID, id)
       status.set(KEY_STATUS, raw.properties.status)
-      status.set(KEY_IMAGE_ID, (raw as beachfront.Job).properties.sceneId)
+      status.set(KEY_SCENE_ID, (raw as beachfront.Job).properties.sceneId)
       source.addFeature(status)
     })
   }
@@ -852,6 +853,7 @@ function generateFrameLayer() {
     source: new ol.source.Vector(),
     style(feature, resolution) {
       const isClose = resolution < RESOLUTION_CLOSE
+      const isDistant = resolution > RESOLUTION_DISTANT
       switch (feature.get(KEY_TYPE)) {
         case TYPE_DIVOT_INBOARD:
           return new ol.style.Style({
@@ -890,7 +892,7 @@ function generateFrameLayer() {
           return new ol.style.Style({
             text: new ol.style.Text({
               fill: new ol.style.Fill({
-                color: 'black',
+                color: isDistant ? 'transparent' : 'black',
               }),
               offsetX: 13,
               offsetY: 1,
@@ -904,14 +906,14 @@ function generateFrameLayer() {
           return new ol.style.Style({
             text: new ol.style.Text({
               fill: new ol.style.Fill({
-                color: 'rgba(0,0,0,.6)',
+                color: isDistant ? 'transparent' : 'rgba(0,0,0,.6)',
               }),
               offsetX: 13,
               offsetY: 15,
               font: '11px Verdana, sans-serif',
               text: ([
                 feature.get(KEY_STATUS),
-                feature.get(KEY_IMAGE_ID),
+                normalizeSceneId(feature.get(KEY_SCENE_ID)),
               ].filter(Boolean)).join(' // ').toUpperCase(),
               textAlign: 'left',
               textBaseline: 'middle',
@@ -1012,6 +1014,10 @@ function getColorForStatus(status) {
     case STATUS_ERROR: return 'hsl(349, 100%, 60%)'
     default: return 'magenta'
   }
+}
+
+function normalizeSceneId(id: string) {
+  return id.replace(/^(landsat):/, '')
 }
 
 function tileLoadFunction(imageTile, src) {
