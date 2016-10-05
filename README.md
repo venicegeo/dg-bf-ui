@@ -34,9 +34,11 @@ npm run build
 ```
 $ npm run lint
 $ npm run test
+$ npm run test:ci  # Will also generate coverage reports
 ```
 
-## External Dependencies
+
+## External Service Dependencies
 
 The UI will attempt to autodiscover the following services via the
 Piazza gateway service locator:

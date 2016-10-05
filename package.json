@@ -4,10 +4,10 @@
   "description": "User interface for the Beachfront project",
   "scripts": {
     "build": "webpack",
-    "clean": "rimraf dist beachfront.zip",
+    "clean": "rimraf reports dist beachfront.zip",
     "lint": "tslint '{src,test}/**/*.{ts,tsx}' -t verbose",
     "test": "karma start",
-    "test:ci": "karma start --single-run --browsers gs_firefox_38",
+    "test:ci": "karma start --single-run --browsers gs_firefox_38 --reporters progress,coverage",
     "typings:install": "typings install",
     "watch": "webpack-dev-server --inline --colors --history-api-fallback"
   },
@@ -23,8 +23,10 @@
     "enzyme": "2.4.1",
     "file-loader": "0.9.0",
     "html-webpack-plugin": "2.22.0",
+    "istanbul-instrumenter-loader": "1.0.0",
     "karma": "1.3.0",
     "karma-chrome-launcher": "2.0.0",
+    "karma-coverage": "1.1.1",
     "karma-firefox-launcher": "1.0.0",
     "karma-mocha": "1.1.1",
     "karma-mocha-reporter": "2.1.0",

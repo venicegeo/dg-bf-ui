@@ -60,6 +60,16 @@ module.exports = (config) => {
       module: {
         preLoaders: webpackConfig.module.preLoaders,
         loaders: webpackConfig.module.loaders,
+        postLoaders: isCoverageRequested ? [
+          {
+            test: /\.tsx?$/,
+            loader: 'istanbul-instrumenter',
+            include: path.resolve('./src/'),
+            query: {
+              esModules: true,
+            },
+          },
+        ] : []
       },
       postcss: webpackConfig.postcss,
       plugins: [
@@ -92,6 +102,15 @@ module.exports = (config) => {
     //
     // Misc
     //
+
+    coverageReporter: isCoverageRequested ? {
+      dir: 'reports/',
+      reporters: [
+        { type: 'text-summary' },
+        { type: 'html', subdir: 'coverage-html' },
+        { type: 'cobertura', subdir: '.', file: 'coverage-cobertura.xml' },
+      ]
+    } : {},
 
     mochaReporter: {
       showDiff: true,
