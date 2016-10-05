@@ -58,7 +58,7 @@ export function createJob({
           pzAuthToken:   client.sessionToken,
           pzAddr:        client.gateway,
           svcURL:        algorithm.url,
-          tideURL:       'https://tideprediction.stage.geointservices.io/',  // HACK
+          tideURL:       'https://bf-tideprediction.stage.geointservices.io/',  // HACK
         }),
         type:     'body',
         mimeType: 'application/json',

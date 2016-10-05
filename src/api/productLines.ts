@@ -60,7 +60,7 @@ export function create({
         pzAddr:      gateway,
         pzAuthToken: sessionToken,
         svcURL:      algorithm.url,
-        tideURL:     'https://tideprediction.stage.geointservices.io/',  // HACK
+        tideURL:     'https://bf-tideprediction.stage.geointservices.io/',  // HACK
       },
     }),
   })
