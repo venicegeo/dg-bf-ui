@@ -16,7 +16,7 @@
 
 /// <reference path="../../node_modules/@types/lodash/index.d.ts" />
 
-const styles = require('./Application.css')
+const styles: any = require('./Application.css')
 
 import * as React from 'react'
 import {render} from 'react-dom'
