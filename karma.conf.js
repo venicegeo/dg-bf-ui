@@ -106,13 +106,14 @@ module.exports = (config) => {
     coverageReporter: isCoverageRequested ? {
       reporters: [
         { type: 'text-summary' },
-        { type: 'lcov', dir: 'reports', subdir: 'coverage' },
-        { type: 'cobertura', dir: 'reports', subdir: 'coverage', file: 'cobertura.xml' },
+        { type: 'lcov', dir: 'report', subdir: 'coverage' },
+        { type: 'json', dir: 'report', subdir: 'coverage' },
+        { type: 'cobertura', dir: 'report', subdir: 'coverage', file: 'cobertura.xml' },
       ]
     } : {},
 
     junitReporter: {
-      outputFile: path.resolve(__dirname, 'reports/junit/test-results.xml'),
+      outputFile: path.resolve(__dirname, 'report/junit/test-results.xml'),
     },
 
     mochaReporter: {
