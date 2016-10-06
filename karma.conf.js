@@ -58,7 +58,7 @@ module.exports = (config) => {
       context: __dirname,
       resolve: webpackConfig.resolve,
       module: {
-        preLoaders: webpackConfig.module.preLoaders,
+        preLoaders: webpackConfig.module.preLoaders.filter(l => l.loader !== 'tslint'),
         loaders: webpackConfig.module.loaders,
         postLoaders: isCoverageRequested ? [
           {

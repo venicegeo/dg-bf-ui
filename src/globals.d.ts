@@ -14,6 +14,8 @@
  * limitations under the License.
  **/
 
+/// <reference path="../node_modules/@types/geojson/index.d.ts" />
+
 declare namespace beachfront {
   namespace x {
     interface ProductLineProperties {
@@ -101,9 +103,13 @@ declare namespace beachfront {
 }
 
 //
-// Webpack API
+// Misc Interop
 //
 
+// Omitting this causes ts-loader to complain about not finding lodash/debounce and friends
+/// <reference path="../node_modules/@types/lodash/index.d.ts" />
+
+// Webpack
 interface BuildEnvironment {
   NODE_ENV: string
   GATEWAY: string
@@ -118,5 +124,8 @@ declare const process: {
 
 declare var require: {
   (path: string)
-  context(path: string, recursive: boolean, pattern: RegExp): any
+  context(path: string, recursive: boolean, pattern?: RegExp): {
+    keys(): string[]
+    (...v: any[])
+  }
 }

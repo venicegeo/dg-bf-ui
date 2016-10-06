@@ -14,6 +14,9 @@
  * limitations under the License.
  **/
 
+/// <reference path="../node_modules/@types/core-js/index.d.ts" />
+/// <reference path="../node_modules/@types/isomorphic-fetch/index.d.ts" />
+
 import 'core-js/es6/object'
 import 'core-js/es6/string'
 import 'core-js/fn/array/includes'

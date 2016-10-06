@@ -14,11 +14,13 @@
  * limitations under the License.
  **/
 
+/// <reference path="../../node_modules/@types/lodash/index.d.ts" />
+
 const styles = require('./Application.css')
 
 import * as React from 'react'
 import {render} from 'react-dom'
-import debounce = require('lodash/debounce')
+import * as debounce from 'lodash/debounce'
 import {About} from './About'
 import {CreateJob, SearchCriteria, createSearchCriteria} from './CreateJob'
 import {CreateProductLine} from './CreateProductLine'

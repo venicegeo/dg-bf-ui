@@ -14,6 +14,8 @@
  * limitations under the License.
  **/
 
+/// <reference path="../../node_modules/@types/lodash/index.d.ts" />
+
 require('openlayers/dist/ol.css')
 const styles: any = require('./PrimaryMap.css')
 const tileErrorPlaceholder: string = require('../images/tile-error.png')
@@ -21,8 +23,8 @@ const tileErrorPlaceholder: string = require('../images/tile-error.png')
 import * as React from 'react'
 import {findDOMNode} from 'react-dom'
 import * as ol from 'openlayers'
-import debounce = require('lodash/debounce')
-import throttle = require('lodash/throttle')
+import * as debounce from 'lodash/debounce'
+import * as throttle from 'lodash/throttle'
 import {ExportControl} from '../utils/openlayers.ExportControl'
 import {SearchControl} from '../utils/openlayers.SearchControl'
 import {BasemapSelect} from './BasemapSelect'
@@ -44,7 +46,6 @@ import {
   TYPE_SCENE,
   TYPE_JOB,
 } from '../constants'
-
 
 const DEFAULT_CENTER = [-10, 0]
 const MIN_ZOOM = 2.5
