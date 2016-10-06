@@ -112,6 +112,10 @@ module.exports = (config) => {
       ]
     } : {},
 
+    junitReporter: {
+      outputFile: path.resolve(__dirname, 'reports/junit/TESTS-xunit.xml'),
+    },
+
     mochaReporter: {
       showDiff: true,
     },
