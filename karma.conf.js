@@ -106,7 +106,6 @@ module.exports = (config) => {
     coverageReporter: isCoverageRequested ? {
       reporters: [
         { type: 'text-summary' },
-        { type: 'html', dir: 'reports', subdir: 'coverage/html-report' },
         { type: 'lcov', dir: 'reports', subdir: 'coverage' },
       ]
     } : {},
