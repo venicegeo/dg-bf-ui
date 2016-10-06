@@ -100,15 +100,14 @@ module.exports = (config) => {
     },
 
     //
-    // Misc
+    // Reporters
     //
 
     coverageReporter: isCoverageRequested ? {
-      dir: 'reports/',
       reporters: [
         { type: 'text-summary' },
-        { type: 'html', subdir: 'coverage-html' },
-        { type: 'cobertura', subdir: '.', file: 'coverage-cobertura.xml' },
+        { type: 'html', dir: 'reports', subdir: 'coverage/html-report' },
+        { type: 'lcov', dir: 'reports', subdir: 'coverage' },
       ]
     } : {},
 
