@@ -57,8 +57,8 @@ partners:
 # - url: URL for the link
 #   text: Anchor text for the link
 contact:
-- url: mailto:mgerlek@radiantblue.com
-  text: Michael Gerlek
+- url: mailto:mdion@radiantblue.com
+  text: Mark Dion
 - url: mailto:dbazile@radiantblue.com
   text: David Bazile
 
