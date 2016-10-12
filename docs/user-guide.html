@@ -1,0 +1,191 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <title>User Guide | Beachfront</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <link href="https://fonts.googleapis.com/css?family=Montserrat:400,700|Inconsolata:400,700|Catamaran:200,300,400,700" rel="stylesheet" type="text/css">
+  <link rel="stylesheet" href="user-guide.css"/>
+</head>
+<body>
+  <div style="line-height: 25px; text-align: center; background: green; color: white;">UNCLASSIFIED</div>
+  <main>
+    <header>
+      <h1>Beachfront User's Guide</h1>
+      <nav>
+        <h3>Table of Contents</h3>
+        <ul>
+          <li><a href="#searching-for-scenes">Searching for Scenes</a></li>
+          <li><a href="#creating-a-job">Creating a Job</a></li>
+          <li><a href="#viewing-job-results">Viewing a Job's Results</a></li>
+        </ul>
+      </nav>
+      <div class="note info">
+        <h3>Still stuck?</h3>
+        Have an issue that's not covered below?  <a href="mailto:venice@radiantblue.com">Let us know!</a>
+      </div>
+    </header>
+
+    <section id="searching-for-scenes">
+      <header>
+        <h2>Searching for Scenes</h2>
+        <p class="note warning">You will need a Planet Labs API key to search for and preview scenes</p>
+      </header>
+
+      <figure>
+        <figcaption>
+          <h3>Navigate to "Create Job"</h3>
+          <p>
+            The scene search is a part of the job creation workflow.
+          </p>
+        </figcaption>
+        <img src="screenshots/navigate-to-create-job.png" alt="Navigate to 'Create Job'"/>
+      </figure>
+
+      <figure>
+        <figcaption>
+          <h3>Draw a bounding box to define the search space</h3>
+          <p>
+            Drawing a bounding box is a 2-click process.  Click once to drop the first corner
+            and again to complete the bounding box.
+          </p>
+        </figcaption>
+        <img src="screenshots/draw-bbox.png"/>
+      </figure>
+
+      <figure>
+        <figcaption>
+          <h3>Adjust the scene filtering criteria</h3>
+          <p class="note info">Don't forget to enter your Planet Labs API key!</p>
+          <p>
+            You can optionally adjust from the default cloud cover and date range.  The format
+            for dates is: <code>YYYY-MM-DD</code>.
+          </p>
+        </figcaption>
+        <img src="screenshots/catalog-search-criteria.png"/>
+      </figure>
+
+      <figure>
+        <figcaption>
+          <h3>After verifying spatial and temporal constraints, execute search</h3>
+          <p>
+            Click on the <em>Search for imagery</em> button to execute a search using the
+            selected filtering criteria.
+          </p>
+          <p>
+            After a moment, footprints of the scenes found in the catalog should render on
+            the map.  You can readjust the filtering criteria and re-execute the search as
+            many times as you need.
+          </p>
+        </figcaption>
+        <img src="screenshots/catalog-search-results.png"/>
+      </figure>
+
+      <figure>
+        <figcaption>
+          <h3>Click on a scene footprint to bring up metadata and a preview</h3>
+          <p>
+            If the preview does not load on the map, click on the <em>thumbnail</em> link.
+          </p>
+        </figcaption>
+        <img src="screenshots/select-scene.png"/>
+      </figure>
+
+    </section>
+
+    <section id="creating-a-job">
+      <header>
+        <h2>Creating a Job</h2>
+        <p class="note info">Start from the end of the instructions for <a href="#searching-for-scenes">Searching for Scenes</a>.</p>
+      </header>
+
+      <figure>
+        <figcaption>
+          <h3>After selecting a scene, find a compatible algorithm</h3>
+          <p>
+            Find an algorithm in the list that can support the selected scene.  Note that
+            some algorithms have strict requirements in order to yield meaningful
+            coastline vector data.
+          </p>
+        </figcaption>
+        <img src="screenshots/select-algorithm-incompatible.png"/>
+      </figure>
+
+      <figure>
+        <figcaption>
+          <h3>After finding a compatible algorithm, click "Run Algorithm"</h3>
+          <p>
+            Find an algorithm in the list that can support the selected scene.  Note that
+            some algorithms have strict requirements in order to yield meaningful
+            coastline vector data.
+          </p>
+          <p class="note info">
+            You can also optionally change the name of the job under <em>Job Details</em>
+            before running the algorithm to something more meaningful to you or your
+            team.
+          </p>
+        </figcaption>
+        <img src="screenshots/select-algorithm-compatible.png"/>
+      </figure>
+    </section>
+
+    <section id="viewing-job-results">
+      <header>
+        <h2>Viewing Job Results</h2>
+      </header>
+
+      <figure>
+        <figcaption>
+          <h3>Navigate to "Jobs"</h3>
+          <p>This menu will list the status and details for all jobs known to you.</p>
+        </figcaption>
+        <img src="screenshots/navigate-to-jobs.png"/>
+      </figure>
+
+      <figure>
+        <figcaption>
+          <h3>Find the job you want to view, then click "View on Map"</h3>
+          <p>The map will pan and zoom to the job's extent and select the job frame.</p>
+          <p class="note info">You can also click any visible job frame on the map to "select" it in the same way.</p>
+        </figcaption>
+        <img src="screenshots/view-job-on-map.png"/>
+      </figure>
+
+      <figure>
+        <figcaption>
+          <h3>Shoreline detections will show for any successful job</h3>
+          <p>
+            If you select a job that is currently running, shoreline detections automatically
+            appear once it successfully completes.
+          </p>
+        </figcaption>
+        <img src="screenshots/selected-job-frame.png"/>
+      </figure>
+
+      <figure>
+        <figcaption>
+          <h3>Click on the job's list item row to view more details</h3>
+          <p>
+            You can also choose to "forget" a job by clicking on the appropriate button in
+            the job's details.
+          </p>
+        </figcaption>
+        <img src="screenshots/job-details.png"/>
+      </figure>
+
+      <figure>
+        <figcaption>
+          <h3>Click "Download" button to download detections as GeoJSON</h3>
+          <p>
+            The GeoJSON file will be named after whatever you named the job, or
+            <code>LC80010012016001LGN00.geojson</code> in this case.
+          </p>
+        </figcaption>
+        <img src="screenshots/download-job-geojson.png"/>
+      </figure>
+    </section>
+
+  </main>
+  <div style="line-height: 25px; text-align: center; background: green; color: white;">UNCLASSIFIED</div>
+</body>
+</html>

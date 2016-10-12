@@ -16,8 +16,6 @@
 
 .root {
   composes: navigation from '../styles/layout.css';
-  /*background-color: #3e8cb3;*/
-  /*background-color: #EBE6E6;*/
   background-color: #1675aa;
 }
 

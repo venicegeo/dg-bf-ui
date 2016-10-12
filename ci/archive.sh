@@ -24,6 +24,7 @@ fi
 
 NODE_ENV=production npm run build
 echo "pushstate: enabled" > dist/Staticfile
+cp -r docs dist
 
 #
 # Package artifacts

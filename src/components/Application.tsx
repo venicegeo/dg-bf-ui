@@ -24,7 +24,6 @@ import * as debounce from 'lodash/debounce'
 import {About} from './About'
 import {CreateJob, SearchCriteria, createSearchCriteria} from './CreateJob'
 import {CreateProductLine} from './CreateProductLine'
-import {Help} from './Help'
 import {JobStatusList} from './JobStatusList'
 import {Login} from './Login'
 import {Navigation} from './Navigation'
@@ -247,12 +246,6 @@ export class Application extends React.Component<Props, State> {
             onCatalogApiKeyChange={this.handleCatalogApiKeyChange}
             onClearBbox={this.handleClearBbox}
             onProductLineCreated={this.handleProductLineCreated}
-          />
-        )
-      case '/help':
-        return (
-          <Help
-            onDismiss={() => this.navigateTo({ pathname: '/' })}
           />
         )
       case '/jobs':

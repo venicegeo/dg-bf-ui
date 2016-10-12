@@ -1,0 +1,175 @@
+/**
+ * Copyright 2016, RadiantBlue Technologies, Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ **/
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  min-height: 100vh;
+  font-family: Catamaran;
+  background-color: white;
+  color: #444;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  margin: 0;
+  font-family: Montserrat;
+  font-weight: normal;
+}
+
+h1,
+h2 {
+  color: #175b82;
+}
+
+h1 {
+  margin-bottom: 1em;
+  font-size: 4em;
+}
+
+h2 {
+  font-size: 3em;
+}
+
+:target h2 {
+  color: white;
+}
+
+a {
+  color: #2fa4e7;
+}
+
+a:visited {
+  color: #3c647c;
+}
+
+a:hover {
+  color: #ff652f;
+}
+
+pre,
+code {
+  font-family: Inconsolata;
+}
+
+code {
+  background-color: #ffebf5;
+  color: #a26;
+  padding: .15em;
+  border-radius: 3px;
+}
+
+p {
+  line-height: 1.6em;
+}
+
+header {
+  padding: 2rem;
+}
+
+:target header {
+  background-color: hsl(36, 100%, 35%);
+}
+
+nav li {
+  line-height: 1.3em;
+}
+
+main {
+  flex: 1;
+  padding-top: 5em;
+}
+
+section {
+  margin-top: 10em;
+}
+
+figure {
+  margin: 0;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  width: 100%;
+  background-color: #f3f3f3;
+}
+
+figure + figure {
+  margin-top: 1px;
+}
+
+figure:nth-child(even) {
+  background-color: #fafafa;
+}
+
+:target figure {
+  background-color: hsl(36, 100%, 95%);
+}
+
+:target figure:nth-child(even) {
+  background-color: hsl(36, 100%, 90%);
+}
+
+figure img {
+  flex: 1;
+  max-width: 50%;
+  align-self: flex-start;
+}
+
+figure img.expand {
+  position: fixed;
+  top: 50%;
+
+}
+
+figcaption {
+  max-width: 600px;
+  flex: 1;
+  align-self: stretch;
+  padding: 2em;
+}
+
+figcaption h3 {
+  border-top: .15em solid;
+  padding-top: .7em;
+}
+
+.note {
+  background-color: #eee;
+  padding: 1em;
+  margin: 1em;
+  border: 1px solid #ccc;
+  width: auto;
+}
+
+.note.info {
+  background-color: hsl(202, 100%, 82%);
+  border-color: hsl(203, 100%, 70%);
+}
+
+.note.warning {
+  background-color: #fd0;
+  border-color: #db0;
+}
