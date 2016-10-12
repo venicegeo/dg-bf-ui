@@ -146,6 +146,7 @@ export class CreateJob extends React.Component<Props, State> {
   }
 
   private handleCreateJob(algorithm) {
+    this.setState({ isCreating: true })
     createJob({
       algorithm,
       catalogApiKey:     this.props.catalogApiKey,
@@ -154,6 +155,7 @@ export class CreateJob extends React.Component<Props, State> {
       name:              this.state.name,
     })
       .then(job => {
+        this.setState({ isCreating: false })
         // Reset Search Criteria
         this.props.onSearchCriteriaChange(createSearchCriteria())
 
