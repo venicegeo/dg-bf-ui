@@ -138,10 +138,6 @@ export class CreateJob extends React.Component<Props, State> {
           {!this.props.bbox && (
             <li className={styles.placeholder}>
               <h3>Draw bounding box to search for imagery</h3>
-              <p>or</p>
-              <button className={styles.uploadButton}>
-                <i className="fa fa-upload"/> Upload my own image
-              </button>
             </li>
           )}
         </ul>
