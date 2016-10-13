@@ -10,7 +10,7 @@ source $root/ci/vars.sh
 ## Install Dependencies ########################################################
 
 npm install
-typings install
+./node_modules/.bin/typings install
 
 
 ## Build #######################################################################
