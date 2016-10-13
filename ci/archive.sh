@@ -23,4 +23,7 @@ cp -r docs dist
 # Package artifacts
 #
 
-zip -jr ${APP}.${EXT} dist
+pushd dist
+zip -r ../${APP}.${EXT} .
+popd > /dev/null
+
