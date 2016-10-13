@@ -14,8 +14,6 @@
  * limitations under the License.
  **/
 
-/// <reference path="../../node_modules/@types/lodash/index.d.ts" />
-
 const styles: any = require('./Application.css')
 
 import * as React from 'react'

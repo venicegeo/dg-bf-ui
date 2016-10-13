@@ -14,8 +14,6 @@
  * limitations under the License.
  **/
 
-/// <reference path="../../node_modules/@types/lodash/index.d.ts" />
-
 require('openlayers/dist/ol.css')
 const styles: any = require('./PrimaryMap.css')
 const tileErrorPlaceholder: string = require('../images/tile-error.png')

@@ -14,8 +14,6 @@
  * limitations under the License.
  **/
 
-/// <reference path="../node_modules/@types/mocha/index.d.ts" />
-
 import '../src/polyfills'
 
 const testsContext = require.context('.', true, /\.test$/)

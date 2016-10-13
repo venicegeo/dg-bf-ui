@@ -14,8 +14,6 @@
  * limitations under the License.
  **/
 
-/// <reference path="../node_modules/@types/geojson/index.d.ts" />
-
 declare namespace beachfront {
   namespace x {
     interface ProductLineProperties {

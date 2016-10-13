@@ -10,6 +10,7 @@ source $root/ci/vars.sh
 ## Install Dependencies ########################################################
 
 npm install
+typings install
 
 
 ## Run Tests ###################################################################
