@@ -132,10 +132,15 @@ figure:nth-child(even) {
   background-color: hsl(36, 100%, 90%);
 }
 
-figure img {
+figure > div {
   flex: 1;
   max-width: 50%;
   align-self: flex-start;
+}
+
+figure > div img {
+  display: block;
+  max-width: 100%;
 }
 
 figure img.expand {
