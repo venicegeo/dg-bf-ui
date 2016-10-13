@@ -4,7 +4,7 @@
   "description": "User interface for the Beachfront project",
   "scripts": {
     "build": "webpack",
-    "clean": "rimraf reports dist beachfront.zip",
+    "clean": "rimraf report dist beachfront.zip",
     "lint": "tslint '{src,test}/**/*.{ts,tsx}' -t verbose",
     "test": "karma start",
     "test:ci": "karma start --single-run --browsers gs_firefox_38 --reporters progress,coverage,junit",
