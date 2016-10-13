@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash -ex
 
 pushd `dirname $0`/.. > /dev/null
 root=$(pwd -P)
