@@ -70,6 +70,29 @@ a:hover {
   color: #ff652f;
 }
 
+a.button {
+display: inline-block;
+  padding: .5em 1em;
+  text-transform: uppercase;
+  background-color: hsl(120, 100%, 35%);
+  color: white;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  text-decoration: none;
+  text-align: center;
+  font-weight: 100;
+  font-size: 14px;
+  border-radius: 3px;
+}
+
+a.button:hover {
+  background-color: hsl(140, 100%, 37%);
+}
+
+a.button:active {
+  background-color: hsl(140, 100%, 30%);
+}
+
 pre,
 code {
   font-family: Inconsolata;
