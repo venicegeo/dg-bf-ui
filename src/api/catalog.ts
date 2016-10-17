@@ -38,11 +38,10 @@ export function discover(): Promise<ServiceDescriptor> {
         url: catalog.url,
       }
     })
-    .then(includeFilters)
     .then(includeEventTypeId)
     .then(catalog => ({
       eventTypeId: catalog.eventTypeId,
-      filters:     catalog.filters,
+      filters:     [],  // HACK -- until we're given the new way to enumerate filters from the catalog...
       url:         catalog.url,
     }))
     .catch(err => {
@@ -57,7 +56,6 @@ export function search({
   cloudCover,
   dateFrom,
   dateTo,
-  filter,
   startIndex,
   count,
 }): Promise<beachfront.ImageryCatalogPage> {
@@ -67,7 +65,6 @@ export function search({
     `maxAcquiredDate=${new Date(dateTo).toISOString()}`,
     `bbox=${bbox}`,
     `cloudCover=${cloudCover}`,
-    `subIndex=${filter || ''}`,
     `count=${count}`,
     `startIndex=${startIndex}`,
   ].join('&'))
@@ -112,17 +109,4 @@ function includeEventTypeId(catalog) {
       return response.text()
     })
     .then(eventTypeId => Object.assign(catalog, {eventTypeId}))
-}
-
-function includeFilters(catalog) {
-  return fetch(`${catalog.url}/subindex`)
-    .then(response => {
-      if (!response.ok) {
-        throw new Error(`HTTP Error (code=${response.status})`)
-      }
-      return response.json()
-    })
-    .then(hash => Object.assign(catalog, {
-      filters: Object.keys(hash).map(id => ({id, name: hash[id].name})),
-    }))
 }
