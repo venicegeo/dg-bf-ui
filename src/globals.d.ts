@@ -104,9 +104,6 @@ declare namespace beachfront {
 // Misc Interop
 //
 
-// Omitting this causes ts-loader to complain about not finding lodash/debounce and friends
-/// <reference path="../node_modules/@types/lodash/index.d.ts" />
-
 // Webpack
 interface BuildEnvironment {
   NODE_ENV: string
