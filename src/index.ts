@@ -16,6 +16,7 @@
 
 // Styles
 import 'font-awesome/css/font-awesome.css'
+import './styles/webfonts/index.css'
 import './styles/layout.css'
 import './styles/colors.css'
 import './styles/typography.css'
