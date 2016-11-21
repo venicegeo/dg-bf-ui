@@ -34,8 +34,6 @@ interface Props {
   algorithms: beachfront.Algorithm[]
   bbox: number[]
   catalogApiKey: string
-  executorServiceId: string
-  filters: {id: string, name: string}[]
   isSearching: boolean
   searchError: any
   searchCriteria: SearchCriteria
@@ -75,13 +73,6 @@ export class CreateJob extends React.Component<Props, State> {
     this.handleSearchFilterChange = this.handleSearchFilterChange.bind(this)
   }
 
-  componentDidMount() {
-    const shorelineFilter = this.props.filters.find(f => /(coast|shore)line/i.test(f.name))
-    if (shorelineFilter) {
-      this.handleSearchFilterChange(shorelineFilter.id)
-    }
-  }
-
   componentWillReceiveProps(nextProps: Props) {
     if (this.state.shouldAutogenerateName && nextProps.selectedScene && nextProps.selectedScene !== this.props.selectedScene) {
       this.setState({ name: generateName(nextProps.selectedScene.id) })
@@ -104,8 +95,6 @@ export class CreateJob extends React.Component<Props, State> {
                 dateFrom={this.props.searchCriteria.dateFrom}
                 dateTo={this.props.searchCriteria.dateTo}
                 error={this.props.searchError}
-                filter={this.props.searchCriteria.filter}
-                filters={this.props.filters}
                 isSearching={this.props.isSearching}
                 onApiKeyChange={this.props.onCatalogApiKeyChange}
                 onClearBbox={this.props.onClearBbox}
@@ -128,7 +117,7 @@ export class CreateJob extends React.Component<Props, State> {
             <li className={styles.algorithms}>
               <AlgorithmList
                 algorithms={this.props.algorithms}
-                imageProperties={this.props.selectedScene.properties}
+                sceneMetadata={this.props.selectedScene.properties}
                 isSubmitting={this.state.isCreating}
                 onSubmit={this.handleCreateJob}
               />
@@ -148,11 +137,9 @@ export class CreateJob extends React.Component<Props, State> {
   private handleCreateJob(algorithm) {
     this.setState({ isCreating: true })
     createJob({
-      algorithm,
-      catalogApiKey:     this.props.catalogApiKey,
-      executorServiceId: this.props.executorServiceId,
-      scene:             this.props.selectedScene,
-      name:              this.state.name,
+      algorithmId: algorithm.id,
+      name:        this.state.name,
+      sceneId:     this.props.selectedScene.id,
     })
       .then(job => {
         this.setState({ isCreating: false })

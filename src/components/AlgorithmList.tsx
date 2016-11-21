@@ -21,7 +21,7 @@ import {Algorithm} from './Algorithm'
 
 interface Props {
   algorithms: beachfront.Algorithm[]
-  imageProperties: beachfront.SceneMetadata
+  sceneMetadata: beachfront.SceneMetadata
   isSubmitting?: boolean
   selectedId?: string
   warningHeading?: string
@@ -38,7 +38,7 @@ export const AlgorithmList = (props: Props) => (
         <li key={algorithm.id}>
           <Algorithm
             algorithm={algorithm}
-            imageProperties={props.imageProperties}
+            sceneMetadata={props.sceneMetadata}
             isSelected={props.selectedId === algorithm.id}
             isSubmitting={props.isSubmitting}
             warningHeading={props.warningHeading}

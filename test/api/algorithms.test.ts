@@ -15,7 +15,7 @@
  **/
 
 describe('Algorithms Service', () => {
-  describe('discover()', () => {
+  describe('lookup()', () => {
     it('looks for service by name')
     it('extracts service ID')
     it('extracts URL')

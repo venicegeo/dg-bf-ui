@@ -14,153 +14,52 @@
  * limitations under the License.
  **/
 
-import * as moment from 'moment'
 import {getClient} from './session'
-import {importByDataId, importByJobId} from '../utils/import-job-record'
-import * as worker from './workers/jobs'
-import {
-  JOBS_WORKER_INTERVAL,
-  JOBS_WORKER_JOB_TTL,
-  SCHEMA_VERSION,
-} from '../config'
-
-import {
-  REQUIREMENT_BANDS,
-  STATUS_RUNNING,
-  TYPE_JOB,
-} from '../constants'
 
 interface ParamsCreateJob {
-  algorithm: beachfront.Algorithm
-  catalogApiKey: string
-  executorServiceId: string
+  algorithmId: string
   name: string
-  scene: beachfront.Scene
+  sceneId: string
 }
 
 export function createJob({
-  catalogApiKey,
-  executorServiceId,
+  algorithmId,
   name,
-  algorithm,
-  scene,
+  sceneId,
 }: ParamsCreateJob): Promise<beachfront.Job> {
-  const client = getClient()
-  return client.post('execute-service', {
-    dataInputs: {
-      body: {
-        content: JSON.stringify({
-          algoType:      algorithm.type,
-          bands:         algorithm.requirements.find(a => a.name === REQUIREMENT_BANDS).literal.split(','),
-          dbAuthToken:   catalogApiKey,
-          jobName:       name,
-          metaDataURL:   scene.properties.link,
-          pzAuthToken:   client.sessionToken,
-          pzAddr:        client.gateway,
-          svcURL:        algorithm.url,
-          tideURL:       'https://bf-tideprediction.stage.geointservices.io/',  // HACK
-        }),
-        type:     'body',
-        mimeType: 'application/json',
-      },
-    },
-    dataOutput: [
-      {
-        mimeType: 'application/json',
-        type:     'text',
-      },
-    ],
-    serviceId: executorServiceId,
+  return getClient().post<ResponseJobCreated>('/v0/job', {
+    algorithm_id: algorithmId,
+    name:         name,
+    scene_id:     sceneId,
   })
-    .then(id => ({
-      id,
-      geometry: scene.geometry,
-      properties: {
-        __schemaVersion__: SCHEMA_VERSION,
-        algorithmName:     algorithm.name,
-        createdOn:         moment().toISOString(),
-        name:              name,
-        sceneCaptureDate:  moment(scene.properties.acquiredDate).toISOString(),
-        sceneId:           scene.id,
-        sceneSensorName:   scene.properties.sensorName,
-        status:            STATUS_RUNNING,
-        type:              TYPE_JOB,
-      },
-      type: 'Feature',
-    }))
+    .then(response => response.data)
     .catch(err => {
       console.error('(jobs:create) could not execute:', err)
       throw err
     })
 }
 
-interface ParamsImportJob {
-  jobId?: string
-  dataId?: string
-  algorithms: beachfront.Algorithm[]
+export function fetchJobs() {
+  return getClient().get<ResponseJobList>('/v0/job')
+    .then(
+      response => response.data.jobs.features,
+      err => {
+        console.error('(jobs:fetchJobs) failed:', err)
+        throw err
+      }
+    )
 }
 
-export function importJob({
-  jobId,
-  dataId,
-  algorithms,
-}: ParamsImportJob) {
-  const client = getClient()
-  const algorithmNames = generateAlgorithmNamesHash(algorithms)
-  const promise = dataId
-    ? importByDataId(client, dataId, algorithmNames)
-    : importByJobId(client, jobId, algorithmNames)
-  return promise
-    .catch(err => {
-      console.error('(jobs:importJob) failed:', err)
-      throw err
-    })
+//
+// Helpers
+//
+
+interface ResponseJobCreated {
+  job: beachfront.Job
 }
 
-export function startWorker({
-  getRecords,
-  onTerminate,
-  onUpdate,
-  onError,
-}: {
-  getRecords(): beachfront.Job[]
-  onTerminate(): void
-  onUpdate(job: beachfront.Job): void
-  onError(error: any): void
-}) {
-  worker.start({
-    client:   getClient(),
-    interval: JOBS_WORKER_INTERVAL,
-    ttl:      JOBS_WORKER_JOB_TTL,
-    onError,
-    onTerminate,
-
-    getRunningJobs() {
-      return getRecords().filter(j => j.properties.status === STATUS_RUNNING)
-    },
-
-    onUpdate(jobId, status, geojsonDataId, wmsLayerId, wmsUrl) {
-      const record = getRecords().find(j => j.id === jobId)
-      const updatedRecord = Object.assign({}, record, {
-        properties: Object.assign({}, record.properties, {
-          detectionsDataId:  geojsonDataId,
-          detectionsLayerId: wmsLayerId,
-          status:            status,
-        }),
-      })
-      onUpdate(updatedRecord)
-    },
-  })
-}
-
-export function stopWorker() {
-  worker.terminate()
-}
-
-function generateAlgorithmNamesHash(algorithms): Map<string, string> {
-  const hash = new Map<string, string>()
-  for (const algorithm of algorithms) {
-    hash[algorithm.url] = algorithm.name
+interface ResponseJobList {
+  jobs: {
+    features: beachfront.Job[]
   }
-  return hash
 }

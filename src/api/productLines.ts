@@ -14,63 +14,42 @@
  * limitations under the License.
  **/
 
-import * as moment from 'moment'
 import {getClient} from './session'
-import {importByDataId} from '../utils/import-job-record'
 
-import {
-  REQUIREMENT_BANDS,
-  STATUS_ACTIVE,
-  STATUS_INACTIVE,
-  TYPE_PRODUCT_LINE,
-} from '../constants'
+export interface ParamsCreateProductline {
+  algorithmId: string
+  bbox: [number, number, number, number]
+  category: string
+  dateStart: string
+  dateStop: string
+  maxCloudCover: number
+  name: string
+}
 
 export function create({
-  algorithm,
+  algorithmId,
   bbox,
-  catalogApiKey,
-  cloudCover,
+  category,
   dateStart,
   dateStop,
-  eventTypeId,
-  executorServiceId,
-  executorUrl,
-  filter,
+  maxCloudCover,
   name,
-}) {
-  const {gateway, sessionToken} = getClient()
-  return fetch(`${executorUrl}/newProductLine`, {
-    method: 'POST',
-    body: JSON.stringify({
-      cloudCover:      cloudCover,
-      eventTypeId:     eventTypeId,
-      minx:            bbox[0],
-      miny:            bbox[1],
-      maxx:            bbox[2],
-      maxy:            bbox[3],
-      minDate:         dateStart,
-      maxDate:         dateStop,
-      name:            name,
-      serviceId:       executorServiceId,
-      spatialFilterId: filter,
-      bfInputJSON: {
-        algoType:    algorithm.type,
-        bands:       algorithm.requirements.find(a => a.name === REQUIREMENT_BANDS).literal.split(','),
-        dbAuthToken: catalogApiKey,
-        pzAddr:      gateway,
-        pzAuthToken: sessionToken,
-        svcURL:      algorithm.url,
-        tideURL:     'https://bf-tideprediction.stage.geointservices.io/',  // HACK
-      },
-    }),
+}: ParamsCreateProductline): Promise<beachfront.ProductLine> {
+  const [minX, minY, maxX, maxY] = bbox
+  return getClient().post<ResponseProductLineCreated>('/v0/productline', {
+    algorithm_id:      algorithmId,
+    category:          category,
+    max_cloud_cover:   maxCloudCover,
+    min_x:             minX,
+    min_y:             minY,
+    max_x:             maxX,
+    max_y:             maxY,
+    name:              name,
+    spatial_filter_id: null,
+    start_on:          dateStart,
+    stop_on:           dateStop,
   })
-    .then(checkResponse)
-    .then(data => {
-      if (!data.triggerId || !data.layerGroupId) {
-        throw new Error('Server response is missing required data')
-      }
-      return data
-    })
+    .then(response => response.data.product_line)
     .catch(err => {
       console.error('(productLines:create) failed:', err)
       throw err
@@ -81,55 +60,18 @@ export function fetchJobs({
   productLineId,
   sinceDate,
   algorithms,
-  executorUrl,
 }) {
-  const {gateway, sessionToken} = getClient()
-  return fetch(`${executorUrl}/resultsByProductLine`, {
-    body: JSON.stringify({
-      triggerId:   productLineId,
-      pzAuthToken: sessionToken,
-      pzAddr:      gateway,
-      perPage:     '200',  // HACK -- see explanation below
-    }),
-    headers: {'content-type': 'application/json'},
-    method: 'POST',
-  })
-    .then(checkResponse)
-
-    // HACK HACK HACK HACK HACK HACK HACK
-    .then(ids => {
-      const client = getClient()
-      const algorithmNames = generateAlgorithmNamesHash(algorithms)
-      return __keepFetchingJobRecordsUntilSinceDate__(client, ids, algorithmNames, productLineId, sinceDate)
-    })
-    // HACK HACK HACK HACK HACK HACK HACK
-
+  return getClient().get<ResponseJobListing>(`/v0/job/by_productline/${productLineId}`)
+    .then(response => response.data.jobs.features)
     .catch(err => {
       console.error('(productLines:fetchJobs) failed:', err)
       throw err
     })
 }
 
-export function fetchProductLines({
-  algorithms,
-  eventTypeId,
-  executorUrl,
-  filters,
-  serviceId,
-}): Promise<beachfront.ProductLine[]> {
-  const {gateway, sessionToken} = getClient()
-  return fetch(`${executorUrl}/getProductLines`, {
-    body: JSON.stringify({
-      eventTypeId,
-      serviceId,
-      pzAuthToken: sessionToken,
-      pzAddr:      gateway,
-    }),
-    headers: {'content-type': 'application/json'},
-    method: 'POST',
-  })
-    .then(checkResponse)
-    .then(extractRecords(algorithms, filters))
+export function fetchProductLines(): Promise<beachfront.ProductLine[]> {
+  return getClient().get<ResponseProductLineList>('/v0/productline')
+    .then(response => response.data.product_lines.features)
     .catch(err => {
       console.error('(productLines:fetchProductLines) failed:', err)
       throw err
@@ -140,119 +82,18 @@ export function fetchProductLines({
 // Helpers
 //
 
-function checkResponse(response) {
-  if (response.ok) {
-    return response.json()
+interface ResponseProductLineCreated {
+  product_line: beachfront.ProductLine
+}
+
+interface ResponseProductLineList {
+  product_lines: {
+    features: beachfront.ProductLine[]
   }
-  throw Object.assign(new Error(`HttpError: (code=${response.status})`), {
-    code: response.status,
-  })
 }
 
-function extractRecords(algorithms, filters) {
-  const algorithmNames = generateAlgorithmNamesHash(algorithms)
-  const filterNames = generateFilterNamesHash(filters)
-  return data => data.productLines.map(datum => ({
-    id: datum.Id,
-    geometry: {
-      type: 'Polygon',
-      coordinates: [[
-        [datum.minx, datum.miny],
-        [datum.minx, datum.maxy],
-        [datum.maxx, datum.maxy],
-        [datum.maxx, datum.miny],
-        [datum.minx, datum.miny],
-      ]],
-    },
-    properties: {
-      algorithmName:     algorithmNames[datum.bfInputJSON.svcURL] || 'Unknown',
-      createdOn:         datum.minDate,
-      detectionsLayerId: 'piazza:' + datum.bfInputJSON.lGroupId,
-      eventTypeId:       datum.eventTypeId,
-      expiresOn:         datum.maxDate,
-      name:              datum.name,
-      owner:             datum.createdBy,
-      sceneCloudCover:   datum.cloudCover,
-      sceneSensorName:   datum.sensorName,
-      spatialFilterName: filterNames[datum.spatialFilterId] || '',
-      startsOn:          datum.minDate,
-      status:            isActive(datum.maxDate) ? STATUS_ACTIVE : STATUS_INACTIVE,
-      type:              TYPE_PRODUCT_LINE,
-    },
-    type: 'Feature',
-  } as beachfront.ProductLine))
-}
-
-function generateAlgorithmNamesHash(algorithms) {
-  const hash = {}
-  for (const algorithm of algorithms) {
-    hash[algorithm.url] = algorithm.name
+interface ResponseJobListing {
+  jobs: {
+    features: beachfront.Job[]
   }
-  return hash
 }
-
-function generateFilterNamesHash(filters) {
-  const hash = {}
-  for (const filter of filters) {
-    hash[filter.id] = filter.name
-  }
-  return hash
-}
-
-function isActive(maxDate) {
-  return !maxDate || moment(maxDate).isAfter(moment())
-}
-
-// HACK HACK HACK HACK HACK HACK HACK HACK HACK HACK HACK HACK HACK HACK HACK
-// HACK HACK HACK HACK HACK HACK HACK HACK HACK HACK HACK HACK HACK HACK HACK
-// HACK HACK HACK HACK HACK HACK HACK HACK HACK HACK HACK HACK HACK HACK HACK
-/*
-  Until bf-handle decides to solve the fan-out problem server-side, this is
-  the world we have to live in...
-
-  The overall strategy here is:
-    (1) grab as many job IDs are we're comfortable hammering Piazza for
-    (2) select first 10 job IDs that have not yet been loaded
-    (3) fetch those jobs
-    (4) if oldest job's creation date >= sinceDate & more to load, go to #2
-
-  Assumptions:
-    - 200 jobs should be enough to satisfy the user's curiosity
-    - Piazza doesn't mind being hammered with 200(*4) HTTP requests over the
-      course of ~5 minutes
- */
-function __keepFetchingJobRecordsUntilSinceDate__(client, ids, algorithmNames, productLineId, sinceDate) {
-  const count = 10
-  return new Promise((resolve, reject) => {
-    const records = []
-    const cutoff = moment(sinceDate)
-
-    ;(function ___fetchNextBatch___(remainingIds: string[]) {  // tslint:disable-line
-      console.debug('(productLines:__keepFetchingJobRecordsUntilSinceDate__) load %s jobs <%s>', count, sinceDate)
-      const promises = remainingIds.slice(0, count).map(dataId => importByDataId(client, dataId, algorithmNames))
-      return Promise.all(promises)
-        .then(batch => {
-          for (const record of batch) {
-            console.debug('(productLines:__keepFetchingJobRecordsUntilSinceDate__) inspect ', record.properties.createdOn)
-            if (moment(record.properties.createdOn).isAfter(cutoff)) {
-              records.push(record)
-            }
-            else {
-              console.debug('(productLines:__keepFetchingJobRecordsUntilSinceDate__) reached since date')
-              resolve(records)
-              return
-            }
-          }
-          if (!remainingIds.length) {
-            console.debug('(productLines:__keepFetchingJobRecordsUntilSinceDate__) no more jobs to load')
-            resolve(records)
-            return
-          }
-          ___fetchNextBatch___(remainingIds.slice(count))
-        }, reject)
-    }(ids))
-  })
-}
-// HACK HACK HACK HACK HACK HACK HACK HACK HACK HACK HACK HACK HACK HACK HACK
-// HACK HACK HACK HACK HACK HACK HACK HACK HACK HACK HACK HACK HACK HACK HACK
-// HACK HACK HACK HACK HACK HACK HACK HACK HACK HACK HACK HACK HACK HACK HACK

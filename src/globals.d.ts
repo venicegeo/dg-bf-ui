@@ -17,49 +17,39 @@
 declare namespace beachfront {
   namespace x {
     interface ProductLineProperties {
-      algorithmName: string
-      createdOn: string
-      detectionsLayerId: string
-      eventTypeId: string
-      expiresOn: string
+      algorithm_name: string
+      category: string
+      created_by: string
+      created_on: string
+      max_cloud_cover: number
       name: string
-      owner: string
-      sceneCloudCover: number
-      sceneSensorName: string
-      spatialFilterName: string
-      startsOn: string
+      owned_by: string
+      spatial_filter_id: string
       status: string
+      start_on: string
+      stop_on: string
       type: 'PRODUCT_LINE'
     }
 
     interface JobProperties {
-      __schemaVersion__: number
-      algorithmName: string
-      createdOn: string
-      detectionsDataId: string
-      detectionsLayerId: string
+      algorithm_name: string
+      created_on: string
       name: string
-      sceneCaptureDate: string
-      sceneId: string
-      sceneSensorName: string
+      scene_capture_date: string
+      scene_id: string
+      scene_sensor_name: string
       status: string
       type: 'JOB'
     }
   }
 
   interface Algorithm {
+    bands: string[]
     description: string
     id: string
+    maxCloudCover: number
     name: string
-    requirements: AlgorithmRequirement[]
     type: string
-    url: string
-  }
-
-  interface AlgorithmRequirement {
-    name: string
-    description: string
-    literal: string
   }
 
   interface Job extends GeoJSON.Feature<GeoJSON.Polygon> {
@@ -84,7 +74,6 @@ declare namespace beachfront {
       [key: string]: string
     }
     cloudCover: number
-    link: string  // HACK -- Can be removed after Redmine #7621 is resolved
     path: string
     resolution: number
     sensorName: string
@@ -107,7 +96,7 @@ declare namespace beachfront {
 // Webpack
 interface BuildEnvironment {
   NODE_ENV: string
-  GATEWAY: string
+  API_ROOT: string
   CLASSIFICATION_BANNER_BACKGROUND: string
   CLASSIFICATION_BANNER_FOREGROUND: string
   CLASSIFICATION_BANNER_TEXT: string
@@ -117,7 +106,7 @@ declare const process: {
   env: BuildEnvironment
 }
 
-declare var require: {
+declare const require: {
   (path: string)
   context(path: string, recursive: boolean, pattern?: RegExp): {
     keys(): string[]

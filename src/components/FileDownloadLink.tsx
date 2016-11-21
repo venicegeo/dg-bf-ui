@@ -21,8 +21,8 @@ const MB = 1024000
 
 interface Props {
   className?:   string
-  dataId:       string
   filename:     string
+  jobId:        string
   onComplete()
   onError(err: any)
   onProgress(loaded: number, total: number)
@@ -94,7 +94,7 @@ export class FileDownloadLink extends React.Component<Props, State> {
     this.props.onStart()
 
     const client = getClient()
-    client.getFile(this.props.dataId, this.handleProgress)
+    client.getFile(this.props.jobId, this.handleProgress)
       .then(this.handleComplete)
       .catch(this.handleError)
   }

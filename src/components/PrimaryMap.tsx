@@ -74,14 +74,15 @@ interface Props {
   bbox: number[]
   catalogApiKey:      string
   detections:         (beachfront.Job | beachfront.ProductLine)[]
+  detectionsLayerId:  string
   frames:             (beachfront.Job | beachfront.ProductLine)[]
-  geoserverUrl:       string
   highlightedFeature: beachfront.Job
   imagery:            beachfront.ImageryCatalogPage
   isSearching:        boolean
   mode:               string
   selectedFeature:    beachfront.Job | beachfront.Scene
   view:               MapView
+  wmsUrl:             string
   onBoundingBoxChange(bbox: number[])
   onSearchPageChange(page: {count: number, startIndex: number})
   onSelectFeature(feature: beachfront.Job | beachfront.Scene)
@@ -436,7 +437,7 @@ export class PrimaryMap extends React.Component<Props, State> {
   }
 
   private renderDetections() {
-    const {detections, geoserverUrl} = this.props
+    const {detections, detectionsLayerId, wmsUrl} = this.props
     const shouldRender = {}
     const alreadyRendered = {}
 
@@ -459,7 +460,7 @@ export class PrimaryMap extends React.Component<Props, State> {
     detections.filter(d => shouldRender[d.id] && !alreadyRendered[d.id]).forEach(detection => {
       const layer = new ol.layer.Tile({
         extent: featureToBbox(detection),
-        source: generateDetectionsSource(geoserverUrl, detection.properties.detectionsLayerId),
+        source: generateDetectionsSource(wmsUrl, detectionsLayerId, detection.id),
       })
 
       this.subscribeToLoadEvents(layer)
@@ -521,7 +522,7 @@ export class PrimaryMap extends React.Component<Props, State> {
       status.set(KEY_TYPE, TYPE_LABEL_MINOR)
       status.set(KEY_OWNER_ID, id)
       status.set(KEY_STATUS, raw.properties.status)
-      status.set(KEY_SCENE_ID, (raw as beachfront.Job).properties.sceneId)
+      status.set(KEY_SCENE_ID, (raw as beachfront.Job).properties.scene_id)
       source.addFeature(status)
     })
   }
@@ -738,7 +739,7 @@ function crossesDateline(geometry: ol.geom.Geometry) {
 function featuresToImages(...features: (beachfront.Job|beachfront.Scene)[]) {
   return features.filter(Boolean).map(feature => ({
     extent: featureToBbox(feature),
-    id:     (feature as beachfront.Job).properties.sceneId || feature.id,
+    id:     (feature as beachfront.Job).properties.scene_id || feature.id,
   }))
 }
 
@@ -780,13 +781,14 @@ function generateControls() {
   ])
 }
 
-function generateDetectionsSource(geoserverUrl, layerId) {
+function generateDetectionsSource(wmsUrl, layerId, jobId) {
   return new ol.source.TileWMS({
     tileLoadFunction,
     crossOrigin: 'anonymous',
-    url: `${geoserverUrl}/wms`,
+    url: wmsUrl,
     params: {
       [KEY_LAYERS]: layerId,
+      'viewparams': `jobid:${jobId}`
     },
   })
 }
@@ -1016,7 +1018,7 @@ function getColorForStatus(status) {
 }
 
 function normalizeSceneId(id: string) {
-  return id.replace(/^(landsat):/, '')
+  return id ? id.replace(/^(landsat):/, '') : null
 }
 
 function tileLoadFunction(imageTile, src) {

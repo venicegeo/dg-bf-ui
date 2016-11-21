@@ -60,7 +60,7 @@ describe('<PrimaryMap/>', () => {
         catalogApiKey={_props.catalogApiKey}
         detections={_props.detections}
         frames={_props.frames}
-        geoserverUrl={_props.geoserverUrl}
+        wmsUrl={_props.geoserverUrl}
         highlightedFeature={_props.highlightedFeature}
         imagery={_props.imagery}
         isSearching={_props.isSearching}
@@ -84,7 +84,7 @@ describe('<PrimaryMap/>', () => {
         catalogApiKey={_props.catalogApiKey}
         detections={_props.detections}
         frames={_props.frames}
-        geoserverUrl={_props.geoserverUrl}
+        wmsUrl={_props.geoserverUrl}
         highlightedFeature={_props.highlightedFeature}
         imagery={_props.imagery}
         isSearching={_props.isSearching}
@@ -108,7 +108,7 @@ describe('<PrimaryMap/>', () => {
         catalogApiKey={_props.catalogApiKey}
         detections={_props.detections}
         frames={_props.frames}
-        geoserverUrl={_props.geoserverUrl}
+        wmsUrl={_props.geoserverUrl}
         highlightedFeature={_props.highlightedFeature}
         imagery={_props.imagery}
         isSearching={_props.isSearching}
@@ -187,7 +187,7 @@ describe('<PrimaryMap/>', () => {
         catalogApiKey={_props.catalogApiKey}
         detections={_props.detections}
         frames={_props.frames}
-        geoserverUrl={_props.geoserverUrl}
+        wmsUrl={_props.geoserverUrl}
         highlightedFeature={_props.highlightedFeature}
         imagery={_props.imagery}
         isSearching={_props.isSearching}
@@ -242,7 +242,7 @@ describe('<PrimaryMap/>', () => {
         catalogApiKey={catalogApiKey}
         detections={_props.detections}
         frames={_props.frames}
-        geoserverUrl={_props.geoserverUrl}
+        wmsUrl={_props.geoserverUrl}
         highlightedFeature={_props.highlightedFeature}
         imagery={_props.imagery}
         isSearching={_props.isSearching}
@@ -271,7 +271,7 @@ describe('<PrimaryMap/>', () => {
         catalogApiKey={_props.catalogApiKey}
         detections={detections}
         frames={_props.frames}
-        geoserverUrl={_props.geoserverUrl}
+        wmsUrl={_props.geoserverUrl}
         highlightedFeature={_props.highlightedFeature}
         imagery={_props.imagery}
         isSearching={_props.isSearching}
@@ -322,7 +322,7 @@ describe('<PrimaryMap/>', () => {
     it('renders product line frames')
   })
 
-  describe('geoserverUrl', () => {
+  describe('wmsUrl', () => {
     it('uses correct geoserver URL')
     it('talks to geoserver via WMS')
   })

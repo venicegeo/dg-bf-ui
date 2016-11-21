@@ -14,17 +14,26 @@
  * limitations under the License.
  **/
 
-import {Client} from '../utils/piazza-client'
+import * as axios from 'axios'
 import * as worker from './workers/session'
-import {GATEWAY, SESSION_WORKER_INTERVAL} from '../config'
+import {API_ROOT, SESSION_WORKER_INTERVAL} from '../config'
 
-let client: Client
+const DEFAULT_TIMEOUT = 6000
+
+let _client: Axios.AxiosInstance
 
 export function create(username, password): Promise<void> {
-  return Client.create(GATEWAY, username, password)
-    .then(instance => {
-      client = instance
-      sessionStorage.setItem('token', client.sessionToken)
+  return axios.post(`${API_ROOT}/login`, null, {auth: {username, password}})
+    .then((response: any) => {
+      _client = axios.create({
+        baseURL: API_ROOT,
+        timeout: DEFAULT_TIMEOUT,
+        auth: {
+          username: response.data.api_key,
+          password: '',
+        },
+      })
+      sessionStorage.setItem('apiKey', response.data.api_key)
     })
     .catch(err => {
       console.error('(session:create) authentication failed')
@@ -33,23 +42,30 @@ export function create(username, password): Promise<void> {
 }
 
 export function destroy() {
-  client = null
+  _client = null
   sessionStorage.clear()
 }
 
 export function exists() {
-  return !!client || !!sessionStorage.getItem('token')
+  return !!_client || !!sessionStorage.getItem('apiKey')
 }
 
-export function getClient(): Client {
-  if (client) {
-     return client
+export function getClient(): Axios.AxiosInstance {
+  if (_client) {
+     return _client
   }
 
-  const token = sessionStorage.getItem('token')
-  if (token) {
-    client = new Client(GATEWAY, token)
-    return client
+  const apiKey = sessionStorage.getItem('apiKey')
+  if (apiKey) {
+    _client = axios.create({
+      baseURL: API_ROOT,
+      timeout: DEFAULT_TIMEOUT,
+      auth: {
+        username: apiKey,
+        password: '',
+      },
+    })
+    return _client
   }
 
   throw new Error('No session exists')

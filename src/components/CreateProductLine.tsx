@@ -41,16 +41,12 @@ const SUPPORTED_BANDS = {
 
 interface Props {
   algorithms:        beachfront.Algorithm[]
-  bbox:              number[]
+  bbox:              [number, number, number, number]
   catalogApiKey:     string
-  eventTypeId:       string
-  executorServiceId: string
-  executorUrl:       string
-  filters:           {id: string, name: string}[]
 
   onCatalogApiKeyChange(apiKey: string)
   onClearBbox()
-  onProductLineCreated()
+  onProductLineCreated(productLine: beachfront.ProductLine)
 }
 
 interface State {
@@ -100,8 +96,6 @@ export class CreateProductLine extends React.Component<Props, State> {
                 apiKey={this.props.catalogApiKey}
                 bbox={this.props.bbox}
                 cloudCover={this.state.cloudCover}
-                filter={this.state.filter}
-                filters={this.props.filters}
                 onApiKeyChange={this.props.onCatalogApiKeyChange}
                 onClearBbox={this.props.onClearBbox}
                 onCloudCoverChange={cloudCover => this.setState({ cloudCover })}
@@ -116,7 +110,7 @@ export class CreateProductLine extends React.Component<Props, State> {
               />
               <AlgorithmList
                 algorithms={this.props.algorithms}
-                imageProperties={{
+                sceneMetadata={{
                   cloudCover: this.state.cloudCover,
                   bands: SUPPORTED_BANDS.LANDSAT,
                 } as any}
@@ -159,19 +153,15 @@ export class CreateProductLine extends React.Component<Props, State> {
 
   private handleSubmit() {
     create({
-      algorithm:         this.state.algorithm,
-      bbox:              this.props.bbox,
-      catalogApiKey:     this.props.catalogApiKey,
-      cloudCover:        this.state.cloudCover,
-      dateStart:         this.state.dateStart,
-      dateStop:          this.state.dateStop,
-      eventTypeId:       this.props.eventTypeId,
-      executorServiceId: this.props.executorServiceId,
-      executorUrl:       this.props.executorUrl,
-      filter:            this.state.filter,
-      name:              this.state.name,
+      algorithmId:   this.state.algorithm.id,
+      bbox:          this.props.bbox,
+      category:      null,
+      dateStart:     this.state.dateStart,
+      dateStop:      this.state.dateStop,
+      maxCloudCover: this.state.cloudCover,
+      name:          this.state.name,
     })
-      .then(() => this.props.onProductLineCreated())
+      .then(this.props.onProductLineCreated)
       .catch(error => {
         this.setState({ error })
         throw error

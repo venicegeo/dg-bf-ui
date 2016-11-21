@@ -27,8 +27,6 @@ interface Props {
   dateFrom: string
   dateTo: string
   error?: any
-  filter: string
-  filters: {id: string, name: string}[]
   isSearching: boolean
   onApiKeyChange(value: string)
   onClearBbox()
@@ -55,8 +53,6 @@ export class ImagerySearch extends React.Component<Props, {}> {
           cloudCover={this.props.cloudCover}
           dateFrom={this.props.dateFrom}
           dateTo={this.props.dateTo}
-          filter={this.props.filter}
-          filters={this.props.filters}
           disabled={this.props.isSearching}
           onApiKeyChange={this.props.onApiKeyChange}
           onClearBbox={this.props.onClearBbox}

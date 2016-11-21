@@ -15,67 +15,32 @@
  **/
 
 import {getClient} from './session'
-import {
-  REQUIREMENT_BANDS,
-  REQUIREMENT_CLOUDCOVER,
-} from '../constants'
 
-const PATTERN_REQUIREMENT_PREFIX = /^ImgReq - /
-const PATTERN_NAME_PREFIX = /^BF_Algo_/
-
-export function discover(): Promise<beachfront.Algorithm[]> {
-  console.debug('(algorithms:discover)')
+export function lookup(): Promise<beachfront.Algorithm[]> {
   const client = getClient()
-  return client.getServices({pattern: PATTERN_NAME_PREFIX.source})
-    .then(algorithms => algorithms.map(normalizeAlgorithm))
+  return client.get<ResponseServiceListing>('/v0/algorithm')
+    .then(response => response.data.algorithms.map(normalize))
     .catch(err => {
-      console.error('(algorithms:discoverAlgorithms) discovery failed:', err)
+      console.error('(algorithms:lookup) Failed:', err)
       throw err
     })
+}
+
+function normalize(descriptor): beachfront.Algorithm {
+  return {
+    bands:         descriptor.bands,
+    description:   descriptor.description,
+    id:            descriptor.service_id,
+    maxCloudCover: descriptor.max_cloud_cover,
+    name:          descriptor.name,
+    type:          descriptor.interface,
+  }
 }
 
 //
 // Helpers
 //
 
-function extractRequirements(metadata) {
-  const requirements = []
-  if (metadata) {
-    Object.keys(metadata).forEach(key => {
-      if (PATTERN_REQUIREMENT_PREFIX.test(key)) {
-        requirements.push(normalizeRequirement(key, metadata[key]))
-      }
-    })
-  }
-  return requirements
-}
-
-function normalizeRequirement(key, value): beachfront.AlgorithmRequirement {
-  let name = key.replace(PATTERN_REQUIREMENT_PREFIX, '')
-  let description = value.trim()
-  switch (name) {
-    case 'bands':
-      name = REQUIREMENT_BANDS
-      description = description.toUpperCase().split(',').join(' and ')
-      break
-    case 'cloudCover':
-      name = REQUIREMENT_CLOUDCOVER
-      description = `Less than ${description}%`
-      value = parseFloat(value)
-      break
-    default:
-      break
-  }
-  return {name, description, literal: value}
-}
-
-function normalizeAlgorithm(serviceDescriptor): beachfront.Algorithm {
-  return {
-    description:  serviceDescriptor.resourceMetadata.description,
-    id:           serviceDescriptor.serviceId,
-    name:         serviceDescriptor.resourceMetadata.name.replace(PATTERN_NAME_PREFIX, ''),
-    requirements: extractRequirements(serviceDescriptor.resourceMetadata.metadata),
-    type:         serviceDescriptor.resourceMetadata.metadata.Interface,
-    url:          serviceDescriptor.url,
-  }
+interface ResponseServiceListing {
+  algorithms: any[]
 }

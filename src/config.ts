@@ -14,20 +14,16 @@
  * limitations under the License.
  **/
 
-export const SCHEMA_VERSION = 4
-
 export const CLASSIFICATION_BANNER_BACKGROUND = process.env.CLASSIFICATION_BANNER_BACKGROUND
 export const CLASSIFICATION_BANNER_FOREGROUND = process.env.CLASSIFICATION_BANNER_FOREGROUND
 export const CLASSIFICATION_BANNER_TEXT       = process.env.CLASSIFICATION_BANNER_TEXT
 
-export const GATEWAY = process.env.GATEWAY
+export const API_ROOT = process.env.API_ROOT
 
 const time = {millisecond: 1, second: 1000, minute: 60000}
 
 export const SESSION_WORKER_INTERVAL = 1 * time.minute
 export const UPDATE_WORKER_INTERVAL = 15 * time.minute
-export const JOBS_WORKER_INTERVAL = 20 * time.second
-export const JOBS_WORKER_JOB_TTL = 10 * time.minute
 
 export const TILE_PROVIDERS = [
   {

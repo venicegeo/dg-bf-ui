@@ -16,29 +16,31 @@
 
 import {getClient} from './session'
 
-const PATTERN_NAME_PREFIX = /^bf-geoserver$/
-
-export interface ServiceDescriptor {
-  error?: any
-  url?: string
-  baselineLayerId?: string
+export interface Descriptor {
+  wmsUrl?: string
+  detectionsLayerId?: string
 }
 
-export function discover(): Promise<ServiceDescriptor> {
-  console.debug('(geoserver:discover)')
+export function lookup(): Promise<Descriptor> {
   const client = getClient()
-  return client.getServices({pattern: PATTERN_NAME_PREFIX.source})
-    .then(([geoserver]) => {
-      if (!geoserver) {
-        throw new Error('Could not find Beachfront GeoServer')
-      }
-      return {
-        baselineLayerId: geoserver.resourceMetadata.metadata.baselineLayerId,
-        url:             geoserver.url,
-      }
-    })
+  return client.get<ResponseServiceListing>('/v0/services')
+    .then(response => ({
+      detectionsLayerId: 'bfdetections',
+      // wmsUrl: response.data.services.wms_server,
+      wmsUrl: response.data.services.wms_server.replace('https:', 'http:'),  // HACK
+    }))
     .catch(err => {
-      console.error('(geoserver:discover) discovery failed:', err)
+      console.error('(geoserver:discover) failed:', err)
       throw err
     })
+}
+
+//
+// Helpers
+//
+
+interface ResponseServiceListing {
+  services: {
+    wms_server: string
+  }
 }

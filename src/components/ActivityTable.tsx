@@ -87,8 +87,8 @@ export const ActivityTable = ({
               <td className={styles.downloadCell} onClick={e => e.stopPropagation()}>
                 <FileDownloadLink
                   className={styles.downloadButton}
-                  dataId={job.properties.detectionsDataId}
                   filename={job.properties.name + '.geojson'}
+                  jobId={job.id}
                   onComplete={() => console.log('onComplete')}
                   onError={() => console.log('onError')}
                   onProgress={() => console.log('onProgress')}
@@ -130,14 +130,14 @@ function generatePlaceholderRows(count) {
 }
 
 function getCapturedOn({ properties }: beachfront.Job) {
-  const then = moment(properties.sceneCaptureDate)
+  const then = moment(properties.scene_capture_date)
   return then.format(then.year() === new Date().getFullYear() ? 'MM/DD' : 'MM/DD/YYYY')
 }
 
 function getSceneId({ properties }: beachfront.Job) {
-  return properties.sceneId.replace(/^landsat:/, '')
+  return properties.scene_id.replace(/^landsat:/, '')
 }
 
 function getImageSensor({ properties }: beachfront.Job) {
-  return properties.sceneSensorName
+  return properties.scene_sensor_name
 }

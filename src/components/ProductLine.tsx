@@ -92,21 +92,21 @@ export class ProductLine extends React.Component<Props, State> {
           <div className={styles.metadata}>
             <dl>
               <dt>Scheduling</dt>
-              <dd>{formatDate(properties.startsOn)} &mdash; {formatDate(properties.expiresOn) || 'Forever'}</dd>
+              <dd>{formatDate(properties.start_on)} &mdash; {formatDate(properties.stop_on) || 'Forever'}</dd>
               <dt>Algorithm</dt>
-              <dd>{properties.algorithmName}</dd>
+              <dd>{properties.algorithm_name}</dd>
               <dt>Cloud Cover</dt>
-              <dd>{properties.sceneCloudCover}% or less</dd>
+              <dd>{properties.max_cloud_cover}% or less</dd>
               {/*
               <dt>Compute Mask</dt>
               <dd>{computeMask}</dd>
               */}
               <dt>Spatial Filter</dt>
-              <dd>{titleCase(properties.spatialFilterName) || 'None'}</dd>
+              <dd>{properties.spatial_filter_id || 'None'}</dd>
               <dt>Owner</dt>
-              <dd>{properties.owner}</dd>
+              <dd>{properties.owned_by}</dd>
               <dt>Date Created</dt>
-              <dd>{formatDate(properties.createdOn)}</dd>
+              <dd>{formatDate(properties.created_on)}</dd>
             </dl>
           </div>
           <ActivityTable
@@ -174,7 +174,7 @@ function formatDate(input) {
 
 function generateSinceDate(offset: string, productLine: beachfront.ProductLine) {
   if (offset === SINCE_CREATION.value) {
-    return productLine.properties.createdOn
+    return productLine.properties.created_on
   }
   return moment()
     .utc()

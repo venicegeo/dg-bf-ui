@@ -100,7 +100,7 @@ module.exports = {
     new webpack.IgnorePlugin(/^\.\/locale$/, /moment$/),
     new webpack.DefinePlugin({
       'process.env.NODE_ENV': JSON.stringify(__environment__),
-      'process.env.GATEWAY': process.env.GATEWAY ? JSON.stringify(process.env.GATEWAY) : (__environment__ === 'development') ? JSON.stringify('http://localhost:3000') : "location.protocol + '//' + location.hostname.replace('.int.', '.stage.').replace(/beachfront[^\\.]*\\./, 'pz-gateway.')",
+      'process.env.API_ROOT': process.env.API_ROOT ? JSON.stringify(process.env.API_ROOT) : (__environment__ === 'development') ? JSON.stringify('http://localhost:5000') : "https://' + location.hostname.replace('.int.', '.stage.').replace(/beachfront[^\\.]*\\./, 'bf-api.')",
       'process.env.CLASSIFICATION_BANNER_BACKGROUND': JSON.stringify(process.env.CLASSIFICATION_BANNER_BACKGROUND || 'green'),
       'process.env.CLASSIFICATION_BANNER_FOREGROUND': JSON.stringify(process.env.CLASSIFICATION_BANNER_FOREGROUND || 'white'),
       'process.env.CLASSIFICATION_BANNER_TEXT': JSON.stringify(process.env.CLASSIFICATION_BANNER_TEXT || 'UNCLASSIFIED // TESTING & DEVELOPMENT USE ONLY'),

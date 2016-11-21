@@ -21,9 +21,6 @@ export const STATUS_ERROR = 'Error'
 export const STATUS_ACTIVE = 'Active'
 export const STATUS_INACTIVE = 'Inactive'
 
-export const REQUIREMENT_BANDS = 'Bands'
-export const REQUIREMENT_CLOUDCOVER = 'Cloud Cover'
-
 // Feature Properties
 export const TYPE_JOB = 'JOB'
 export const TYPE_PRODUCT_LINE = 'PRODUCT_LINE'

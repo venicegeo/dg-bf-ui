@@ -1,3 +1,4 @@
+import {generateAlgorithmDescriptor} from "../../test/fixtures/beachfront-service-descriptors";
 /**
  * Copyright 2016, RadiantBlue Technologies, Inc.
  *
@@ -17,14 +18,10 @@
 const styles: any = require('./Algorithm.css')
 
 import * as React from 'react'
-import {
-  REQUIREMENT_BANDS,
-  REQUIREMENT_CLOUDCOVER,
-} from '../constants'
 
 interface Props {
   algorithm: beachfront.Algorithm
-  imageProperties: beachfront.SceneMetadata
+  sceneMetadata: beachfront.SceneMetadata
   isSelected?: boolean
   isSubmitting?: boolean
   warningHeading?: string
@@ -35,7 +32,7 @@ interface Props {
 
 export const Algorithm = ({
   algorithm,
-  imageProperties,
+  sceneMetadata,
   isSelected,
   isSubmitting,
   warningHeading,
@@ -46,7 +43,7 @@ export const Algorithm = ({
   <div className={[
     styles.root,
     isSubmitting ? styles.isSubmitting : '',
-    algorithm.requirements.every(r => isCompatible(r, imageProperties)) ? styles.isCompatible : styles.isNotCompatible,
+    isCompatible(algorithm, sceneMetadata) ? styles.isCompatible : styles.isNotCompatible,
     isSelected ? styles.isSelected : '',
     onSelect ? styles.isSelectable : '',
   ].join(' ')}>
@@ -92,12 +89,14 @@ export const Algorithm = ({
         <h4>Image Requirements</h4>
         <table>
           <tbody>
-          {algorithm.requirements.map(r => (
-            <tr key={r.name} className={isCompatible(r, imageProperties) ? styles.met : styles.unmet}>
-              <th>{r.name}</th>
-              <td>{r.description}</td>
+            <tr className={meetsBandRequirement(algorithm, sceneMetadata) ? styles.met : styles.unmet}>
+              <th>Bands</th>
+              <td>{algorithm.bands.map(s => s.toUpperCase()).join(' and ')}</td>
             </tr>
-          ))}
+            <tr className={meetsCloudCoverRequirement(algorithm, sceneMetadata) ? styles.met : styles.unmet}>
+              <th>Maximum Cloud Cover</th>
+              <td>Less than or equal to {algorithm.maxCloudCover}%</td>
+            </tr>
           </tbody>
         </table>
       </div>
@@ -109,13 +108,14 @@ export const Algorithm = ({
 // Helpers
 //
 
-function isCompatible(requirement, imageProperties) {
-  switch (requirement.name) {
-    case REQUIREMENT_BANDS:
-      return requirement.literal.split(',').every(s => imageProperties.bands[s])
-    case REQUIREMENT_CLOUDCOVER:
-      return imageProperties.cloudCover <= requirement.literal
-    default:
-      return false
-  }
+function meetsBandRequirement(algorithm: beachfront.Algorithm, metadata: beachfront.SceneMetadata) {
+  return algorithm.bands.every(s => metadata.bands.hasOwnProperty(s))
+}
+
+function meetsCloudCoverRequirement(algorithm: beachfront.Algorithm, metadata: beachfront.SceneMetadata) {
+  return algorithm.maxCloudCover >= metadata.cloudCover
+}
+
+function isCompatible(algorithm: beachfront.Algorithm, metadata: beachfront.SceneMetadata) {
+  return meetsBandRequirement(algorithm, metadata) && meetsCloudCoverRequirement(algorithm, metadata)
 }

@@ -27,8 +27,6 @@ interface Props {
   dateTo?: string
   disabled?: boolean
   errorElement?: React.ReactElement<any>
-  filter: string
-  filters: {id: string, name: string}[]
   onApiKeyChange(apiKey: string)
   onClearBbox()
   onCloudCoverChange(cloudCover: number)
@@ -100,18 +98,6 @@ export const CatalogSearchCriteria = (props: Props) => (
         onChange={event => props.onCloudCoverChange(parseInt((event.target as HTMLInputElement).value, 10))}
       />
       <span className={styles.value}>{props.cloudCover > 0 && '< '}{props.cloudCover}%</span>
-    </label>
-    <label className={styles.spatialFilter}>
-      <span>Spatial Filter</span>
-      <select
-        value={props.filter || ''}
-        onChange={event => props.onFilterChange((event.target as HTMLInputElement).value || null)}
-        >
-        <option value="">None</option>
-        {props.filters.map(({id, name}) => (
-          <option key={id} value={id}>{titleCase(name)}</option>
-        ))}
-      </select>
     </label>
   </div>
 )

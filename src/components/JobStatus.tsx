@@ -64,7 +64,6 @@ export class JobStatus extends React.Component<Props, State> {
 
   render() {
     const {id, properties} = this.props.job
-    const canDownload = properties.status === STATUS_SUCCESS && properties.detectionsDataId
     const downloadPercentage = `${this.state.downloadProgress || 0}%`
     return (
       <li className={`${styles.root} ${this.aggregatedClassNames}`}>
@@ -78,7 +77,7 @@ export class JobStatus extends React.Component<Props, State> {
             <span className={styles.status}>{properties.status}</span>
             <Timestamp
               className={styles.timer}
-              timestamp={properties.createdOn}
+              timestamp={properties.created_on}
             />
           </div>
 
@@ -89,13 +88,13 @@ export class JobStatus extends React.Component<Props, State> {
           <div className={styles.metadata} onClick={e => e.stopPropagation()}>
             <dl>
               <dt>Algorithm</dt>
-              <dd>{properties.algorithmName}</dd>
+              <dd>{properties.algorithm_name}</dd>
               <dt>Scene ID</dt>
-              <dd>{normalizeSceneId(properties.sceneId)}</dd>
+              <dd>{normalizeSceneId(properties.scene_id)}</dd>
               <dt>Captured On</dt>
-              <dd>{moment(properties.sceneCaptureDate).utc().format('MM/DD/YYYY HH:mm z')}</dd>
+              <dd>{moment(properties.scene_capture_date).utc().format('MM/DD/YYYY HH:mm z')}</dd>
               <dt>Sensor</dt>
-              <dd>{properties.sceneSensorName}</dd>
+              <dd>{properties.scene_sensor_name}</dd>
             </dl>
             <div className={styles.removeToggle}>
               <button onClick={this.handleForgetToggle}>
@@ -120,9 +119,9 @@ export class JobStatus extends React.Component<Props, State> {
             onClick={this.props.onNavigate}>
             <i className="fa fa-globe"/>
           </Link>
-          {canDownload && (
+          {properties.status === STATUS_SUCCESS && (
             <FileDownloadLink
-              dataId={properties.detectionsDataId}
+              jobId={id}
               filename={properties.name + '.geojson'}
               className={styles.download}
               onProgress={this.handleDownloadProgress}

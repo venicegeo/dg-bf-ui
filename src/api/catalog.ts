@@ -14,44 +14,26 @@
  * limitations under the License.
  **/
 
+import * as axios from 'axios'
 import {getClient} from './session'
 
-const PATTERN_NAME_PREFIX = /^pzsvc-image-catalog$/
+let _client
 
-export interface ServiceDescriptor {
-  error?: any
-  eventTypeId?: string
-  filters?: {id: string, name: string}[]
-  url?: string
-}
-
-export function discover(): Promise<ServiceDescriptor> {
-  console.debug('(catalog:discover)')
-  const client = getClient()
-  return client.getServices({pattern: PATTERN_NAME_PREFIX.source})
-    .then(([catalog]) => {
-      if (!catalog) {
-        throw new Error('Could not find image catalog service')
-      }
-      return {
-        sessionToken: client.sessionToken,
-        url: catalog.url,
-      }
+export function initialize(): Promise<void> {
+  const session = getClient()
+  return session.get<ResponseServiceListing>('/v0/services')
+    .then(response => {
+      _client = axios.create({
+        baseURL: response.data.services.catalog,
+      })
     })
-    .then(includeEventTypeId)
-    .then(catalog => ({
-      eventTypeId: catalog.eventTypeId,
-      filters:     [],  // HACK -- until we're given the new way to enumerate filters from the catalog...
-      url:         catalog.url,
-    }))
     .catch(err => {
-      console.error('(catalog:discover) discovery failed:', err)
+      console.error('(catalog:initialize) failed:', err)
       throw err
     })
 }
 
 export function search({
-  catalogUrl,
   bbox,
   cloudCover,
   dateFrom,
@@ -59,34 +41,19 @@ export function search({
   startIndex,
   count,
 }): Promise<beachfront.ImageryCatalogPage> {
-  console.debug('(catalog:search)')
-  return fetch(`${catalogUrl}/discover?` + [
-    `acquiredDate=${new Date(dateFrom).toISOString()}`,
-    `maxAcquiredDate=${new Date(dateTo).toISOString()}`,
-    `bbox=${bbox}`,
-    `cloudCover=${cloudCover}`,
-    `count=${count}`,
-    `startIndex=${startIndex}`,
-  ].join('&'))
-    .then(response => {
-      if (!response.ok) {
-        throw new Error(`HTTP Error (code=${response.status})`)
-      }
-      return response.json()
-    })
-
-    // HACK HACK HACK HACK HACK HACK HACK HACK HACK HACK HACK HACK HACK HACK
-    // This can be removed after Redmine #7621 is resolved
-    .then((imagery: beachfront.ImageryCatalogPage) => {
-      for (const feature of imagery.images.features) {
-        feature.properties.link = `${catalogUrl}/image/${feature.id}`
-      }
-      return imagery
-    })
-    // HACK HACK HACK HACK HACK HACK HACK HACK HACK HACK HACK HACK HACK HACK
-
+  return _client.get('/discover', {
+    params: {
+      bbox: bbox.join(','),
+      cloudCover,
+      count,
+      startIndex,
+      acquiredDate:    new Date(dateFrom).toISOString(),
+      maxAcquiredDate: new Date(dateTo).toISOString(),
+    }
+  })
+    .then(response => response.data)
     .catch(err => {
-      console.error('(catalog:search) discovery failed:', err)
+      console.error('(catalog:search) failed:', err)
       throw err
     })
 }
@@ -95,18 +62,8 @@ export function search({
 // Helpers
 //
 
-function includeEventTypeId(catalog) {
-  const {gateway, sessionToken} = getClient()
-  return fetch(`${catalog.url}/eventTypeID?pzGateway=${encodeURIComponent(gateway)}`, {
-    headers: {
-      'Authorization': sessionToken,
-    },
-  })
-    .then(response => {
-      if (!response.ok) {
-        throw new Error(`HTTP Error (code=${response.status})`)
-      }
-      return response.text()
-    })
-    .then(eventTypeId => Object.assign(catalog, {eventTypeId}))
+interface ResponseServiceListing {
+  services: {
+    catalog: string
+  }
 }

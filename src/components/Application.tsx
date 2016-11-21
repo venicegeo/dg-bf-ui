@@ -39,7 +39,6 @@ import {SessionExpired} from './SessionExpired'
 import {UpdateAvailable} from './UpdateAvailable'
 import * as algorithmsService from '../api/algorithms'
 import * as catalogService from '../api/catalog'
-import * as executorService from '../api/executor'
 import * as geoserverService from '../api/geoserver'
 import * as jobsService from '../api/jobs'
 import * as productLinesService from '../api/productLines'
@@ -47,7 +46,6 @@ import * as sessionService from '../api/session'
 import * as updateService from '../api/update'
 import {createCollection, Collection} from '../utils/collections'
 import {getFeatureCenter} from '../utils/geometries'
-import {upgradeIfNeeded} from '../utils/upgrade-job-record'
 
 import {
   STATUS_SUCCESS,
@@ -62,16 +60,14 @@ interface Props {
 
 interface State {
   catalogApiKey?: string
-  error?: any
+  errors?: any[]
   isLoggedIn?: boolean
   isSessionExpired?: boolean
   isUpdateAvailable?: boolean
   route?: Route
 
   // Services
-  catalog?: catalogService.ServiceDescriptor
-  executor?: executorService.ServiceDescriptor
-  geoserver?: geoserverService.ServiceDescriptor
+  geoserver?: geoserverService.Descriptor
 
   // Data Collections
   algorithms?: Collection<beachfront.Algorithm>
@@ -79,7 +75,7 @@ interface State {
   productLines?: Collection<beachfront.ProductLine>
 
   // Map state
-  bbox?: number[]
+  bbox?: [number, number, number, number]
   mapView?: MapView
   hoveredFeature?: beachfront.Job
   selectedFeature?: beachfront.Job | beachfront.Scene
@@ -98,7 +94,7 @@ export const createApplication = (element) => render(
   />, element)
 
 export class Application extends React.Component<Props, State> {
-  private autodiscoveryPromise: Promise<any>
+  private initializationPromise: Promise<any>
 
   constructor(props) {
     super(props)
@@ -127,9 +123,8 @@ export class Application extends React.Component<Props, State> {
 
   componentDidUpdate(_, prevState: State) {
     if (!prevState.isLoggedIn && this.state.isLoggedIn) {
-      this.autodiscoverServices()
+      this.initializeServices()
       this.startWorkers()
-      this.checkForImports()
     }
     if (!prevState.isSessionExpired && this.state.isSessionExpired || prevState.isLoggedIn && !this.state.isLoggedIn) {
       this.stopWorkers()
@@ -140,9 +135,8 @@ export class Application extends React.Component<Props, State> {
   componentWillMount() {
     this.subscribeToHistoryEvents()
     if (this.state.isLoggedIn && !this.state.isSessionExpired) {
-      this.autodiscoverServices()
+      this.initializeServices()
       this.startWorkers()
-      this.checkForImports()
     }
   }
 
@@ -158,14 +152,15 @@ export class Application extends React.Component<Props, State> {
           bbox={this.state.bbox}
           catalogApiKey={this.state.catalogApiKey}
           detections={this.detectionsForCurrentMode}
+          detectionsLayerId={this.state.geoserver.detectionsLayerId}
           frames={this.framesForCurrentMode}
-          geoserverUrl={this.state.geoserver.url}
           highlightedFeature={this.state.hoveredFeature}
           imagery={this.state.searchResults}
           isSearching={this.state.isSearching}
           mode={this.mapMode}
           selectedFeature={this.state.selectedFeature}
           view={this.state.mapView}
+          wmsUrl={this.state.geoserver.wmsUrl}
           onBoundingBoxChange={this.handleBoundingBoxChange}
           onSearchPageChange={this.handleSearchSubmit}
           onSelectFeature={this.handleSelectFeature}
@@ -218,8 +213,6 @@ export class Application extends React.Component<Props, State> {
             algorithms={this.state.algorithms.records}
             bbox={this.state.bbox}
             catalogApiKey={this.state.catalogApiKey}
-            executorServiceId={this.state.executor.serviceId}
-            filters={this.state.catalog.filters || []}
             isSearching={this.state.isSearching}
             searchError={this.state.searchError}
             searchCriteria={this.state.searchCriteria}
@@ -237,10 +230,6 @@ export class Application extends React.Component<Props, State> {
             algorithms={this.state.algorithms.records}
             bbox={this.state.bbox}
             catalogApiKey={this.state.catalogApiKey}
-            eventTypeId={this.state.catalog.eventTypeId}
-            executorServiceId={this.state.executor.serviceId}
-            executorUrl={this.state.executor.url}
-            filters={this.state.catalog.filters || []}
             onCatalogApiKeyChange={this.handleCatalogApiKeyChange}
             onClearBbox={this.handleClearBbox}
             onProductLineCreated={this.handleProductLineCreated}
@@ -314,73 +303,38 @@ export class Application extends React.Component<Props, State> {
     }
   }
 
-  private autodiscoverServices() {
-    this.autodiscoveryPromise = Promise.all([
-      this.discoverAlgorithms(),
-      this.discoverCatalog(),
-      this.discoverExecutor(),
-      this.discoverGeoserver(),
+  private initializeServices() {
+    this.initializationPromise = Promise.all([
+      this.fetchAlgorithms(),
+      this.fetchGeoserverConfig(),
+      this.fetchJobs(),
+      this.initializeCatalog(),
     ])
   }
 
-  private checkForImports() {
-    this.autodiscoveryPromise.then(() => {
-      const knownIds = this.state.jobs.records.map(j => j.id)
-      const missingIds = this.state.route.jobIds.filter(id => !knownIds.includes(id))
-      const algorithms = this.state.algorithms.records
-      missingIds.forEach(jobId => {
-        console.debug('Attempting import <%s>', jobId)
-        jobsService.importJob({ jobId, algorithms })
-          .then(record => {
-            this.setState({
-              jobs: this.state.jobs.$append(record),
-              selectedFeature: this.state.selectedFeature || record,
-            })
-          })
-          .catch(err => {
-            console.warn('Import failed <%s>:', jobId, err)
-            this.navigateTo({
-              pathname: '/jobs',
-              search:   this.state.route.search.replace(new RegExp('(\\?|&)?jobId=' + jobId), ''),
-            })
-          })
-      })
-    })
+  private fetchAlgorithms() {
+    this.setState({ algorithms: this.state.algorithms.$fetching() })
+    return algorithmsService.lookup()
+      .then(algorithms => this.setState({ algorithms: this.state.algorithms.$records(algorithms) }))
+      .catch(err => this.setState({ algorithms: this.state.algorithms.$error(err) }))
   }
 
-  private discoverAlgorithms() {
-    this.setState({
-      algorithms: this.state.algorithms.$fetching(),
-    })
-    return algorithmsService.discover()
-      .then(algorithms => {
-        this.setState({
-          algorithms: this.state.algorithms.$records(algorithms),
-        })
-      })
-      .catch(err => {
-        this.setState({
-          algorithms: this.state.algorithms.$error(err),
-        })
-      })
-  }
-
-  private discoverCatalog() {
-    return catalogService.discover()
-      .then(catalog => this.setState({ catalog }))
-      .catch(error => this.setState({ catalog: { error }}))
-  }
-
-  private discoverExecutor() {
-    return executorService.discover()
-      .then(executor => this.setState({ executor }))
-      .catch(error => this.setState({ executor: { error }}))
-  }
-
-  private discoverGeoserver() {
-    return geoserverService.discover()
+  private fetchGeoserverConfig() {
+    return geoserverService.lookup()
       .then(geoserver => this.setState({ geoserver }))
-      .catch(error => this.setState({ geoserver: { error }}))
+      .catch(err => this.setState({ errors: [...this.state.errors, err] }))
+  }
+
+  private fetchJobs() {
+    this.setState({ jobs: this.state.jobs.$fetching() })
+    return jobsService.fetchJobs()
+      .then(jobs => this.setState({ jobs: this.state.jobs.$records(jobs) }))
+      .catch(err => this.setState({ jobs: this.state.jobs.$error(err) }))
+  }
+
+  private initializeCatalog() {
+    return catalogService.initialize()
+      .catch(err => this.setState({ errors: [...this.state.errors, err] }))
   }
 
   private handleBoundingBoxChange(bbox) {
@@ -406,17 +360,11 @@ export class Application extends React.Component<Props, State> {
   }
 
   private handleFetchProductLines() {
-    this.autodiscoveryPromise.then(() => {
+    this.initializationPromise.then(() => {
       this.setState({
         productLines: this.state.productLines.$error(null).$fetching(),
       })
-      productLinesService.fetchProductLines({
-        algorithms:   this.state.algorithms.records,
-        eventTypeId:  this.state.catalog.eventTypeId,
-        executorUrl:  this.state.executor.url,
-        filters:      this.state.catalog.filters,
-        serviceId:    this.state.executor.serviceId,
-      })
+      productLinesService.fetchProductLines()
         .then(records => {
           this.setState({
             productLines: this.state.productLines.$records(records),
@@ -430,7 +378,6 @@ export class Application extends React.Component<Props, State> {
       productLineId,
       sinceDate,
       algorithms:   this.state.algorithms.records,
-      executorUrl:  this.state.executor.url,
     })
   }
 
@@ -465,7 +412,10 @@ export class Application extends React.Component<Props, State> {
     this.panTo(getFeatureCenter(productLine), 3.5)
   }
 
-  private handleProductLineCreated() {
+  private handleProductLineCreated(productLine: beachfront.ProductLine) {
+    this.setState({
+      productLines: this.state.productLines.$append(productLine),
+    })
     this.navigateTo({ pathname: '/product-lines' })
   }
 
@@ -498,7 +448,6 @@ export class Application extends React.Component<Props, State> {
       count,
       startIndex,
       bbox: this.state.bbox,
-      catalogUrl: this.state.catalog.url,
     }, this.state.searchCriteria))
       .then(searchResults => this.setState({ searchResults, isSearching: false }))
       .catch(searchError => this.setState({ searchError, isSearching: false }))
@@ -551,28 +500,16 @@ export class Application extends React.Component<Props, State> {
   }
 
   private startWorkers() {
-    jobsService.startWorker({
-      getRecords: () => this.state.jobs.records,
-      onUpdate: (updatedRecord) => this.setState({
-        jobs: this.state.jobs.$map(j => j.id === updatedRecord.id ? updatedRecord : j),
-      }),
-      onError: (err) => this.setState({
-        jobs: this.state.jobs.$error(err),
-      }),
-      onTerminate() {/* noop */},
-    })
-
+    setInterval(() => this.fetchJobs(), 60000)  // HACK
     sessionService.startWorker({
       onExpired: () => this.setState({ isSessionExpired: true }),
     })
-
     updateService.startWorker({
       onAvailable: () => this.setState({ isUpdateAvailable: true }),
     })
   }
 
   private stopWorkers() {
-    jobsService.stopWorker()
     sessionService.stopWorker()
     updateService.stopWorker()
   }
@@ -597,14 +534,13 @@ export class Application extends React.Component<Props, State> {
 function generateInitialState(): State {
   const state: State = {
     catalogApiKey: '',
+    errors: [],
     route: generateRoute(location),
     isLoggedIn: sessionService.exists(),
     isSessionExpired: false,
     isUpdateAvailable: false,
 
     // Services
-    catalog: {},
-    executor: {},
     geoserver: {},
 
     // Data Collections
@@ -641,11 +577,8 @@ function deserialize(): State {
   return {
     algorithms:       createCollection(JSON.parse(sessionStorage.getItem('algorithms_records')) || []),
     bbox:             JSON.parse(sessionStorage.getItem('bbox')),
-    catalog:          JSON.parse(sessionStorage.getItem('catalog')),
-    executor:         JSON.parse(sessionStorage.getItem('executor')),
     geoserver:        JSON.parse(sessionStorage.getItem('geoserver')),
     isSessionExpired: JSON.parse(sessionStorage.getItem('isSessionExpired')),
-    jobs:             createCollection((JSON.parse(localStorage.getItem('jobs_records')) || []).map(upgradeIfNeeded).filter(Boolean)),
     mapView:          JSON.parse(sessionStorage.getItem('mapView')),
     searchCriteria:   JSON.parse(sessionStorage.getItem('searchCriteria')),
     searchResults:    JSON.parse(sessionStorage.getItem('searchResults')),
@@ -656,11 +589,8 @@ function deserialize(): State {
 function serialize(state: State) {
   sessionStorage.setItem('algorithms_records', JSON.stringify(state.algorithms.records))
   sessionStorage.setItem('bbox', JSON.stringify(state.bbox))
-  sessionStorage.setItem('catalog', JSON.stringify(state.catalog))
-  sessionStorage.setItem('executor', JSON.stringify(state.executor))
   sessionStorage.setItem('geoserver', JSON.stringify(state.geoserver))
   sessionStorage.setItem('isSessionExpired', JSON.stringify(state.isSessionExpired))
-  localStorage.setItem('jobs_records', JSON.stringify(state.jobs.records))
   sessionStorage.setItem('mapView', JSON.stringify(state.mapView))
   sessionStorage.setItem('searchCriteria', JSON.stringify(state.searchCriteria))
   sessionStorage.setItem('searchResults', JSON.stringify(state.searchResults))

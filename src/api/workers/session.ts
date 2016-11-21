@@ -27,11 +27,11 @@ export function start({
 
   const work = () => {
     console.debug('(session:worker) validating session')
-    client.isSessionActive()
-      .then(active => !active && onExpired())
-      .catch(err => {
-        console.error('(session:worker) failed:', err)
-      })
+    client.get('/login/heartbeat')
+      .then(
+        active => !active && onExpired(),
+        err => console.error('(session:worker) failed:', err)
+      )
   }
 
   instance = setInterval(work, interval)
@@ -53,7 +53,7 @@ export function terminate() {
 //
 
 interface Params {
-  client: Client
+  client: Axios.AxiosInstance
   interval: number
   onExpired(): void
 }
