@@ -460,7 +460,7 @@ export class PrimaryMap extends React.Component<Props, State> {
     detections.filter(d => shouldRender[d.id] && !alreadyRendered[d.id]).forEach(detection => {
       const layer = new ol.layer.Tile({
         extent: featureToBbox(detection),
-        source: generateDetectionsSource(wmsUrl, detectionsLayerId, detection.id),
+        source: generateDetectionsSource(wmsUrl, detectionsLayerId, detection),
       })
 
       this.subscribeToLoadEvents(layer)
@@ -781,14 +781,14 @@ function generateControls() {
   ])
 }
 
-function generateDetectionsSource(wmsUrl, layerId, jobId) {
+function generateDetectionsSource(wmsUrl, layerId, feature: beachfront.Job|beachfront.ProductLine) {
   return new ol.source.TileWMS({
     tileLoadFunction,
     crossOrigin: 'anonymous',
     url: wmsUrl,
     params: {
       [KEY_LAYERS]: layerId,
-      'viewparams': `jobid:${jobId}`
+      'viewparams': (feature.properties.type === TYPE_JOB ? 'jobid:' : 'productlineid:') + feature.id,  // HACK
     },
   })
 }
