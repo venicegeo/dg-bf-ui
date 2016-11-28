@@ -52,12 +52,15 @@ const RESOLUTION_CLOSE = 1000
 const RESOLUTION_DISTANT = 13000
 const VIEW_BOUNDS = [-170, -75, 170, 75]
 const STEM_OFFSET = 10000
+const IDENTIFIER_DETECTIONS = 'bfdetections'
 const KEY_SCENE_ID = 'SCENE_ID'
 const KEY_LAYERS = 'LAYERS'
 const KEY_NAME = 'name'
 const KEY_OWNER_ID = 'OWNER_ID'
 const KEY_STATUS = 'status'
+const KEY_STYLES = 'STYLES'
 const KEY_TYPE = 'type'
+const KEY_VIEWPARAMS = 'VIEWPARAMS'
 const TYPE_DIVOT_INBOARD = 'DIVOT_INBOARD'
 const TYPE_DIVOT_OUTBOARD = 'DIVOT_OUTBOARD'
 const TYPE_LABEL_MAJOR = 'LABEL_MAJOR'
@@ -74,7 +77,6 @@ interface Props {
   bbox: number[]
   catalogApiKey:      string
   detections:         (beachfront.Job | beachfront.ProductLine)[]
-  detectionsLayerId:  string
   frames:             (beachfront.Job | beachfront.ProductLine)[]
   highlightedFeature: beachfront.Job
   imagery:            beachfront.ImageryCatalogPage
@@ -437,7 +439,7 @@ export class PrimaryMap extends React.Component<Props, State> {
   }
 
   private renderDetections() {
-    const {detections, detectionsLayerId, wmsUrl} = this.props
+    const {detections, wmsUrl} = this.props
     const shouldRender = {}
     const alreadyRendered = {}
 
@@ -460,7 +462,7 @@ export class PrimaryMap extends React.Component<Props, State> {
     detections.filter(d => shouldRender[d.id] && !alreadyRendered[d.id]).forEach(detection => {
       const layer = new ol.layer.Tile({
         extent: featureToBbox(detection),
-        source: generateDetectionsSource(wmsUrl, detectionsLayerId, detection),
+        source: generateDetectionsSource(wmsUrl, detection),
       })
 
       this.subscribeToLoadEvents(layer)
@@ -781,14 +783,15 @@ function generateControls() {
   ])
 }
 
-function generateDetectionsSource(wmsUrl, layerId, feature: beachfront.Job|beachfront.ProductLine) {
+function generateDetectionsSource(wmsUrl, feature: beachfront.Job|beachfront.ProductLine) {
   return new ol.source.TileWMS({
     tileLoadFunction,
     crossOrigin: 'anonymous',
     url: wmsUrl,
     params: {
-      [KEY_LAYERS]: layerId,
-      'viewparams': (feature.properties.type === TYPE_JOB ? 'jobid:' : 'productlineid:') + feature.id,  // HACK
+      [KEY_LAYERS]: IDENTIFIER_DETECTIONS,
+      [KEY_STYLES]: IDENTIFIER_DETECTIONS,
+      [KEY_VIEWPARAMS]: (feature.properties.type === TYPE_JOB ? 'jobid:' : 'productlineid:') + feature.id,  // HACK
     },
   })
 }

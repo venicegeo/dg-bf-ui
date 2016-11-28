@@ -25,7 +25,6 @@ export function lookup(): Promise<Descriptor> {
   const client = getClient()
   return client.get<ResponseServiceListing>('/v0/services')
     .then(response => ({
-      detectionsLayerId: 'bfdetections',
       // wmsUrl: response.data.services.wms_server,
       wmsUrl: response.data.services.wms_server.replace('https:', 'http:'),  // HACK
     }))

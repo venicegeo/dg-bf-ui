@@ -152,7 +152,6 @@ export class Application extends React.Component<Props, State> {
           bbox={this.state.bbox}
           catalogApiKey={this.state.catalogApiKey}
           detections={this.detectionsForCurrentMode}
-          detectionsLayerId={this.state.geoserver.detectionsLayerId}
           frames={this.framesForCurrentMode}
           highlightedFeature={this.state.hoveredFeature}
           imagery={this.state.searchResults}
