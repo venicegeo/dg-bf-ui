@@ -18,7 +18,7 @@ import * as axios from 'axios'
 import * as worker from './workers/session'
 import {API_ROOT, SESSION_WORKER_INTERVAL} from '../config'
 
-const DEFAULT_TIMEOUT = 6000
+const DEFAULT_TIMEOUT = 18000
 
 let _client: Axios.AxiosInstance
 
