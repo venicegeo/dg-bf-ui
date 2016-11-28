@@ -32,7 +32,7 @@ export function createJob({
     name:         name,
     scene_id:     sceneId,
   })
-    .then(response => response.data)
+    .then(response => response.data.job)
     .catch(err => {
       console.error('(jobs:create) could not execute:', err)
       throw err
