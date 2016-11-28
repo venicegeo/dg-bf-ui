@@ -14,6 +14,8 @@
  * limitations under the License.
  **/
 
+import * as axios from 'axios'
+
 let instance
 
 export function start({
@@ -25,11 +27,9 @@ export function start({
   }
   instance = setInterval(() => {
     console.debug('(update:worker) checking for updates to the UI')
-    fetch('/', { cache: 'reload' })
-      .then(response => response.text())
-      .then(markup => new DOMParser().parseFromString(markup, 'text/html'))
-      .then(dom => {
-        if (getVersion(dom) !== getVersion(document)) {
+    axios.get<Document>('/', {responseType: 'document'})
+      .then(response => {
+        if (getVersion(response.data) !== getVersion(document)) {
           onAvailable()
         }
       })
