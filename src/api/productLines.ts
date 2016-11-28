@@ -59,7 +59,6 @@ export function create({
 export function fetchJobs({
   productLineId,
   sinceDate,
-  algorithms,
 }) {
   return getClient().get<ResponseJobListing>(`/v0/job/by_productline/${productLineId}`)
     .then(response => response.data.jobs.features)

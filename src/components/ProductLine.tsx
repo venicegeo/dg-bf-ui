@@ -182,7 +182,3 @@ function generateSinceDate(offset: string, productLine: beachfront.ProductLine) 
     .startOf(offset === LAST_24_HOURS.value ? 'hour' : 'day')
     .toISOString()
 }
-
-function titleCase(s) {
-  return s.replace(/((?:^|\s)[a-z])/g, c => c.toUpperCase())
-}

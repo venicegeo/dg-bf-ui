@@ -1,4 +1,3 @@
-import {generateAlgorithmDescriptor} from "../../test/fixtures/beachfront-service-descriptors";
 /**
  * Copyright 2016, RadiantBlue Technologies, Inc.
  *

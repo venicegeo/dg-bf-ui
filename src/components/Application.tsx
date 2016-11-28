@@ -376,7 +376,6 @@ export class Application extends React.Component<Props, State> {
     return productLinesService.fetchJobs({
       productLineId,
       sinceDate,
-      algorithms:   this.state.algorithms.records,
     })
   }
 
