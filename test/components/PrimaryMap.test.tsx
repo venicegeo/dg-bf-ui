@@ -40,12 +40,12 @@ describe('<PrimaryMap/>', () => {
       catalogApiKey:       '',
       detections:          [],
       frames:              [],
-      geoserverUrl:        'http://test-geoserver-url',
       highlightedFeature:  null,
       imagery:             null,
       isSearching:         false,
       mode:                MODE_NORMAL,
       selectedFeature:     null,
+      wmsUrl:              'http://test-geoserver-url',
       onBoundingBoxChange: sinon.stub(),
       onSearchPageChange:  sinon.stub(),
       onSelectFeature:     sinon.stub(),
@@ -60,13 +60,13 @@ describe('<PrimaryMap/>', () => {
         catalogApiKey={_props.catalogApiKey}
         detections={_props.detections}
         frames={_props.frames}
-        wmsUrl={_props.geoserverUrl}
         highlightedFeature={_props.highlightedFeature}
         imagery={_props.imagery}
         isSearching={_props.isSearching}
         mode={_props.mode}
         selectedFeature={_props.selectedFeature}
         view={_props.view}
+        wmsUrl={_props.wmsUrl}
         onBoundingBoxChange={_props.onBoundingBoxChange}
         onSearchPageChange={_props.onSearchPageChange}
         onSelectFeature={_props.onSelectFeature}
@@ -84,13 +84,13 @@ describe('<PrimaryMap/>', () => {
         catalogApiKey={_props.catalogApiKey}
         detections={_props.detections}
         frames={_props.frames}
-        wmsUrl={_props.geoserverUrl}
         highlightedFeature={_props.highlightedFeature}
         imagery={_props.imagery}
         isSearching={_props.isSearching}
         mode={_props.mode}
         selectedFeature={_props.selectedFeature}
         view={_props.view}
+        wmsUrl={_props.wmsUrl}
         onBoundingBoxChange={_props.onBoundingBoxChange}
         onSearchPageChange={_props.onSearchPageChange}
         onSelectFeature={_props.onSelectFeature}
@@ -108,13 +108,13 @@ describe('<PrimaryMap/>', () => {
         catalogApiKey={_props.catalogApiKey}
         detections={_props.detections}
         frames={_props.frames}
-        wmsUrl={_props.geoserverUrl}
         highlightedFeature={_props.highlightedFeature}
         imagery={_props.imagery}
         isSearching={_props.isSearching}
         mode={_props.mode}
         selectedFeature={_props.selectedFeature}
         view={view}
+        wmsUrl={_props.wmsUrl}
         onBoundingBoxChange={_props.onBoundingBoxChange}
         onSearchPageChange={_props.onSearchPageChange}
         onSelectFeature={_props.onSelectFeature}
@@ -187,13 +187,13 @@ describe('<PrimaryMap/>', () => {
         catalogApiKey={_props.catalogApiKey}
         detections={_props.detections}
         frames={_props.frames}
-        wmsUrl={_props.geoserverUrl}
         highlightedFeature={_props.highlightedFeature}
         imagery={_props.imagery}
         isSearching={_props.isSearching}
         mode={_props.mode}
         selectedFeature={_props.selectedFeature}
         view={_props.view}
+        wmsUrl={_props.wmsUrl}
         onBoundingBoxChange={_props.onBoundingBoxChange}
         onSearchPageChange={_props.onSearchPageChange}
         onSelectFeature={_props.onSelectFeature}
@@ -242,13 +242,13 @@ describe('<PrimaryMap/>', () => {
         catalogApiKey={catalogApiKey}
         detections={_props.detections}
         frames={_props.frames}
-        wmsUrl={_props.geoserverUrl}
         highlightedFeature={_props.highlightedFeature}
         imagery={_props.imagery}
         isSearching={_props.isSearching}
         mode={_props.mode}
         selectedFeature={generateScene()}
         view={_props.view}
+        wmsUrl={_props.wmsUrl}
         onBoundingBoxChange={_props.onBoundingBoxChange}
         onSearchPageChange={_props.onSearchPageChange}
         onSelectFeature={_props.onSelectFeature}
@@ -271,13 +271,13 @@ describe('<PrimaryMap/>', () => {
         catalogApiKey={_props.catalogApiKey}
         detections={detections}
         frames={_props.frames}
-        wmsUrl={_props.geoserverUrl}
         highlightedFeature={_props.highlightedFeature}
         imagery={_props.imagery}
         isSearching={_props.isSearching}
         mode={_props.mode}
         selectedFeature={generateScene()}
         view={_props.view}
+        wmsUrl={_props.wmsUrl}
         onBoundingBoxChange={_props.onBoundingBoxChange}
         onSearchPageChange={_props.onSearchPageChange}
         onSelectFeature={_props.onSelectFeature}
@@ -293,9 +293,9 @@ describe('<PrimaryMap/>', () => {
 
     it('creates one layer per detection', () => {
       const wrapper = getComponent([
-        generateCompletedJob('job-1', 'test-data-id-1'),
-        generateCompletedJob('job-2', 'test-data-id-2'),
-        generateCompletedJob('job-3', 'test-data-id-3'),
+        generateCompletedJob('job-1'),
+        generateCompletedJob('job-2'),
+        generateCompletedJob('job-3'),
       ])
       const layer1 = (wrapper.instance() as any as Internals).detectionsLayers['job-1']
       const layer2 = (wrapper.instance() as any as Internals).detectionsLayers['job-2']
@@ -306,7 +306,19 @@ describe('<PrimaryMap/>', () => {
     it('sends correct layer ID to WMS server', () => {
       const wrapper = getComponent([generateCompletedJob()])
       const source = (wrapper.instance() as any as Internals).detectionsLayers['test-job-id'].getSource() as ol.source.TileWMS
-      assert.deepEqual(source.getParams(), {LAYERS: 'test-data-id'})
+      assert.equal(source.getParams().LAYERS, 'bfdetections')
+    })
+
+    it('sends correct style ID to WMS server', () => {
+      const wrapper = getComponent([generateCompletedJob()])
+      const source = (wrapper.instance() as any as Internals).detectionsLayers['test-job-id'].getSource() as ol.source.TileWMS
+      assert.equal(source.getParams().STYLES, 'bfdetections')
+    })
+
+    it('sends correct view parameters to WMS server', () => {
+      const wrapper = getComponent([generateCompletedJob()])
+      const source = (wrapper.instance() as any as Internals).detectionsLayers['test-job-id'].getSource() as ol.source.TileWMS
+      assert.deepEqual(source.getParams().VIEWPARAMS, 'jobid:test-job-id')
     })
 
     it('set appropriate bbox for layer', () => {
@@ -387,11 +399,9 @@ function layerExtent(layer) {
   return ol.proj.transformExtent(layer.getExtent(), 'EPSG:3857', 'EPSG:4326').map(Math.round)
 }
 
-function generateCompletedJob(jobId?, dataId = 'test-data-id') {
+function generateCompletedJob(jobId?: string) {
   const job = generateRunningJob(jobId)
   job.properties.status = 'Success'
-  job.properties.detectionsDataId = dataId
-  job.properties.detectionsLayerId = dataId
   return job
 }
 
@@ -427,14 +437,11 @@ function generateRunningJob(id = 'test-job-id'): beachfront.Job {
       ]
     },
     "properties": {
-      "__schemaVersion__": 4,
-      "algorithmName": "BF_Algo_NDWI",
-      "createdOn": "2016-08-19T22:41:27.713Z",
-      "detectionsDataId": null,
-      "detectionsLayerId": null,
-      "sceneCaptureDate": "2016-07-01T02:11:05.604Z",
-      "sceneId": "landsat:LC81130812016183LGN00",
-      "sceneSensorName": "Landsat8",
+      "algorithm_name": "NDWI",
+      "created_on": "2016-08-19T22:41:27.713Z",
+      "scene_capture_date": "2016-07-01T02:11:05.604Z",
+      "scene_id": "landsat:LC81130812016183LGN00",
+      "scene_sensor_name": "Landsat8",
       "name": "BF_19AUG2016",
       "status": "Running",
       "type": "JOB",
@@ -491,7 +498,6 @@ function generateScene(): beachfront.Scene {
         "tirs2": "https://landsat-pds.s3.amazonaws.com/L8/118/056/LC81180562016186LGN00/LC81180562016186LGN00_B11.TIF"
       },
       "cloudCover": 11.11,
-      "link": "test-link",
       "path": "https://landsat-pds.s3.amazonaws.com/L8/118/056/LC81180562016186LGN00/index.html",
       "resolution": 30,
       "sensorName": "Landsat8",

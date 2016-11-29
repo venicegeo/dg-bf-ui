@@ -32,7 +32,6 @@ interface Props {
   onClearBbox()
   onCloudCoverChange(value: number)
   onDateChange(fromValue: string, toValue: string)
-  onFilterChange(value: string)
   onSubmit()
 }
 
@@ -58,7 +57,6 @@ export class ImagerySearch extends React.Component<Props, {}> {
           onClearBbox={this.props.onClearBbox}
           onCloudCoverChange={this.props.onCloudCoverChange}
           onDateChange={this.props.onDateChange}
-          onFilterChange={this.props.onFilterChange}
           errorElement={this.props.error && (
             <div className={styles.errorMessage}>
               <h4><i className="fa fa-warning"/> Search failed</h4>

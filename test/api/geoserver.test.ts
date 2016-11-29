@@ -17,14 +17,15 @@
 import {assert} from 'chai'
 import * as sinon from 'sinon'
 import * as session from '../../src/api/session'
-import * as service from '../../src/api/geoserver'
+import * as geoserver from '../../src/api/geoserver'
+import {AxiosPromise} from 'axios'
 
 describe('GeoServer Service', () => {
   let client: FakeClient
 
   beforeEach(() => {
     client = {
-      getServices: sinon.stub(),
+      get: sinon.stub(),
     }
     sinon.stub(session, 'getClient').returns(client)
     sinon.stub(console, 'debug')
@@ -38,93 +39,51 @@ describe('GeoServer Service', () => {
   })
 
   describe('discover()', () => {
-    it('looks for service by name', () => {
-      const stub = client.getServices.returns(Promise.resolve(generateServiceListing()))
-      return service.discover()
+    it('returns WMS URL', () => {
+      client.get.returns(resolve({services: {wms_server: 'test-wms-url'}}))
+      return geoserver.lookup()
+        .then(descriptor => {
+          assert.equal(descriptor.wmsUrl, 'test-wms-url')
+        })
+    })
+
+    it('calls correct URL', () => {
+      client.get.returns(resolve({services: {wms_server: 'test-wms-url'}}))
+      return geoserver.lookup()
         .then(() => {
-          assert.equal(stub.firstCall.args[0].pattern, '^bf-geoserver$')
+          assert.deepEqual(client.get.firstCall.args, ['/v0/services'])
         })
     })
 
-    it('extracts URL', () => {
-      client.getServices.returns(Promise.resolve(generateServiceListing()))
-      return service.discover()
-        .then(descriptor => {
-          assert.equal(descriptor.url, 'test-url')
-        })
-    })
-
-    it('extracts baseline layer ID', () => {
-      client.getServices.returns(Promise.resolve(generateServiceListing()))
-      return service.discover()
-        .then(descriptor => {
-          assert.equal(descriptor.baselineLayerId, 'test-baseline-layer-id')
-        })
-    })
-
-    it('throws if service not found', () => {
-      client.getServices.returns(Promise.resolve([]))
-      return service.discover()
+    it('throws on HTTP error', () => {
+      client.get.returns(reject('test-error', {status: 500}))
+      return geoserver.lookup()
         .then(
           () => assert.fail('Should have rejected'),
           (err) => {
             assert.instanceOf(err, Error)
-            assert.match(err, /could not find/i)
-          }
-        )
-    })
-
-    it('throws if not logged in', () => {
-      const _ = session.getClient as Sinon.SinonStub
-      _.throws(new Error('Session does not yet exist'))
-      client.getServices.returns(Promise.resolve([]))
-
-      assert.throws(() => {
-        service.discover()
-      })
-    })
-
-    it('handles client errors gracefully', () => {
-      client.getServices.returns(Promise.reject(new Error('test-error')))
-      return service.discover()
-        .then(
-          () => assert.fail('Should have rejected'),
-          (err) => {
-            assert.instanceOf(err, Error)
+            assert.match(err, /test-error/i)
           }
         )
     })
   })
 })
 
-interface FakeClient {
-  getServices: Sinon.SinonStub
-}
-
 //
 // Helpers
 //
 
-function generateServiceListing() {
-  // tslint:disable
-  return [
-    {
-      "serviceId": "test-id-1",
-      "url": "test-url",
-      "contractUrl": "test-contract-url",
-      "method": "POST",
-      "resourceMetadata": {
-        "name": "bf-geoserver",
-        "description": "test-description",
-        "metadata": {
-          "baselineLayerId": "test-baseline-layer-id"
-        },
-        "classType": {
-          "classification": "UNCLASSIFIED"
-        },
-        "version": "test-version"
-      }
-    }
-  ]
-  // tslint:enable
+interface FakeClient {
+  get: Sinon.SinonStub
+}
+
+function resolve(data): AxiosPromise {
+  return Promise.resolve({
+    data,
+  })
+}
+function reject(err, response = {}): Promise<void> {
+  return Promise.reject(Object.assign(new Error(err), {
+    response,
+  }))
 }

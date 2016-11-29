@@ -27,7 +27,6 @@ export interface SearchCriteria {
   cloudCover: number
   dateFrom: string
   dateTo: string
-  filter: string
 }
 
 interface Props {
@@ -55,7 +54,6 @@ export const createSearchCriteria = (): SearchCriteria => ({
   cloudCover: 10,
   dateFrom:   moment().subtract(30, 'days').format('YYYY-MM-DD'),
   dateTo:     moment().format('YYYY-MM-DD'),
-  filter:     '',
 })
 
 export class CreateJob extends React.Component<Props, State> {
@@ -70,7 +68,6 @@ export class CreateJob extends React.Component<Props, State> {
     this.handleNameChange = this.handleNameChange.bind(this)
     this.handleSearchCloudCoverChange = this.handleSearchCloudCoverChange.bind(this)
     this.handleSearchDateChange = this.handleSearchDateChange.bind(this)
-    this.handleSearchFilterChange = this.handleSearchFilterChange.bind(this)
   }
 
   componentWillReceiveProps(nextProps: Props) {
@@ -100,7 +97,6 @@ export class CreateJob extends React.Component<Props, State> {
                 onClearBbox={this.props.onClearBbox}
                 onCloudCoverChange={this.handleSearchCloudCoverChange}
                 onDateChange={this.handleSearchDateChange}
-                onFilterChange={this.handleSearchFilterChange}
                 onSubmit={this.props.onSearchSubmit}
               />
             </li>
@@ -161,12 +157,6 @@ export class CreateJob extends React.Component<Props, State> {
     this.props.onSearchCriteriaChange(Object.assign({}, this.props.searchCriteria, {
       dateFrom,
       dateTo,
-    }))
-  }
-
-  private handleSearchFilterChange(filter) {
-    this.props.onSearchCriteriaChange(Object.assign({}, this.props.searchCriteria, {
-      filter,
     }))
   }
 

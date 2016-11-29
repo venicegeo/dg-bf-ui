@@ -30,13 +30,10 @@ describe('<CatalogSearchCriteria/>', () => {
       cloudCover:         19,
       dateFrom:           '2016-01-01',
       dateTo:             '2016-02-01',
-      filter:             '',
-      filters:            [],
       onApiKeyChange:     sinon.stub(),
       onClearBbox:        sinon.stub(),
       onCloudCoverChange: sinon.stub(),
       onDateChange:       sinon.stub(),
-      onFilterChange:     sinon.stub(),
     }
   })
 
@@ -48,20 +45,16 @@ describe('<CatalogSearchCriteria/>', () => {
         cloudCover={_props.cloudCover}
         dateFrom={_props.dateFrom}
         dateTo={_props.dateTo}
-        filter={_props.filter}
-        filters={_props.filters}
         onApiKeyChange={_props.onApiKeyChange}
         onClearBbox={_props.onClearBbox}
         onCloudCoverChange={_props.onCloudCoverChange}
         onDateChange={_props.onDateChange}
-        onFilterChange={_props.onFilterChange}
       />
     )
     assert.equal(wrapper.find('.CatalogSearchCriteria-apiKey input').prop('value'), 'test-catalog-api-key')
     assert.equal(wrapper.find('.CatalogSearchCriteria-cloudCover input').prop('value'), '19')
     assert.equal(wrapper.find('.CatalogSearchCriteria-captureDateFrom input').prop('value'), '2016-01-01')
     assert.equal(wrapper.find('.CatalogSearchCriteria-captureDateTo input').prop('value'), '2016-02-01')
-    assert.equal(wrapper.find('.CatalogSearchCriteria-spatialFilter select').prop('value'), '')
   })
 
   it('does not render date fields if `dateFrom` and `dateTo` are undefined', () => {
@@ -72,15 +65,10 @@ describe('<CatalogSearchCriteria/>', () => {
         cloudCover={_props.cloudCover}
         dateFrom={undefined}
         dateTo={undefined}
-        filter={'test-id'}
-        filters={[
-          {id: 'test-id', name: 'Testing'},
-        ]}
         onApiKeyChange={_props.onApiKeyChange}
         onClearBbox={_props.onClearBbox}
         onCloudCoverChange={_props.onCloudCoverChange}
         onDateChange={_props.onDateChange}
-        onFilterChange={_props.onFilterChange}
       />
     )
     assert.equal(wrapper.find('.CatalogSearchCriteria-captureDateFrom input').length, 0)
@@ -88,79 +76,6 @@ describe('<CatalogSearchCriteria/>', () => {
   })
 
   it('renders error message if exists')
-
-  it('renders spatial filter options', () => {
-    const wrapper = shallow(
-      <CatalogSearchCriteria
-        bbox={_props.bbox}
-        apiKey={_props.apiKey}
-        cloudCover={_props.cloudCover}
-        dateFrom={_props.dateFrom}
-        dateTo={_props.dateTo}
-        filter={'test-id'}
-        filters={[
-          {id: 'test-id', name: 'Testing'},
-        ]}
-        onApiKeyChange={_props.onApiKeyChange}
-        onClearBbox={_props.onClearBbox}
-        onCloudCoverChange={_props.onCloudCoverChange}
-        onDateChange={_props.onDateChange}
-        onFilterChange={_props.onFilterChange}
-      />
-    )
-    assert.equal(wrapper.find('.CatalogSearchCriteria-spatialFilter select').prop('value'), 'test-id')
-    assert.equal(wrapper.find('.CatalogSearchCriteria-spatialFilter option').at(0).prop('value'), '')
-    assert.equal(wrapper.find('.CatalogSearchCriteria-spatialFilter option').at(0).text(), 'None')
-    assert.equal(wrapper.find('.CatalogSearchCriteria-spatialFilter option').at(1).prop('value'), 'test-id')
-    assert.equal(wrapper.find('.CatalogSearchCriteria-spatialFilter option').at(1).text(), 'Testing')
-  })
-
-  it('normalizes spatial filter names', () => {
-    const wrapper = shallow(
-      <CatalogSearchCriteria
-        bbox={_props.bbox}
-        apiKey={_props.apiKey}
-        cloudCover={_props.cloudCover}
-        dateFrom={_props.dateFrom}
-        dateTo={_props.dateTo}
-        filter={_props.filter}
-        filters={[
-          {id: 'test-filter-1', name: 'lorem ipsum'},
-          {id: 'test-filter-2', name: 'dolor sit amet'},
-        ]}
-        onApiKeyChange={_props.onApiKeyChange}
-        onClearBbox={_props.onClearBbox}
-        onCloudCoverChange={_props.onCloudCoverChange}
-        onDateChange={_props.onDateChange}
-        onFilterChange={_props.onFilterChange}
-      />
-    )
-    assert.equal(wrapper.find('.CatalogSearchCriteria-spatialFilter option').at(1).text(), 'Lorem Ipsum')
-    assert.equal(wrapper.find('.CatalogSearchCriteria-spatialFilter option').at(2).text(), 'Dolor Sit Amet')
-  })
-
-  it('renders with correct initial spatial filter selection', () => {
-    const wrapper = shallow(
-      <CatalogSearchCriteria
-        bbox={_props.bbox}
-        apiKey={_props.apiKey}
-        cloudCover={_props.cloudCover}
-        dateFrom={_props.dateFrom}
-        dateTo={_props.dateTo}
-        filter={'test-filter-1'}
-        filters={[
-          {id: 'test-filter-1', name: 'test-name'},
-          {id: 'test-filter-2', name: 'dolor sit amet'},
-        ]}
-        onApiKeyChange={_props.onApiKeyChange}
-        onClearBbox={_props.onClearBbox}
-        onCloudCoverChange={_props.onCloudCoverChange}
-        onDateChange={_props.onDateChange}
-        onFilterChange={_props.onFilterChange}
-      />
-    )
-    assert.equal(wrapper.find('.CatalogSearchCriteria-spatialFilter select').prop('value'), 'test-filter-1')
-  })
 
   it('emits api key change event', () => {
     const wrapper = shallow(
@@ -170,13 +85,10 @@ describe('<CatalogSearchCriteria/>', () => {
         cloudCover={_props.cloudCover}
         dateFrom={_props.dateFrom}
         dateTo={_props.dateTo}
-        filter={_props.filter}
-        filters={_props.filters}
         onApiKeyChange={_props.onApiKeyChange}
         onClearBbox={_props.onClearBbox}
         onCloudCoverChange={_props.onCloudCoverChange}
         onDateChange={_props.onDateChange}
-        onFilterChange={_props.onFilterChange}
       />
     )
     wrapper.find('.CatalogSearchCriteria-apiKey input').simulate('change', {target: {value: 'test-new-catalog-api-key'}})
@@ -191,13 +103,10 @@ describe('<CatalogSearchCriteria/>', () => {
         cloudCover={_props.cloudCover}
         dateFrom={_props.dateFrom}
         dateTo={_props.dateTo}
-        filter={_props.filter}
-        filters={_props.filters}
         onApiKeyChange={_props.onApiKeyChange}
         onClearBbox={_props.onClearBbox}
         onCloudCoverChange={_props.onCloudCoverChange}
         onDateChange={_props.onDateChange}
-        onFilterChange={_props.onFilterChange}
       />
     )
     wrapper.find('.CatalogSearchCriteria-clearBbox').simulate('click')
@@ -212,13 +121,10 @@ describe('<CatalogSearchCriteria/>', () => {
         cloudCover={_props.cloudCover}
         dateFrom={_props.dateFrom}
         dateTo={_props.dateTo}
-        filter={_props.filter}
-        filters={_props.filters}
         onApiKeyChange={_props.onApiKeyChange}
         onClearBbox={_props.onClearBbox}
         onCloudCoverChange={_props.onCloudCoverChange}
         onDateChange={_props.onDateChange}
-        onFilterChange={_props.onFilterChange}
       />
     )
     wrapper.find('.CatalogSearchCriteria-cloudCover input').simulate('change', {target: {value: '42'}})
@@ -233,13 +139,10 @@ describe('<CatalogSearchCriteria/>', () => {
         cloudCover={_props.cloudCover}
         dateFrom={_props.dateFrom}
         dateTo={_props.dateTo}
-        filter={_props.filter}
-        filters={_props.filters}
         onApiKeyChange={_props.onApiKeyChange}
         onClearBbox={_props.onClearBbox}
         onCloudCoverChange={_props.onCloudCoverChange}
         onDateChange={_props.onDateChange}
-        onFilterChange={_props.onFilterChange}
       />
     )
     wrapper.find('.CatalogSearchCriteria-captureDateFrom input').simulate('change', {target: {value: '1999-12-31'}})
@@ -254,63 +157,14 @@ describe('<CatalogSearchCriteria/>', () => {
         cloudCover={_props.cloudCover}
         dateFrom={_props.dateFrom}
         dateTo={_props.dateTo}
-        filter={_props.filter}
-        filters={_props.filters}
         onApiKeyChange={_props.onApiKeyChange}
         onClearBbox={_props.onClearBbox}
         onCloudCoverChange={_props.onCloudCoverChange}
         onDateChange={_props.onDateChange}
-        onFilterChange={_props.onFilterChange}
       />
     )
     wrapper.find('.CatalogSearchCriteria-captureDateTo input').simulate('change', {target: {value: '1999-12-31'}})
     assert.isTrue(_props.onDateChange.calledWithExactly(_props.dateFrom, '1999-12-31'))
-  })
-
-  it('emits spatial filter change event', () => {
-    const wrapper = shallow(
-      <CatalogSearchCriteria
-        bbox={_props.bbox}
-        apiKey={_props.apiKey}
-        cloudCover={_props.cloudCover}
-        dateFrom={_props.dateFrom}
-        dateTo={_props.dateTo}
-        filter={''}
-        filters={[
-          {id: 'test-id', name: 'Testing'},
-        ]}
-        onApiKeyChange={_props.onApiKeyChange}
-        onClearBbox={_props.onClearBbox}
-        onCloudCoverChange={_props.onCloudCoverChange}
-        onDateChange={_props.onDateChange}
-        onFilterChange={_props.onFilterChange}
-      />
-    )
-    wrapper.find('.CatalogSearchCriteria-spatialFilter select').simulate('change', {target: {value: 'test-id'}})
-    assert.isTrue(_props.onFilterChange.calledWithExactly('test-id'))
-  })
-
-  it('emits spatial filter change event (to empty)', () => {
-    const wrapper = shallow(
-      <CatalogSearchCriteria
-        bbox={_props.bbox}
-        apiKey={_props.apiKey}
-        cloudCover={_props.cloudCover}
-        dateFrom={_props.dateFrom}
-        dateTo={_props.dateTo}
-        filter={'test-id'}
-        filters={[
-          {id: 'test-id', name: 'Testing'},
-        ]}
-        onApiKeyChange={_props.onApiKeyChange}
-        onClearBbox={_props.onClearBbox}
-        onCloudCoverChange={_props.onCloudCoverChange}
-        onDateChange={_props.onDateChange}
-        onFilterChange={_props.onFilterChange}
-      />
-    )
-    wrapper.find('.CatalogSearchCriteria-spatialFilter select').simulate('change', {target: {value: ''}})
-    assert.isTrue(_props.onFilterChange.calledWithExactly(null))
   })
 
   it('updates api key when props change', () => {
@@ -321,13 +175,10 @@ describe('<CatalogSearchCriteria/>', () => {
         cloudCover={_props.cloudCover}
         dateFrom={_props.dateFrom}
         dateTo={_props.dateTo}
-        filter={_props.filter}
-        filters={_props.filters}
         onApiKeyChange={_props.onApiKeyChange}
         onClearBbox={_props.onClearBbox}
         onCloudCoverChange={_props.onCloudCoverChange}
         onDateChange={_props.onDateChange}
-        onFilterChange={_props.onFilterChange}
       />
     )
     wrapper.setProps({apiKey: 'test-new-catalog-api-key'})
@@ -342,13 +193,10 @@ describe('<CatalogSearchCriteria/>', () => {
         cloudCover={_props.cloudCover}
         dateFrom={_props.dateFrom}
         dateTo={_props.dateTo}
-        filter={_props.filter}
-        filters={_props.filters}
         onApiKeyChange={_props.onApiKeyChange}
         onClearBbox={_props.onClearBbox}
         onCloudCoverChange={_props.onCloudCoverChange}
         onDateChange={_props.onDateChange}
-        onFilterChange={_props.onFilterChange}
       />
     )
     wrapper.setProps({cloudCover: 42})
@@ -363,13 +211,10 @@ describe('<CatalogSearchCriteria/>', () => {
         cloudCover={_props.cloudCover}
         dateFrom={_props.dateFrom}
         dateTo={_props.dateTo}
-        filter={_props.filter}
-        filters={_props.filters}
         onApiKeyChange={_props.onApiKeyChange}
         onClearBbox={_props.onClearBbox}
         onCloudCoverChange={_props.onCloudCoverChange}
         onDateChange={_props.onDateChange}
-        onFilterChange={_props.onFilterChange}
       />
     )
     wrapper.setProps({dateFrom: '1999-12-31'})
@@ -385,40 +230,14 @@ describe('<CatalogSearchCriteria/>', () => {
         cloudCover={_props.cloudCover}
         dateFrom={_props.dateFrom}
         dateTo={_props.dateTo}
-        filter={_props.filter}
-        filters={_props.filters}
         onApiKeyChange={_props.onApiKeyChange}
         onClearBbox={_props.onClearBbox}
         onCloudCoverChange={_props.onCloudCoverChange}
         onDateChange={_props.onDateChange}
-        onFilterChange={_props.onFilterChange}
       />
     )
     wrapper.setProps({dateTo: '1999-12-31'})
     assert.equal(wrapper.find('.CatalogSearchCriteria-captureDateFrom input').prop('value'), _props.dateFrom)
     assert.equal(wrapper.find('.CatalogSearchCriteria-captureDateTo input').prop('value'), '1999-12-31')
-  })
-
-  it('updates spatial filter when props change', () => {
-    const wrapper = shallow(
-      <CatalogSearchCriteria
-        bbox={_props.bbox}
-        apiKey={_props.apiKey}
-        cloudCover={_props.cloudCover}
-        dateFrom={_props.dateFrom}
-        dateTo={_props.dateTo}
-        filter={''}
-        filters={[
-          {id: 'test-id', name: 'Testing'},
-        ]}
-        onApiKeyChange={_props.onApiKeyChange}
-        onClearBbox={_props.onClearBbox}
-        onCloudCoverChange={_props.onCloudCoverChange}
-        onDateChange={_props.onDateChange}
-        onFilterChange={_props.onFilterChange}
-      />
-    )
-    wrapper.setProps({filter: 'test-id'})
-    assert.equal(wrapper.find('.CatalogSearchCriteria-spatialFilter select').prop('value'), 'test-id')
   })
 })

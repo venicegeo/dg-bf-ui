@@ -31,7 +31,6 @@ interface Props {
   onClearBbox()
   onCloudCoverChange(cloudCover: number)
   onDateChange?(dateFrom: string, dateTo: string)
-  onFilterChange(filter: string)
 }
 
 export const CatalogSearchCriteria = (props: Props) => (

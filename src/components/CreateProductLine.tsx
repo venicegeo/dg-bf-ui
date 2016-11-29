@@ -56,7 +56,6 @@ interface State {
   dateStop?:               string
   error?:                  any
   isCreating?:             boolean
-  filter?:                 string
   name?:                   string
   shouldAutogenerateName?: boolean
 }
@@ -70,7 +69,6 @@ export class CreateProductLine extends React.Component<Props, State> {
       dateStart:  moment().format('YYYY-MM-DD'),
       dateStop:   '',
       isCreating: false,
-      filter:     '',
       name:       '',
       shouldAutogenerateName: true,
     }
@@ -99,7 +97,6 @@ export class CreateProductLine extends React.Component<Props, State> {
                 onApiKeyChange={this.props.onCatalogApiKeyChange}
                 onClearBbox={this.props.onClearBbox}
                 onCloudCoverChange={cloudCover => this.setState({ cloudCover })}
-                onFilterChange={filter => this.setState({ filter })}
               />
               <NewProductLineDetails
                 name={this.state.name}

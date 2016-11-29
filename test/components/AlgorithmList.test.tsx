@@ -34,7 +34,7 @@ describe('<AlgorithmListList/>', () => {
         type:         'test-type',
         url:         'test-url',
       }],
-      imageProperties: {
+      sceneMetadata: {
         bands: {},
         cloudCover: 5,
       },
@@ -49,7 +49,7 @@ describe('<AlgorithmListList/>', () => {
     const wrapper = shallow(
       <AlgorithmList
         algorithms={_props.algorithms}
-        imageProperties={_props.imageProperties}
+        sceneMetadata={_props.sceneMetadata}
       />
     )
     assert.equal(wrapper.find('.AlgorithmList-root').length, 1)
@@ -61,23 +61,23 @@ describe('<AlgorithmListList/>', () => {
       <AlgorithmList
         algorithms={[
           {
+            bands:        ['coastal','swir1'],
             description:  'test-description',
             id:           'test-algorithm-1',
+            maxCloudCover: 30,
             name:         'test-name',
-            requirements: [],
             type:         'test-type',
-            url:         'test-url',
           },
           {
+            bands:        ['coastal','swir1'],
             description:  'test-description',
             id:           'test-algorithm-2',
             name:         'test-name',
-            requirements: [],
+            maxCloudCover: 30,
             type:         'test-type',
-            url:         'test-url',
           },
         ]}
-        imageProperties={_props.imageProperties}
+        sceneMetadata={_props.sceneMetadata}
       />
     )
     assert.equal(wrapper.find(Algorithm).length, 2)
@@ -87,7 +87,7 @@ describe('<AlgorithmListList/>', () => {
     const wrapper = shallow(
       <AlgorithmList
         algorithms={[]}
-        imageProperties={_props.imageProperties}
+        sceneMetadata={_props.sceneMetadata}
       />
     )
     assert.equal(wrapper.find(Algorithm).length, 0)
@@ -97,7 +97,7 @@ describe('<AlgorithmListList/>', () => {
     const wrapper = shallow(
       <AlgorithmList
         algorithms={_props.algorithms}
-        imageProperties={_props.imageProperties}
+        sceneMetadata={_props.sceneMetadata}
         onSelect={_props.onSelect}
       />
     )
@@ -108,7 +108,7 @@ describe('<AlgorithmListList/>', () => {
     const wrapper = shallow(
       <AlgorithmList
         algorithms={_props.algorithms}
-        imageProperties={_props.imageProperties}
+        sceneMetadata={_props.sceneMetadata}
         onSubmit={_props.onSubmit}
       />
     )
@@ -119,7 +119,7 @@ describe('<AlgorithmListList/>', () => {
     const wrapper = shallow(
       <AlgorithmList
         algorithms={_props.algorithms}
-        imageProperties={_props.imageProperties}
+        sceneMetadata={_props.sceneMetadata}
       />
     )
     assert.strictEqual(wrapper.find(Algorithm).prop('onSelect'), undefined)
@@ -130,7 +130,7 @@ describe('<AlgorithmListList/>', () => {
     const wrapper = shallow(
       <AlgorithmList
         algorithms={_props.algorithms}
-        imageProperties={_props.imageProperties}
+        sceneMetadata={_props.sceneMetadata}
         onSelect={_props.onSelect}
         onSubmit={_props.onSubmit}
       />
@@ -144,23 +144,23 @@ describe('<AlgorithmListList/>', () => {
       <AlgorithmList
         algorithms={[
           {
+            bands:        ['coastal','swir1'],
             description:  'test-description',
             id:           'test-algorithm-1',
+            maxCloudCover: 30,
             name:         'test-name',
-            requirements: [],
             type:         'test-type',
-            url:         'test-url',
           },
           {
+            bands:        ['coastal','swir1'],
             description:  'test-description',
             id:           'test-algorithm-2',
             name:         'test-name',
-            requirements: [],
+            maxCloudCover: 30,
             type:         'test-type',
-            url:         'test-url',
           },
         ]}
-        imageProperties={_props.imageProperties}
+        sceneMetadata={_props.sceneMetadata}
         selectedId="test-algorithm-2"
         onSelect={_props.onSelect}
       />
@@ -174,23 +174,23 @@ describe('<AlgorithmListList/>', () => {
       <AlgorithmList
         algorithms={[
           {
+            bands:        ['coastal', 'swir1'],
             description:  'test-description',
             id:           'test-algorithm-1',
+            maxCloudCover: 30,
             name:         'test-name',
-            requirements: [],
             type:         'test-type',
-            url:         'test-url',
           },
           {
+            bands:        ['coastal', 'swir1'],
             description:  'test-description',
             id:           'test-algorithm-2',
             name:         'test-name',
-            requirements: [],
+            maxCloudCover: 30,
             type:         'test-type',
-            url:         'test-url',
           },
         ]}
-        imageProperties={_props.imageProperties}
+        sceneMetadata={_props.sceneMetadata}
         selectedId="test-algorithm-2"
         onSelect={_props.onSelect}
       />
@@ -205,7 +205,7 @@ describe('<AlgorithmListList/>', () => {
     const wrapper = shallow(
       <AlgorithmList
         algorithms={[algorithm]}
-        imageProperties={_props.imageProperties}
+        sceneMetadata={_props.sceneMetadata}
         onSubmit={_props.onSubmit}
       />
     )
@@ -218,7 +218,7 @@ describe('<AlgorithmListList/>', () => {
     const wrapper = shallow(
       <AlgorithmList
         algorithms={[algorithm]}
-        imageProperties={_props.imageProperties}
+        sceneMetadata={_props.sceneMetadata}
         onSelect={_props.onSelect}
       />
     )
@@ -230,7 +230,7 @@ describe('<AlgorithmListList/>', () => {
     const wrapper = shallow(
       <AlgorithmList
         algorithms={_props.algorithms}
-        imageProperties={_props.imageProperties}
+        sceneMetadata={_props.sceneMetadata}
         warningHeading="test-warning-heading"
         warningMessage="test-warning-message"
       />

@@ -18,13 +18,8 @@ import {assert} from 'chai'
 import * as config from '../src/config'
 
 describe('config', () => {
-  it('reads gateway URL from environment', () => {
-    assert.equal(config.GATEWAY, '/test-gateway')
-  })
-
-  it('defines jobs worker timing properties', () => {
-    assert.isNumber(config.JOBS_WORKER_INTERVAL)
-    assert.isNumber(config.JOBS_WORKER_JOB_TTL)
+  it('reads API root URL from environment', () => {
+    assert.equal(config.API_ROOT, '/test-api-root')
   })
 
   it('defines session worker timing properties', () => {
@@ -41,10 +36,6 @@ describe('config', () => {
 
   it('defines at least one scene preview tile provider', () => {
     assert.isAbove(config.SCENE_TILE_PROVIDERS.length, 0)
-  })
-
-  it('defines a schema version', () => {
-    assert.isNumber(config.SCHEMA_VERSION)
   })
 
   it('defines at least one tile provider', () => {

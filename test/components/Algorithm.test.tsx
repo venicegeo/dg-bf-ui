@@ -26,17 +26,12 @@ describe('<Algorithm/>', () => {
   beforeEach(() => {
     _props = {
       algorithm: {
-        description:  'test-description',
-        name:         'test-name',
-        requirements: [
-          {
-            name: 'Bands',
-            description: 'test-description',
-            literal: 'red,green',
-          },
-        ],
+        bands:         ['orange', 'purple'],
+        description:   'test-description',
+        maxCloudCover: 30,
+        name:          'test-name',
       },
-      imageProperties: {
+      sceneMetadata: {
         bands:      {},
         cloudCover: 5,
       },
@@ -51,20 +46,22 @@ describe('<Algorithm/>', () => {
     const wrapper = shallow(
       <Algorithm
         algorithm={_props.algorithm}
-        imageProperties={_props.imageProperties}
+        sceneMetadata={_props.sceneMetadata}
       />
     )
     assert.equal(wrapper.find('.Algorithm-name').text(), 'test-name')
     assert.equal(wrapper.find('.Algorithm-description').text(), 'test-description')
-    assert.equal(wrapper.find('.Algorithm-requirements tbody tr th').text(), 'Bands')
-    assert.equal(wrapper.find('.Algorithm-requirements tbody tr td').text(), 'test-description')
+    assert.equal(wrapper.find('.Algorithm-requirements tbody tr th').at(0).text(), 'Bands')
+    assert.equal(wrapper.find('.Algorithm-requirements tbody tr td').at(0).text(), 'ORANGE and PURPLE')
+    assert.equal(wrapper.find('.Algorithm-requirements tbody tr th').at(1).text(), 'Maximum Cloud Cover')
+    assert.equal(wrapper.find('.Algorithm-requirements tbody tr td').at(1).text(), 'Less than or equal to 30%')
   })
 
   it('can be neither selectable nor submittable', () => {
     const wrapper = shallow(
       <Algorithm
         algorithm={_props.algorithm}
-        imageProperties={_props.imageProperties}
+        sceneMetadata={_props.sceneMetadata}
       />
     )
     assert.equal(wrapper.find('.Algorithm-selectionIndicator').length, 0)
@@ -75,7 +72,7 @@ describe('<Algorithm/>', () => {
     const wrapper = shallow(
       <Algorithm
         algorithm={_props.algorithm}
-        imageProperties={_props.imageProperties}
+        sceneMetadata={_props.sceneMetadata}
         onSelect={_props.onSelect}
       />
     )
@@ -86,7 +83,7 @@ describe('<Algorithm/>', () => {
     const wrapper = shallow(
       <Algorithm
         algorithm={_props.algorithm}
-        imageProperties={_props.imageProperties}
+        sceneMetadata={_props.sceneMetadata}
         onSubmit={_props.onSubmit}
       />
     )
@@ -97,7 +94,7 @@ describe('<Algorithm/>', () => {
     const wrapper = shallow(
       <Algorithm
         algorithm={_props.algorithm}
-        imageProperties={_props.imageProperties}
+        sceneMetadata={_props.sceneMetadata}
         onSelect={_props.onSelect}
         onSubmit={_props.onSubmit}
       />
@@ -110,7 +107,7 @@ describe('<Algorithm/>', () => {
     const wrapper = shallow(
       <Algorithm
         algorithm={_props.algorithm}
-        imageProperties={_props.imageProperties}
+        sceneMetadata={_props.sceneMetadata}
         isSubmitting={true}
         onSubmit={_props.onSubmit}
       />
@@ -122,7 +119,7 @@ describe('<Algorithm/>', () => {
     const wrapper = shallow(
       <Algorithm
         algorithm={_props.algorithm}
-        imageProperties={_props.imageProperties}
+        sceneMetadata={_props.sceneMetadata}
         isSelected={true}
         onSelect={_props.onSelect}
       />
@@ -134,7 +131,7 @@ describe('<Algorithm/>', () => {
     const wrapper = shallow(
       <Algorithm
         algorithm={_props.algorithm}
-        imageProperties={_props.imageProperties}
+        sceneMetadata={_props.sceneMetadata}
         isSelected={_props.isSelected}
         onSelect={_props.onSelect}
       />
@@ -147,7 +144,7 @@ describe('<Algorithm/>', () => {
     const wrapper = shallow(
       <Algorithm
         algorithm={_props.algorithm}
-        imageProperties={_props.imageProperties}
+        sceneMetadata={_props.sceneMetadata}
         isSelected={true}
         onSelect={_props.onSelect}
       />
@@ -160,7 +157,7 @@ describe('<Algorithm/>', () => {
     const wrapper = shallow(
       <Algorithm
         algorithm={_props.algorithm}
-        imageProperties={_props.imageProperties}
+        sceneMetadata={_props.sceneMetadata}
       />
     )
     wrapper.find('.Algorithm-header').simulate('click')
@@ -171,7 +168,7 @@ describe('<Algorithm/>', () => {
     const wrapper = shallow(
       <Algorithm
         algorithm={_props.algorithm}
-        imageProperties={_props.imageProperties}
+        sceneMetadata={_props.sceneMetadata}
         onSubmit={_props.onSubmit}
       />
     )
@@ -183,25 +180,14 @@ describe('<Algorithm/>', () => {
     const wrapper = shallow(
       <Algorithm
         algorithm={{
-          id:           'test-id',
+          bands:        ['red','green'],
           description:  'test-description',
+          id:           'test-id',
+          maxCloudCover: 10,
           name:         'test-name',
-          requirements: [
-            {
-              name: 'Bands',
-              description: 'test-description',
-              literal: 'red,green',
-            },
-            {
-              name: 'Cloud Cover',
-              description: 'test-description',
-              literal: '10',
-            },
-          ],
-          type: 'test-type',
-          url: 'test-url',
+          type:         'test-type',
         }}
-        imageProperties={{
+        sceneMetadata={{
           bands: {
             red: 'lorem',
             green: 'lorem',
@@ -219,25 +205,14 @@ describe('<Algorithm/>', () => {
     const wrapper = shallow(
       <Algorithm
         algorithm={{
-          id:           'test-id',
-          description:  'test-description',
-          name:         'test-name',
-          requirements: [
-            {
-              name: 'Bands',
-              description: 'test-description',
-              literal: 'red,green',
-            },
-            {
-              name: 'Cloud Cover',
-              description: 'test-description',
-              literal: '9000',
-            },
-          ],
-          type: 'test-type',
-          url: 'test-url',
+          bands:         ['red','green'],
+          id:            'test-id',
+          description:   'test-description',
+          maxCloudCover: 9000,
+          name:          'test-name',
+          type:          'test-type',
         }}
-        imageProperties={{
+        sceneMetadata={{
           bands: {
             red: 'lorem',
             green: 'lorem',
@@ -255,25 +230,14 @@ describe('<Algorithm/>', () => {
     const wrapper = shallow(
       <Algorithm
         algorithm={{
-          id:           'test-id',
-          description:  'test-description',
-          name:         'test-name',
-          requirements: [
-            {
-              name: 'Bands',
-              description: 'test-description',
-              literal: 'red,green',
-            },
-            {
-              name: 'Cloud Cover',
-              description: 'test-description',
-              literal: '9000',
-            },
-          ],
+          bands:         ['red','green'],
+          description:   'test-description',
+          id:            'test-id',
+          maxCloudCover: 9000,
+          name:          'test-name',
           type: 'test-type',
-          url: 'test-url',
         }}
-        imageProperties={{
+        sceneMetadata={{
           bands: {
             hotpink: 'lorem',
             fuschia: 'lorem',
@@ -291,7 +255,7 @@ describe('<Algorithm/>', () => {
     const wrapper = shallow(
       <Algorithm
         algorithm={_props.algorithm}
-        imageProperties={_props.imageProperties}
+        sceneMetadata={_props.sceneMetadata}
         warningHeading="test-warning-heading"
         warningMessage="test-warning-message"
         isSubmitting={true}

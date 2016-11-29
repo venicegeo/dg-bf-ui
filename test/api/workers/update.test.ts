@@ -17,15 +17,16 @@
 import {assert} from 'chai'
 import * as sinon from 'sinon'
 import * as worker from '../../../src/api/workers/update'
+import axios from 'axios'
 
 describe('Update Worker', function () {
-  let globalStubs: GlobalStubs
+  let stubs: Stubs
 
   this.timeout(100)
 
   beforeEach(() => {
-    globalStubs = {
-      fetch: sinon.stub(window, 'fetch').returns(resolveMarkup()),
+    stubs = {
+      axiosGet: sinon.stub(axios, 'get'),
 
       // Short circuit async operations
       setInterval:   sinon.stub(window, 'setInterval').returns(-1),
@@ -40,11 +41,11 @@ describe('Update Worker', function () {
   afterEach(() => {
     worker.terminate()
     document.documentElement.removeAttribute('data-build')
-    globalStubs.fetch.restore()
-    globalStubs.setInterval.restore()
-    globalStubs.clearInterval.restore()
-    globalStubs.debug.restore()
-    globalStubs.error.restore()
+    stubs.axiosGet.restore()
+    stubs.setInterval.restore()
+    stubs.clearInterval.restore()
+    stubs.debug.restore()
+    stubs.error.restore()
   })
 
   describe('start()', () => {
@@ -59,7 +60,7 @@ describe('Update Worker', function () {
     })
 
     it('honors `interval` configuration', () => {
-      const stub = globalStubs.setInterval
+      const stub = stubs.setInterval
       document.documentElement.setAttribute('data-build', 'test-build-id')
       worker.start({
         interval:    -1234,
@@ -83,7 +84,7 @@ describe('Update Worker', function () {
     })
 
     it('does not begin cycle immediately', () => {
-      const stub = globalStubs.fetch
+      const stub = stubs.axiosGet
       document.documentElement.setAttribute('data-build', 'test-build-id')
       worker.start({
         interval:    0,
@@ -95,13 +96,13 @@ describe('Update Worker', function () {
 
   describe('work cycle', () => {
     it('handles errors gracefully', () => {
-      const stub = globalStubs.error
-      globalStubs.fetch.returns(Promise.reject(new Error('oh noes')))
+      const stub = stubs.error
+      stubs.axiosGet.returns(Promise.reject(new Error('oh noes')))
       worker.start({
         interval:    0,
         onAvailable: sinon.stub(),
       })
-      globalStubs.setInterval.callArg(0)  // Manually invoke tick
+      stubs.setInterval.callArg(0)  // Manually invoke tick
       return defer(() => {
         assert.equal(stub.firstCall.args[0], '(update:worker) failed:')
         assert.instanceOf(stub.firstCall.args[1], Error)
@@ -112,27 +113,27 @@ describe('Update Worker', function () {
   describe('event hook', () => {
     it('fires if updated', () => {
       const stub = sinon.stub()
-      globalStubs.fetch.returns(resolveMarkup('test-newer-build-id'))
+      stubs.axiosGet.returns(resolveMarkup('test-newer-build-id'))
       document.documentElement.setAttribute('data-build', 'test-build-id')
       worker.start({
         interval:    0,
         onAvailable: stub,
       })
-      globalStubs.setInterval.callArg(0)  // Manually invoke tick
+      stubs.setInterval.callArg(0)  // Manually invoke tick
       return defer(() => {
         assert.isTrue(stub.calledOnce)
       })
     })
 
     it('does not fire if not updated', () => {
-      globalStubs.fetch.returns(resolveMarkup())
+      stubs.axiosGet.returns(resolveMarkup())
       const stub = sinon.stub()
       document.documentElement.setAttribute('data-build', 'test-build-id')
       worker.start({
         interval:    0,
         onAvailable: stub,
       })
-      globalStubs.setInterval.callArg(0)  // Manually invoke tick
+      stubs.setInterval.callArg(0)  // Manually invoke tick
       return defer(() => {
         assert.isFalse(stub.calledOnce)
       })
@@ -141,8 +142,8 @@ describe('Update Worker', function () {
 
   describe('terminate()', () => {
     it('stops worker', () => {
-      globalStubs.setInterval.returns(-1234)
-      const stub = globalStubs.clearInterval
+      stubs.setInterval.returns(-1234)
+      const stub = stubs.clearInterval
       worker.start({
         interval:    0,
         onAvailable: sinon.stub(),
@@ -174,8 +175,8 @@ describe('Update Worker', function () {
 // Types
 //
 
-interface GlobalStubs {
-  fetch: Sinon.SinonStub
+interface Stubs {
+  axiosGet: Sinon.SinonStub
   setInterval: Sinon.SinonStub
   clearInterval: Sinon.SinonStub
   debug: Sinon.SinonStub
@@ -191,16 +192,15 @@ function defer(func, delay = 1) {
 }
 
 function resolveMarkup(build = 'test-build-id') {
-  return Promise.resolve(new Response(`\
-<!doctype html>
-<html lang="en" data-build="${build}">
-<head>
-  <title>Beachfront</title>
-<body></body>
-</html>`, {
-    status: 200,
-    headers: new Headers({
-      'content-type': 'text/html',
-    }),
-  }))
+  return Promise.resolve({
+    data: new DOMParser().parseFromString(`
+        <!doctype html>
+        <html lang="en" data-build="${build}">
+          <head>
+            <title>Beachfront</title>
+          </head>
+          <body></body>
+        </html>
+      `.trim(), 'text/html'),
+    })
 }

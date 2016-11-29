@@ -28,15 +28,11 @@ describe('<CreateJob/>', () => {
       algorithms:               [],
       bbox:                     [0, 0, 0, 0],
       catalogApiKey:            'test-catalog-api-key',
-      executorServiceId:        'test-executor-service-id',
-      filter:                   '',
-      filters:                  [],
       isSearching:              false,
       searchCriteria: {
         cloudCover: 10,
         dateFrom:   '2016-01-01',
         dateTo:     '2016-12-31',
-        filter:     '',
       },
       searchError: null,
       selectedScene: {
@@ -57,8 +53,6 @@ describe('<CreateJob/>', () => {
         algorithms={_props.algorithms}
         bbox={_props.bbox}
         catalogApiKey={_props.catalogApiKey}
-        executorServiceId={_props.executorServiceId}
-        filters={_props.filters}
         isSearching={_props.isSearching}
         searchCriteria={_props.searchCriteria}
         searchError={_props.searchError}
@@ -83,8 +77,6 @@ describe('<CreateJob/>', () => {
         algorithms={_props.algorithms}
         bbox={null}
         catalogApiKey={_props.catalogApiKey}
-        executorServiceId={_props.executorServiceId}
-        filters={_props.filters}
         isSearching={_props.isSearching}
         searchCriteria={_props.searchCriteria}
         searchError={_props.searchError}
@@ -105,8 +97,6 @@ describe('<CreateJob/>', () => {
         algorithms={_props.algorithms}
         bbox={null}
         catalogApiKey={_props.catalogApiKey}
-        executorServiceId={_props.executorServiceId}
-        filters={_props.filters}
         isSearching={_props.isSearching}
         searchCriteria={_props.searchCriteria}
         searchError={_props.searchError}
@@ -127,8 +117,6 @@ describe('<CreateJob/>', () => {
         algorithms={_props.algorithms}
         bbox={_props.bbox}
         catalogApiKey={_props.catalogApiKey}
-        executorServiceId={_props.executorServiceId}
-        filters={_props.filters}
         isSearching={_props.isSearching}
         searchCriteria={_props.searchCriteria}
         searchError={_props.searchError}
@@ -149,8 +137,6 @@ describe('<CreateJob/>', () => {
         algorithms={_props.algorithms}
         bbox={_props.bbox}
         catalogApiKey={_props.catalogApiKey}
-        executorServiceId={_props.executorServiceId}
-        filters={_props.filters}
         isSearching={_props.isSearching}
         searchCriteria={_props.searchCriteria}
         searchError={_props.searchError}
@@ -171,8 +157,6 @@ describe('<CreateJob/>', () => {
         algorithms={_props.algorithms}
         bbox={_props.bbox}
         catalogApiKey={_props.catalogApiKey}
-        executorServiceId={_props.executorServiceId}
-        filters={_props.filters}
         isSearching={_props.isSearching}
         searchCriteria={_props.searchCriteria}
         searchError={_props.searchError}
@@ -193,8 +177,6 @@ describe('<CreateJob/>', () => {
         algorithms={_props.algorithms}
         bbox={_props.bbox}
         catalogApiKey={_props.catalogApiKey}
-        executorServiceId={_props.executorServiceId}
-        filters={_props.filters}
         isSearching={_props.isSearching}
         searchCriteria={_props.searchCriteria}
         searchError={_props.searchError}
@@ -215,8 +197,6 @@ describe('<CreateJob/>', () => {
         algorithms={_props.algorithms}
         bbox={_props.bbox}
         catalogApiKey={_props.catalogApiKey}
-        executorServiceId={_props.executorServiceId}
-        filters={_props.filters}
         isSearching={_props.isSearching}
         searchCriteria={_props.searchCriteria}
         searchError={_props.searchError}
@@ -245,8 +225,6 @@ describe('<CreateJob/>', () => {
         algorithms={_props.algorithms}
         bbox={_props.bbox}
         catalogApiKey={_props.catalogApiKey}
-        executorServiceId={_props.executorServiceId}
-        filters={_props.filters}
         isSearching={_props.isSearching}
         searchCriteria={_props.searchCriteria}
         searchError={_props.searchError}
@@ -271,8 +249,6 @@ describe('<CreateJob/>', () => {
         algorithms={_props.algorithms}
         bbox={_props.bbox}
         catalogApiKey={_props.catalogApiKey}
-        executorServiceId={_props.executorServiceId}
-        filters={_props.filters}
         isSearching={_props.isSearching}
         searchCriteria={_props.searchCriteria}
         searchError={_props.searchError}

@@ -30,10 +30,13 @@ export function start({
   const work = () => {
     console.debug('(session:worker) validating session')
     client.get('/login/heartbeat')
-      .then(
-        active => !active && onExpired(),
-        err => console.error('(session:worker) failed:', err)
-      )
+      .catch(err => {
+        if (err.response.status === 401) {
+          onExpired()
+          return
+        }
+        console.error('(session:worker) failed:', err)
+      })
   }
 
   instance = setInterval(work, interval)

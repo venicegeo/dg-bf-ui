@@ -76,7 +76,7 @@ module.exports = (config) => {
         new webpack.IgnorePlugin(/^\.\/locale$/, /moment$/),
         new webpack.DefinePlugin({
           'process.env.NODE_ENV': JSON.stringify('test'),
-          'process.env.GATEWAY': JSON.stringify('/test-gateway')
+          'process.env.API_ROOT': JSON.stringify('/test-api-root')
         })
       ],
       externals: {

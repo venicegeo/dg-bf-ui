@@ -14,69 +14,89 @@
  * limitations under the License.
  **/
 
-import {Client} from '../../src/utils/piazza-client'
 import {assert} from 'chai'
 import * as sinon from 'sinon'
+import axios from 'axios'
 import * as service from '../../src/api/session'
 import * as worker from '../../src/api/workers/session'
-import {GATEWAY} from '../../src/config'
 
 describe('Session Service', () => {
   let globalStubs: GlobalStubs
 
   beforeEach(() => {
     globalStubs = {
-      fetch: sinon.stub(window, 'fetch'),
       error: sinon.stub(console, 'error'),
     }
   })
 
   afterEach(() => {
     service.destroy()
-    globalStubs.fetch.restore()
     globalStubs.error.restore()
   })
 
   describe('create()', () => {
-    let stub: Sinon.SinonStub
+    let stubPost: Sinon.SinonStub,
+      stubCreate: Sinon.SinonStub
 
     beforeEach(() => {
-      stub = sinon.stub(Client, 'create')
+      stubPost = sinon.stub(axios, 'post')
+      stubCreate = sinon.stub(axios, 'create')
     })
 
     afterEach(() => {
-      stub.restore()
+      stubPost.restore()
+      stubCreate.restore()
     })
 
     it('sends correct credentials', () => {
-      stub.returns(Promise.resolve(generateClient()))
+      stubPost.returns(Promise.resolve({data: {api_key: 'test-api-key-from-response'}}))
       return service.create('test-username', 'test-password')
         .then(() => {
-          assert.deepEqual(stub.firstCall.args, [GATEWAY, 'test-username', 'test-password'])
+          assert.deepEqual(stubPost.firstCall.args, ['/test-api-root/login', null, {
+            auth: {
+              username: 'test-username',
+              password: 'test-password',
+            },
+          }])
+        })
+    })
+
+    it('correctly instantiates client', () => {
+      stubPost.returns(Promise.resolve({data: {api_key: 'test-api-key-from-response'}}))
+      return service.create('test-username', 'test-password')
+        .then(() => {
+          assert.deepEqual(stubCreate.firstCall.args, [{
+            baseURL: '/test-api-root',
+            timeout: 18000,
+            auth: {
+              username: 'test-api-key-from-response',
+              password: '',
+            },
+          }])
         })
     })
 
     it('serializes session token', () => {
-      stub.returns(Promise.resolve(generateClient()))
+      stubPost.returns(Promise.resolve({data: {api_key: 'test-api-key-from-response'}}))
       return service.create('test-username', 'test-password')
         .then(() => {
-          assert.equal(sessionStorage.getItem('token'), 'Basic dGVzdC1zb21lLXV1aWQ6')
+          assert.equal(sessionStorage.getItem('apiKey'), 'test-api-key-from-response')
         })
     })
 
     it('does not serialize session token on failure', () => {
-      stub.returns(Promise.reject(new Error('test-error')))
+      stubPost.returns(Promise.reject(new Error('test-error')))
       return service.create('test-username', 'test-password')
         .then(
           () => assert.fail('Should have thrown'),
-          (err) => {
-            assert.isNull(sessionStorage.getItem('token'))
+          () => {
+            assert.isNull(sessionStorage.getItem('apiKey'))
           }
         )
     })
 
     it('throws if authentication fails', () => {
-      stub.returns(Promise.reject(new Error('test-error')))
+      stubPost.returns(Promise.reject(new Error('test-error')))
       return service.create('test-username', 'test-password')
         .then(
           () => assert.fail('Should have thrown'),
@@ -87,8 +107,9 @@ describe('Session Service', () => {
     })
 
     it('exposes client instance on success', () => {
-      const client = generateClient()
-      stub.returns(Promise.resolve(client))
+      stubPost.returns(Promise.resolve({data: {api_key: 'test-api-key-from-response'}}))
+      const client = {isTotallyAnAxiosInstance: true}
+      stubCreate.returns(client)
       return service.create('test-username', 'test-password')
         .then(() => {
           assert.strictEqual(service.getClient(), client)
@@ -96,7 +117,7 @@ describe('Session Service', () => {
     })
 
     it('does not exposes client on failure', () => {
-      stub.returns(Promise.reject(new Error('test-error')))
+      stubPost.returns(Promise.reject(new Error('test-error')))
       return service.create('test-username', 'test-password')
         .then(
           () => assert.fail('Should have thrown'),
@@ -110,20 +131,54 @@ describe('Session Service', () => {
   })
 
   describe('getClient()', () => {
+    let stub: Sinon.SinonStub
+
+    beforeEach(() => {
+      stub = sinon.stub(axios, 'create')
+    })
+
     afterEach(() => {
       sessionStorage.clear()
+      stub.restore()
     })
 
     it('throws if no session exists', () => {
-      sessionStorage.setItem('token', '')
+      sessionStorage.setItem('apiKey', '')
       assert.throws(() => {
         service.getClient()
       })
     })
 
+    it('correctly instantiates client', () => {
+      sessionStorage.setItem('apiKey', 'test-api-key')
+      service.getClient()
+      assert.equal(stub.callCount, 1)
+      assert.deepEqual(stub.firstCall.args, [{
+        baseURL: '/test-api-root',
+        timeout: 18000,
+        auth: {
+          username: 'test-api-key',
+          password: '',
+        },
+      }])
+    })
+
     it('restores session if one exists', () => {
-      sessionStorage.setItem('token', 'Basic dGVzdC1zb21lLXV1aWQ6')
-      assert.instanceOf(service.getClient(), Client)
+      const client = {isTotallyAnAxiosInstance: true}
+      stub.returns(client)
+      sessionStorage.setItem('apiKey', 'test-api-key')
+      assert.strictEqual(service.getClient(), client)
+    })
+
+    it('can handle gratuitous invocations', () => {
+      const client = {isTotallyAnAxiosInstance: true}
+      stub.returns(client)
+      sessionStorage.setItem('apiKey', 'test-api-key')
+      assert.doesNotThrow(() => {
+        for (let i = 0; i < 100; i++) {
+          assert.strictEqual(service.getClient(), client)
+        }
+      })
     })
   })
 
@@ -133,19 +188,19 @@ describe('Session Service', () => {
     })
 
     it('indicates presence of a session', () => {
-      sessionStorage.setItem('token', 'Basic dGVzdC1zb21lLXV1aWQ6')
+      sessionStorage.setItem('apiKey', 'test-api-key')
       assert.isTrue(service.exists())
     })
 
     it('indicates absence of a session', () => {
-      sessionStorage.removeItem('token')
+      sessionStorage.removeItem('apiKey')
       assert.isFalse(service.exists())
     })
   })
 
   describe('destroy()', () => {
     it('voids client instance', () => {
-      sessionStorage.setItem('token', 'Basic dGVzdC1zb21lLXV1aWQ6')
+      sessionStorage.setItem('apiKey', 'test-api-key')
       service.destroy()
       assert.throws(() => {
         service.getClient()
@@ -153,7 +208,7 @@ describe('Session Service', () => {
     })
 
     it('actually clears the session', () => {
-      sessionStorage.setItem('token', 'Basic dGVzdC1zb21lLXV1aWQ6')
+      sessionStorage.setItem('apiKey', 'test-api-key')
       sessionStorage.setItem('lorem', '###########')
       sessionStorage.setItem('ipsum', '###########')
       sessionStorage.setItem('dolor', '###########')
@@ -163,11 +218,16 @@ describe('Session Service', () => {
   })
 
   describe('startWorker()', () => {
+    let client: Sinon.SinonStub
+
     beforeEach(() => {
-      sessionStorage.setItem('token', 'Basic dGVzdC1zb21lLXV1aWQ6')
+      client = sinon.stub()
+      sinon.stub(axios, 'create').returns(client)
+      sessionStorage.setItem('apiKey', 'test-api-key')
     })
 
     afterEach(() => {
+      sinon.restore(axios.create)
       sinon.restore(worker.start)
       sinon.restore(worker.terminate)
       sessionStorage.clear()
@@ -175,28 +235,24 @@ describe('Session Service', () => {
 
     it('starts worker', () => {
       const stub = sinon.stub(worker, 'start')
-      service.startWorker({
-        onExpired() {/* noop */},
-      })
-      assert.instanceOf(stub.firstCall.args[0].client, Client)
+      service.startWorker({ onExpired() {/* noop */} })
+      assert.strictEqual(stub.firstCall.args[0].client, client)
       assert.isFunction(stub.firstCall.args[0].onExpired)
       assert.isNumber(stub.firstCall.args[0].interval)
     })
 
     it('throws if started without active session', () => {
-      sessionStorage.removeItem('token')
+      sessionStorage.removeItem('apiKey')
       sinon.stub(worker, 'start')
       assert.throws(() => {
-        service.startWorker({
-          onExpired() {/* noop */},
-        })
+        service.startWorker({ onExpired() {/* noop */} })
       })
     })
   })
 
   describe('stopWorker()', () => {
     beforeEach(() => {
-      sessionStorage.setItem('token', 'Basic dGVzdC1zb21lLXV1aWQ6')
+      sessionStorage.setItem('apiKey', 'test-api-key')
     })
 
     afterEach(() => {
@@ -220,13 +276,5 @@ describe('Session Service', () => {
 //
 
 interface GlobalStubs {
-  fetch: Sinon.SinonStub
   error: Sinon.SinonStub
-}
-
-function generateClient() {
-  return {
-    sessionToken: 'Basic dGVzdC1zb21lLXV1aWQ6',
-    gateway: GATEWAY,
-  }
 }

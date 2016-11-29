@@ -26,7 +26,7 @@ describe('Session Worker', function () {
 
   beforeEach(() => {
     client = {
-      isSessionActive: sinon.stub().returns(Promise.resolve(true)),
+      get: sinon.stub().returns(Promise.resolve({status: 204, data: ''})),
     }
 
     globalStubs = {
@@ -52,7 +52,7 @@ describe('Session Worker', function () {
     it('can start worker instance', () => {
       assert.doesNotThrow(() => {
         worker.start({
-          client,
+          client:    client as any,
           interval:  0,
           onExpired: sinon.stub(),
         })
@@ -62,7 +62,7 @@ describe('Session Worker', function () {
     it('honors `interval` configuration', () => {
       const stub = globalStubs.setInterval
       worker.start({
-        client,
+        client:    client as any,
         interval:  -1234,
         onExpired: sinon.stub(),
       })
@@ -70,11 +70,11 @@ describe('Session Worker', function () {
     })
 
     it('begins cycle immediately', () => {
-      const stub = client.isSessionActive
+      const stub = client.get
       worker.start({
-        client,
+        client:    client as any,
         interval:  0,
-        onExpired: stub,
+        onExpired: sinon.stub(),
       })
       return defer(() => {
         assert.isTrue(stub.called)
@@ -83,15 +83,15 @@ describe('Session Worker', function () {
 
     it('throws if started twice', () => {
       worker.start({
-        client:      (client as any),
-        interval:    -1234,
-        onExpired:   sinon.stub(),
+        client:    client as any,
+        interval:  -1234,
+        onExpired: sinon.stub(),
       })
       assert.throws(() => {
         worker.start({
-          client:      (client as any),
-          interval:    -1234,
-          onExpired:   sinon.stub(),
+          client:    client as any,
+          interval:  -1234,
+          onExpired: sinon.stub(),
         })
       })
     })
@@ -100,13 +100,14 @@ describe('Session Worker', function () {
   describe('work cycle', () => {
     it('handles errors gracefully', () => {
       const stub = globalStubs.error
-      client.isSessionActive.returns(Promise.reject(new Error('oh noes')))
+      client.get.returns(reject('oh noes', 500))
       worker.start({
-        client:      (client as any),
-        interval:    0,
-        onExpired:   sinon.stub(),
+        client:    client as any,
+        interval:  0,
+        onExpired: sinon.stub(),
       })
       return defer(() => {
+        console.log(globalStubs.error.args)
         assert.equal(stub.firstCall.args[0], '(session:worker) failed:')
         assert.instanceOf(stub.firstCall.args[1], Error)
       })
@@ -116,11 +117,11 @@ describe('Session Worker', function () {
   describe('event hook', () => {
     it('fires if session is expired', () => {
       const stub = sinon.stub()
-      client.isSessionActive.returns(Promise.resolve(false))
+      client.get.returns(reject('Session expired', 401))
       worker.start({
-        client:      (client as any),
-        interval:    0,
-        onExpired:   stub,
+        client:    client as any,
+        interval:  0,
+        onExpired: stub,
       })
       return defer(() => {
         assert.isTrue(stub.calledOnce)
@@ -145,7 +146,7 @@ describe('Session Worker', function () {
       globalStubs.setInterval.returns(-1234)
       const stub = globalStubs.clearInterval
       worker.start({
-        client,
+        client:    client as any,
         interval:  0,
         onExpired: sinon.stub(),
       })
@@ -177,7 +178,7 @@ describe('Session Worker', function () {
 //
 
 interface Client {
-  isSessionActive: Sinon.SinonStub
+  get: Sinon.SinonStub
 }
 
 interface GlobalStubs {
@@ -193,4 +194,12 @@ interface GlobalStubs {
 
 function defer(func, delay = 1) {
   return new Promise(resolve => setTimeout(resolve, delay)).then(func)
+}
+
+function reject(message: string, status: number) {
+  return Promise.reject(Object.assign(new Error(message), {
+    response: {
+      status,
+    },
+  }))
 }

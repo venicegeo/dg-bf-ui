@@ -31,14 +31,11 @@ describe('<ImagerySearch/>', () => {
       cloudCover:         19,
       dateFrom:           '2016-01-01',
       dateTo:             '2016-02-01',
-      filter:             '',
-      filters:            [],
       isSearching:        false,
       onApiKeyChange:     sinon.stub(),
       onClearBbox:        sinon.stub(),
       onCloudCoverChange: sinon.stub(),
       onDateChange:       sinon.stub(),
-      onFilterChange:     sinon.stub(),
       onSubmit:           sinon.stub(),
     }
   })
@@ -51,14 +48,11 @@ describe('<ImagerySearch/>', () => {
         cloudCover={_props.cloudCover}
         dateFrom={_props.dateFrom}
         dateTo={_props.dateTo}
-        filter={_props.filter}
-        filters={_props.filters}
         isSearching={_props.isSearching}
         onApiKeyChange={_props.onApiKeyChange}
         onClearBbox={_props.onClearBbox}
         onCloudCoverChange={_props.onCloudCoverChange}
         onDateChange={_props.onDateChange}
-        onFilterChange={_props.onFilterChange}
         onSubmit={_props.onSubmit}
       />
     )
@@ -74,14 +68,11 @@ describe('<ImagerySearch/>', () => {
         cloudCover={_props.cloudCover}
         dateFrom={_props.dateFrom}
         dateTo={_props.dateTo}
-        filter={_props.filter}
-        filters={_props.filters}
         isSearching={_props.isSearching}
         onApiKeyChange={_props.onApiKeyChange}
         onClearBbox={_props.onClearBbox}
         onCloudCoverChange={_props.onCloudCoverChange}
         onDateChange={_props.onDateChange}
-        onFilterChange={_props.onFilterChange}
         onSubmit={_props.onSubmit}
       />
     )
@@ -97,14 +88,11 @@ describe('<ImagerySearch/>', () => {
         cloudCover={_props.cloudCover}
         dateFrom={_props.dateFrom}
         dateTo={_props.dateTo}
-        filter={_props.filter}
-        filters={_props.filters}
         isSearching={_props.isSearching}
         onApiKeyChange={_props.onApiKeyChange}
         onClearBbox={_props.onClearBbox}
         onCloudCoverChange={_props.onCloudCoverChange}
         onDateChange={_props.onDateChange}
-        onFilterChange={_props.onFilterChange}
         onSubmit={_props.onSubmit}
       />
     )
@@ -120,14 +108,11 @@ describe('<ImagerySearch/>', () => {
         cloudCover={_props.cloudCover}
         dateFrom={_props.dateFrom}
         dateTo={_props.dateTo}
-        filter={_props.filter}
-        filters={_props.filters}
         isSearching={_props.isSearching}
         onApiKeyChange={_props.onApiKeyChange}
         onClearBbox={_props.onClearBbox}
         onCloudCoverChange={_props.onCloudCoverChange}
         onDateChange={_props.onDateChange}
-        onFilterChange={_props.onFilterChange}
         onSubmit={_props.onSubmit}
       />
     )
@@ -143,14 +128,11 @@ describe('<ImagerySearch/>', () => {
         cloudCover={_props.cloudCover}
         dateFrom={_props.dateFrom}
         dateTo={_props.dateTo}
-        filter={_props.filter}
-        filters={_props.filters}
         isSearching={_props.isSearching}
         onApiKeyChange={_props.onApiKeyChange}
         onClearBbox={_props.onClearBbox}
         onCloudCoverChange={_props.onCloudCoverChange}
         onDateChange={_props.onDateChange}
-        onFilterChange={_props.onFilterChange}
         onSubmit={_props.onSubmit}
       />
     )
@@ -166,69 +148,16 @@ describe('<ImagerySearch/>', () => {
         cloudCover={_props.cloudCover}
         dateFrom={_props.dateFrom}
         dateTo={_props.dateTo}
-        filter={_props.filter}
-        filters={_props.filters}
         isSearching={_props.isSearching}
         onApiKeyChange={_props.onApiKeyChange}
         onClearBbox={_props.onClearBbox}
         onCloudCoverChange={_props.onCloudCoverChange}
         onDateChange={_props.onDateChange}
-        onFilterChange={_props.onFilterChange}
         onSubmit={_props.onSubmit}
       />
     )
     wrapper.find(CatalogSearchCriteria).props().onDateChange(_props.dateFrom, '1999-12-31')
     assert.isTrue(_props.onDateChange.calledWithExactly(_props.dateFrom, '1999-12-31'))
-  })
-
-  it('bubbles spatial filter change event', () => {
-    const wrapper = shallow(
-      <ImagerySearch
-        bbox={_props.bbox}
-        catalogApiKey={_props.catalogApiKey}
-        cloudCover={_props.cloudCover}
-        dateFrom={_props.dateFrom}
-        dateTo={_props.dateTo}
-        filter={''}
-        filters={[
-          {id: 'test-id', name: 'Testing'},
-        ]}
-        isSearching={_props.isSearching}
-        onApiKeyChange={_props.onApiKeyChange}
-        onClearBbox={_props.onClearBbox}
-        onCloudCoverChange={_props.onCloudCoverChange}
-        onDateChange={_props.onDateChange}
-        onFilterChange={_props.onFilterChange}
-        onSubmit={_props.onSubmit}
-      />
-    )
-    wrapper.find(CatalogSearchCriteria).props().onFilterChange('test-id')
-    assert.isTrue(_props.onFilterChange.calledWithExactly('test-id'))
-  })
-
-  it('bubbles spatial filter change event (to empty)', () => {
-    const wrapper = shallow(
-      <ImagerySearch
-        bbox={_props.bbox}
-        catalogApiKey={_props.catalogApiKey}
-        cloudCover={_props.cloudCover}
-        dateFrom={_props.dateFrom}
-        dateTo={_props.dateTo}
-        filter={'test-id'}
-        filters={[
-          {id: 'test-id', name: 'Testing'},
-        ]}
-        isSearching={_props.isSearching}
-        onApiKeyChange={_props.onApiKeyChange}
-        onClearBbox={_props.onClearBbox}
-        onCloudCoverChange={_props.onCloudCoverChange}
-        onDateChange={_props.onDateChange}
-        onFilterChange={_props.onFilterChange}
-        onSubmit={_props.onSubmit}
-      />
-    )
-    wrapper.find(CatalogSearchCriteria).props().onFilterChange(null)
-    assert.isTrue(_props.onFilterChange.calledWithExactly(null))
   })
 
   it('emits submission event', () => {
@@ -239,18 +168,15 @@ describe('<ImagerySearch/>', () => {
         cloudCover={_props.cloudCover}
         dateFrom={_props.dateFrom}
         dateTo={_props.dateTo}
-        filter={_props.filter}
-        filters={_props.filters}
         isSearching={_props.isSearching}
         onApiKeyChange={_props.onApiKeyChange}
         onClearBbox={_props.onClearBbox}
         onCloudCoverChange={_props.onCloudCoverChange}
         onDateChange={_props.onDateChange}
-        onFilterChange={_props.onFilterChange}
         onSubmit={_props.onSubmit}
       />
     )
-    const noop = () => {}
+    const noop = () => {/* noop */}
     wrapper.find('form').simulate('submit', { preventDefault: noop, stopPropagation: noop })
     assert.equal(_props.onSubmit.callCount, 1)
   })
@@ -266,16 +192,13 @@ describe('<ImagerySearch/>', () => {
         error={{
           message: 'oh noes',
           stack: 'paper',
-          code: 123
+          code: 123,
         }}
-        filter={_props.filter}
-        filters={_props.filters}
         isSearching={_props.isSearching}
         onApiKeyChange={_props.onApiKeyChange}
         onClearBbox={_props.onClearBbox}
         onCloudCoverChange={_props.onCloudCoverChange}
         onDateChange={_props.onDateChange}
-        onFilterChange={_props.onFilterChange}
         onSubmit={_props.onSubmit}
       />
     )
@@ -290,14 +213,11 @@ describe('<ImagerySearch/>', () => {
         cloudCover={_props.cloudCover}
         dateFrom={_props.dateFrom}
         dateTo={_props.dateTo}
-        filter={_props.filter}
-        filters={_props.filters}
         isSearching={true}
         onApiKeyChange={_props.onApiKeyChange}
         onClearBbox={_props.onClearBbox}
         onCloudCoverChange={_props.onCloudCoverChange}
         onDateChange={_props.onDateChange}
-        onFilterChange={_props.onFilterChange}
         onSubmit={_props.onSubmit}
       />
     )
@@ -312,14 +232,11 @@ describe('<ImagerySearch/>', () => {
         cloudCover={_props.cloudCover}
         dateFrom={_props.dateFrom}
         dateTo={_props.dateTo}
-        filter={_props.filter}
-        filters={_props.filters}
         isSearching={true}
         onApiKeyChange={_props.onApiKeyChange}
         onClearBbox={_props.onClearBbox}
         onCloudCoverChange={_props.onCloudCoverChange}
         onDateChange={_props.onDateChange}
-        onFilterChange={_props.onFilterChange}
         onSubmit={_props.onSubmit}
       />
     )
