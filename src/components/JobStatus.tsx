@@ -70,7 +70,7 @@ export class JobStatus extends React.Component<Props, State> {
         <div className={styles.details} onClick={this.handleExpansionToggle}>
           <h3 className={styles.title}>
             <i className={`fa fa-chevron-right ${styles.caret}`}/>
-            <span>{properties.name}</span>
+            <span>{segmentIfNeeded(properties.name)}</span>
           </h3>
 
           <div className={styles.summary}>
@@ -221,4 +221,8 @@ export class JobStatus extends React.Component<Props, State> {
 
 function normalizeSceneId(sceneId) {
   return sceneId.replace(/^landsat:/, '')
+}
+
+function segmentIfNeeded(s: string) {
+  return s.length > 30 ? s.replace(/(\W)/g, '$1 ') : s
 }
