@@ -23,7 +23,7 @@ export interface Descriptor {
 
 export function lookup(): Promise<Descriptor> {
   const client = getClient()
-  return client.get<ResponseServiceListing>('/v0/services')
+  return client.get('/v0/services')
     .then(response => ({
       // wmsUrl: response.data.services.wms_server,
       wmsUrl: response.data.services.wms_server.replace('https:', 'http:'),  // HACK
@@ -32,14 +32,4 @@ export function lookup(): Promise<Descriptor> {
       console.error('(geoserver:discover) failed:', err)
       throw err
     })
-}
-
-//
-// Helpers
-//
-
-interface ResponseServiceListing {
-  services: {
-    wms_server: string
-  }
 }

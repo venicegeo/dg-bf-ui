@@ -10,8 +10,5 @@
     "react": "registry:dt/react#0.14.0+20161008064207",
     "react-dom": "registry:dt/react-dom#0.14.0+20160412154040",
     "sinon": "registry:dt/sinon#1.16.0+20160924120326"
-  },
-  "globalDevDependencies": {
-    "axios": "registry:dt/axios#0.9.1+20161016142654"
   }
 }

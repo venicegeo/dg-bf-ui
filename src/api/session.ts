@@ -14,17 +14,17 @@
  * limitations under the License.
  **/
 
-import * as axios from 'axios'
+import axios, {AxiosInstance, AxiosPromise} from 'axios'
 import * as worker from './workers/session'
 import {API_ROOT, SESSION_WORKER_INTERVAL} from '../config'
 
 const DEFAULT_TIMEOUT = 18000
 
-let _client: Axios.AxiosInstance
+let _client: AxiosInstance
 
-export function create(username, password): Promise<void> {
+export function create(username, password): AxiosPromise {
   return axios.post(`${API_ROOT}/login`, null, {auth: {username, password}})
-    .then((response: any) => {
+    .then(response => {
       _client = axios.create({
         baseURL: API_ROOT,
         timeout: DEFAULT_TIMEOUT,
@@ -50,7 +50,7 @@ export function exists() {
   return !!_client || !!sessionStorage.getItem('apiKey')
 }
 
-export function getClient(): Axios.AxiosInstance {
+export function getClient(): AxiosInstance {
   if (_client) {
      return _client
   }

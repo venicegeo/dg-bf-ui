@@ -18,7 +18,7 @@ import {getClient} from './session'
 
 export function lookup(): Promise<beachfront.Algorithm[]> {
   const client = getClient()
-  return client.get<ResponseServiceListing>('/v0/algorithm')
+  return client.get('/v0/algorithm')
     .then(response => response.data.algorithms.map(normalize))
     .catch(err => {
       console.error('(algorithms:lookup) Failed:', err)
@@ -35,12 +35,4 @@ function normalize(descriptor): beachfront.Algorithm {
     name:          descriptor.name,
     type:          descriptor.interface,
   }
-}
-
-//
-// Helpers
-//
-
-interface ResponseServiceListing {
-  algorithms: any[]
 }

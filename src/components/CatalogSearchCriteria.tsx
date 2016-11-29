@@ -101,11 +101,3 @@ export const CatalogSearchCriteria = (props: Props) => (
     </label>
   </div>
 )
-
-//
-// Helpers
-//
-
-function titleCase(s) {
-  return s.replace(/((?:^|\s)[a-z])/g, c => c.toUpperCase())
-}

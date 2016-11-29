@@ -27,7 +27,7 @@ export function createJob({
   name,
   sceneId,
 }: ParamsCreateJob): Promise<beachfront.Job> {
-  return getClient().post<ResponseJobCreated>('/v0/job', {
+  return getClient().post('/v0/job', {
     algorithm_id: algorithmId,
     name:         name,
     scene_id:     sceneId,
@@ -40,7 +40,7 @@ export function createJob({
 }
 
 export function fetchJobs() {
-  return getClient().get<ResponseJobList>('/v0/job')
+  return getClient().get('/v0/job')
     .then(
       response => response.data.jobs.features,
       err => {
@@ -48,18 +48,4 @@ export function fetchJobs() {
         throw err
       }
     )
-}
-
-//
-// Helpers
-//
-
-interface ResponseJobCreated {
-  job: beachfront.Job
-}
-
-interface ResponseJobList {
-  jobs: {
-    features: beachfront.Job[]
-  }
 }

@@ -14,14 +14,14 @@
  * limitations under the License.
  **/
 
-import * as axios from 'axios'
+import axios from 'axios'
 import {getClient} from './session'
 
 let _client
 
 export function initialize(): Promise<void> {
   const session = getClient()
-  return session.get<ResponseServiceListing>('/v0/services')
+  return session.get('/v0/services')
     .then(response => {
       _client = axios.create({
         baseURL: response.data.services.catalog,
@@ -49,21 +49,11 @@ export function search({
       startIndex,
       acquiredDate:    new Date(dateFrom).toISOString(),
       maxAcquiredDate: new Date(dateTo).toISOString(),
-    }
+    },
   })
     .then(response => response.data)
     .catch(err => {
       console.error('(catalog:search) failed:', err)
       throw err
     })
-}
-
-//
-// Helpers
-//
-
-interface ResponseServiceListing {
-  services: {
-    catalog: string
-  }
 }

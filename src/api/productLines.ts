@@ -36,7 +36,7 @@ export function create({
   name,
 }: ParamsCreateProductline): Promise<beachfront.ProductLine> {
   const [minX, minY, maxX, maxY] = bbox
-  return getClient().post<ResponseProductLineCreated>('/v0/productline', {
+  return getClient().post('/v0/productline', {
     algorithm_id:      algorithmId,
     category:          category,
     max_cloud_cover:   maxCloudCover,
@@ -60,7 +60,7 @@ export function fetchJobs({
   productLineId,
   sinceDate,
 }) {
-  return getClient().get<ResponseJobListing>(`/v0/job/by_productline/${productLineId}`)
+  return getClient().get(`/v0/job/by_productline/${productLineId}`)
     .then(response => response.data.jobs.features)
     .catch(err => {
       console.error('(productLines:fetchJobs) failed:', err)
@@ -69,30 +69,10 @@ export function fetchJobs({
 }
 
 export function fetchProductLines(): Promise<beachfront.ProductLine[]> {
-  return getClient().get<ResponseProductLineList>('/v0/productline')
+  return getClient().get('/v0/productline')
     .then(response => response.data.product_lines.features)
     .catch(err => {
       console.error('(productLines:fetchProductLines) failed:', err)
       throw err
     })
-}
-
-//
-// Helpers
-//
-
-interface ResponseProductLineCreated {
-  product_line: beachfront.ProductLine
-}
-
-interface ResponseProductLineList {
-  product_lines: {
-    features: beachfront.ProductLine[]
-  }
-}
-
-interface ResponseJobListing {
-  jobs: {
-    features: beachfront.Job[]
-  }
 }

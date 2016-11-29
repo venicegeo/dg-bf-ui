@@ -14,6 +14,8 @@
  * limitations under the License.
  **/
 
+import {AxiosInstance} from 'axios'
+
 let instance
 
 export function start({
@@ -53,11 +55,7 @@ export function terminate() {
 //
 
 interface Params {
-  client: Axios.AxiosInstance
+  client: AxiosInstance
   interval: number
   onExpired(): void
-}
-
-interface Client {
-  isSessionActive(): Promise<boolean>
 }
