@@ -15,9 +15,11 @@
  **/
 
 import * as React from 'react'
+import axios, {AxiosResponse} from 'axios'
 import {getClient} from '../api/session'
 
 const MB = 1024000
+const TIMEOUT = 600000
 
 interface Props {
   className?:   string
@@ -94,13 +96,18 @@ export class FileDownloadLink extends React.Component<Props, State> {
     this.props.onStart()
 
     const client = getClient()
-    client.getFile(this.props.jobId, this.handleProgress)
+    client.get(`/v0/job/${this.props.jobId}.geojson`, {
+      cancelToken: new axios.CancelToken(cancel => this.cancel = cancel),
+      onDownloadProgress: this.handleProgress,
+      responseType: 'blob',
+      timeout: TIMEOUT,
+    })
       .then(this.handleComplete)
       .catch(this.handleError)
   }
 
-  private handleComplete(contents) {
-    const file = new File([contents], this.props.filename, {type: 'application/json'})
+  private handleComplete(response: AxiosResponse) {
+    const file = new File([response.data], this.props.filename, {type: 'application/json'})
     this.setState({
       blobUrl: URL.createObjectURL(file),
       isDownloading: false,
@@ -109,17 +116,16 @@ export class FileDownloadLink extends React.Component<Props, State> {
   }
 
   private handleError(err) {
-    if (err.isCancellation) {
-      return
-    }
-    this.props.onError(err)
     this.setState({
       isDownloading: false,
     })
+    if (axios.isCancel(err)) {
+      return
+    }
+    this.props.onError(err)
   }
 
-  private handleProgress({cancel, loaded, total}) {
-    this.cancel = cancel
+  private handleProgress({ loaded, total }) {
     this.setState({
       loaded,
       total,
