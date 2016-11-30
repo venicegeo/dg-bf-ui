@@ -72,6 +72,9 @@ module.exports = (config) => {
         ] : []
       },
       postcss: webpackConfig.postcss,
+      ts: {
+        transpileOnly: false,
+      },
       plugins: [
         new webpack.IgnorePlugin(/^\.\/locale$/, /moment$/),
         new webpack.DefinePlugin({

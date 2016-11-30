@@ -92,6 +92,15 @@ module.exports = {
     cssnext({ browsers: 'Firefox >= 38, Chrome >= 40' }),
   ]),
 
+  ts: {
+    /*
+     Note: This is done to improve the development feedback loop during a watch
+           cycle.  It should be accompanied by a karma config that does FULL static
+           type checking!
+     */
+    transpileOnly: true,
+  },
+
   plugins: [
     new CopyWebpackPlugin([{
       from: require.resolve('openlayers/dist/ol-debug.js'),
