@@ -389,6 +389,7 @@ export class Application extends React.Component<Props, State> {
         search: this.state.route.search.replace(new RegExp('\\??jobId=' + id), ''),
       })
     }
+    this.forgetJob(id)
   }
 
   private handleJobCreated(job) {

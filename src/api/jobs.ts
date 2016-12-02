@@ -39,6 +39,10 @@ export function createJob({
     })
 }
 
+export function forgetJob( jobId: string ){
+  return getClient().delete('/v0/job/'+jobId)
+}
+
 export function fetchJobs() {
   return getClient().get('/v0/job')
     .then(
