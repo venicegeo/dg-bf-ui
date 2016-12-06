@@ -32,9 +32,10 @@ const Icon = ({ path }) => (
 
 interface Props {
   activeRoute: { pathname: string, search: string, hash: string }
+  onClick(loc: { pathname: string, search: string, hash: string }): void
 }
 
-export const Navigation = ({ activeRoute, onClick }) => (
+export const Navigation = ({ activeRoute, onClick }: Props) => (
   <nav className={`${styles.root} ${activeRoute.pathname === '/' ? styles.atHome : ''}`}>
     <Link pathname="/about" onClick={onClick}>
       <img className={styles.brand} src={brand} alt="Beachfront"/>

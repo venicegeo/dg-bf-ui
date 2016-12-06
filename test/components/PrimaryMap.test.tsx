@@ -176,7 +176,7 @@ describe('<PrimaryMap/>', () => {
       wrapper.setProps({ view: { basemapIndex: 2, center: [30, 30], zoom: 10.5 } })
       return awaitMap(() => {
         assert.isFalse(wrapper.prop('onViewChange').called)
-      }, 300)  // wait for debounce to complete
+      }, 300)  // Wait for debounce to complete
     })
   })
 
@@ -226,9 +226,7 @@ describe('<PrimaryMap/>', () => {
 
     it('doesnt reverberate `onBoundingBoxChange` event', () => {
       const wrapper = getComponent([0, 0, 30, 30])
-      // awaitMap(() => {
       wrapper.setProps({ bbox: [-30, -30, 0, 0] })
-      // }, 0)
       return awaitMap(() => {
         assert.isTrue(wrapper.prop('onBoundingBoxChange').notCalled)
       })

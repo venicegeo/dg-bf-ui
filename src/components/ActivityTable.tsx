@@ -41,7 +41,6 @@ export const ActivityTable = ({
   duration,
   durations,
   isLoading,
-  error,
   jobs,
   selectedJobIds,
   onDurationChange,
