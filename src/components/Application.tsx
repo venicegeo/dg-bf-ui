@@ -20,6 +20,7 @@ import * as React from 'react'
 import {render} from 'react-dom'
 import * as debounce from 'lodash/debounce'
 import {About} from './About'
+import {ClassificationBanner} from './ClassificationBanner'
 import {CreateJob, SearchCriteria, createSearchCriteria} from './CreateJob'
 import {CreateProductLine} from './CreateProductLine'
 import {JobStatusList} from './JobStatusList'
@@ -33,7 +34,6 @@ import {
   MODE_SELECT_IMAGERY,
   MODE_PRODUCT_LINES,
 } from './PrimaryMap'
-import {ClassificationBanner} from './ClassificationBanner'
 import {ProductLineList} from './ProductLineList'
 import {SessionExpired} from './SessionExpired'
 import {UpdateAvailable} from './UpdateAvailable'
