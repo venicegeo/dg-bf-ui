@@ -28,7 +28,6 @@ export function start({
   }
 
   const work = () => {
-    console.debug('(session:worker) validating session')
     client.get('/login/heartbeat')
       .catch(err => {
         if (err.response.status === 401) {
@@ -39,6 +38,7 @@ export function start({
       })
   }
 
+  console.debug('(session:worker) starting at %s second intervals', Math.ceil(interval / 1000))
   instance = setInterval(work, interval)
   work()
 }

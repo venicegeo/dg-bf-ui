@@ -506,7 +506,7 @@ export class Application extends React.Component<Props, State> {
       onAvailable: () => this.setState({ isUpdateAvailable: true }),
     })
 
-    console.debug('(application:startBackgroundTasks) starting job/productline polling (at %s second intervals)', Math.ceil(RECORD_POLLING_INTERVAL / 1000))
+    console.debug('(application:startBackgroundTasks) starting job/productline polling at %s second intervals', Math.ceil(RECORD_POLLING_INTERVAL / 1000))
     this.pollingInstance = setInterval(this.refreshRecords.bind(this), RECORD_POLLING_INTERVAL)
   }
 
