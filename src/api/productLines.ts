@@ -16,16 +16,6 @@
 
 import {getClient} from './session'
 
-export interface ParamsCreateProductline {
-  algorithmId: string
-  bbox: [number, number, number, number]
-  category: string
-  dateStart: string
-  dateStop: string
-  maxCloudCover: number
-  name: string
-}
-
 export function create({
   algorithmId,
   bbox,
@@ -75,4 +65,14 @@ export function fetchProductLines(): Promise<beachfront.ProductLine[]> {
       console.error('(productLines:fetchProductLines) failed:', err)
       throw err
     })
+}
+
+export interface ParamsCreateProductline {
+  algorithmId: string
+  bbox: [number, number, number, number]
+  category: string
+  dateStart: string
+  dateStop: string
+  maxCloudCover: number
+  name: string
 }
