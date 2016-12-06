@@ -35,7 +35,7 @@ describe('<NewJobDetails/>', () => {
       <NewJobDetails
         name={_props.name}
         onNameChange={_props.onNameChange}
-      />
+      />,
     )
     assert.equal((wrapper.find('input') as any).node.value, 'test-name')
   })
@@ -45,7 +45,7 @@ describe('<NewJobDetails/>', () => {
       <NewJobDetails
         name={_props.name}
         onNameChange={_props.onNameChange}
-      />
+      />,
     )
     const input: any = wrapper.find('input')
     input.node.value = 'test-new-value'
@@ -58,7 +58,7 @@ describe('<NewJobDetails/>', () => {
       <NewJobDetails
         name={_props.name}
         onNameChange={_props.onNameChange}
-      />
+      />,
     )
     wrapper.setProps({name: 'test-new-value'})
     assert.equal((wrapper.find('input') as any).node.value, 'test-new-value')

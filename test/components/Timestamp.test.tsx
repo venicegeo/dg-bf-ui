@@ -37,7 +37,7 @@ describe('<Timestamp/>', () => {
     const wrapper = shallow(
       <Timestamp
         timestamp={_props.timestamp}
-      />
+      />,
     )
     assert.equal(wrapper.text(), '3 hours ago')
   })
@@ -46,7 +46,7 @@ describe('<Timestamp/>', () => {
     const wrapper = shallow(
       <Timestamp
         timestamp={new Date(Date.now() - (96 * HOUR)).toISOString()}
-      />
+      />,
     )
     assert.equal(wrapper.text(), '4 days ago')
   })
@@ -55,7 +55,7 @@ describe('<Timestamp/>', () => {
     const wrapper = shallow(
       <Timestamp
         timestamp={'2016-01-15T12:34:00Z'}
-      />
+      />,
     )
     wrapper.simulate('click', new Event('click'))
     assert.match(wrapper.text(), /Jan \d{2}, 2016 \d{1,2}:34 (AM|PM)$/)

@@ -62,7 +62,7 @@ describe('<CreateJob/>', () => {
         onJobCreated={_props.onJobCreated}
         onSearchCriteriaChange={_props.onSearchCriteriaChange}
         onSearchSubmit={_props.onSearchSubmit}
-      />
+      />,
     )
     assert.equal(wrapper.find('.CreateJob-root').length, 1)
     assert.equal(wrapper.find('.CreateJob-placeholder').length, 0)
@@ -86,7 +86,7 @@ describe('<CreateJob/>', () => {
         onJobCreated={_props.onJobCreated}
         onSearchCriteriaChange={_props.onSearchCriteriaChange}
         onSearchSubmit={_props.onSearchSubmit}
-      />
+      />,
     )
     assert.equal(wrapper.find('.CreateJob-placeholder').length, 1)
   })
@@ -106,7 +106,7 @@ describe('<CreateJob/>', () => {
         onJobCreated={_props.onJobCreated}
         onSearchCriteriaChange={_props.onSearchCriteriaChange}
         onSearchSubmit={_props.onSearchSubmit}
-      />
+      />,
     )
     assert.equal(wrapper.find('.CreateJob-search').length, 0)
   })
@@ -126,7 +126,7 @@ describe('<CreateJob/>', () => {
         onJobCreated={_props.onJobCreated}
         onSearchCriteriaChange={_props.onSearchCriteriaChange}
         onSearchSubmit={_props.onSearchSubmit}
-      />
+      />,
     )
     assert.equal(wrapper.find('.CreateJob-details').length, 0)
   })
@@ -146,7 +146,7 @@ describe('<CreateJob/>', () => {
         onJobCreated={_props.onJobCreated}
         onSearchCriteriaChange={_props.onSearchCriteriaChange}
         onSearchSubmit={_props.onSearchSubmit}
-      />
+      />,
     )
     assert.equal(wrapper.find('.CreateJob-algorithms').length, 0)
   })
@@ -166,7 +166,7 @@ describe('<CreateJob/>', () => {
         onJobCreated={_props.onJobCreated}
         onSearchCriteriaChange={_props.onSearchCriteriaChange}
         onSearchSubmit={_props.onSearchSubmit}
-      />
+      />,
     )
     assert.equal(wrapper.state('name'), 'test-scene-id')
   })
@@ -186,7 +186,7 @@ describe('<CreateJob/>', () => {
         onJobCreated={_props.onJobCreated}
         onSearchCriteriaChange={_props.onSearchCriteriaChange}
         onSearchSubmit={_props.onSearchSubmit}
-      />
+      />,
     )
     assert.equal(wrapper.state('name'), 'test-scene-id')
   })
@@ -206,7 +206,7 @@ describe('<CreateJob/>', () => {
         onJobCreated={_props.onJobCreated}
         onSearchCriteriaChange={_props.onSearchCriteriaChange}
         onSearchSubmit={_props.onSearchSubmit}
-      />
+      />,
     )
     const instance = wrapper.instance() as any as Internals
     instance.handleNameChange('test-custom-name')
@@ -234,7 +234,7 @@ describe('<CreateJob/>', () => {
         onJobCreated={_props.onJobCreated}
         onSearchCriteriaChange={_props.onSearchCriteriaChange}
         onSearchSubmit={_props.onSearchSubmit}
-      />
+      />,
     )
     wrapper.setProps({ selectedScene: {
       id: 'test-different-scene',
@@ -261,7 +261,7 @@ describe('<CreateJob/>', () => {
         onJobCreated={_props.onJobCreated}
         onSearchCriteriaChange={_props.onSearchCriteriaChange}
         onSearchSubmit={_props.onSearchSubmit}
-      />
+      />,
     )
     assert.equal(wrapper.state('name'), 'test-prefixed-scene-id')
   })

@@ -46,6 +46,6 @@ export function fetchJobs() {
       err => {
         console.error('(jobs:fetchJobs) failed:', err)
         throw err
-      }
+      },
     )
 }

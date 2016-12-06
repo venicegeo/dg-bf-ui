@@ -71,7 +71,7 @@ declare namespace beachfront {
     type: 'SCENE'
     acquiredDate: string
     bands: {
-      [key: string]: string
+      [key: string]: string,
     }
     cloudCover: number
     path: string
@@ -103,13 +103,13 @@ interface BuildEnvironment {
 }
 
 declare const process: {
-  env: BuildEnvironment
+  env: BuildEnvironment,
 }
 
 declare const require: {
   (path: string)
   context(path: string, recursive: boolean, pattern?: RegExp): {
     keys(): string[]
-    (...v: any[])
-  }
+    (...v: any[]),
+  },
 }

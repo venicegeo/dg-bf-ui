@@ -63,7 +63,7 @@ describe('GeoServer Service', () => {
           (err) => {
             assert.instanceOf(err, Error)
             assert.match(err, /test-error/i)
-          }
+          },
         )
     })
   })

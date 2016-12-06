@@ -49,7 +49,7 @@ describe('<CatalogSearchCriteria/>', () => {
         onClearBbox={_props.onClearBbox}
         onCloudCoverChange={_props.onCloudCoverChange}
         onDateChange={_props.onDateChange}
-      />
+      />,
     )
     assert.equal(wrapper.find('.CatalogSearchCriteria-apiKey input').prop('value'), 'test-catalog-api-key')
     assert.equal(wrapper.find('.CatalogSearchCriteria-cloudCover input').prop('value'), '19')
@@ -69,7 +69,7 @@ describe('<CatalogSearchCriteria/>', () => {
         onClearBbox={_props.onClearBbox}
         onCloudCoverChange={_props.onCloudCoverChange}
         onDateChange={_props.onDateChange}
-      />
+      />,
     )
     assert.equal(wrapper.find('.CatalogSearchCriteria-captureDateFrom input').length, 0)
     assert.equal(wrapper.find('.CatalogSearchCriteria-captureDateTo input').length, 0)
@@ -89,7 +89,7 @@ describe('<CatalogSearchCriteria/>', () => {
         onClearBbox={_props.onClearBbox}
         onCloudCoverChange={_props.onCloudCoverChange}
         onDateChange={_props.onDateChange}
-      />
+      />,
     )
     wrapper.find('.CatalogSearchCriteria-apiKey input').simulate('change', {target: {value: 'test-new-catalog-api-key'}})
     assert.isTrue(_props.onApiKeyChange.calledWithExactly('test-new-catalog-api-key'))
@@ -107,7 +107,7 @@ describe('<CatalogSearchCriteria/>', () => {
         onClearBbox={_props.onClearBbox}
         onCloudCoverChange={_props.onCloudCoverChange}
         onDateChange={_props.onDateChange}
-      />
+      />,
     )
     wrapper.find('.CatalogSearchCriteria-clearBbox').simulate('click')
     assert.equal(_props.onClearBbox.callCount, 1)
@@ -125,7 +125,7 @@ describe('<CatalogSearchCriteria/>', () => {
         onClearBbox={_props.onClearBbox}
         onCloudCoverChange={_props.onCloudCoverChange}
         onDateChange={_props.onDateChange}
-      />
+      />,
     )
     wrapper.find('.CatalogSearchCriteria-cloudCover input').simulate('change', {target: {value: '42'}})
     assert.isTrue(_props.onCloudCoverChange.calledWithExactly(42))
@@ -143,7 +143,7 @@ describe('<CatalogSearchCriteria/>', () => {
         onClearBbox={_props.onClearBbox}
         onCloudCoverChange={_props.onCloudCoverChange}
         onDateChange={_props.onDateChange}
-      />
+      />,
     )
     wrapper.find('.CatalogSearchCriteria-captureDateFrom input').simulate('change', {target: {value: '1999-12-31'}})
     assert.isTrue(_props.onDateChange.calledWithExactly('1999-12-31', _props.dateTo))
@@ -161,7 +161,7 @@ describe('<CatalogSearchCriteria/>', () => {
         onClearBbox={_props.onClearBbox}
         onCloudCoverChange={_props.onCloudCoverChange}
         onDateChange={_props.onDateChange}
-      />
+      />,
     )
     wrapper.find('.CatalogSearchCriteria-captureDateTo input').simulate('change', {target: {value: '1999-12-31'}})
     assert.isTrue(_props.onDateChange.calledWithExactly(_props.dateFrom, '1999-12-31'))
@@ -179,7 +179,7 @@ describe('<CatalogSearchCriteria/>', () => {
         onClearBbox={_props.onClearBbox}
         onCloudCoverChange={_props.onCloudCoverChange}
         onDateChange={_props.onDateChange}
-      />
+      />,
     )
     wrapper.setProps({apiKey: 'test-new-catalog-api-key'})
     assert.equal(wrapper.find('.CatalogSearchCriteria-apiKey input').prop('value'), 'test-new-catalog-api-key')
@@ -197,7 +197,7 @@ describe('<CatalogSearchCriteria/>', () => {
         onClearBbox={_props.onClearBbox}
         onCloudCoverChange={_props.onCloudCoverChange}
         onDateChange={_props.onDateChange}
-      />
+      />,
     )
     wrapper.setProps({cloudCover: 42})
     assert.equal(wrapper.find('.CatalogSearchCriteria-cloudCover input').prop('value'), '42')
@@ -215,7 +215,7 @@ describe('<CatalogSearchCriteria/>', () => {
         onClearBbox={_props.onClearBbox}
         onCloudCoverChange={_props.onCloudCoverChange}
         onDateChange={_props.onDateChange}
-      />
+      />,
     )
     wrapper.setProps({dateFrom: '1999-12-31'})
     assert.equal(wrapper.find('.CatalogSearchCriteria-captureDateFrom input').prop('value'), '1999-12-31')
@@ -234,7 +234,7 @@ describe('<CatalogSearchCriteria/>', () => {
         onClearBbox={_props.onClearBbox}
         onCloudCoverChange={_props.onCloudCoverChange}
         onDateChange={_props.onDateChange}
-      />
+      />,
     )
     wrapper.setProps({dateTo: '1999-12-31'})
     assert.equal(wrapper.find('.CatalogSearchCriteria-captureDateFrom input').prop('value'), _props.dateFrom)

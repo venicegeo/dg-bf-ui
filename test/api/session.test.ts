@@ -91,7 +91,7 @@ describe('Session Service', () => {
           () => assert.fail('Should have thrown'),
           () => {
             assert.isNull(sessionStorage.getItem('apiKey'))
-          }
+          },
         )
     })
 
@@ -102,7 +102,7 @@ describe('Session Service', () => {
           () => assert.fail('Should have thrown'),
           (err) => {
             assert.instanceOf(err, Error)
-          }
+          },
         )
     })
 
@@ -125,7 +125,7 @@ describe('Session Service', () => {
             assert.throws(() => {
               service.getClient()
             })
-          }
+          },
         )
     })
   })

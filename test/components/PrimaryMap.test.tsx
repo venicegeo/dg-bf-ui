@@ -71,7 +71,7 @@ describe('<PrimaryMap/>', () => {
         onSearchPageChange={_props.onSearchPageChange}
         onSelectFeature={_props.onSelectFeature}
         onViewChange={_props.onViewChange}
-      />
+      />,
     )
     assert.equal(wrapper.find('.PrimaryMap-root').length, 1)
     assert.equal(wrapper.find('.PrimaryMap-basemapSelect').length, 1)
@@ -95,7 +95,7 @@ describe('<PrimaryMap/>', () => {
         onSearchPageChange={_props.onSearchPageChange}
         onSelectFeature={_props.onSelectFeature}
         onViewChange={_props.onViewChange}
-      />
+      />,
     )
     assert.instanceOf((wrapper.instance() as any as Internals).map, ol.Map)
     assert.instanceOf((wrapper.ref('container') as any).node.querySelector('canvas'), HTMLCanvasElement)
@@ -119,7 +119,7 @@ describe('<PrimaryMap/>', () => {
         onSearchPageChange={_props.onSearchPageChange}
         onSelectFeature={_props.onSelectFeature}
         onViewChange={_props.onViewChange}
-      />
+      />,
     )
 
     it('has correct center on init', () => {
@@ -198,7 +198,7 @@ describe('<PrimaryMap/>', () => {
         onSearchPageChange={_props.onSearchPageChange}
         onSelectFeature={_props.onSelectFeature}
         onViewChange={_props.onViewChange}
-      />
+      />,
     )
 
     it('can render bbox', () => {
@@ -209,7 +209,7 @@ describe('<PrimaryMap/>', () => {
         const points = (features[0].getGeometry() as ol.geom.Polygon).getCoordinates()[0].map(p => ol.proj.toLonLat(p).map(Math.round))
         assert.equal(features.length, 1)
         assert.deepEqual(points, [[0, 0], [0, 30], [30, 30], [30, 0], [0, 0]])
-      }, 0)
+      })
     })
 
     it('redraws bbox when `bbox` prop changes', () => {
@@ -221,7 +221,7 @@ describe('<PrimaryMap/>', () => {
         const points = (features[0].getGeometry() as ol.geom.Polygon).getCoordinates()[0].map(p => ol.proj.toLonLat(p).map(Math.round))
         assert.equal(features.length, 1)
         assert.deepEqual(points, [[-30, -30], [-30, 0], [0, 0], [0, -30], [-30, -30]])
-      }, 0)
+      })
     })
 
     it('doesnt reverberate `onBoundingBoxChange` event', () => {
@@ -253,7 +253,7 @@ describe('<PrimaryMap/>', () => {
         onSearchPageChange={_props.onSearchPageChange}
         onSelectFeature={_props.onSelectFeature}
         onViewChange={_props.onViewChange}
-      />
+      />,
     )
 
     it('sends correct catalog API key via XYZ', () => {
@@ -282,7 +282,7 @@ describe('<PrimaryMap/>', () => {
         onSearchPageChange={_props.onSearchPageChange}
         onSelectFeature={_props.onSelectFeature}
         onViewChange={_props.onViewChange}
-      />
+      />,
     )
 
     it('adds detections layer to map', () => {

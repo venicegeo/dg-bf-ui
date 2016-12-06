@@ -47,7 +47,7 @@ describe('<Algorithm/>', () => {
       <Algorithm
         algorithm={_props.algorithm}
         sceneMetadata={_props.sceneMetadata}
-      />
+      />,
     )
     assert.equal(wrapper.find('.Algorithm-name').text(), 'test-name')
     assert.equal(wrapper.find('.Algorithm-description').text(), 'test-description')
@@ -62,7 +62,7 @@ describe('<Algorithm/>', () => {
       <Algorithm
         algorithm={_props.algorithm}
         sceneMetadata={_props.sceneMetadata}
-      />
+      />,
     )
     assert.equal(wrapper.find('.Algorithm-selectionIndicator').length, 0)
     assert.equal(wrapper.find('.Algorithm-startButton').length, 0)
@@ -74,7 +74,7 @@ describe('<Algorithm/>', () => {
         algorithm={_props.algorithm}
         sceneMetadata={_props.sceneMetadata}
         onSelect={_props.onSelect}
-      />
+      />,
     )
     assert.equal(wrapper.find('.Algorithm-selectionIndicator').length, 1)
   })
@@ -85,7 +85,7 @@ describe('<Algorithm/>', () => {
         algorithm={_props.algorithm}
         sceneMetadata={_props.sceneMetadata}
         onSubmit={_props.onSubmit}
-      />
+      />,
     )
     assert.equal(wrapper.find('.Algorithm-startButton').length, 1)
   })
@@ -97,7 +97,7 @@ describe('<Algorithm/>', () => {
         sceneMetadata={_props.sceneMetadata}
         onSelect={_props.onSelect}
         onSubmit={_props.onSubmit}
-      />
+      />,
     )
     assert.equal(wrapper.find('.Algorithm-selectionIndicator').length, 1)
     assert.equal(wrapper.find('.Algorithm-startButton').length, 1)
@@ -110,7 +110,7 @@ describe('<Algorithm/>', () => {
         sceneMetadata={_props.sceneMetadata}
         isSubmitting={true}
         onSubmit={_props.onSubmit}
-      />
+      />,
     )
     assert.isTrue(wrapper.find('.Algorithm-startButton').prop('disabled'))
   })
@@ -122,7 +122,7 @@ describe('<Algorithm/>', () => {
         sceneMetadata={_props.sceneMetadata}
         isSelected={true}
         onSelect={_props.onSelect}
-      />
+      />,
     )
     assert.isTrue(wrapper.find('.Algorithm-selectionIndicator input').prop('checked'))
   })
@@ -134,7 +134,7 @@ describe('<Algorithm/>', () => {
         sceneMetadata={_props.sceneMetadata}
         isSelected={_props.isSelected}
         onSelect={_props.onSelect}
-      />
+      />,
     )
     wrapper.find('.Algorithm-header').simulate('click')
     assert.isTrue(_props.onSelect.called)
@@ -147,7 +147,7 @@ describe('<Algorithm/>', () => {
         sceneMetadata={_props.sceneMetadata}
         isSelected={true}
         onSelect={_props.onSelect}
-      />
+      />,
     )
     wrapper.find('.Algorithm-header').simulate('click')
     assert.isTrue(_props.onSelect.notCalled)
@@ -158,7 +158,7 @@ describe('<Algorithm/>', () => {
       <Algorithm
         algorithm={_props.algorithm}
         sceneMetadata={_props.sceneMetadata}
-      />
+      />,
     )
     wrapper.find('.Algorithm-header').simulate('click')
     assert.isTrue(_props.onSelect.notCalled)
@@ -170,7 +170,7 @@ describe('<Algorithm/>', () => {
         algorithm={_props.algorithm}
         sceneMetadata={_props.sceneMetadata}
         onSubmit={_props.onSubmit}
-      />
+      />,
     )
     wrapper.find('.Algorithm-startButton').simulate('click')
     assert.isTrue(_props.onSubmit.called)
@@ -194,7 +194,7 @@ describe('<Algorithm/>', () => {
           },
           cloudCover: 5,
         } as any}
-      />
+      />,
     )
     assert.equal(wrapper.find('.Algorithm-root').hasClass('Algorithm-isCompatible'), true)
     assert.equal(wrapper.find('.Algorithm-requirements tbody tr').at(0).hasClass('Algorithm-met'), true)
@@ -219,7 +219,7 @@ describe('<Algorithm/>', () => {
           },
           cloudCover: 9001,
         } as any}
-      />
+      />,
     )
     assert.equal(wrapper.find('.Algorithm-root').hasClass('Algorithm-isNotCompatible'), true)
     assert.equal(wrapper.find('.Algorithm-requirements tbody tr').at(0).hasClass('Algorithm-met'), true)
@@ -244,7 +244,7 @@ describe('<Algorithm/>', () => {
           },
           cloudCover: 9001,
         } as any}
-      />
+      />,
     )
     assert.equal(wrapper.find('.Algorithm-root').hasClass('Algorithm-isNotCompatible'), true)
     assert.equal(wrapper.find('.Algorithm-requirements tbody tr').at(0).hasClass('Algorithm-unmet'), true)
@@ -260,7 +260,7 @@ describe('<Algorithm/>', () => {
         warningMessage="test-warning-message"
         isSubmitting={true}
         onSubmit={_props.onSubmit}
-      />
+      />,
     )
     assert.equal(wrapper.find('.Algorithm-compatibilityWarning h4').text().trim(), 'test-warning-heading')
     assert.equal(wrapper.find('.Algorithm-compatibilityWarning p').text().trim(), 'test-warning-message')

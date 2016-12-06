@@ -54,7 +54,7 @@ describe('<ImagerySearch/>', () => {
         onCloudCoverChange={_props.onCloudCoverChange}
         onDateChange={_props.onDateChange}
         onSubmit={_props.onSubmit}
-      />
+      />,
     )
     assert.equal(wrapper.find(CatalogSearchCriteria).length, 1)
     assert.equal(wrapper.find('button[type="submit"]').length, 1)
@@ -74,7 +74,7 @@ describe('<ImagerySearch/>', () => {
         onCloudCoverChange={_props.onCloudCoverChange}
         onDateChange={_props.onDateChange}
         onSubmit={_props.onSubmit}
-      />
+      />,
     )
     wrapper.find(CatalogSearchCriteria).props().onApiKeyChange('test-new-catalog-api-key')
     assert.isTrue(_props.onApiKeyChange.calledWithExactly('test-new-catalog-api-key'))
@@ -94,7 +94,7 @@ describe('<ImagerySearch/>', () => {
         onCloudCoverChange={_props.onCloudCoverChange}
         onDateChange={_props.onDateChange}
         onSubmit={_props.onSubmit}
-      />
+      />,
     )
     wrapper.find(CatalogSearchCriteria).props().onClearBbox()
     assert.equal(_props.onClearBbox.callCount, 1)
@@ -114,7 +114,7 @@ describe('<ImagerySearch/>', () => {
         onCloudCoverChange={_props.onCloudCoverChange}
         onDateChange={_props.onDateChange}
         onSubmit={_props.onSubmit}
-      />
+      />,
     )
     wrapper.find(CatalogSearchCriteria).props().onCloudCoverChange(42)
     assert.isTrue(_props.onCloudCoverChange.calledWithExactly(42))
@@ -134,7 +134,7 @@ describe('<ImagerySearch/>', () => {
         onCloudCoverChange={_props.onCloudCoverChange}
         onDateChange={_props.onDateChange}
         onSubmit={_props.onSubmit}
-      />
+      />,
     )
     wrapper.find(CatalogSearchCriteria).props().onDateChange('1999-12-31', _props.dateTo)
     assert.isTrue(_props.onDateChange.calledWithExactly('1999-12-31', _props.dateTo))
@@ -154,7 +154,7 @@ describe('<ImagerySearch/>', () => {
         onCloudCoverChange={_props.onCloudCoverChange}
         onDateChange={_props.onDateChange}
         onSubmit={_props.onSubmit}
-      />
+      />,
     )
     wrapper.find(CatalogSearchCriteria).props().onDateChange(_props.dateFrom, '1999-12-31')
     assert.isTrue(_props.onDateChange.calledWithExactly(_props.dateFrom, '1999-12-31'))
@@ -174,7 +174,7 @@ describe('<ImagerySearch/>', () => {
         onCloudCoverChange={_props.onCloudCoverChange}
         onDateChange={_props.onDateChange}
         onSubmit={_props.onSubmit}
-      />
+      />,
     )
     const noop = () => {/* noop */}
     wrapper.find('form').simulate('submit', { preventDefault: noop, stopPropagation: noop })
@@ -200,7 +200,7 @@ describe('<ImagerySearch/>', () => {
         onCloudCoverChange={_props.onCloudCoverChange}
         onDateChange={_props.onDateChange}
         onSubmit={_props.onSubmit}
-      />
+      />,
     )
     assert.equal(wrapper.find('.ImagerySearch-errorMessage').length, 1)
   })
@@ -219,7 +219,7 @@ describe('<ImagerySearch/>', () => {
         onCloudCoverChange={_props.onCloudCoverChange}
         onDateChange={_props.onDateChange}
         onSubmit={_props.onSubmit}
-      />
+      />,
     )
     assert.equal(wrapper.find('.ImagerySearch-loadingMask').length, 1)
   })
@@ -238,7 +238,7 @@ describe('<ImagerySearch/>', () => {
         onCloudCoverChange={_props.onCloudCoverChange}
         onDateChange={_props.onDateChange}
         onSubmit={_props.onSubmit}
-      />
+      />,
     )
     assert.isTrue(wrapper.find('button[type="submit"]').prop('disabled'))
   })

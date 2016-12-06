@@ -50,7 +50,7 @@ describe('<AlgorithmListList/>', () => {
       <AlgorithmList
         algorithms={_props.algorithms}
         sceneMetadata={_props.sceneMetadata}
-      />
+      />,
     )
     assert.equal(wrapper.find('.AlgorithmList-root').length, 1)
     assert.equal(wrapper.find(Algorithm).length, 1)
@@ -78,7 +78,7 @@ describe('<AlgorithmListList/>', () => {
           },
         ]}
         sceneMetadata={_props.sceneMetadata}
-      />
+      />,
     )
     assert.equal(wrapper.find(Algorithm).length, 2)
   })
@@ -88,7 +88,7 @@ describe('<AlgorithmListList/>', () => {
       <AlgorithmList
         algorithms={[]}
         sceneMetadata={_props.sceneMetadata}
-      />
+      />,
     )
     assert.equal(wrapper.find(Algorithm).length, 0)
   })
@@ -99,7 +99,7 @@ describe('<AlgorithmListList/>', () => {
         algorithms={_props.algorithms}
         sceneMetadata={_props.sceneMetadata}
         onSelect={_props.onSelect}
-      />
+      />,
     )
     assert.isFunction(wrapper.find(Algorithm).prop('onSelect'))
   })
@@ -110,7 +110,7 @@ describe('<AlgorithmListList/>', () => {
         algorithms={_props.algorithms}
         sceneMetadata={_props.sceneMetadata}
         onSubmit={_props.onSubmit}
-      />
+      />,
     )
     assert.isFunction(wrapper.find(Algorithm).prop('onSubmit'))
   })
@@ -120,7 +120,7 @@ describe('<AlgorithmListList/>', () => {
       <AlgorithmList
         algorithms={_props.algorithms}
         sceneMetadata={_props.sceneMetadata}
-      />
+      />,
     )
     assert.strictEqual(wrapper.find(Algorithm).prop('onSelect'), undefined)
     assert.strictEqual(wrapper.find(Algorithm).prop('onSubmit'), undefined)
@@ -133,7 +133,7 @@ describe('<AlgorithmListList/>', () => {
         sceneMetadata={_props.sceneMetadata}
         onSelect={_props.onSelect}
         onSubmit={_props.onSubmit}
-      />
+      />,
     )
     assert.isFunction(wrapper.find(Algorithm).prop('onSelect'))
     assert.isFunction(wrapper.find(Algorithm).prop('onSubmit'))
@@ -163,7 +163,7 @@ describe('<AlgorithmListList/>', () => {
         sceneMetadata={_props.sceneMetadata}
         selectedId="test-algorithm-2"
         onSelect={_props.onSelect}
-      />
+      />,
     )
     assert.isFalse(wrapper.find(Algorithm).at(0).prop('isSelected'))
     assert.isTrue(wrapper.find(Algorithm).at(1).prop('isSelected'))
@@ -193,7 +193,7 @@ describe('<AlgorithmListList/>', () => {
         sceneMetadata={_props.sceneMetadata}
         selectedId="test-algorithm-2"
         onSelect={_props.onSelect}
-      />
+      />,
     )
     wrapper.setProps({ selectedId: 'test-algorithm-1' })
     assert.isTrue(wrapper.find(Algorithm).at(0).prop('isSelected'))
@@ -207,7 +207,7 @@ describe('<AlgorithmListList/>', () => {
         algorithms={[algorithm]}
         sceneMetadata={_props.sceneMetadata}
         onSubmit={_props.onSubmit}
-      />
+      />,
     )
     wrapper.find(Algorithm).props().onSubmit(algorithm)
     assert.isTrue(_props.onSubmit.calledWithExactly(algorithm))
@@ -220,7 +220,7 @@ describe('<AlgorithmListList/>', () => {
         algorithms={[algorithm]}
         sceneMetadata={_props.sceneMetadata}
         onSelect={_props.onSelect}
-      />
+      />,
     )
     wrapper.find(Algorithm).props().onSelect(algorithm)
     assert.isTrue(_props.onSelect.calledWithExactly(algorithm))
@@ -233,7 +233,7 @@ describe('<AlgorithmListList/>', () => {
         sceneMetadata={_props.sceneMetadata}
         warningHeading="test-warning-heading"
         warningMessage="test-warning-message"
-      />
+      />,
     )
     assert.equal(wrapper.find(Algorithm).prop('warningHeading'), 'test-warning-heading')
     assert.equal(wrapper.find(Algorithm).prop('warningMessage'), 'test-warning-message')

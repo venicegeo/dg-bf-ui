@@ -123,7 +123,7 @@ function generatePlaceholderRows(count) {
         <td><span/></td>
         <td><span/></td>
         <td><span/></td>
-      </tr>
+      </tr>,
     )
   }
   return rows
