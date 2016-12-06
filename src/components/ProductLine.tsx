@@ -19,6 +19,7 @@ const styles = require('./ProductLine.css')
 import * as React from 'react'
 import * as moment from 'moment'
 import {ActivityTable} from './ActivityTable'
+import {fetchJobs} from '../api/productLines'
 
 const LAST_24_HOURS = {value: 'PT24H', label: 'Last 24 Hours'}
 const LAST_7_DAYS = {value: 'P7D', label: 'Last 7 Days'}
@@ -28,7 +29,6 @@ const SINCE_CREATION = {value: 'P0D', label: 'All'}
 interface Props {
   className?: string
   productLine: beachfront.ProductLine
-  onFetchJobs(productLineId: string, sinceDate: string)
   onJobHoverIn(job: beachfront.Job)
   onJobHoverOut(job: beachfront.Job)
   onJobSelect(job: beachfront.Job)
@@ -62,7 +62,7 @@ export class ProductLine extends React.Component<Props, State> {
     this.handleJobRowClick = this.handleJobRowClick.bind(this)
   }
 
-  componentDidUpdate(prevProps, prevState) {
+  componentDidUpdate(_, prevState) {
     if (this.state.isExpanded && (prevState.isExpanded !== this.state.isExpanded || prevState.duration !== this.state.duration)) {
       this.fetchJobs()
     }
@@ -134,7 +134,10 @@ export class ProductLine extends React.Component<Props, State> {
 
   private fetchJobs() {
     this.setState({ isFetchingJobs: true })
-    this.props.onFetchJobs(this.props.productLine.id, generateSinceDate(this.state.duration, this.props.productLine))
+    fetchJobs({
+      productLineId: this.props.productLine.id,
+      sinceDate: generateSinceDate(this.state.duration, this.props.productLine),
+    })
       .then(jobs => this.setState({ jobs, isFetchingJobs: false }))
       .catch(error => this.setState({ error, isFetchingJobs: false }))
   }

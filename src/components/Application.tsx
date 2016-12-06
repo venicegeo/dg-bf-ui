@@ -20,6 +20,7 @@ import * as React from 'react'
 import {render} from 'react-dom'
 import * as debounce from 'lodash/debounce'
 import {About} from './About'
+import {ClassificationBanner} from './ClassificationBanner'
 import {CreateJob, SearchCriteria, createSearchCriteria} from './CreateJob'
 import {CreateProductLine} from './CreateProductLine'
 import {JobStatusList} from './JobStatusList'
@@ -33,7 +34,6 @@ import {
   MODE_SELECT_IMAGERY,
   MODE_PRODUCT_LINES,
 } from './PrimaryMap'
-import {ClassificationBanner} from './ClassificationBanner'
 import {ProductLineList} from './ProductLineList'
 import {SessionExpired} from './SessionExpired'
 import {UpdateAvailable} from './UpdateAvailable'
@@ -46,6 +46,7 @@ import * as sessionService from '../api/session'
 import * as updateService from '../api/update'
 import {createCollection, Collection} from '../utils/collections'
 import {getFeatureCenter} from '../utils/geometries'
+import {RECORD_POLLING_INTERVAL} from '../config'
 
 import {
   STATUS_SUCCESS,
@@ -95,6 +96,7 @@ export const createApplication = (element) => render(
 
 export class Application extends React.Component<Props, State> {
   private initializationPromise: Promise<any>
+  private pollingInstance: number
 
   constructor(props) {
     super(props)
@@ -103,8 +105,7 @@ export class Application extends React.Component<Props, State> {
     this.handleCatalogApiKeyChange = this.handleCatalogApiKeyChange.bind(this)
     this.handleClearBbox = this.handleClearBbox.bind(this)
     this.handleDismissJobError = this.handleDismissJobError.bind(this)
-    this.handleFetchProductLines = this.handleFetchProductLines.bind(this)
-    this.handleFetchProductLineJobs = this.handleFetchProductLineJobs.bind(this)
+    this.handleDismissProductLineError = this.handleDismissProductLineError.bind(this)
     this.handleForgetJob = this.handleForgetJob.bind(this)
     this.handleJobCreated = this.handleJobCreated.bind(this)
     this.handleNavigateToJob = this.handleNavigateToJob.bind(this)
@@ -124,10 +125,11 @@ export class Application extends React.Component<Props, State> {
   componentDidUpdate(_, prevState: State) {
     if (!prevState.isLoggedIn && this.state.isLoggedIn) {
       this.initializeServices()
-      this.startWorkers()
+      this.startBackgroundTasks()
+      this.refreshRecords()
     }
     if (!prevState.isSessionExpired && this.state.isSessionExpired || prevState.isLoggedIn && !this.state.isLoggedIn) {
-      this.stopWorkers()
+      this.stopBackgroundTasks()
     }
     this.props.serialize(this.state)
   }
@@ -136,7 +138,8 @@ export class Application extends React.Component<Props, State> {
     this.subscribeToHistoryEvents()
     if (this.state.isLoggedIn && !this.state.isSessionExpired) {
       this.initializeServices()
-      this.startWorkers()
+      this.startBackgroundTasks()
+      this.refreshRecords()
     }
   }
 
@@ -251,8 +254,7 @@ export class Application extends React.Component<Props, State> {
             error={this.state.productLines.error}
             isFetching={this.state.productLines.fetching}
             productLines={this.state.productLines.records}
-            onFetch={this.handleFetchProductLines}
-            onFetchJobs={this.handleFetchProductLineJobs}
+            onDismissError={this.handleDismissProductLineError}
             onJobHoverIn={this.handleProductLineJobHoverIn}
             onJobHoverOut={this.handleProductLineJobHoverOut}
             onJobSelect={this.handleProductLineJobSelect}
@@ -306,7 +308,6 @@ export class Application extends React.Component<Props, State> {
     this.initializationPromise = Promise.all([
       this.fetchAlgorithms(),
       this.fetchGeoserverConfig(),
-      this.fetchJobs(),
       this.initializeCatalog(),
     ])
   }
@@ -329,6 +330,13 @@ export class Application extends React.Component<Props, State> {
     return jobsService.fetchJobs()
       .then(jobs => this.setState({ jobs: this.state.jobs.$records(jobs) }))
       .catch(err => this.setState({ jobs: this.state.jobs.$error(err) }))
+  }
+
+  private fetchProductLines() {
+    this.setState({ productLines: this.state.productLines.$fetching() })
+    return productLinesService.fetchProductLines()
+      .then(records => this.setState({ productLines: this.state.productLines.$records(records) }))
+      .catch(err => this.setState({ productLines: this.state.productLines.$error(err) }))
   }
 
   private initializeCatalog() {
@@ -356,27 +364,14 @@ export class Application extends React.Component<Props, State> {
     this.setState({
       jobs: this.state.jobs.$error(null),
     })
+    setTimeout(() => this.fetchJobs())
   }
 
-  private handleFetchProductLines() {
-    this.initializationPromise.then(() => {
-      this.setState({
-        productLines: this.state.productLines.$error(null).$fetching(),
-      })
-      productLinesService.fetchProductLines()
-        .then(records => {
-          this.setState({
-            productLines: this.state.productLines.$records(records),
-          })
-        })
+  private handleDismissProductLineError() {
+    this.setState({
+      productLines: this.state.productLines.$error(null),
     })
-  }
-
-  private handleFetchProductLineJobs(productLineId, sinceDate) {
-    return productLinesService.fetchJobs({
-      productLineId,
-      sinceDate,
-    })
+    setTimeout(() => this.fetchProductLines())
   }
 
   private handleForgetJob(id) {
@@ -497,19 +492,30 @@ export class Application extends React.Component<Props, State> {
     })
   }
 
-  private startWorkers() {
-    setInterval(() => this.fetchJobs(), 60000)  // HACK
+  private refreshRecords() {
+    console.debug('(application:refreshRecords) fetching latest jobs and product lines')
+    this.fetchJobs()
+    this.fetchProductLines()
+  }
+
+  private startBackgroundTasks() {
     sessionService.startWorker({
       onExpired: () => this.setState({ isSessionExpired: true }),
     })
     updateService.startWorker({
       onAvailable: () => this.setState({ isUpdateAvailable: true }),
     })
+
+    console.debug('(application:startBackgroundTasks) starting job/productline polling (at %s second intervals)', Math.ceil(RECORD_POLLING_INTERVAL / 1000))
+    this.pollingInstance = setInterval(this.refreshRecords.bind(this), RECORD_POLLING_INTERVAL)
   }
 
-  private stopWorkers() {
+  private stopBackgroundTasks() {
     sessionService.stopWorker()
     updateService.stopWorker()
+
+    console.debug('(application:stopBackgroundTasks) stopping job/productline polling')
+    clearInterval(this.pollingInstance)
   }
 
   private subscribeToHistoryEvents() {

@@ -23,6 +23,7 @@ export const API_ROOT = process.env.API_ROOT
 const time = {millisecond: 1, second: 1000, minute: 60000}
 
 export const SESSION_WORKER_INTERVAL = 1 * time.minute
+export const RECORD_POLLING_INTERVAL = 30 * time.second
 export const UPDATE_WORKER_INTERVAL = 15 * time.minute
 
 export const TILE_PROVIDERS = [

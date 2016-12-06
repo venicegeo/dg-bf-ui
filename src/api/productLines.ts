@@ -16,16 +16,6 @@
 
 import {getClient} from './session'
 
-export interface ParamsCreateProductline {
-  algorithmId: string
-  bbox: [number, number, number, number]
-  category: string
-  dateStart: string
-  dateStop: string
-  maxCloudCover: number
-  name: string
-}
-
 export function create({
   algorithmId,
   bbox,
@@ -59,8 +49,8 @@ export function create({
 export function fetchJobs({
   productLineId,
   sinceDate,
-}) {
-  return getClient().get(`/v0/job/by_productline/${productLineId}`)
+}: ParamsFetchJobs): Promise<beachfront.Job[]> {
+  return getClient().get(`/v0/job/by_productline/${productLineId}?since=${sinceDate}`)
     .then(response => response.data.jobs.features)
     .catch(err => {
       console.error('(productLines:fetchJobs) failed:', err)
@@ -75,4 +65,19 @@ export function fetchProductLines(): Promise<beachfront.ProductLine[]> {
       console.error('(productLines:fetchProductLines) failed:', err)
       throw err
     })
+}
+
+export interface ParamsCreateProductline {
+  algorithmId: string
+  bbox: [number, number, number, number]
+  category: string
+  dateStart: string
+  dateStop: string
+  maxCloudCover: number
+  name: string
+}
+
+export interface ParamsFetchJobs {
+  productLineId: string
+  sinceDate: string
 }
