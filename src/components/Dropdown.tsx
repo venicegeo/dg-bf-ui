@@ -37,7 +37,7 @@ export class Dropdown extends React.Component<Props, State> {
     this.handleExternalClick = this.handleExternalClick.bind(this)
   }
 
-  componentDidUpdate(prevProps: Props, prevState: State) {
+  componentDidUpdate(_: Props, prevState: State) {
     if (this.state.isOpen !== prevState.isOpen) {
       if (this.state.isOpen) {
         this.attachClickInterceptor()

@@ -21,10 +21,10 @@ import * as React from 'react'
 import {Modal} from './Modal'
 
 interface Props {
-  location: any
+  onDismiss()
 }
 
-export const About = ({ onDismiss }) => (
+export const About = ({ onDismiss }: Props) => (
   <Modal onDismiss={onDismiss}>
     <div className={styles.root}>
       <section className={styles.brandColumn}>

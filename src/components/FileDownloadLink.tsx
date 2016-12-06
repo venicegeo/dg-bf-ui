@@ -51,7 +51,7 @@ export class FileDownloadLink extends React.Component<Props, State> {
     this.handleProgress = this.handleProgress.bind(this)
   }
 
-  componentDidUpdate(prevProps: Props, prevState: State) {
+  componentDidUpdate(_: Props, prevState: State) {
     const downloadFinished = prevState.isDownloading && !this.state.isDownloading
     const receivedBlobUrl = !prevState.blobUrl && this.state.blobUrl
     if (downloadFinished && receivedBlobUrl) {
