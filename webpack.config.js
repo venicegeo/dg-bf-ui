@@ -98,7 +98,7 @@ module.exports = {
            cycle.  It should be accompanied by a karma config that does FULL static
            type checking!
      */
-    transpileOnly: true,
+    transpileOnly: __environment__ === 'development',
   },
 
   plugins: [
