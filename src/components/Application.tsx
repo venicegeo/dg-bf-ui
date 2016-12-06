@@ -105,8 +105,7 @@ export class Application extends React.Component<Props, State> {
     this.handleCatalogApiKeyChange = this.handleCatalogApiKeyChange.bind(this)
     this.handleClearBbox = this.handleClearBbox.bind(this)
     this.handleDismissJobError = this.handleDismissJobError.bind(this)
-    this.handleFetchProductLines = this.handleFetchProductLines.bind(this)
-    this.handleFetchProductLineJobs = this.handleFetchProductLineJobs.bind(this)
+    this.handleDismissProductLineError = this.handleDismissProductLineError.bind(this)
     this.handleForgetJob = this.handleForgetJob.bind(this)
     this.handleJobCreated = this.handleJobCreated.bind(this)
     this.handleNavigateToJob = this.handleNavigateToJob.bind(this)
@@ -255,8 +254,7 @@ export class Application extends React.Component<Props, State> {
             error={this.state.productLines.error}
             isFetching={this.state.productLines.fetching}
             productLines={this.state.productLines.records}
-            onFetch={this.handleFetchProductLines}
-            onFetchJobs={this.handleFetchProductLineJobs}
+            onDismissError={this.handleDismissProductLineError}
             onJobHoverIn={this.handleProductLineJobHoverIn}
             onJobHoverOut={this.handleProductLineJobHoverOut}
             onJobSelect={this.handleProductLineJobSelect}

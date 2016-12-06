@@ -49,8 +49,8 @@ export function create({
 export function fetchJobs({
   productLineId,
   sinceDate,
-}) {
-  return getClient().get(`/v0/job/by_productline/${productLineId}`)
+}: ParamsFetchJobs): Promise<beachfront.Job[]> {
+  return getClient().get(`/v0/job/by_productline/${productLineId}?since=${sinceDate}`)
     .then(response => response.data.jobs.features)
     .catch(err => {
       console.error('(productLines:fetchJobs) failed:', err)
@@ -75,4 +75,9 @@ export interface ParamsCreateProductline {
   dateStop: string
   maxCloudCover: number
   name: string
+}
+
+export interface ParamsFetchJobs {
+  productLineId: string
+  sinceDate: string
 }

@@ -24,8 +24,7 @@ interface Props {
   error: { message: string, code?: number }
   isFetching: boolean
   productLines: beachfront.ProductLine[]
-  onFetch()
-  onFetchJobs(productLineId: string, sinceDate: string)
+  onDismissError()
   onJobHoverIn(job: beachfront.Job)
   onJobHoverOut()
   onJobSelect(job: beachfront.Job)
@@ -34,10 +33,6 @@ interface Props {
 }
 
 export class ProductLineList extends React.Component<Props, {}> {
-  componentDidMount() {
-    this.props.onFetch()
-  }
-
   render() {
     const isEmpty = !this.props.productLines.length && !this.props.isFetching && !this.props.error
     return (
@@ -53,7 +48,7 @@ export class ProductLineList extends React.Component<Props, {}> {
                 ? 'Cannot communicate with the server'
                 : 'An error is preventing the display of product lines'
               }. (<code>{this.props.error.message}</code>)</p>
-              <button onClick={this.props.onFetch}>Retry</button>
+              <button onClick={this.props.onDismissError}>Retry</button>
             </li>
           )}
           {this.props.productLines.map(productLine => (
@@ -61,7 +56,6 @@ export class ProductLineList extends React.Component<Props, {}> {
               className={styles.listItem}
               key={productLine.id}
               productLine={productLine}
-              onFetchJobs={this.props.onFetchJobs}
               onJobHoverIn={this.props.onJobHoverIn}
               onJobHoverOut={this.props.onJobHoverOut}
               onJobSelect={this.props.onJobSelect}
