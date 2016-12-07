@@ -27,13 +27,6 @@ module.exports = (config) => {
 
     browsers: ['Chrome'],
 
-    customLaunchers: {
-      gs_firefox_38: {
-        base: 'Firefox',
-        prefs: {'dom.fetch.enabled': true}
-      }
-    },
-
     frameworks: ['mocha'],
 
     reporters: ['mocha'],
