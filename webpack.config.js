@@ -93,12 +93,6 @@ module.exports = {
   ]),
 
   ts: {
-    /*
-     Note: This is done to improve the development feedback loop during a watch
-           cycle.  It should be accompanied by a karma config that does FULL static
-           type checking!
-     */
-    transpileOnly: __environment__ === 'development',
   },
 
   plugins: [
