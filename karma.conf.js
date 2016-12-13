@@ -42,6 +42,10 @@ module.exports = (config) => {
       'test/index.ts'
     ],
 
+    mime: {
+      'text/x-typescript': ['ts','tsx'],
+    },
+
     preprocessors: {
       'test/index.ts': ['webpack', 'sourcemap']
     },
