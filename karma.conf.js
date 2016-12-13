@@ -43,15 +43,15 @@ module.exports = (config) => {
     ],
 
     preprocessors: {
-      'test/index.ts': ['webpack', 'sourcemap']
+      'test/index.ts': ['webpack']
     },
 
     webpack: {
-      devtool: 'inline-source-map',
+      devtool: 'eval',
       context: __dirname,
       resolve: webpackConfig.resolve,
       module: {
-        preLoaders: webpackConfig.module.preLoaders.filter(l => l.loader !== 'tslint'),
+        preLoaders: webpackConfig.module.preLoaders,
         loaders: webpackConfig.module.loaders,
         postLoaders: isCoverageRequested ? [
           {

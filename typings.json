@@ -1,7 +1,6 @@
 {
   "globalDependencies": {
     "chai": "registry:dt/chai#3.4.0+20160601211834",
-    "core-js": "registry:dt/core-js#0.0.0+20160914114559",
     "enzyme": "registry:dt/enzyme#2.4.1+20161004164857",
     "geojson": "registry:dt/geojson#0.0.0+20160619034323",
     "lodash": "registry:dt/lodash#4.14.0+20161004174455",

@@ -93,6 +93,9 @@ module.exports = {
   ]),
 
   ts: {
+    compilerOptions: {
+      target: __environment__ === 'development' ? 'es6' : 'es5',
+    },
   },
 
   plugins: [
