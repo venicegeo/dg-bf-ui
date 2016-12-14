@@ -14,7 +14,7 @@
  * limitations under the License.
  **/
 
-import axios from 'axios'
+import axios, {Promise} from 'axios'
 import {getClient} from './session'
 
 let _client

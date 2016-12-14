@@ -14,6 +14,7 @@
  * limitations under the License.
  **/
 
+import {Promise} from 'axios'
 import {getClient} from './session'
 
 export function create({
