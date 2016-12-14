@@ -51,7 +51,7 @@ describe('GeoServer Service', () => {
       client.get.returns(resolve({services: {wms_server: 'test-wms-url'}}))
       return geoserver.lookup()
         .then(() => {
-          assert.deepEqual(client.get.firstCall.args, ['/v0/services'])
+          assert.deepEqual(client.get.firstCall.args, ['/v0/user'])
         })
     })
 

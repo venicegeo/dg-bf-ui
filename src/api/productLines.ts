@@ -39,7 +39,7 @@ export function create({
     start_on:          dateStart,
     stop_on:           dateStop,
   })
-    .then(response => response.data.product_line)
+    .then(response => response.data.productline)
     .catch(err => {
       console.error('(productLines:create) failed:', err)
       throw err
@@ -60,7 +60,7 @@ export function fetchJobs({
 
 export function fetchProductLines(): Promise<beachfront.ProductLine[]> {
   return getClient().get('/v0/productline')
-    .then(response => response.data.product_lines.features)
+    .then(response => response.data.productlines.features)
     .catch(err => {
       console.error('(productLines:fetchProductLines) failed:', err)
       throw err

@@ -21,7 +21,7 @@ let _client
 
 export function initialize(): Promise<void> {
   const session = getClient()
-  return session.get('/v0/services')
+  return session.get('/v0/user')
     .then(response => {
       _client = axios.create({
         baseURL: response.data.services.catalog,

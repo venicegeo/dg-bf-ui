@@ -39,6 +39,7 @@ import {
   STATUS_ERROR,
   STATUS_INACTIVE,
   STATUS_RUNNING,
+  STATUS_SUBMITTED,
   STATUS_SUCCESS,
   STATUS_TIMED_OUT,
   TYPE_SCENE,
@@ -1013,6 +1014,7 @@ function getColorForStatus(status) {
     case STATUS_ACTIVE: return 'hsl(200, 94%, 54%)'
     case STATUS_INACTIVE: return 'hsl(0, 0%, 50%)'
     case STATUS_RUNNING: return 'hsl(48, 94%, 54%)'
+    case STATUS_SUBMITTED: return 'hsl(48, 94%, 54%)'
     case STATUS_SUCCESS: return 'hsl(114, 100%, 45%)'
     case STATUS_TIMED_OUT:
     case STATUS_ERROR: return 'hsl(349, 100%, 60%)'
