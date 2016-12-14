@@ -98,6 +98,10 @@ module.exports = {
     },
   },
 
+  devServer: {
+    stats: 'error-only',
+  },
+
   plugins: [
     new CopyWebpackPlugin([{
       from: require.resolve('openlayers/dist/ol-debug.js'),
