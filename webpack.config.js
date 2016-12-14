@@ -28,7 +28,7 @@ const pkg = require('./package')
 const __environment__ = process.env.NODE_ENV || 'development'
 
 module.exports = {
-  devtool: 'cheap-module-eval-source-map',
+  devtool: '#cheap-module-eval-source-map',
 
   context: __dirname,
   entry: './src/index.ts',

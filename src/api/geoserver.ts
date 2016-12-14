@@ -26,7 +26,6 @@ export function lookup(): Promise<Descriptor> {
   const client = getClient()
   return client.get('/v0/user')
     .then(response => ({
-      // wmsUrl: response.data.services.wms_server,
       wmsUrl: response.data.services.wms_server.replace('https:', 'http:'),  // HACK
     }))
     .catch(err => {
