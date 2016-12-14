@@ -23,7 +23,7 @@ npm run build
 
 | Variable                           | Description                                           |
 |------------------------------------|-------------------------------------------------------|
-| `GATEWAY`                          | A URL pointing at a specific Piazza Gateway instance. |
+| `API_ROOT`                         | A URL pointing at a [`bf-api`](https://github.com/venicegeo/bf-api) instance. |
 | `CLASSIFICATION_BANNER_BACKGROUND` | A color value (e.g., `red`, `green`, `blue`) for the classification banner background. |
 | `CLASSIFICATION_BANNER_FOREGROUND` | A color value (e.g., `red`, `green`, `blue`) for the classification banner foreground. |
 | `CLASSIFICATION_BANNER_TEXT`       | A text value for the classification banner. |
