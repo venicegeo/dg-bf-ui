@@ -28,7 +28,7 @@ const pkg = require('./package')
 const __environment__ = process.env.NODE_ENV || 'development'
 
 module.exports = {
-  devtool: 'cheap-module-eval-source-map',
+  devtool: '#cheap-module-eval-source-map',
 
   context: __dirname,
   entry: './src/index.ts',
@@ -93,12 +93,13 @@ module.exports = {
   ]),
 
   ts: {
-    /*
-     Note: This is done to improve the development feedback loop during a watch
-           cycle.  It should be accompanied by a karma config that does FULL static
-           type checking!
-     */
-    transpileOnly: __environment__ === 'development',
+    compilerOptions: {
+      target: __environment__ === 'development' ? 'es6' : 'es5',
+    },
+  },
+
+  devServer: {
+    stats: 'error-only',
   },
 
   plugins: [

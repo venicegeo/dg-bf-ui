@@ -2,7 +2,8 @@
   "compilerOptions": {
     "sourceMap": true,
     "module": "commonjs",
-    "target": "es5",
+    "target": "es6",
+    "lib": ["dom", "es6", "es2016.array.include"],
     "jsx": "react",
     "noUnusedLocals": true,
     "noUnusedParameters": true
@@ -12,6 +13,7 @@
   ],
   "include": [
     "./typings/index.d.ts",
+    "./beachfront.d.ts",
     "./src/**/*"
   ]
 }
