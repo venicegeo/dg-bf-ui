@@ -14,6 +14,7 @@
  * limitations under the License.
  **/
 
+import {Promise} from 'axios'
 import {getClient} from './session'
 
 interface ParamsCreateJob {
@@ -39,16 +40,31 @@ export function createJob({
     })
 }
 
+<<<<<<< HEAD
 export function forgetJob( jobId: string ){
   return getClient().delete('/v0/job/'+jobId)
 }
 
 export function fetchJobs() {
+=======
+export function fetchJobs(): Promise<beachfront.Job[]> {
+>>>>>>> master
   return getClient().get('/v0/job')
     .then(
       response => response.data.jobs.features,
       err => {
         console.error('(jobs:fetchJobs) failed:', err)
+        throw err
+      },
+    )
+}
+
+export function fetchJob(jobId: string): Promise<beachfront.Job> {
+  return getClient().get(`/v0/job/${jobId}`)
+    .then(
+      response => response.data.job,
+      err => {
+        console.error('(jobs:fetchJob) failed:', err)
         throw err
       },
     )

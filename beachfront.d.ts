@@ -15,7 +15,7 @@
  **/
 
 declare namespace beachfront {
-  namespace x {
+  namespace _ {
     interface ProductLineProperties {
       algorithm_name: string
       category: string
@@ -54,12 +54,12 @@ declare namespace beachfront {
 
   interface Job extends GeoJSON.Feature<GeoJSON.Polygon> {
     id: string
-    properties: x.JobProperties
+    properties: _.JobProperties
   }
 
   interface ProductLine extends GeoJSON.Feature<GeoJSON.Polygon> {
     id: string
-    properties: x.ProductLineProperties
+    properties: _.ProductLineProperties
   }
 
   interface Scene extends GeoJSON.Feature<GeoJSON.Polygon> {
@@ -93,7 +93,8 @@ declare namespace beachfront {
 // Misc Interop
 //
 
-// Webpack
+// Interop: Webpack
+
 interface BuildEnvironment {
   NODE_ENV: string
   API_ROOT: string
@@ -112,4 +113,14 @@ declare const require: {
     keys(): string[]
     (...v: any[]),
   },
+}
+
+// Interop: core-js
+
+interface String {
+  includes(value: any, fromIndex?: number): boolean
+}
+
+interface Array<T> {
+  includes(value: any, fromIndex?: number): boolean
 }

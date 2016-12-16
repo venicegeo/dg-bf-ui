@@ -820,7 +820,7 @@ function generateDrawInteraction(drawLayer) {
     source: drawLayer.getSource(),
     maxPoints: 2,
     type: 'LineString',
-    geometryFunction(coordinates, geometry: ol.geom.Polygon) {
+    geometryFunction(coordinates: any, geometry: ol.geom.Polygon) {
       if (!geometry) {
         geometry = new ol.geom.Polygon(null)
       }

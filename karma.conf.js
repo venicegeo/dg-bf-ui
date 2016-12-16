@@ -18,6 +18,8 @@ const path = require('path')
 const webpack = require('webpack')
 const webpackConfig = require('./webpack.config')
 
+const __environment__ = process.env.NODE_ENV || 'development'
+
 module.exports = (config) => {
   const isCoverageRequested = config.reporters.includes('coverage')
   config.set({
@@ -47,15 +49,15 @@ module.exports = (config) => {
     },
 
     preprocessors: {
-      'test/index.ts': ['webpack', 'sourcemap']
+      'test/index.ts': ['webpack']
     },
 
     webpack: {
-      devtool: 'inline-source-map',
+      devtool: '#eval',
       context: __dirname,
       resolve: webpackConfig.resolve,
       module: {
-        preLoaders: webpackConfig.module.preLoaders.filter(l => l.loader !== 'tslint'),
+        preLoaders: webpackConfig.module.preLoaders,
         loaders: webpackConfig.module.loaders,
         postLoaders: isCoverageRequested ? [
           {
@@ -70,7 +72,9 @@ module.exports = (config) => {
       },
       postcss: webpackConfig.postcss,
       ts: {
-        transpileOnly: false,
+        compilerOptions: {
+          target: __environment__ === 'development' ? 'es6' : 'es5',
+        },
       },
       plugins: [
         new webpack.IgnorePlugin(/^\.\/locale$/, /moment$/),

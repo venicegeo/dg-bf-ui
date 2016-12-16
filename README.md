@@ -23,7 +23,7 @@ npm run build
 
 | Variable                           | Description                                           |
 |------------------------------------|-------------------------------------------------------|
-| `GATEWAY`                          | A URL pointing at a specific Piazza Gateway instance. |
+| `API_ROOT`                         | A URL pointing at a [`bf-api`](https://github.com/venicegeo/bf-api) instance. |
 | `CLASSIFICATION_BANNER_BACKGROUND` | A color value (e.g., `red`, `green`, `blue`) for the classification banner background. |
 | `CLASSIFICATION_BANNER_FOREGROUND` | A color value (e.g., `red`, `green`, `blue`) for the classification banner foreground. |
 | `CLASSIFICATION_BANNER_TEXT`       | A text value for the classification banner. |
@@ -36,13 +36,3 @@ $ npm run lint
 $ npm run test
 $ npm run test:ci  # Will also generate coverage reports
 ```
-
-
-## External Service Dependencies
-
-The UI will attempt to autodiscover the following services via the
-Piazza gateway service locator:
-
-- [bf-handle](https://github.com/venicegeo/bf-handle)
-- [geoserver](http://geoserver.org)
-- [pzsvc-image-catalog](https://github.com/venicegeo/pzsvc-image-catalog)
