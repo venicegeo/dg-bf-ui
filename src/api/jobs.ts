@@ -40,15 +40,13 @@ export function createJob({
     })
 }
 
-<<<<<<< HEAD
+
 export function forgetJob( jobId: string ){
   return getClient().delete('/v0/job/'+jobId)
 }
 
-export function fetchJobs() {
-=======
+
 export function fetchJobs(): Promise<beachfront.Job[]> {
->>>>>>> master
   return getClient().get('/v0/job')
     .then(
       response => response.data.jobs.features,
