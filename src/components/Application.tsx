@@ -131,6 +131,9 @@ export class Application extends React.Component<Props, State> {
     if (!prevState.isSessionExpired && this.state.isSessionExpired || prevState.isLoggedIn && !this.state.isLoggedIn) {
       this.stopBackgroundTasks()
     }
+    if (prevState.route.jobIds.join(',') !== this.state.route.jobIds.join(',')) {
+      this.importJobsIfNeeded()
+    }
     this.props.serialize(this.state)
   }
 
@@ -140,6 +143,7 @@ export class Application extends React.Component<Props, State> {
       this.initializeServices()
       this.startBackgroundTasks()
       this.refreshRecords()
+      this.importJobsIfNeeded()
     }
   }
 
@@ -302,6 +306,24 @@ export class Application extends React.Component<Props, State> {
       case '/product-lines': return MODE_PRODUCT_LINES
       default: return MODE_NORMAL
     }
+  }
+
+  private importJobsIfNeeded() {
+    this.state.route.jobIds.map(jobId => {
+      if (this.state.jobs.records.find(j => j.id === jobId)) {
+        return
+      }
+      console.debug('(application:componentDidUpdate) fetching job %s', jobId)
+      jobsService.fetchJob(jobId)
+        .then(record => {
+          this.setState({ jobs: this.state.jobs.$append(record) })
+          this.panTo(getFeatureCenter(record), 7.5)
+        })
+        .catch(err => {
+          console.error('(application:fetch) failed:', err)
+          throw err
+        })
+    })
   }
 
   private initializeServices() {
