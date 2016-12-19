@@ -408,11 +408,12 @@ export class Application extends React.Component<Props, State> {
         search: this.state.route.search.replace(new RegExp('\\??jobId=' + id), ''),
       })
     }
-    forgetJob(id).catch(() => {
-      this.setState({
-      jobs: this.state.jobs.$append(job),
+    forgetJob(id)
+      .catch(() => {
+        this.setState({
+          jobs: this.state.jobs.$append(job),
+        })
       })
-    })
   }
 
   private handleJobCreated(job) {
