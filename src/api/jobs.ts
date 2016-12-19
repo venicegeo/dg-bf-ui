@@ -40,6 +40,10 @@ export function createJob({
     })
 }
 
+export function forgetJob(jobId: string) {
+  return getClient().delete(`/v0/job/${jobId}`)
+}
+
 export function fetchJobs(): Promise<beachfront.Job[]> {
   return getClient().get('/v0/job')
     .then(

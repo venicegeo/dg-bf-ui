@@ -24,6 +24,7 @@ import {ClassificationBanner} from './ClassificationBanner'
 import {CreateJob, SearchCriteria, createSearchCriteria} from './CreateJob'
 import {CreateProductLine} from './CreateProductLine'
 import {JobStatusList} from './JobStatusList'
+import {forgetJob} from '../api/jobs'
 import {Login} from './Login'
 import {Navigation} from './Navigation'
 import {
@@ -397,6 +398,7 @@ export class Application extends React.Component<Props, State> {
   }
 
   private handleForgetJob(id) {
+    const job = this.state.jobs.records.find(j => j.id === id)
     this.setState({
       jobs: this.state.jobs.$filter(j => j.id !== id),
     })
@@ -406,6 +408,12 @@ export class Application extends React.Component<Props, State> {
         search: this.state.route.search.replace(new RegExp('\\??jobId=' + id), ''),
       })
     }
+    forgetJob(id)
+      .catch(() => {
+        this.setState({
+          jobs: this.state.jobs.$append(job),
+        })
+      })
   }
 
   private handleJobCreated(job) {
