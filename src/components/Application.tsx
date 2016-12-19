@@ -398,20 +398,21 @@ export class Application extends React.Component<Props, State> {
   }
 
   private handleForgetJob(id) {
+    const job = this.state.jobs.records.find(j => j.id === id)
     this.setState({
       jobs: this.state.jobs.$filter(j => j.id !== id),
     })
     if (this.state.route.jobIds.includes(id)) {
-      const job = this.state.jobs.records.find(j => j.id === id)
       this.navigateTo({
         pathname: this.state.route.pathname,
         search: this.state.route.search.replace(new RegExp('\\??jobId=' + id), ''),
       })
-      let forgetPromise = forgetJob(id)
-      forgetPromise.catch(() => {
-        this.handleJobCreated(job)
-      })
     }
+    forgetJob(id).catch(() => {
+      this.setState({
+      jobs: this.state.jobs.$append(job),
+      })
+    })
   }
 
   private handleJobCreated(job) {
