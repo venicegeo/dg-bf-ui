@@ -17,35 +17,28 @@
 .root {
   margin: 0 auto;
   font-size: 22px;
-  display: flex;
-  max-width: 800px;
+  max-width: 700px;
   height: 600px;
   padding: 0 20px;
-  align-items: stretch;
 }
 
-.root h1 {
-  font-size: 3em;
+.heading {
+  margin-bottom: 2em;
+}
+
+.heading h1 {
+  margin: .5em 0 1em;
+  font-size: 2.5em;
   line-height: 1em;
+  text-align: center;
 }
 
-.brandColumn {
-  flex: 1;
-  text-align: right;
-  align-self: flex-start;
-}
-
-.brandColumn img {
+.heading img {
+  display: block;
+  margin: auto auto .5em;
   height: 175px;
 }
 
-.textColumn {
-  flex: 1;
-  margin-left: 50px;
+.body {
   text-align: left;
-}
-
-.textColumn h2 {
-  font-size: 1.3em;
-  line-height: 1em;
 }
