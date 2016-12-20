@@ -15,7 +15,7 @@
  **/
 
 const styles: any = require('./Login.css')
-const brand: string = require('../images/brand-small.svg')
+const brand: string = require('../images/brand-small-circle.svg')
 
 import * as React from 'react'
 import {Modal} from './Modal'

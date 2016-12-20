@@ -73,7 +73,7 @@
   text-align: center;
   text-decoration: none;
   transition: .1s ease-in;
-  transition-property: line-height, background-color, color;
+  transition-property: height, line-height, background-color, color;
 }
 
 .atHome .link {
@@ -198,6 +198,10 @@ li.home {
 
 .home .link {
   position: relative;
+  height: 60px;
+}
+
+.atHome .home .link {
   height: 90px;
 }
 
@@ -206,7 +210,7 @@ li.home {
   position: absolute;
   top: 50%;
   left: 50%;
-  height: 70px;
+  height: 30px;
   width: 30px;
   transform: translate(-50%, -50%);
   transition: .1s ease-in-out;
