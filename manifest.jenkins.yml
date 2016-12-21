@@ -2,7 +2,7 @@ applications:
 - name: beachfront
   host: beachfront
   path: beachfront.zip
-  buildpack: https://github.com/venicegeo/staticfile-buildpack
+  buildpack: staticfile_buildpack
   memory: 512M
   instances: 1
   timeout: 15
