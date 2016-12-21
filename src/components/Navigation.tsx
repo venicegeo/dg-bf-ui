@@ -44,7 +44,7 @@ export const Navigation = ({ activeRoute, onClick }: Props) => (
       <li className={styles.home}>
         <Link pathname="/" className={styles.linkHome} activeClassName={styles.active} onClick={onClick}>
           <img className={styles.complexIcon} src={brandSmall} alt="Beachfront"/>
-          <svg className={styles.icon} viewBox="0 0 64 64"><path d="M1.02589061,13.1701395 C1.45245621,6.37734112 7.09669674,1 13.9972317,1 L50.0027683,1 C57.1809412,1 63,6.81886994 63,13.9972317 L63,28.6220204 L1.02589061,13.1701395 Z M63,35.8363158 L63,50.0027683 C63,57.1809412 57.1811301,63 50.0027683,63 L13.9972317,63 C6.81905884,63 1,57.1811301 1,50.0027683 L1,20.3779796 L63,35.8363158 Z" fillRule="evenodd"/></svg>
+          <svg className={styles.icon} viewBox="0 0 64 64"><path d="M63,34.6220204 L63,13.9972317 C63,6.81886994 57.1809412,1 50.0027683,1 L13.9972317,1 C6.81886994,1 1,6.81905884 1,13.9972317 L1,19.1636842 L63,34.6220204 Z M63,41.8363158 L63,50.0027683 C63,57.1809412 57.1811301,63 50.0027683,63 L13.9972317,63 C6.81905884,63 1,57.1811301 1,50.0027683 L1,26.3779796 L63,41.8363158 Z" fillRule="evenodd"/></svg>
         </Link>
       </li>
       <li>
