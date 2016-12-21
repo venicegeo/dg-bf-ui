@@ -15,7 +15,7 @@
  **/
 
 const styles: any = require('./About.css')
-const brand: string = require('../images/brand-small-circle.svg')
+const brand: string = require('../images/brand-small-square.svg')
 
 import * as React from 'react'
 import {Modal} from './Modal'
