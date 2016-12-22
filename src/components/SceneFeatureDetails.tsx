@@ -29,8 +29,6 @@ export const SceneFeatureDetails = ({className, feature}: Props) => (
     <h1 title={normalizeId(feature.id)}>{normalizeId(feature.id)}</h1>
 
     <dl>
-      <dt>Thumbnail</dt>
-      <dd><a className={styles.thumbnailLink} href={feature.properties.thumb_large} target="_blank">Click here to open</a></dd>
       <dt>Date Captured</dt>
       <dd>{moment(feature.properties.acquiredDate).utc().format('MM/DD/YYYY HH:mm z')}</dd>
 
