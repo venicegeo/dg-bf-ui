@@ -51,10 +51,8 @@ describe('<Algorithm/>', () => {
     )
     assert.equal(wrapper.find('.Algorithm-name').text(), 'test-name')
     assert.equal(wrapper.find('.Algorithm-description').text(), 'test-description')
-    assert.equal(wrapper.find('.Algorithm-requirements tbody tr th').at(0).text(), 'Bands')
-    assert.equal(wrapper.find('.Algorithm-requirements tbody tr td').at(0).text(), 'ORANGE and PURPLE')
-    assert.equal(wrapper.find('.Algorithm-requirements tbody tr th').at(1).text(), 'Maximum Cloud Cover')
-    assert.equal(wrapper.find('.Algorithm-requirements tbody tr td').at(1).text(), 'Less than or equal to 30%')
+    assert.equal(wrapper.find('.Algorithm-requirements tbody tr th').at(0).text(), 'Maximum Cloud Cover')
+    assert.equal(wrapper.find('.Algorithm-requirements tbody tr td').at(0).text(), 'Less than or equal to 30%')
   })
 
   it('can be neither selectable nor submittable', () => {
@@ -176,7 +174,7 @@ describe('<Algorithm/>', () => {
     assert.isTrue(_props.onSubmit.called)
   })
 
-  it('verifies image compatibility (meets all requirements)', () => {
+  it('verifies image compatibility (meets cloud cover requirements)', () => {
     const wrapper = shallow(
       <Algorithm
         algorithm={{
@@ -188,67 +186,32 @@ describe('<Algorithm/>', () => {
           type:         'test-type',
         }}
         sceneMetadata={{
-          bands: {
-            red: 'lorem',
-            green: 'lorem',
-          },
           cloudCover: 5,
         } as any}
       />,
     )
     assert.equal(wrapper.find('.Algorithm-root').hasClass('Algorithm-isCompatible'), true)
     assert.equal(wrapper.find('.Algorithm-requirements tbody tr').at(0).hasClass('Algorithm-met'), true)
-    assert.equal(wrapper.find('.Algorithm-requirements tbody tr').at(1).hasClass('Algorithm-met'), true)
   })
 
-  it('verifies image compatibility (meets some requirements)', () => {
+  it('verifies image compatibility (does not meet cloud cover requirements)', () => {
     const wrapper = shallow(
       <Algorithm
         algorithm={{
           bands:         ['red','green'],
-          id:            'test-id',
           description:   'test-description',
+          id:            'test-id',
           maxCloudCover: 9000,
           name:          'test-name',
           type:          'test-type',
         }}
         sceneMetadata={{
-          bands: {
-            red: 'lorem',
-            green: 'lorem',
-          },
-          cloudCover: 9001,
-        } as any}
-      />,
-    )
-    assert.equal(wrapper.find('.Algorithm-root').hasClass('Algorithm-isNotCompatible'), true)
-    assert.equal(wrapper.find('.Algorithm-requirements tbody tr').at(0).hasClass('Algorithm-met'), true)
-    assert.equal(wrapper.find('.Algorithm-requirements tbody tr').at(1).hasClass('Algorithm-unmet'), true)
-  })
-
-  it('verifies image compatibility (meets no requirements)', () => {
-    const wrapper = shallow(
-      <Algorithm
-        algorithm={{
-          bands:         ['red','green'],
-          description:   'test-description',
-          id:            'test-id',
-          maxCloudCover: 9000,
-          name:          'test-name',
-          type: 'test-type',
-        }}
-        sceneMetadata={{
-          bands: {
-            hotpink: 'lorem',
-            fuschia: 'lorem',
-          },
           cloudCover: 9001,
         } as any}
       />,
     )
     assert.equal(wrapper.find('.Algorithm-root').hasClass('Algorithm-isNotCompatible'), true)
     assert.equal(wrapper.find('.Algorithm-requirements tbody tr').at(0).hasClass('Algorithm-unmet'), true)
-    assert.equal(wrapper.find('.Algorithm-requirements tbody tr').at(1).hasClass('Algorithm-unmet'), true)
   })
 
   it('supports custom compatibility warnings', () => {
