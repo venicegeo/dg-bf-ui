@@ -22,11 +22,13 @@ import {AlgorithmList} from './AlgorithmList'
 import {ImagerySearch} from './ImagerySearch'
 import {NewJobDetails} from './NewJobDetails'
 import {createJob} from '../api/jobs'
+import {SOURCE_RAPIDEYE} from '../constants'
 
 export interface SearchCriteria {
   cloudCover: number
   dateFrom: string
   dateTo: string
+  source: string
 }
 
 interface Props {
@@ -54,6 +56,7 @@ export const createSearchCriteria = (): SearchCriteria => ({
   cloudCover: 10,
   dateFrom:   moment().subtract(30, 'days').format('YYYY-MM-DD'),
   dateTo:     moment().format('YYYY-MM-DD'),
+  source:     SOURCE_RAPIDEYE,
 })
 
 export class CreateJob extends React.Component<Props, State> {
@@ -68,6 +71,7 @@ export class CreateJob extends React.Component<Props, State> {
     this.handleNameChange = this.handleNameChange.bind(this)
     this.handleSearchCloudCoverChange = this.handleSearchCloudCoverChange.bind(this)
     this.handleSearchDateChange = this.handleSearchDateChange.bind(this)
+    this.handleSearchSourceChange = this.handleSearchSourceChange.bind(this)
   }
 
   componentWillReceiveProps(nextProps: Props) {
@@ -93,10 +97,12 @@ export class CreateJob extends React.Component<Props, State> {
                 dateTo={this.props.searchCriteria.dateTo}
                 error={this.props.searchError}
                 isSearching={this.props.isSearching}
+                source={this.props.searchCriteria.source}
                 onApiKeyChange={this.props.onCatalogApiKeyChange}
                 onClearBbox={this.props.onClearBbox}
                 onCloudCoverChange={this.handleSearchCloudCoverChange}
                 onDateChange={this.handleSearchDateChange}
+                onSourceChange={this.handleSearchSourceChange}
                 onSubmit={this.props.onSearchSubmit}
               />
             </li>
@@ -158,6 +164,10 @@ export class CreateJob extends React.Component<Props, State> {
       dateFrom,
       dateTo,
     }))
+  }
+
+  private handleSearchSourceChange(source: string) {
+    this.props.onSearchCriteriaChange({ ...this.props.searchCriteria, source })
   }
 
   private handleNameChange(name) {

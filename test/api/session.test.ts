@@ -121,7 +121,7 @@ describe('Session Service', () => {
       return service.create('test-username', 'test-password')
         .then(
           () => assert.fail('Should have thrown'),
-          (err) => {
+          () => {
             assert.throws(() => {
               service.getClient()
             })

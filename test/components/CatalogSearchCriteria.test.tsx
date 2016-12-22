@@ -30,10 +30,12 @@ describe('<CatalogSearchCriteria/>', () => {
       cloudCover:         19,
       dateFrom:           '2016-01-01',
       dateTo:             '2016-02-01',
+      source:             'rapideye',
       onApiKeyChange:     sinon.stub(),
       onClearBbox:        sinon.stub(),
       onCloudCoverChange: sinon.stub(),
       onDateChange:       sinon.stub(),
+      onSourceChange:     sinon.stub(),
     }
   })
 
@@ -45,10 +47,12 @@ describe('<CatalogSearchCriteria/>', () => {
         cloudCover={_props.cloudCover}
         dateFrom={_props.dateFrom}
         dateTo={_props.dateTo}
+        source={_props.source}
         onApiKeyChange={_props.onApiKeyChange}
         onClearBbox={_props.onClearBbox}
         onCloudCoverChange={_props.onCloudCoverChange}
         onDateChange={_props.onDateChange}
+        onSourceChange={_props.onSourceChange}
       />,
     )
     assert.equal(wrapper.find('.CatalogSearchCriteria-apiKey input').prop('value'), 'test-catalog-api-key')
@@ -65,10 +69,12 @@ describe('<CatalogSearchCriteria/>', () => {
         cloudCover={_props.cloudCover}
         dateFrom={undefined}
         dateTo={undefined}
+        source={_props.source}
         onApiKeyChange={_props.onApiKeyChange}
         onClearBbox={_props.onClearBbox}
         onCloudCoverChange={_props.onCloudCoverChange}
         onDateChange={_props.onDateChange}
+        onSourceChange={_props.onSourceChange}
       />,
     )
     assert.equal(wrapper.find('.CatalogSearchCriteria-captureDateFrom input').length, 0)
@@ -85,10 +91,12 @@ describe('<CatalogSearchCriteria/>', () => {
         cloudCover={_props.cloudCover}
         dateFrom={_props.dateFrom}
         dateTo={_props.dateTo}
+        source={_props.source}
         onApiKeyChange={_props.onApiKeyChange}
         onClearBbox={_props.onClearBbox}
         onCloudCoverChange={_props.onCloudCoverChange}
         onDateChange={_props.onDateChange}
+        onSourceChange={_props.onSourceChange}
       />,
     )
     wrapper.find('.CatalogSearchCriteria-apiKey input').simulate('change', {target: {value: 'test-new-catalog-api-key'}})
@@ -103,10 +111,12 @@ describe('<CatalogSearchCriteria/>', () => {
         cloudCover={_props.cloudCover}
         dateFrom={_props.dateFrom}
         dateTo={_props.dateTo}
+        source={_props.source}
         onApiKeyChange={_props.onApiKeyChange}
         onClearBbox={_props.onClearBbox}
         onCloudCoverChange={_props.onCloudCoverChange}
         onDateChange={_props.onDateChange}
+        onSourceChange={_props.onSourceChange}
       />,
     )
     wrapper.find('.CatalogSearchCriteria-clearBbox').simulate('click')
@@ -121,10 +131,12 @@ describe('<CatalogSearchCriteria/>', () => {
         cloudCover={_props.cloudCover}
         dateFrom={_props.dateFrom}
         dateTo={_props.dateTo}
+        source={_props.source}
         onApiKeyChange={_props.onApiKeyChange}
         onClearBbox={_props.onClearBbox}
         onCloudCoverChange={_props.onCloudCoverChange}
         onDateChange={_props.onDateChange}
+        onSourceChange={_props.onSourceChange}
       />,
     )
     wrapper.find('.CatalogSearchCriteria-cloudCover input').simulate('change', {target: {value: '42'}})
@@ -139,10 +151,12 @@ describe('<CatalogSearchCriteria/>', () => {
         cloudCover={_props.cloudCover}
         dateFrom={_props.dateFrom}
         dateTo={_props.dateTo}
+        source={_props.source}
         onApiKeyChange={_props.onApiKeyChange}
         onClearBbox={_props.onClearBbox}
         onCloudCoverChange={_props.onCloudCoverChange}
         onDateChange={_props.onDateChange}
+        onSourceChange={_props.onSourceChange}
       />,
     )
     wrapper.find('.CatalogSearchCriteria-captureDateFrom input').simulate('change', {target: {value: '1999-12-31'}})
@@ -157,14 +171,36 @@ describe('<CatalogSearchCriteria/>', () => {
         cloudCover={_props.cloudCover}
         dateFrom={_props.dateFrom}
         dateTo={_props.dateTo}
+        source={_props.source}
         onApiKeyChange={_props.onApiKeyChange}
         onClearBbox={_props.onClearBbox}
         onCloudCoverChange={_props.onCloudCoverChange}
         onDateChange={_props.onDateChange}
+        onSourceChange={_props.onSourceChange}
       />,
     )
     wrapper.find('.CatalogSearchCriteria-captureDateTo input').simulate('change', {target: {value: '1999-12-31'}})
     assert.isTrue(_props.onDateChange.calledWithExactly(_props.dateFrom, '1999-12-31'))
+  })
+
+  it('emits source change event', () => {
+    const wrapper = shallow(
+      <CatalogSearchCriteria
+        bbox={_props.bbox}
+        apiKey={_props.apiKey}
+        cloudCover={_props.cloudCover}
+        dateFrom={_props.dateFrom}
+        dateTo={_props.dateTo}
+        source={_props.source}
+        onApiKeyChange={_props.onApiKeyChange}
+        onClearBbox={_props.onClearBbox}
+        onCloudCoverChange={_props.onCloudCoverChange}
+        onDateChange={_props.onDateChange}
+        onSourceChange={_props.onSourceChange}
+      />,
+    )
+    wrapper.find('.CatalogSearchCriteria-source select').simulate('change', {target: {value: 'averagespeedeye'}})
+    assert.isTrue(_props.onSourceChange.calledWithExactly('averagespeedeye'))
   })
 
   it('updates api key when props change', () => {
@@ -175,10 +211,12 @@ describe('<CatalogSearchCriteria/>', () => {
         cloudCover={_props.cloudCover}
         dateFrom={_props.dateFrom}
         dateTo={_props.dateTo}
+        source={_props.source}
         onApiKeyChange={_props.onApiKeyChange}
         onClearBbox={_props.onClearBbox}
         onCloudCoverChange={_props.onCloudCoverChange}
         onDateChange={_props.onDateChange}
+        onSourceChange={_props.onSourceChange}
       />,
     )
     wrapper.setProps({apiKey: 'test-new-catalog-api-key'})
@@ -193,10 +231,12 @@ describe('<CatalogSearchCriteria/>', () => {
         cloudCover={_props.cloudCover}
         dateFrom={_props.dateFrom}
         dateTo={_props.dateTo}
+        source={_props.source}
         onApiKeyChange={_props.onApiKeyChange}
         onClearBbox={_props.onClearBbox}
         onCloudCoverChange={_props.onCloudCoverChange}
         onDateChange={_props.onDateChange}
+        onSourceChange={_props.onSourceChange}
       />,
     )
     wrapper.setProps({cloudCover: 42})
@@ -211,10 +251,12 @@ describe('<CatalogSearchCriteria/>', () => {
         cloudCover={_props.cloudCover}
         dateFrom={_props.dateFrom}
         dateTo={_props.dateTo}
+        source={_props.source}
         onApiKeyChange={_props.onApiKeyChange}
         onClearBbox={_props.onClearBbox}
         onCloudCoverChange={_props.onCloudCoverChange}
         onDateChange={_props.onDateChange}
+        onSourceChange={_props.onSourceChange}
       />,
     )
     wrapper.setProps({dateFrom: '1999-12-31'})
@@ -230,10 +272,12 @@ describe('<CatalogSearchCriteria/>', () => {
         cloudCover={_props.cloudCover}
         dateFrom={_props.dateFrom}
         dateTo={_props.dateTo}
+        source={_props.source}
         onApiKeyChange={_props.onApiKeyChange}
         onClearBbox={_props.onClearBbox}
         onCloudCoverChange={_props.onCloudCoverChange}
         onDateChange={_props.onDateChange}
+        onSourceChange={_props.onSourceChange}
       />,
     )
     wrapper.setProps({dateTo: '1999-12-31'})

@@ -50,5 +50,5 @@ function normalizeId(featureId) {
   if (!featureId) {
     return 'nil'
   }
-  return featureId.replace(/^(pl:)?landsat:/i, '')
+  return featureId.replace(/^(landsat|rapideye|planetscope):/, '')
 }

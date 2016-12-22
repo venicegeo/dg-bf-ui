@@ -22,6 +22,10 @@ export const STATUS_ACTIVE = 'Active'
 export const STATUS_SUBMITTED = 'Submitted'
 export const STATUS_INACTIVE = 'Inactive'
 
+export const SOURCE_LANDSAT = 'landsat'
+export const SOURCE_PLANETSCOPE = 'planetscope'
+export const SOURCE_RAPIDEYE = 'rapideye'
+
 // Feature Properties
 export const TYPE_JOB = 'JOB'
 export const TYPE_PRODUCT_LINE = 'PRODUCT_LINE'

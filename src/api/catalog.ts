@@ -14,10 +14,16 @@
  * limitations under the License.
  **/
 
-import axios, {Promise} from 'axios'
+import axios, {AxiosInstance, Promise} from 'axios'
 import {getClient} from './session'
 
-let _client
+import {
+  SOURCE_LANDSAT,
+  SOURCE_PLANETSCOPE,
+  SOURCE_RAPIDEYE,
+} from '../constants'
+
+let _client: AxiosInstance
 
 export function initialize(): Promise<void> {
   const session = getClient()
@@ -35,11 +41,76 @@ export function initialize(): Promise<void> {
 
 export function search({
   bbox,
+  catalogApiKey,
   cloudCover,
   dateFrom,
   dateTo,
+  source,
   startIndex,
   count,
+}): Promise<beachfront.ImageryCatalogPage> {
+  let itemType
+  switch (source) {
+    case SOURCE_LANDSAT:
+      return searchLegacy({
+          bbox,
+          cloudCover,
+          dateFrom,
+          dateTo,
+          startIndex,
+          count,
+      })
+    case SOURCE_RAPIDEYE:
+      itemType = 'REOrthoTile'
+      break
+    case SOURCE_PLANETSCOPE:
+      itemType = 'PSOrthoTile'
+      break
+    default:
+      return Promise.reject(new Error(`Unknown data source prefix: '${source}'`))
+  }
+  return axios.get(`https://bf-ia-broker.int.geointservices.io/planet/discover/${itemType}`, {
+    params: {
+      cloudCover,
+      PL_API_KEY:      catalogApiKey,
+      bbox:            bbox.join(','),
+      acquiredDate:    new Date(dateFrom).toISOString(),
+      maxAcquiredDate: new Date(dateTo).toISOString(),
+    },
+  })
+    .then(response => response.data)
+    // HACK HACK HACK HACK HACK HACK HACK HACK HACK HACK
+    .then(images => {
+      console.warn('(catalog:search) Normalizing bf-ia-broker response')
+      images.features.forEach(f => {
+        f.properties.bands = {}
+        f.id = source + ':' + f.id
+      })
+      return {
+        images,
+        count:      images.features.length,
+        startIndex: 0,
+        totalCount: images.features.length,
+      }
+    })
+    // HACK HACK HACK HACK HACK HACK HACK HACK HACK HACK
+    .catch(err => {
+      console.error('(catalog:search) failed:', err)
+      throw err
+    })
+}
+
+//
+// Internals
+//
+
+function searchLegacy({
+    bbox,
+    cloudCover,
+    dateFrom,
+    dateTo,
+    startIndex,
+    count,
 }): Promise<beachfront.ImageryCatalogPage> {
   return _client.get('/discover', {
     params: {
@@ -51,9 +122,9 @@ export function search({
       maxAcquiredDate: new Date(dateTo).toISOString(),
     },
   })
-    .then(response => response.data)
-    .catch(err => {
-      console.error('(catalog:search) failed:', err)
-      throw err
-    })
+      .then(response => response.data)
+      .catch(err => {
+        console.error('(catalog:search) failed:', err)
+        throw err
+      })
 }

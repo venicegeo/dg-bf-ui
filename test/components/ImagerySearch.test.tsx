@@ -32,11 +32,13 @@ describe('<ImagerySearch/>', () => {
       dateFrom:           '2016-01-01',
       dateTo:             '2016-02-01',
       isSearching:        false,
+      source:             'rapideye',
       onApiKeyChange:     sinon.stub(),
       onClearBbox:        sinon.stub(),
       onCloudCoverChange: sinon.stub(),
       onDateChange:       sinon.stub(),
       onSubmit:           sinon.stub(),
+      onSourceChange:     sinon.stub(),
     }
   })
 
@@ -49,11 +51,13 @@ describe('<ImagerySearch/>', () => {
         dateFrom={_props.dateFrom}
         dateTo={_props.dateTo}
         isSearching={_props.isSearching}
+        source={_props.source}
         onApiKeyChange={_props.onApiKeyChange}
         onClearBbox={_props.onClearBbox}
         onCloudCoverChange={_props.onCloudCoverChange}
         onDateChange={_props.onDateChange}
         onSubmit={_props.onSubmit}
+        onSourceChange={_props.onSourceChange}
       />,
     )
     assert.equal(wrapper.find(CatalogSearchCriteria).length, 1)
@@ -69,11 +73,13 @@ describe('<ImagerySearch/>', () => {
         dateFrom={_props.dateFrom}
         dateTo={_props.dateTo}
         isSearching={_props.isSearching}
+        source={_props.source}
         onApiKeyChange={_props.onApiKeyChange}
         onClearBbox={_props.onClearBbox}
         onCloudCoverChange={_props.onCloudCoverChange}
         onDateChange={_props.onDateChange}
         onSubmit={_props.onSubmit}
+        onSourceChange={_props.onSourceChange}
       />,
     )
     wrapper.find(CatalogSearchCriteria).props().onApiKeyChange('test-new-catalog-api-key')
@@ -89,11 +95,13 @@ describe('<ImagerySearch/>', () => {
         dateFrom={_props.dateFrom}
         dateTo={_props.dateTo}
         isSearching={_props.isSearching}
+        source={_props.source}
         onApiKeyChange={_props.onApiKeyChange}
         onClearBbox={_props.onClearBbox}
         onCloudCoverChange={_props.onCloudCoverChange}
         onDateChange={_props.onDateChange}
         onSubmit={_props.onSubmit}
+        onSourceChange={_props.onSourceChange}
       />,
     )
     wrapper.find(CatalogSearchCriteria).props().onClearBbox()
@@ -109,11 +117,13 @@ describe('<ImagerySearch/>', () => {
         dateFrom={_props.dateFrom}
         dateTo={_props.dateTo}
         isSearching={_props.isSearching}
+        source={_props.source}
         onApiKeyChange={_props.onApiKeyChange}
         onClearBbox={_props.onClearBbox}
         onCloudCoverChange={_props.onCloudCoverChange}
         onDateChange={_props.onDateChange}
         onSubmit={_props.onSubmit}
+        onSourceChange={_props.onSourceChange}
       />,
     )
     wrapper.find(CatalogSearchCriteria).props().onCloudCoverChange(42)
@@ -129,11 +139,13 @@ describe('<ImagerySearch/>', () => {
         dateFrom={_props.dateFrom}
         dateTo={_props.dateTo}
         isSearching={_props.isSearching}
+        source={_props.source}
         onApiKeyChange={_props.onApiKeyChange}
         onClearBbox={_props.onClearBbox}
         onCloudCoverChange={_props.onCloudCoverChange}
         onDateChange={_props.onDateChange}
         onSubmit={_props.onSubmit}
+        onSourceChange={_props.onSourceChange}
       />,
     )
     wrapper.find(CatalogSearchCriteria).props().onDateChange('1999-12-31', _props.dateTo)
@@ -149,15 +161,39 @@ describe('<ImagerySearch/>', () => {
         dateFrom={_props.dateFrom}
         dateTo={_props.dateTo}
         isSearching={_props.isSearching}
+        source={_props.source}
         onApiKeyChange={_props.onApiKeyChange}
         onClearBbox={_props.onClearBbox}
         onCloudCoverChange={_props.onCloudCoverChange}
         onDateChange={_props.onDateChange}
         onSubmit={_props.onSubmit}
+        onSourceChange={_props.onSourceChange}
       />,
     )
     wrapper.find(CatalogSearchCriteria).props().onDateChange(_props.dateFrom, '1999-12-31')
     assert.isTrue(_props.onDateChange.calledWithExactly(_props.dateFrom, '1999-12-31'))
+  })
+
+  it('bubbles source change event', () => {
+    const wrapper = shallow(
+        <ImagerySearch
+            bbox={_props.bbox}
+            catalogApiKey={_props.catalogApiKey}
+            cloudCover={_props.cloudCover}
+            dateFrom={_props.dateFrom}
+            dateTo={_props.dateTo}
+            isSearching={_props.isSearching}
+            source={_props.source}
+            onApiKeyChange={_props.onApiKeyChange}
+            onClearBbox={_props.onClearBbox}
+            onCloudCoverChange={_props.onCloudCoverChange}
+            onDateChange={_props.onDateChange}
+            onSubmit={_props.onSubmit}
+            onSourceChange={_props.onSourceChange}
+        />,
+    )
+    wrapper.find(CatalogSearchCriteria).props().onSourceChange('averagespeedeye')
+    assert.isTrue(_props.onSourceChange.calledWithExactly('averagespeedeye'))
   })
 
   it('emits submission event', () => {
@@ -169,11 +205,13 @@ describe('<ImagerySearch/>', () => {
         dateFrom={_props.dateFrom}
         dateTo={_props.dateTo}
         isSearching={_props.isSearching}
+        source={_props.source}
         onApiKeyChange={_props.onApiKeyChange}
         onClearBbox={_props.onClearBbox}
         onCloudCoverChange={_props.onCloudCoverChange}
         onDateChange={_props.onDateChange}
         onSubmit={_props.onSubmit}
+        onSourceChange={_props.onSourceChange}
       />,
     )
     const noop = () => {/* noop */}
@@ -195,11 +233,13 @@ describe('<ImagerySearch/>', () => {
           code: 123,
         }}
         isSearching={_props.isSearching}
+        source={_props.source}
         onApiKeyChange={_props.onApiKeyChange}
         onClearBbox={_props.onClearBbox}
         onCloudCoverChange={_props.onCloudCoverChange}
         onDateChange={_props.onDateChange}
         onSubmit={_props.onSubmit}
+        onSourceChange={_props.onSourceChange}
       />,
     )
     assert.equal(wrapper.find('.ImagerySearch-errorMessage').length, 1)
@@ -214,11 +254,13 @@ describe('<ImagerySearch/>', () => {
         dateFrom={_props.dateFrom}
         dateTo={_props.dateTo}
         isSearching={true}
+        source={_props.source}
         onApiKeyChange={_props.onApiKeyChange}
         onClearBbox={_props.onClearBbox}
         onCloudCoverChange={_props.onCloudCoverChange}
         onDateChange={_props.onDateChange}
         onSubmit={_props.onSubmit}
+        onSourceChange={_props.onSourceChange}
       />,
     )
     assert.equal(wrapper.find('.ImagerySearch-loadingMask').length, 1)
@@ -233,11 +275,13 @@ describe('<ImagerySearch/>', () => {
         dateFrom={_props.dateFrom}
         dateTo={_props.dateTo}
         isSearching={true}
+        source={_props.source}
         onApiKeyChange={_props.onApiKeyChange}
         onClearBbox={_props.onClearBbox}
         onCloudCoverChange={_props.onCloudCoverChange}
         onDateChange={_props.onDateChange}
         onSubmit={_props.onSubmit}
+        onSourceChange={_props.onSourceChange}
       />,
     )
     assert.isTrue(wrapper.find('button[type="submit"]').prop('disabled'))
