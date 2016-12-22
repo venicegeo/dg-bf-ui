@@ -31,7 +31,7 @@ describe('config', () => {
   })
 
   it('defines at least one basemap tile provider', () => {
-    assert.isAbove(config.TILE_PROVIDERS.length, 0)
+    assert.isAbove(config.BASEMAP_TILE_PROVIDERS.length, 0)
   })
 
   it('defines at least one scene preview tile provider', () => {
@@ -39,6 +39,6 @@ describe('config', () => {
   })
 
   it('defines at least one tile provider', () => {
-    assert.isAbove(config.TILE_PROVIDERS.length, 0)
+    assert.isAbove(config.BASEMAP_TILE_PROVIDERS.length, 0)
   })
 })
