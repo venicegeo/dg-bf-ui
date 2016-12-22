@@ -466,11 +466,13 @@ export class Application extends React.Component<Props, State> {
       isSearching: true,
       selectedFeature: null,
     })
-    catalogService.search(Object.assign({
+    catalogService.search({
       count,
       startIndex,
       bbox: this.state.bbox,
-    }, this.state.searchCriteria))
+      catalogApiKey: this.state.catalogApiKey,
+      ...this.state.searchCriteria
+    })
       .then(searchResults => this.setState({ searchResults, isSearching: false }))
       .catch(searchError => this.setState({ searchError, isSearching: false }))
   }
