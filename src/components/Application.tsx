@@ -471,7 +471,7 @@ export class Application extends React.Component<Props, State> {
       startIndex,
       bbox: this.state.bbox,
       catalogApiKey: this.state.catalogApiKey,
-      ...this.state.searchCriteria
+      ...this.state.searchCriteria,
     })
       .then(searchResults => this.setState({ searchResults, isSearching: false }))
       .catch(searchError => this.setState({ searchError, isSearching: false }))

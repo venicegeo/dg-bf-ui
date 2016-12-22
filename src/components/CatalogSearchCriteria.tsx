@@ -21,7 +21,7 @@ import {StaticMinimap} from './StaticMinimap'
 import {
   SOURCE_LANDSAT,
   SOURCE_PLANETSCOPE,
-  SOURCE_RAPIDEYE
+  SOURCE_RAPIDEYE,
 } from '../constants'
 
 interface Props {

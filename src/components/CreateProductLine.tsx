@@ -94,9 +94,11 @@ export class CreateProductLine extends React.Component<Props, State> {
                 apiKey={this.props.catalogApiKey}
                 bbox={this.props.bbox}
                 cloudCover={this.state.cloudCover}
+                source="landsat"
                 onApiKeyChange={this.props.onCatalogApiKeyChange}
                 onClearBbox={this.props.onClearBbox}
                 onCloudCoverChange={cloudCover => this.setState({ cloudCover })}
+                onSourceChange={() => {/* HACK -- noop */}}
               />
               <NewProductLineDetails
                 name={this.state.name}

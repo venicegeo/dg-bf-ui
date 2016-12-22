@@ -166,7 +166,7 @@ export class CreateJob extends React.Component<Props, State> {
     }))
   }
 
-  private handleSearchSourceChange(source: SourceIdentifier) {
+  private handleSearchSourceChange(source: string) {
     this.props.onSearchCriteriaChange({ ...this.props.searchCriteria, source })
   }
 
