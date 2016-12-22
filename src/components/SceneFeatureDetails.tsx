@@ -34,9 +34,6 @@ export const SceneFeatureDetails = ({className, feature}: Props) => (
       <dt>Date Captured</dt>
       <dd>{moment(feature.properties.acquiredDate).utc().format('MM/DD/YYYY HH:mm z')}</dd>
 
-      <dt>Bands</dt>
-      <dd>{Object.keys(feature.properties.bands).join(', ')}</dd>
-
       <dt>Cloud Cover</dt>
       <dd>{feature.properties.cloudCover}%</dd>
 
