@@ -53,8 +53,8 @@ export function initialize(): boolean {
   return false
 }
 
-export function getClient(reuse = true): AxiosInstance {
-  if (!_client || !reuse) {
+export function getClient(): AxiosInstance {
+  if (!_client) {
     _client = axios.create({
       baseURL: API_ROOT,
       timeout: DEFAULT_TIMEOUT,
