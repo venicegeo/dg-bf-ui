@@ -61,10 +61,8 @@ export function search({
           count,
       })
     case SOURCE_RAPIDEYE:
-      itemType = 'REOrthoTile'
-      break
     case SOURCE_PLANETSCOPE:
-      itemType = 'PSOrthoTile'
+      itemType = source
       break
     default:
       return Promise.reject(new Error(`Unknown data source prefix: '${source}'`))
