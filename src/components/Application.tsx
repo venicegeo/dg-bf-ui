@@ -143,7 +143,7 @@ export class Application extends React.Component<Props, State> {
       this.initializeServices()
       this.startBackgroundTasks()
       this.refreshRecords()
-      this.importJobsIfNeeded()
+          .then(this.importJobsIfNeeded.bind(this))
     }
   }
 
@@ -201,9 +201,7 @@ export class Application extends React.Component<Props, State> {
   renderRoute() {
     if (!this.state.isLoggedIn) {
       return (
-        <Login
-          onSuccess={() => this.setState({ isLoggedIn: true })}
-        />
+        <Login/>
       )
     }
     switch (this.state.route.pathname) {
@@ -525,8 +523,10 @@ export class Application extends React.Component<Props, State> {
 
   private refreshRecords() {
     console.debug('(application:refreshRecords) fetching latest jobs and product lines')
-    this.fetchJobs()
-    this.fetchProductLines()
+    return Promise.all([
+      this.fetchJobs(),
+      this.fetchProductLines(),
+    ])
   }
 
   private startBackgroundTasks() {
@@ -571,7 +571,7 @@ function generateInitialState(): State {
     catalogApiKey: '',
     errors: [],
     route: generateRoute(location),
-    isLoggedIn: sessionService.exists(),
+    isLoggedIn: sessionService.initialize(),
     isSessionExpired: false,
     isUpdateAvailable: false,
 
