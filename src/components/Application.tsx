@@ -571,7 +571,7 @@ function generateInitialState(): State {
     catalogApiKey: '',
     errors: [],
     route: generateRoute(location),
-    isLoggedIn: sessionService.exists(),
+    isLoggedIn: sessionService.initialize(),
     isSessionExpired: false,
     isUpdateAvailable: false,
 
