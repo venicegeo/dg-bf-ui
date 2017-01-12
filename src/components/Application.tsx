@@ -201,9 +201,7 @@ export class Application extends React.Component<Props, State> {
   renderRoute() {
     if (!this.state.isLoggedIn) {
       return (
-        <Login
-          onSuccess={() => this.setState({ isLoggedIn: true })}
-        />
+        <Login/>
       )
     }
     switch (this.state.route.pathname) {
