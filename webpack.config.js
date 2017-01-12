@@ -101,11 +101,6 @@ module.exports = {
 
   devServer: {
     stats: 'error-only',
-    https: true,
-    // HACK HACK HACK HACK HACK HACK HACK HACK HACK HACK HACK HACK HACK HACK
-    cert: fs.readFileSync('../bf-api/.dev/ssl-certificate.pem').toString(),
-    key: fs.readFileSync('../bf-api/.dev/ssl-certificate.key').toString(),
-    // HACK HACK HACK HACK HACK HACK HACK HACK HACK HACK HACK HACK HACK HACK
   },
 
   plugins: [

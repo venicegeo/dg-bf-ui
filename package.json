@@ -9,7 +9,7 @@
     "test": "karma start",
     "test:ci": "NODE_ENV=ci karma start --single-run --browsers Chrome,Firefox --reporters progress,coverage,junit",
     "typings:install": "typings install",
-    "watch": "webpack-dev-server --inline --colors --history-api-fallback"
+    "watch": "webpack-dev-server --inline --colors --history-api-fallback --https --cert ../bf-api/.dev/ssl-certificate.pem --key ../bf-api/.dev/ssl-certificate.key"
   },
   "author": "RadiantBlue Technologies",
   "license": "Apache-2.0",
