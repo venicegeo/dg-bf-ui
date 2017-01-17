@@ -26,7 +26,10 @@ export const Login = () => (
     <div className={styles.root}>
       <img src={brand} alt="Beachfront"/>
       <h1>Welcome to Beachfront!</h1>
-      <a href={API_ROOT + '/login/geoaxis'}>
+      <a className={styles.button} href={API_ROOT + '/login/geoaxis'}>
+        <span className={styles.buttonIcons}>
+            <span className="fa fa-lock"/>
+        </span>
         Login with GeoAxis
       </a>
     </div>
