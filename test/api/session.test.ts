@@ -18,7 +18,6 @@ import {assert} from 'chai'
 import * as sinon from 'sinon'
 import axios from 'axios'
 import * as service from '../../src/api/session'
-import * as worker from '../../src/api/workers/session'
 
 describe('Session Service', () => {
   let globalStubs: GlobalStubs
@@ -145,45 +144,6 @@ describe('Session Service', () => {
       sessionStorage.setItem('dolor', '###########')
       service.destroy()
       assert.equal(sessionStorage.length, 0)
-    })
-  })
-
-  describe('startWorker()', () => {
-    let client: Sinon.SinonStub
-
-    beforeEach(() => {
-      client = sinon.stub()
-      sinon.stub(axios, 'create').returns(client)
-    })
-
-    afterEach(() => {
-      sinon.restore(axios.create)
-      sinon.restore(worker.start)
-      sinon.restore(worker.terminate)
-    })
-
-    it('starts worker', () => {
-      const stub = sinon.stub(worker, 'start')
-      service.startWorker({ onExpired() {/* noop */} })
-      assert.strictEqual(stub.firstCall.args[0].client, client)
-      assert.isFunction(stub.firstCall.args[0].onExpired)
-      assert.isNumber(stub.firstCall.args[0].interval)
-    })
-  })
-
-  describe('stopWorker()', () => {
-
-    afterEach(() => {
-      sinon.restore(worker.start)
-      sinon.restore(worker.terminate)
-    })
-
-    it('stops worker', () => {
-      const stub = sinon.stub(worker, 'terminate')
-      sinon.stub(worker, 'start')
-      service.startWorker({ onExpired() {/* noop */} })
-      service.stopWorker()
-      assert.isTrue(stub.called)
     })
   })
 })

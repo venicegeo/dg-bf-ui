@@ -15,15 +15,17 @@
  **/
 
 import axios, {AxiosInstance} from 'axios'
-import * as worker from './workers/session'
-import {API_ROOT, SESSION_WORKER_INTERVAL} from '../config'
+import {API_ROOT} from '../config'
 
 const DEFAULT_TIMEOUT = 18000
+const DEFAULT_ENTRY_URL = '/'
 
-let _client: AxiosInstance
+let _client: AxiosInstance,
+    _onExpired: () => void
 
 export function destroy(): void {
   _client = null
+  _onExpired = null
   sessionStorage.clear()
 }
 
@@ -39,7 +41,7 @@ export function initialize(): boolean {
   if (location.search.indexOf('logged_in=true') !== -1) {
     sessionStorage.setItem('__timestamp__', new Date().toISOString())
 
-    const entry = sessionStorage.getItem('__entry__')
+    const entry = sessionStorage.getItem('__entry__') || DEFAULT_ENTRY_URL
     sessionStorage.removeItem('__entry__')
 
     // Return to original destination
@@ -62,19 +64,18 @@ export function getClient(): AxiosInstance {
       headers: {
         'X-Requested-With': 'XMLHttpRequest',
       },
+      validateStatus(status) {
+        if (status === 401 && _onExpired) {
+          _onExpired()
+          _onExpired = null
+        }
+        return status >= 200 && status < 300
+      },
     })
   }
   return _client
 }
 
-export function startWorker({ onExpired }) {
-  worker.start({
-    client:   getClient(),
-    interval: SESSION_WORKER_INTERVAL,
-    onExpired,
-  })
-}
-
-export function stopWorker() {
-  worker.terminate()
+export function onExpired(callback: () => void) {
+  _onExpired = callback
 }

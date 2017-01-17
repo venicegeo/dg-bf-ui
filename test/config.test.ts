@@ -22,10 +22,6 @@ describe('config', () => {
     assert.equal(config.API_ROOT, '/test-api-root')
   })
 
-  it('defines session worker timing properties', () => {
-    assert.isNumber(config.SESSION_WORKER_INTERVAL)
-  })
-
   it('defines update worker timing properties', () => {
     assert.isNumber(config.UPDATE_WORKER_INTERVAL)
   })
