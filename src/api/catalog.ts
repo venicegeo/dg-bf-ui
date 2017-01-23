@@ -72,7 +72,6 @@ export function search({
     .then(images => {
       console.warn('(catalog:search) Normalizing bf-ia-broker response')
       images.features.forEach(f => {
-        f.properties.bands = {}
         f.id = source + ':' + f.id
       })
       return {

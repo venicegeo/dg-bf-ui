@@ -26,13 +26,11 @@ describe('<Algorithm/>', () => {
   beforeEach(() => {
     _props = {
       algorithm: {
-        bands:         ['orange', 'purple'],
         description:   'test-description',
         maxCloudCover: 30,
         name:          'test-name',
       },
       sceneMetadata: {
-        bands:      {},
         cloudCover: 5,
       },
       isSelected:   false,
@@ -178,7 +176,6 @@ describe('<Algorithm/>', () => {
     const wrapper = shallow(
       <Algorithm
         algorithm={{
-          bands:        ['red','green'],
           description:  'test-description',
           id:           'test-id',
           maxCloudCover: 10,
@@ -198,7 +195,6 @@ describe('<Algorithm/>', () => {
     const wrapper = shallow(
       <Algorithm
         algorithm={{
-          bands:         ['red','green'],
           description:   'test-description',
           id:            'test-id',
           maxCloudCover: 9000,
