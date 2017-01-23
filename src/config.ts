@@ -54,12 +54,6 @@ export const BASEMAP_TILE_PROVIDERS = [
 
 export const SCENE_TILE_PROVIDERS = [
   {
-    prefix: 'landsat',
-    url: 'https://tiles{0-3}.planet.com/v0/scenes/landsat/__SCENE_ID__/{z}/{x}/{y}.png?api_key=__API_KEY__',
-    maxZoom:  13,
-    attributions: '&copy; <a href="https://www.planet.com" target="_blank" rel="noopener">Planet Labs</a> &copy; <a href="https://landsat.usgs.gov" target="_blank" rel="noopener">LANDSAT (USGS)</a>',
-  },
-  {
     prefix: 'planetscope',
     url: 'https://tiles{0-3}.planet.com/v0/scenes/ortho/__SCENE_ID__/{z}/{x}/{y}.png?api_key=__API_KEY__',
     maxZoom:  13,

@@ -1013,7 +1013,7 @@ function getColorForStatus(status) {
 }
 
 function normalizeSceneId(id: string) {
-  return id ? id.replace(/^(landsat):/, '') : null
+  return id ? id.replace(/^(planetscope|rapideye):/, '') : null
 }
 
 function tileLoadFunction(imageTile, src) {

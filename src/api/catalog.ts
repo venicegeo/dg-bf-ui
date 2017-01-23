@@ -18,7 +18,6 @@ import axios, {AxiosInstance, Promise} from 'axios'
 import {getClient} from './session'
 
 import {
-  SOURCE_LANDSAT,
   SOURCE_PLANETSCOPE,
   SOURCE_RAPIDEYE,
 } from '../constants'
@@ -49,17 +48,9 @@ export function search({
   startIndex,
   count,
 }): Promise<beachfront.ImageryCatalogPage> {
+  console.warn('(catalog:search): Discarding parameters `count` (%s) and `startIndex` (%s)', count, startIndex)
   let itemType
   switch (source) {
-    case SOURCE_LANDSAT:
-      return searchLegacy({
-          bbox,
-          cloudCover,
-          dateFrom,
-          dateTo,
-          startIndex,
-          count,
-      })
     case SOURCE_RAPIDEYE:
     case SOURCE_PLANETSCOPE:
       itemType = source
@@ -96,33 +87,4 @@ export function search({
       console.error('(catalog:search) failed:', err)
       throw err
     })
-}
-
-//
-// Internals
-//
-
-function searchLegacy({
-    bbox,
-    cloudCover,
-    dateFrom,
-    dateTo,
-    startIndex,
-    count,
-}): Promise<beachfront.ImageryCatalogPage> {
-  return _client.get('/discover', {
-    params: {
-      bbox: bbox.join(','),
-      cloudCover,
-      count,
-      startIndex,
-      acquiredDate:    new Date(dateFrom).toISOString(),
-      maxAcquiredDate: new Date(dateTo).toISOString(),
-    },
-  })
-      .then(response => response.data)
-      .catch(err => {
-        console.error('(catalog:search) failed:', err)
-        throw err
-      })
 }

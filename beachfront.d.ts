@@ -44,7 +44,6 @@ declare namespace beachfront {
   }
 
   interface Algorithm {
-    bands: string[]
     description: string
     id: string
     maxCloudCover: number
@@ -70,15 +69,9 @@ declare namespace beachfront {
   interface SceneMetadata {
     type: 'SCENE'
     acquiredDate: string
-    bands: {
-      [key: string]: string,
-    }
     cloudCover: number
-    path: string
     resolution: number
     sensorName: string
-    thumb_large: string
-    thumb_small: string
   }
 
   interface ImageryCatalogPage {

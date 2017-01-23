@@ -19,7 +19,6 @@ const styles: any = require('./CatalogSearchCriteria.css')
 import * as React from 'react'
 import {StaticMinimap} from './StaticMinimap'
 import {
-  SOURCE_LANDSAT,
   SOURCE_PLANETSCOPE,
   SOURCE_RAPIDEYE,
 } from '../constants'
@@ -57,7 +56,6 @@ export const CatalogSearchCriteria = (props: Props) => (
       <select value={props.source} onChange={event => props.onSourceChange((event.target as HTMLSelectElement).value)}>
         <option value={SOURCE_RAPIDEYE}>RapidEye (Planet)</option>
         <option value={SOURCE_PLANETSCOPE}>PlanetScope (Planet)</option>
-        <option value={SOURCE_LANDSAT}>LANDSAT 8 (via Planet)</option>
       </select>
     </label>
     <label className={styles.apiKey}>
