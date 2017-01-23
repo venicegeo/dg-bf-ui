@@ -142,6 +142,7 @@ export class CreateJob extends React.Component<Props, State> {
       algorithmId: algorithm.id,
       name:        this.state.name,
       sceneId:     this.props.selectedScene.id,
+      catalogApiKey: this.props.catalogApiKey,
     })
       .then(job => {
         this.setState({ isCreating: false })

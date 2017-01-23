@@ -253,7 +253,7 @@ describe('<CreateJob/>', () => {
         searchCriteria={_props.searchCriteria}
         searchError={_props.searchError}
         selectedScene={({
-          id:         'landsat:test-prefixed-scene-id',
+          id:         'planetscope:test-prefixed-scene-id',
           properties: {},
         } as any)}
         onCatalogApiKeyChange={_props.onCatalogApiKeyChange}
