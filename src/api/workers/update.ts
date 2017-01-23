@@ -27,7 +27,7 @@ export function start({
   }
   instance = setInterval(() => {
     console.debug('(update:worker) checking for updates to the UI')
-    axios.get('/', {responseType: 'document'})
+    axios.get('/', {responseType: 'document', params: {update_check: Date.now()}})
       .then(response => {
         if (getVersion(response.data) !== getVersion(document)) {
           onAvailable()
