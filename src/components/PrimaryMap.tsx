@@ -599,11 +599,11 @@ export class PrimaryMap extends React.Component<Props, State> {
   }
 
   private renderSelectionPreview() {
-    const features = [this.props.selectedFeature].filter(Boolean)
+    const previewables = toPreviewable([this.props.selectedFeature].filter(Boolean))
     const shouldRender = {}
     const alreadyRendered = {}
 
-    features.forEach(i => shouldRender[i.id] = true)
+    previewables.forEach(i => shouldRender[i.sceneId] = true)
 
     // Removals
     Object.keys(this.previewLayers).forEach(imageId => {
@@ -619,31 +619,33 @@ export class PrimaryMap extends React.Component<Props, State> {
 
     // Additions
     const insertionIndex = this.basemapLayers.length
-    features.filter(i => shouldRender[i.id] && !alreadyRendered[i.id]).forEach(feature => {
-      const chunks = feature.id.match(/^(\w+):(.*)$/)
-      if (!chunks) {
-        console.warn('(@primaryMap._renderSelectionPreview) Invalid scene ID: `%s`', feature.id)
-        return
-      }
+    previewables
+      .filter(f => shouldRender[f.sceneId] && !alreadyRendered[f.sceneId])
+      .forEach(f => {
+        const chunks = f.sceneId.match(/^(\w+):(.*)$/)
+        if (!chunks) {
+          console.warn('(@primaryMap._renderSelectionPreview) Invalid scene ID: `%s`', f.sceneId)
+          return
+        }
 
-      const [, prefix, externalId] = chunks
-      const provider = SCENE_TILE_PROVIDERS.find(p => p.prefix === prefix)
-      if (!provider) {
-        console.warn('(@primaryMap._renderSelectionPreview) No provider available for scene `%s`', feature.id)
-        return
-      }
+        const [, prefix, externalId] = chunks
+        const provider = SCENE_TILE_PROVIDERS.find(p => p.prefix === prefix)
+        if (!provider) {
+          console.warn('(@primaryMap._renderSelectionPreview) No provider available for scene `%s`', f.sceneId)
+          return
+        }
 
-      const {catalogApiKey} = this.props
-      const layer = new ol.layer.Tile({
-        extent: featureToBbox(feature),
-        source: generateScenePreviewSource(provider, externalId, catalogApiKey),
+        const {catalogApiKey} = this.props
+        const layer = new ol.layer.Tile({
+          extent: f.extent,
+          source: generateScenePreviewSource(provider, externalId, catalogApiKey),
+        })
+
+        this.subscribeToLoadEvents(layer)
+        this.previewLayers[f.sceneId] = layer
+        this.map.getLayers().insertAt(insertionIndex, layer)
       })
-
-      this.subscribeToLoadEvents(layer)
-      this.previewLayers[feature.id] = layer
-      this.map.getLayers().insertAt(insertionIndex, layer)
-    })
-  }
+    }
 
   private subscribeToLoadEvents(layer) {
     const source = layer.getSource()
@@ -1010,6 +1012,13 @@ function getColorForStatus(status) {
     case STATUS_ERROR: return 'hsl(349, 100%, 60%)'
     default: return 'magenta'
   }
+}
+
+function toPreviewable(features: Array<beachfront.Job|beachfront.Scene>) {
+  return features.map(f => ({
+    sceneId: f.properties.type === TYPE_JOB ? f.properties.scene_id : f.id,
+    extent: featureToBbox(f),
+  }))
 }
 
 function normalizeSceneId(id: string) {
