@@ -315,7 +315,7 @@ export class Application extends React.Component<Props, State> {
       jobsService.fetchJob(jobId)
         .then(record => {
           this.setState({ jobs: this.state.jobs.$append(record) })
-          this.panTo(getFeatureCenter(record), 7.5)
+          this.panTo(getFeatureCenter(record))
         })
         .catch(err => {
           console.error('(application:fetch) failed:', err)
@@ -425,7 +425,7 @@ export class Application extends React.Component<Props, State> {
 
   private handleNavigateToJob(loc) {
     this.navigateTo(loc)
-    this.panTo(getFeatureCenter(this.state.jobs.records.find(j => loc.search.includes(j.id))), 7.5)
+    this.panTo(getFeatureCenter(this.state.jobs.records.find(j => loc.search.includes(j.id))))
   }
 
   private handlePanToProductLine(productLine) {
