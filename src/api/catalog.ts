@@ -60,7 +60,7 @@ export function search({
   }
   return axios.get(`https://bf-ia-broker.int.geointservices.io/planet/discover/${itemType}`, {
     params: {
-      cloudCover,
+      cloudCover:      cloudCover + .05,
       PL_API_KEY:      catalogApiKey,
       bbox:            bbox.join(','),
       acquiredDate:    new Date(dateFrom).toISOString(),
