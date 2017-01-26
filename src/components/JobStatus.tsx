@@ -92,7 +92,7 @@ export class JobStatus extends React.Component<Props, State> {
               <dt>Scene ID</dt>
               <dd>{normalizeSceneId(properties.scene_id)}</dd>
               <dt>Captured On</dt>
-              <dd>{moment(properties.scene_capture_date).utc().format('MM/DD/YYYY HH:mm z')}</dd>
+              <dd>{moment(properties.scene_time_of_collect).utc().format('MM/DD/YYYY HH:mm z')}</dd>
               <dt>Sensor</dt>
               <dd>{properties.scene_sensor_name}</dd>
             </dl>
@@ -220,7 +220,7 @@ export class JobStatus extends React.Component<Props, State> {
 //
 
 function normalizeSceneId(sceneId) {
-  return sceneId.replace(/^landsat:/, '')
+  return sceneId.replace(/^(rapideye|planetscope):/, '')
 }
 
 function segmentIfNeeded(s: string) {

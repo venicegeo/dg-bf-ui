@@ -15,7 +15,7 @@
  **/
 
 const styles: any = require('./About.css')
-const brand: string = require('../images/brand-small.svg')
+const brand: string = require('../images/brand-small-square.svg')
 
 import * as React from 'react'
 import {Modal} from './Modal'
@@ -27,12 +27,11 @@ interface Props {
 export const About = ({ onDismiss }: Props) => (
   <Modal onDismiss={onDismiss}>
     <div className={styles.root}>
-      <section className={styles.brandColumn}>
+      <section className={styles.heading}>
         <img src={brand} alt="Beachfront"/>
-        <h1>Beachfront</h1>
+        <h1>About Beachfront</h1>
       </section>
-      <section className={styles.textColumn}>
-        <h2>Welcome to Beachfront</h2>
+      <section className={styles.body}>
         <p>
           Beachfront is an NGA Services project aimed at providing automated
           near real time feature extraction of global shoreline captured at

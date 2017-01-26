@@ -28,10 +28,12 @@ interface Props {
   dateTo: string
   error?: any
   isSearching: boolean
+  source: string
   onApiKeyChange(value: string)
   onClearBbox()
   onCloudCoverChange(value: number)
   onDateChange(fromValue: string, toValue: string)
+  onSourceChange(source: string)
   onSubmit()
 }
 
@@ -53,10 +55,12 @@ export class ImagerySearch extends React.Component<Props, {}> {
           dateFrom={this.props.dateFrom}
           dateTo={this.props.dateTo}
           disabled={this.props.isSearching}
+          source={this.props.source}
           onApiKeyChange={this.props.onApiKeyChange}
           onClearBbox={this.props.onClearBbox}
           onCloudCoverChange={this.props.onCloudCoverChange}
           onDateChange={this.props.onDateChange}
+          onSourceChange={this.props.onSourceChange}
           errorElement={this.props.error && (
             <div className={styles.errorMessage}>
               <h4><i className="fa fa-warning"/> Search failed</h4>

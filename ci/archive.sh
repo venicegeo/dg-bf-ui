@@ -16,7 +16,7 @@ npm install
 ## Build #######################################################################
 
 NODE_ENV=production npm run build
-echo "pushstate: enabled" > dist/Staticfile
+cp nginx.conf dist/
 cp -r docs dist
 
 #
@@ -26,4 +26,3 @@ cp -r docs dist
 pushd dist
 zip -r ../${APP}.${EXT} .
 popd > /dev/null
-

@@ -22,16 +22,12 @@ describe('config', () => {
     assert.equal(config.API_ROOT, '/test-api-root')
   })
 
-  it('defines session worker timing properties', () => {
-    assert.isNumber(config.SESSION_WORKER_INTERVAL)
-  })
-
   it('defines update worker timing properties', () => {
     assert.isNumber(config.UPDATE_WORKER_INTERVAL)
   })
 
   it('defines at least one basemap tile provider', () => {
-    assert.isAbove(config.TILE_PROVIDERS.length, 0)
+    assert.isAbove(config.BASEMAP_TILE_PROVIDERS.length, 0)
   })
 
   it('defines at least one scene preview tile provider', () => {
@@ -39,6 +35,6 @@ describe('config', () => {
   })
 
   it('defines at least one tile provider', () => {
-    assert.isAbove(config.TILE_PROVIDERS.length, 0)
+    assert.isAbove(config.BASEMAP_TILE_PROVIDERS.length, 0)
   })
 })

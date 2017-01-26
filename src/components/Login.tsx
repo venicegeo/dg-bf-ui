@@ -15,67 +15,23 @@
  **/
 
 const styles: any = require('./Login.css')
-const brand: string = require('../images/brand-small.svg')
+const brand: string = require('../images/brand-small-square.svg')
 
+import {API_ROOT} from '../config'
 import * as React from 'react'
 import {Modal} from './Modal'
-import {create as createSession} from '../api/session'
 
-interface Props {
-  onSuccess(): void
-}
-
-interface State {
-  authenticating?: boolean
-  error?: any
-}
-
-export class Login extends React.Component<Props, State> {
-  refs: any
-
-  constructor() {
-    super()
-    this.state = {error: null, authenticating: false}
-    this.handleSubmit = this.handleSubmit.bind(this)
-  }
-
-  componentDidMount() {
-    this.refs.username.focus()
-  }
-
-  render() {
-    return (
-      <Modal onDismiss={() => {/* noop */}}>
-        <form className={`${styles.root} ${this.state.error ? styles.failed : ''}`} onSubmit={this.handleSubmit}>
-          <img src={brand} alt="Beachfront"/>
-          <h1>Welcome to Beachfront!</h1>
-          <p>Please enter your username and password to login.</p>
-          {this.state.error && (
-            <div className={styles.errorMessage}>Oh no, login failed! ({this.state.error.message})</div>
-          )}
-          <div className={styles.fields}>
-            <label><input ref="username" placeholder="username"/></label>
-            <label><input ref="pass" placeholder="password" type="password"/></label>
-          </div>
-          <button className={styles.submitButton} type="submit" disabled={this.state.authenticating}>
-            {this.state.authenticating ? 'Logging In...' : 'Log In'}
-          </button>
-        </form>
-      </Modal>
-    )
-  }
-
-  private handleSubmit(event) {
-    event.preventDefault()
-    const username = this.refs.username.value
-    const password = this.refs.pass.value
-    createSession(username, password)
-      .then(() => {
-        this.props.onSuccess()
-      })
-      .catch(err => {
-        console.error(err)
-        this.setState({ error: err })
-      })
-  }
-}
+export const Login = () => (
+  <Modal onDismiss={() => {/* noop */}}>
+    <div className={styles.root}>
+      <img src={brand} alt="Beachfront"/>
+      <h1>Welcome to Beachfront!</h1>
+      <a className={styles.button} href={API_ROOT + '/login/geoaxis'}>
+        <span className={styles.buttonIcons}>
+            <span className="fa fa-lock"/>
+        </span>
+        Login with GeoAxis
+      </a>
+    </div>
+  </Modal>
+)

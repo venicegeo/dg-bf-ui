@@ -31,7 +31,7 @@ import {LoadingAnimation} from './LoadingAnimation'
 import {ImagerySearchResults} from './ImagerySearchResults'
 import {featureToBbox, deserializeBbox, serializeBbox} from '../utils/geometries'
 import {
-  TILE_PROVIDERS,
+  BASEMAP_TILE_PROVIDERS,
   SCENE_TILE_PROVIDERS,
 } from '../config'
 import {
@@ -197,7 +197,7 @@ export class PrimaryMap extends React.Component<Props, State> {
   }
 
   render() {
-    const basemapNames = TILE_PROVIDERS.map(b => b.name)
+    const basemapNames = BASEMAP_TILE_PROVIDERS.map(b => b.name)
     return (
       <main className={`${styles.root} ${this.state.loadingRefCount > 0 ? styles.isLoading : ''}`} ref="container" tabIndex={1}>
         <BasemapSelect
@@ -369,7 +369,7 @@ export class PrimaryMap extends React.Component<Props, State> {
   }
 
   private initializeOpenLayers() {
-    this.basemapLayers = generateBasemapLayers(TILE_PROVIDERS)
+    this.basemapLayers = generateBasemapLayers(BASEMAP_TILE_PROVIDERS)
     this.drawLayer = generateDrawLayer()
     this.highlightLayer = generateHighlightLayer()
     this.frameLayer = generateFrameLayer()
@@ -599,11 +599,11 @@ export class PrimaryMap extends React.Component<Props, State> {
   }
 
   private renderSelectionPreview() {
-    const images = featuresToImages(this.props.selectedFeature)
+    const previewables = toPreviewable([this.props.selectedFeature].filter(Boolean))
     const shouldRender = {}
     const alreadyRendered = {}
 
-    images.forEach(i => shouldRender[i.id] = true)
+    previewables.forEach(i => shouldRender[i.sceneId] = true)
 
     // Removals
     Object.keys(this.previewLayers).forEach(imageId => {
@@ -619,34 +619,33 @@ export class PrimaryMap extends React.Component<Props, State> {
 
     // Additions
     const insertionIndex = this.basemapLayers.length
-    images.filter(i => shouldRender[i.id] && !alreadyRendered[i.id]).forEach(image => {
-      const chunks = image.id.match(/^(\w+):(.*)$/)
-      if (!chunks) {
-        console.warn('(@primaryMap._renderSelectionPreview) Invalid image ID: `%s`', image.id)
-        return
-      }
+    previewables
+      .filter(f => shouldRender[f.sceneId] && !alreadyRendered[f.sceneId])
+      .forEach(f => {
+        const chunks = f.sceneId.match(/^(\w+):(.*)$/)
+        if (!chunks) {
+          console.warn('(@primaryMap._renderSelectionPreview) Invalid scene ID: `%s`', f.sceneId)
+          return
+        }
 
-      const [, prefix, externalImageId] = chunks
-      const provider = SCENE_TILE_PROVIDERS.find(p => p.prefix === prefix)
-      if (!provider) {
-        console.warn('(@primaryMap._renderSelectionPreview) No provider available for image `%s`', image.id)
-        return
-      }
+        const [, prefix, externalId] = chunks
+        const provider = SCENE_TILE_PROVIDERS.find(p => p.prefix === prefix)
+        if (!provider) {
+          console.warn('(@primaryMap._renderSelectionPreview) No provider available for scene `%s`', f.sceneId)
+          return
+        }
 
-      // HACK HACK HACK HACK
-      const apiKey = this.props.catalogApiKey
-      // HACK HACK HACK HACK
+        const {catalogApiKey} = this.props
+        const layer = new ol.layer.Tile({
+          extent: f.extent,
+          source: generateScenePreviewSource(provider, externalId, catalogApiKey),
+        })
 
-      const layer = new ol.layer.Tile({
-        extent: image.extent,
-        source: generateScenePreviewSource(provider, externalImageId, apiKey),
+        this.subscribeToLoadEvents(layer)
+        this.previewLayers[f.sceneId] = layer
+        this.map.getLayers().insertAt(insertionIndex, layer)
       })
-
-      this.subscribeToLoadEvents(layer)
-      this.previewLayers[image.id] = layer
-      this.map.getLayers().insertAt(insertionIndex, layer)
-    })
-  }
+    }
 
   private subscribeToLoadEvents(layer) {
     const source = layer.getSource()
@@ -737,13 +736,6 @@ function calculateExtent(geometry: ol.geom.Geometry) {
 function crossesDateline(geometry: ol.geom.Geometry) {
   const [minX, , maxX] = ol.proj.transformExtent(geometry.getExtent(), WEB_MERCATOR, WGS84)
   return minX === -180 && maxX === 180
-}
-
-function featuresToImages(...features: (beachfront.Job|beachfront.Scene)[]) {
-  return features.filter(Boolean).map(feature => ({
-    extent: featureToBbox(feature),
-    id:     (feature as beachfront.Job).properties.scene_id || feature.id,
-  }))
 }
 
 function generateBasemapLayers(providers) {
@@ -991,7 +983,7 @@ function generateScenePreviewSource(provider, imageId, apiKey) {
     crossOrigin: 'anonymous',
     tileLoadFunction,
     url: provider.url
-           .replace('__IMAGE_ID__', imageId)
+           .replace('__SCENE_ID__', imageId)
            .replace('__API_KEY__', apiKey),
   }))
 }
@@ -1022,8 +1014,15 @@ function getColorForStatus(status) {
   }
 }
 
+function toPreviewable(features: Array<beachfront.Job|beachfront.Scene>) {
+  return features.map(f => ({
+    sceneId: f.properties.type === TYPE_JOB ? f.properties.scene_id : f.id,
+    extent: featureToBbox(f),
+  }))
+}
+
 function normalizeSceneId(id: string) {
-  return id ? id.replace(/^(landsat):/, '') : null
+  return id ? id.replace(/^(planetscope|rapideye):/, '') : null
 }
 
 function tileLoadFunction(imageTile, src) {

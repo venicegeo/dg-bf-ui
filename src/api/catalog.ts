@@ -14,10 +14,15 @@
  * limitations under the License.
  **/
 
-import axios, {Promise} from 'axios'
+import axios, {AxiosInstance, Promise} from 'axios'
 import {getClient} from './session'
 
-let _client
+import {
+  SOURCE_PLANETSCOPE,
+  SOURCE_RAPIDEYE,
+} from '../constants'
+
+let _client: AxiosInstance
 
 export function initialize(): Promise<void> {
   const session = getClient()
@@ -35,23 +40,48 @@ export function initialize(): Promise<void> {
 
 export function search({
   bbox,
+  catalogApiKey,
   cloudCover,
   dateFrom,
   dateTo,
+  source,
   startIndex,
   count,
 }): Promise<beachfront.ImageryCatalogPage> {
-  return _client.get('/discover', {
+  console.warn('(catalog:search): Discarding parameters `count` (%s) and `startIndex` (%s)', count, startIndex)
+  let itemType
+  switch (source) {
+    case SOURCE_RAPIDEYE:
+    case SOURCE_PLANETSCOPE:
+      itemType = source
+      break
+    default:
+      return Promise.reject(new Error(`Unknown data source prefix: '${source}'`))
+  }
+  return axios.get(`https://bf-ia-broker.int.geointservices.io/planet/discover/${itemType}`, {
     params: {
-      bbox: bbox.join(','),
       cloudCover,
-      count,
-      startIndex,
+      PL_API_KEY:      catalogApiKey,
+      bbox:            bbox.join(','),
       acquiredDate:    new Date(dateFrom).toISOString(),
       maxAcquiredDate: new Date(dateTo).toISOString(),
     },
   })
     .then(response => response.data)
+    // HACK HACK HACK HACK HACK HACK HACK HACK HACK HACK
+    .then(images => {
+      console.warn('(catalog:search) Normalizing bf-ia-broker response')
+      images.features.forEach(f => {
+        f.id = source + ':' + f.id
+      })
+      return {
+        images,
+        count:      images.features.length,
+        startIndex: 0,
+        totalCount: images.features.length,
+      }
+    })
+    // HACK HACK HACK HACK HACK HACK HACK HACK HACK HACK
     .catch(err => {
       console.error('(catalog:search) failed:', err)
       throw err

@@ -18,10 +18,10 @@ const styles: any = require('./StaticMinimap.css')
 
 import * as React from 'react'
 import * as ol from 'openlayers'
-import {TILE_PROVIDERS} from '../config'
+import {BASEMAP_TILE_PROVIDERS} from '../config'
 import {deserializeBbox} from '../utils/geometries'
 
-const [DEFAULT_TILE_PROVIDER] = TILE_PROVIDERS
+const [DEFAULT_TILE_PROVIDER] = BASEMAP_TILE_PROVIDERS
 
 interface Props {
   bbox: number[]

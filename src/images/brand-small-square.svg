@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="64px" height="64px" viewBox="0 0 64 64" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: Sketch 41.2 (35397) - http://www.bohemiancoding.com/sketch -->
+    <title>brand-small-square</title>
+    <desc>Created with Sketch.</desc>
+    <defs>
+        <path d="M58,39.0464779 L58,16.0027339 C58,10.478703 53.5249324,6 48.0046567,6 L15.9953433,6 C10.4784969,6 6,10.4783765 6,16.0027339 L6,30.810487 L58,39.0464779 Z" id="path-1"></path>
+        <mask id="mask-2" maskContentUnits="userSpaceOnUse" maskUnits="objectBoundingBox" x="-6" y="-6" width="64" height="45.0464779">
+            <rect x="-3.55271368e-15" y="0" width="64" height="45.0464779" fill="white"></rect>
+            <use xlink:href="#path-1" fill="black"></use>
+        </mask>
+        <linearGradient x1="50%" y1="0%" x2="50%" y2="100%" id="linearGradient-3">
+            <stop stop-color="#3FE7FE" offset="0%"></stop>
+            <stop stop-color="#1ECAFB" offset="45.1590402%"></stop>
+            <stop stop-color="#4EB4FF" offset="83.4941008%"></stop>
+        </linearGradient>
+        <path d="M58,38.3637232 L58,47.9988171 C58,53.5223179 53.5215031,58 48.0046567,58 L15.9953433,58 C10.4750676,58 6,53.5257738 6,47.9988171 L6,30.1277323 L58,38.3637232 Z" id="path-4"></path>
+        <mask id="mask-5" maskContentUnits="userSpaceOnUse" maskUnits="objectBoundingBox" x="-6" y="-6" width="64" height="39.8722677">
+            <rect x="0" y="24.1277323" width="64" height="39.8722677" fill="white"></rect>
+            <use xlink:href="#path-4" fill="black"></use>
+        </mask>
+    </defs>
+    <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="brand-small-square">
+            <g id="Solid">
+                <use fill="#4A90E2" fill-rule="evenodd" xlink:href="#path-1"></use>
+                <use stroke="#FFFFFF" mask="url(#mask-2)" stroke-width="12" xlink:href="#path-1"></use>
+            </g>
+            <g id="Gradient">
+                <use fill="url(#linearGradient-3)" fill-rule="evenodd" xlink:href="#path-4"></use>
+                <use stroke="#FFFFFF" mask="url(#mask-5)" stroke-width="12" xlink:href="#path-4"></use>
+            </g>
+        </g>
+    </g>
+</svg>

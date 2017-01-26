@@ -14,71 +14,68 @@
  * limitations under the License.
  **/
 
-import axios, {AxiosInstance, AxiosPromise} from 'axios'
-import * as worker from './workers/session'
-import {API_ROOT, SESSION_WORKER_INTERVAL} from '../config'
+import axios, {AxiosInstance} from 'axios'
+import {API_ROOT} from '../config'
 
 const DEFAULT_TIMEOUT = 18000
+const DEFAULT_ENTRY_URL = '/'
 
-let _client: AxiosInstance
+let _client: AxiosInstance,
+    _onExpired: () => void
 
-export function create(username, password): AxiosPromise {
-  return axios.post(`${API_ROOT}/login`, null, {auth: {username, password}})
-    .then(response => {
-      _client = axios.create({
-        baseURL: API_ROOT,
-        timeout: DEFAULT_TIMEOUT,
-        auth: {
-          username: response.data.api_key,
-          password: '',
-        },
-      })
-      sessionStorage.setItem('apiKey', response.data.api_key)
-    })
-    .catch(err => {
-      console.error('(session:create) authentication failed')
-      throw err
-    })
-}
-
-export function destroy() {
+export function destroy(): void {
   _client = null
+  _onExpired = null
   sessionStorage.clear()
 }
 
-export function exists() {
-  return !!_client || !!sessionStorage.getItem('apiKey')
+export function initialize(): boolean {
+
+  // User has already logged on
+  const timestamp = sessionStorage.getItem('__timestamp__')
+  if (timestamp) {
+    return true
+  }
+
+    // User has been redirected back from bf-api
+  if (location.search.indexOf('logged_in=true') !== -1) {
+    sessionStorage.setItem('__timestamp__', new Date().toISOString())
+
+    const entry = sessionStorage.getItem('__entry__') || DEFAULT_ENTRY_URL
+    sessionStorage.removeItem('__entry__')
+
+    // Return to original destination
+    history.replaceState(null, null, entry)
+    return true
+  }
+
+  // Save search for later
+  sessionStorage.setItem('__entry__', location.pathname + location.search.replace(/\blogged_in=true&?/, ''))
+
+  return false
 }
 
 export function getClient(): AxiosInstance {
-  if (_client) {
-     return _client
-  }
-
-  const apiKey = sessionStorage.getItem('apiKey')
-  if (apiKey) {
+  if (!_client) {
     _client = axios.create({
       baseURL: API_ROOT,
       timeout: DEFAULT_TIMEOUT,
-      auth: {
-        username: apiKey,
-        password: '',
+      withCredentials: true,
+      headers: {
+        'X-Requested-With': 'XMLHttpRequest',
+      },
+      validateStatus(status) {
+        if (status === 401 && _onExpired) {
+          _onExpired()
+          _onExpired = null
+        }
+        return status >= 200 && status < 300
       },
     })
-    return _client
   }
-
-  throw new Error('No session exists')
+  return _client
 }
 
-export function startWorker({ onExpired }) {
-  worker.start({
-    client:   getClient(),
-    interval: SESSION_WORKER_INTERVAL,
-    onExpired,
-  })
-}
-
-export function stopWorker() {
-  worker.terminate()
+export function onExpired(callback: () => void) {
+  _onExpired = callback
 }

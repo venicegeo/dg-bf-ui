@@ -16,7 +16,7 @@
 
 const styles: any = require('./Navigation.css')
 const brand: string = require('../images/brand-experiment2.svg')
-const brandSmall: string = require('../images/brand-small.svg')
+const brandSmall: string = require('../images/brand-small-square.svg')
 
 import * as React from 'react'
 import {Link} from './Link'
@@ -44,7 +44,7 @@ export const Navigation = ({ activeRoute, onClick }: Props) => (
       <li className={styles.home}>
         <Link pathname="/" className={styles.linkHome} activeClassName={styles.active} onClick={onClick}>
           <img className={styles.complexIcon} src={brandSmall} alt="Beachfront"/>
-          <svg className={styles.icon} viewBox="0 0 30 70"><path d="M3,14.9981077 C3,8.37173577 8.37112582,3 15,3 C21.627417,3 27,8.37134457 27,14.9981077 L27,54.0018923 C27,60.6282642 21.6288742,66 15,66 C8.372583,66 3,60.6286554 3,54.0018923 L3,14.9981077 Z M3,33.1954106 L27,40 L27,35.3445904 L3.00000003,28.5400009 L3,33.1954106 Z" fillRule="evenodd"/></svg>
+          <svg className={styles.icon} viewBox="0 0 64 64"><path d="M63,34.6220204 L63,13.9972317 C63,6.81886994 57.1809412,1 50.0027683,1 L13.9972317,1 C6.81886994,1 1,6.81905884 1,13.9972317 L1,19.1636842 L63,34.6220204 Z M63,41.8363158 L63,50.0027683 C63,57.1809412 57.1811301,63 50.0027683,63 L13.9972317,63 C6.81905884,63 1,57.1811301 1,50.0027683 L1,26.3779796 L63,41.8363158 Z" fillRule="evenodd"/></svg>
         </Link>
       </li>
       <li>

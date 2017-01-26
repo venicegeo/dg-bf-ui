@@ -35,7 +35,6 @@ describe('<AlgorithmListList/>', () => {
         url:         'test-url',
       }],
       sceneMetadata: {
-        bands: {},
         cloudCover: 5,
       },
       isSubmitting: false,
@@ -61,7 +60,6 @@ describe('<AlgorithmListList/>', () => {
       <AlgorithmList
         algorithms={[
           {
-            bands:        ['coastal','swir1'],
             description:  'test-description',
             id:           'test-algorithm-1',
             maxCloudCover: 30,
@@ -69,7 +67,6 @@ describe('<AlgorithmListList/>', () => {
             type:         'test-type',
           },
           {
-            bands:        ['coastal','swir1'],
             description:  'test-description',
             id:           'test-algorithm-2',
             name:         'test-name',
@@ -144,7 +141,6 @@ describe('<AlgorithmListList/>', () => {
       <AlgorithmList
         algorithms={[
           {
-            bands:        ['coastal','swir1'],
             description:  'test-description',
             id:           'test-algorithm-1',
             maxCloudCover: 30,
@@ -152,7 +148,6 @@ describe('<AlgorithmListList/>', () => {
             type:         'test-type',
           },
           {
-            bands:        ['coastal','swir1'],
             description:  'test-description',
             id:           'test-algorithm-2',
             name:         'test-name',
@@ -174,7 +169,6 @@ describe('<AlgorithmListList/>', () => {
       <AlgorithmList
         algorithms={[
           {
-            bands:        ['coastal', 'swir1'],
             description:  'test-description',
             id:           'test-algorithm-1',
             maxCloudCover: 30,
@@ -182,7 +176,6 @@ describe('<AlgorithmListList/>', () => {
             type:         'test-type',
           },
           {
-            bands:        ['coastal', 'swir1'],
             description:  'test-description',
             id:           'test-algorithm-2',
             name:         'test-name',

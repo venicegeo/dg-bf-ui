@@ -24,7 +24,6 @@ import {ClassificationBanner} from './ClassificationBanner'
 import {CreateJob, SearchCriteria, createSearchCriteria} from './CreateJob'
 import {CreateProductLine} from './CreateProductLine'
 import {JobStatusList} from './JobStatusList'
-import {forgetJob} from '../api/jobs'
 import {Login} from './Login'
 import {Navigation} from './Navigation'
 import {
@@ -144,7 +143,7 @@ export class Application extends React.Component<Props, State> {
       this.initializeServices()
       this.startBackgroundTasks()
       this.refreshRecords()
-      this.importJobsIfNeeded()
+          .then(this.importJobsIfNeeded.bind(this))
     }
   }
 
@@ -202,9 +201,7 @@ export class Application extends React.Component<Props, State> {
   renderRoute() {
     if (!this.state.isLoggedIn) {
       return (
-        <Login
-          onSuccess={() => this.setState({ isLoggedIn: true })}
-        />
+        <Login/>
       )
     }
     switch (this.state.route.pathname) {
@@ -318,7 +315,7 @@ export class Application extends React.Component<Props, State> {
       jobsService.fetchJob(jobId)
         .then(record => {
           this.setState({ jobs: this.state.jobs.$append(record) })
-          this.panTo(getFeatureCenter(record), 7.5)
+          this.panTo(getFeatureCenter(record))
         })
         .catch(err => {
           console.error('(application:fetch) failed:', err)
@@ -408,11 +405,12 @@ export class Application extends React.Component<Props, State> {
         search: this.state.route.search.replace(new RegExp('\\??jobId=' + id), ''),
       })
     }
-    forgetJob(id).catch(() => {
-      this.setState({
-      jobs: this.state.jobs.$append(job),
+    jobsService.forgetJob(id)
+      .catch(() => {
+        this.setState({
+          jobs: this.state.jobs.$append(job),
+        })
       })
-    })
   }
 
   private handleJobCreated(job) {
@@ -427,7 +425,7 @@ export class Application extends React.Component<Props, State> {
 
   private handleNavigateToJob(loc) {
     this.navigateTo(loc)
-    this.panTo(getFeatureCenter(this.state.jobs.records.find(j => loc.search.includes(j.id))), 7.5)
+    this.panTo(getFeatureCenter(this.state.jobs.records.find(j => loc.search.includes(j.id))))
   }
 
   private handlePanToProductLine(productLine) {
@@ -466,11 +464,13 @@ export class Application extends React.Component<Props, State> {
       isSearching: true,
       selectedFeature: null,
     })
-    catalogService.search(Object.assign({
+    catalogService.search({
       count,
       startIndex,
       bbox: this.state.bbox,
-    }, this.state.searchCriteria))
+      catalogApiKey: this.state.catalogApiKey,
+      ...this.state.searchCriteria,
+    })
       .then(searchResults => this.setState({ searchResults, isSearching: false }))
       .catch(searchError => this.setState({ searchError, isSearching: false }))
   }
@@ -523,14 +523,14 @@ export class Application extends React.Component<Props, State> {
 
   private refreshRecords() {
     console.debug('(application:refreshRecords) fetching latest jobs and product lines')
-    this.fetchJobs()
-    this.fetchProductLines()
+    return Promise.all([
+      this.fetchJobs(),
+      this.fetchProductLines(),
+    ])
   }
 
   private startBackgroundTasks() {
-    sessionService.startWorker({
-      onExpired: () => this.setState({ isSessionExpired: true }),
-    })
+    sessionService.onExpired(() => this.setState({ isSessionExpired: true }))
     updateService.startWorker({
       onAvailable: () => this.setState({ isUpdateAvailable: true }),
     })
@@ -540,7 +540,6 @@ export class Application extends React.Component<Props, State> {
   }
 
   private stopBackgroundTasks() {
-    sessionService.stopWorker()
     updateService.stopWorker()
 
     console.debug('(application:stopBackgroundTasks) stopping job/productline polling')
@@ -569,7 +568,7 @@ function generateInitialState(): State {
     catalogApiKey: '',
     errors: [],
     route: generateRoute(location),
-    isLoggedIn: sessionService.exists(),
+    isLoggedIn: sessionService.initialize(),
     isSessionExpired: false,
     isUpdateAvailable: false,
 

@@ -20,18 +20,21 @@ import {getClient} from './session'
 interface ParamsCreateJob {
   algorithmId: string
   name: string
+  catalogApiKey: string
   sceneId: string
 }
 
 export function createJob({
   algorithmId,
   name,
+  catalogApiKey,
   sceneId,
 }: ParamsCreateJob): Promise<beachfront.Job> {
   return getClient().post('/v0/job', {
-    algorithm_id: algorithmId,
-    name:         name,
-    scene_id:     sceneId,
+    algorithm_id:   algorithmId,
+    name:           name,
+    planet_api_key: catalogApiKey,
+    scene_id:       sceneId,
   })
     .then(response => response.data.job)
     .catch(err => {
@@ -40,11 +43,9 @@ export function createJob({
     })
 }
 
-
-export function forgetJob( jobId: string ){
-  return getClient().delete('/v0/job/'+jobId)
+export function forgetJob(jobId: string) {
+  return getClient().delete(`/v0/job/${jobId}`)
 }
-
 
 export function fetchJobs(): Promise<beachfront.Job[]> {
   return getClient().get('/v0/job')

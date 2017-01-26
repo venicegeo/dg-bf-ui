@@ -27,7 +27,7 @@ export const SessionExpired = ({ onDismiss }: Props) => (
   <Modal onDismiss={onDismiss}>
     <div className={styles.root}>
       <h1><i className="fa fa-lock"/> Your session has expired</h1>
-      <p>This may have happened because you logged in from another location.</p>
+      <p>This happens if you've been idle for a while or if Beachfront has been upgraded after you logged in.</p>
       <p className={styles.instructions}>
         Click anywhere or press <kbd>ESC</kbd> to close this message
       </p>

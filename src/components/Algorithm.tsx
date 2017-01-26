@@ -42,7 +42,7 @@ export const Algorithm = ({
   <div className={[
     styles.root,
     isSubmitting ? styles.isSubmitting : '',
-    isCompatible(algorithm, sceneMetadata) ? styles.isCompatible : styles.isNotCompatible,
+    meetsCloudCoverRequirement(algorithm, sceneMetadata) ? styles.isCompatible : styles.isNotCompatible,
     isSelected ? styles.isSelected : '',
     onSelect ? styles.isSelectable : '',
   ].join(' ')}>
@@ -88,10 +88,6 @@ export const Algorithm = ({
         <h4>Image Requirements</h4>
         <table>
           <tbody>
-            <tr className={meetsBandRequirement(algorithm, sceneMetadata) ? styles.met : styles.unmet}>
-              <th>Bands</th>
-              <td>{algorithm.bands.map(s => s.toUpperCase()).join(' and ')}</td>
-            </tr>
             <tr className={meetsCloudCoverRequirement(algorithm, sceneMetadata) ? styles.met : styles.unmet}>
               <th>Maximum Cloud Cover</th>
               <td>Less than or equal to {algorithm.maxCloudCover}%</td>
@@ -107,14 +103,6 @@ export const Algorithm = ({
 // Helpers
 //
 
-function meetsBandRequirement(algorithm: beachfront.Algorithm, metadata: beachfront.SceneMetadata) {
-  return algorithm.bands.every(s => metadata.bands.hasOwnProperty(s))
-}
-
 function meetsCloudCoverRequirement(algorithm: beachfront.Algorithm, metadata: beachfront.SceneMetadata) {
   return algorithm.maxCloudCover >= metadata.cloudCover
-}
-
-function isCompatible(algorithm: beachfront.Algorithm, metadata: beachfront.SceneMetadata) {
-  return meetsBandRequirement(algorithm, metadata) && meetsCloudCoverRequirement(algorithm, metadata)
 }

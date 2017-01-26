@@ -129,12 +129,12 @@ function generatePlaceholderRows(count) {
 }
 
 function getCapturedOn({ properties }: beachfront.Job) {
-  const then = moment(properties.scene_capture_date)
+  const then = moment(properties.scene_time_of_collect)
   return then.format(then.year() === new Date().getFullYear() ? 'MM/DD' : 'MM/DD/YYYY')
 }
 
 function getSceneId({ properties }: beachfront.Job) {
-  return properties.scene_id.replace(/^landsat:/, '')
+  return properties.scene_id.replace(/^(planetscope|rapideye):/, '')
 }
 
 function getImageSensor({ properties }: beachfront.Job) {

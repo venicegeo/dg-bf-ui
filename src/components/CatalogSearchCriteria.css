@@ -51,7 +51,7 @@
 .captureDateTo,
 .apiKey,
 .cloudCover,
-.provider,
+.source,
 .spatialFilter {
   composes: field-normal from '../styles/forms.css';
 }

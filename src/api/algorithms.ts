@@ -29,7 +29,6 @@ export function lookup(): Promise<beachfront.Algorithm[]> {
 
 function normalize(descriptor): beachfront.Algorithm {
   return {
-    bands:         descriptor.bands,
     description:   descriptor.description,
     id:            descriptor.service_id,
     maxCloudCover: descriptor.max_cloud_cover,

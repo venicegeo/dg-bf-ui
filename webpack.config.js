@@ -16,6 +16,7 @@
 
 'use strict'
 
+const fs = require('fs')
 const path = require('path')
 const webpack = require('webpack')
 const childProcess = require('child_process')

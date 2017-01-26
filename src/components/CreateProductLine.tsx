@@ -22,22 +22,9 @@ import {AlgorithmList} from './AlgorithmList'
 import {CatalogSearchCriteria} from './CatalogSearchCriteria'
 import {NewProductLineDetails} from './NewProductLineDetails'
 import {create} from '../api/productLines'
-
-// FIXME -- request list of supported bands for each provider from image catalog
-const SUPPORTED_BANDS = {
-  LANDSAT: {
-    cirrus: true,
-    coastal: true,
-    green: true,
-    nir: true,
-    panchromatic: true,
-    red: true,
-    swir1: true,
-    swir2: true,
-    tirs1: true,
-    tirs2: true,
-  },
-}
+import {
+  SOURCE_RAPIDEYE,
+} from '../constants'
 
 interface Props {
   algorithms:        beachfront.Algorithm[]
@@ -58,6 +45,7 @@ interface State {
   isCreating?:             boolean
   name?:                   string
   shouldAutogenerateName?: boolean
+  source?:                 string
 }
 
 export class CreateProductLine extends React.Component<Props, State> {
@@ -71,8 +59,10 @@ export class CreateProductLine extends React.Component<Props, State> {
       isCreating: false,
       name:       '',
       shouldAutogenerateName: true,
+      source: SOURCE_RAPIDEYE,
     }
     this.handleAlgorithmSelect = this.handleAlgorithmSelect.bind(this)
+    this.handleSourceChange = this.handleSourceChange.bind(this)
     this.handleSubmit = this.handleSubmit.bind(this)
   }
 
@@ -94,9 +84,11 @@ export class CreateProductLine extends React.Component<Props, State> {
                 apiKey={this.props.catalogApiKey}
                 bbox={this.props.bbox}
                 cloudCover={this.state.cloudCover}
+                source={this.state.source}
                 onApiKeyChange={this.props.onCatalogApiKeyChange}
                 onClearBbox={this.props.onClearBbox}
                 onCloudCoverChange={cloudCover => this.setState({ cloudCover })}
+                onSourceChange={this.handleSourceChange}
               />
               <NewProductLineDetails
                 name={this.state.name}
@@ -109,7 +101,6 @@ export class CreateProductLine extends React.Component<Props, State> {
                 algorithms={this.props.algorithms}
                 sceneMetadata={{
                   cloudCover: this.state.cloudCover,
-                  bands: SUPPORTED_BANDS.LANDSAT,
                 } as any}
                 selectedId={this.state.algorithm ? this.state.algorithm.id : null}
                 onSelect={this.handleAlgorithmSelect}
@@ -141,10 +132,17 @@ export class CreateProductLine extends React.Component<Props, State> {
         && this.state.name
   }
 
-  private handleAlgorithmSelect(algorithm) {
+  private handleAlgorithmSelect(algorithm: beachfront.Algorithm) {
     this.setState({
-      name: this.state.shouldAutogenerateName ? generateName(algorithm) : this.state.name,
+      name: this.state.shouldAutogenerateName ? generateName(this.state.source, algorithm) : this.state.name,
       algorithm,
+    })
+  }
+
+  private handleSourceChange(source: string) {
+    this.setState({
+      name: this.state.shouldAutogenerateName ? generateName(source, this.state.algorithm) : this.state.name,
+      source,
     })
   }
 
@@ -170,6 +168,6 @@ export class CreateProductLine extends React.Component<Props, State> {
 // Helpers
 //
 
-function generateName(algorithm) {
-  return `LANDSAT_${algorithm.name}`.toUpperCase()
+function generateName(source: string, algorithm: beachfront.Algorithm) {
+  return algorithm ? `${source}_${algorithm.name}`.toUpperCase() : ''
 }

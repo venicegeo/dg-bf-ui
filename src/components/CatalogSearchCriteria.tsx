@@ -18,6 +18,10 @@ const styles: any = require('./CatalogSearchCriteria.css')
 
 import * as React from 'react'
 import {StaticMinimap} from './StaticMinimap'
+import {
+  SOURCE_PLANETSCOPE,
+  SOURCE_RAPIDEYE,
+} from '../constants'
 
 interface Props {
   apiKey: string
@@ -27,10 +31,12 @@ interface Props {
   dateTo?: string
   disabled?: boolean
   errorElement?: React.ReactElement<any>
+  source: string
   onApiKeyChange(apiKey: string)
   onClearBbox()
   onCloudCoverChange(cloudCover: number)
   onDateChange?(dateFrom: string, dateTo: string)
+  onSourceChange(source: string)
 }
 
 export const CatalogSearchCriteria = (props: Props) => (
@@ -45,10 +51,11 @@ export const CatalogSearchCriteria = (props: Props) => (
     {props.errorElement}
 
     <h3>Catalog</h3>
-    <label className={styles.provider}>
-      <span>Provider</span>
-      <select disabled={true}>
-        <option>Planet Labs (LANDSAT)</option>
+    <label className={styles.source}>
+      <span>Source</span>
+      <select value={props.source} onChange={event => props.onSourceChange((event.target as HTMLSelectElement).value)}>
+        <option value={SOURCE_RAPIDEYE}>RapidEye (Planet)</option>
+        <option value={SOURCE_PLANETSCOPE}>PlanetScope (Planet)</option>
       </select>
     </label>
     <label className={styles.apiKey}>

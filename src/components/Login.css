@@ -26,7 +26,7 @@
 }
 
 .root img {
-  height: 100px;
+  height: 128px;
   margin: 0 auto;
 }
 
@@ -34,28 +34,27 @@
   margin: 1em 0 .25em;
 }
 
-.root p {
-  margin: 0 0 1em;
-}
-
-.errorMessage {
+.button {
   composes: heading from '../styles/typography.css';
-  font-size: .8em;
-  color: var(--COLOR_RED);
-}
-
-.submitButton {
-  composes: heading from '../styles/typography.css';
-  display: block;
-  padding: .7em 2em;
+  display: flex;
+  align-items: stretch;
+  line-height: 2em;
+  padding: .25em 1em;
   margin-top: 1.5em;
   background-color: var(--COLOR_GREEN);
   border: none;
   border-radius: 4px;
   color: white;
-  font-size: inherit;
+  font-size: 16px;
+  text-decoration: none;
 }
 
-.submitButton:disabled {
-  background-color: grey;
+.buttonIcons {
+  line-height: inherit;
+  padding-right: .75em;
+  margin-right: .5em;
+  text-shadow: 1px 1px rgba(0,0,0, .2);
+  box-shadow:
+          1px 0 rgba(0,0,0,.1),
+          inset -1px 0 rgba(255,255,255,.5);
 }

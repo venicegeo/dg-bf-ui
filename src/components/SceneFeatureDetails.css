@@ -51,8 +51,8 @@
 .root h1 {
   margin: 0;
   padding: .5em;
-  white-space: nowrap;
-  text-overflow: ellipsis;
+  width: 200px;
+  word-wrap: break-word;
   overflow-x: hidden;
   max-width: 250px;
   font-size: 1.1em;
