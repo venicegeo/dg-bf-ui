@@ -17,7 +17,6 @@ npm install
 
 NODE_ENV=production npm run build
 cp nginx.conf dist/
-cp -r docs dist
 
 #
 # Package artifacts
