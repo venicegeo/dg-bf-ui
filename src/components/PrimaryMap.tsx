@@ -37,9 +37,10 @@ import {
 import {
   STATUS_ACTIVE,
   STATUS_ERROR,
+  STATUS_FAIL,
   STATUS_INACTIVE,
+  STATUS_PENDING,
   STATUS_RUNNING,
-  STATUS_SUBMITTED,
   STATUS_SUCCESS,
   STATUS_TIMED_OUT,
   TYPE_SCENE,
@@ -526,6 +527,7 @@ export class PrimaryMap extends React.Component<Props, State> {
       status.set(KEY_OWNER_ID, id)
       status.set(KEY_STATUS, raw.properties.status)
       status.set(KEY_SCENE_ID, (raw as beachfront.Job).properties.scene_id)
+      status.set(KEY_NAME, (raw as beachfront.Job).properties.name)
       source.addFeature(status)
     })
   }
@@ -848,7 +850,7 @@ function generateDrawInteraction(drawLayer) {
 function generateFrameLayer() {
   return new ol.layer.Vector({
     source: new ol.source.Vector(),
-    style(feature, resolution) {
+    style(feature: ol.Feature, resolution: number) {
       const isClose = resolution < RESOLUTION_CLOSE
       const isDistant = resolution > RESOLUTION_DISTANT
       switch (feature.get(KEY_TYPE)) {
@@ -900,6 +902,8 @@ function generateFrameLayer() {
             }),
           })
         case TYPE_LABEL_MINOR:
+          const name = feature.get(KEY_NAME)
+          const sceneId = normalizeSceneId(feature.get(KEY_SCENE_ID))
           return new ol.style.Style({
             text: new ol.style.Text({
               fill: new ol.style.Fill({
@@ -910,7 +914,7 @@ function generateFrameLayer() {
               font: '11px Verdana, sans-serif',
               text: ([
                 feature.get(KEY_STATUS),
-                normalizeSceneId(feature.get(KEY_SCENE_ID)),
+                sceneId !== name ? sceneId : null,
               ].filter(Boolean)).join(' // ').toUpperCase(),
               textAlign: 'left',
               textBaseline: 'middle',
@@ -1005,10 +1009,11 @@ function getColorForStatus(status) {
   switch (status) {
     case STATUS_ACTIVE: return 'hsl(200, 94%, 54%)'
     case STATUS_INACTIVE: return 'hsl(0, 0%, 50%)'
+    case STATUS_PENDING:
     case STATUS_RUNNING: return 'hsl(48, 94%, 54%)'
-    case STATUS_SUBMITTED: return 'hsl(48, 94%, 54%)'
     case STATUS_SUCCESS: return 'hsl(114, 100%, 45%)'
     case STATUS_TIMED_OUT:
+    case STATUS_FAIL:
     case STATUS_ERROR: return 'hsl(349, 100%, 60%)'
     default: return 'magenta'
   }
