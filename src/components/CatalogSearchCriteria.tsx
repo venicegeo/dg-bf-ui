@@ -77,6 +77,8 @@ export const CatalogSearchCriteria = (props: Props) => (
           <input
             value={props.dateFrom}
             type="text"
+            pattern="[0-9]{4}-[0-9]{2}-[0-9]{2}"
+            title="YYYY-MM-DD"
             disabled={props.disabled}
             onChange={event => props.onDateChange((event.target as HTMLInputElement).value, props.dateTo)}
           />
@@ -86,6 +88,8 @@ export const CatalogSearchCriteria = (props: Props) => (
           <input
             value={props.dateTo}
             type="text"
+            pattern="[0-9]{4}-[0-9]{2}-[0-9]{2}"
+            title="YYYY-MM-DD"
             disabled={props.disabled}
             onChange={event => props.onDateChange(props.dateFrom, (event.target as HTMLInputElement).value)}
           />

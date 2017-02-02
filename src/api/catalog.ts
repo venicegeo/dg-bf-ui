@@ -58,6 +58,14 @@ export function search({
     default:
       return Promise.reject(new Error(`Unknown data source prefix: '${source}'`))
   }
+  let from = new Date(dateFrom)
+  if ( isNaN( from.getTime() ) ) {
+      return Promise.reject(new Error(`Unknown date: '${dateFrom}'`))
+  }
+  let to = new Date(dateTo)
+  if ( isNaN( to.getTime() ) ) {
+      return Promise.reject(new Error(`Unknown date: '${dateTo}'`))
+  }
   return axios.get(`https://bf-ia-broker.int.geointservices.io/planet/discover/${itemType}`, {
     params: {
       cloudCover:      cloudCover + .05,
