@@ -16,6 +16,7 @@
 
 import axios, {AxiosInstance, Promise} from 'axios'
 import {getClient} from './session'
+import * as moment from 'moment'
 
 import {
   SOURCE_PLANETSCOPE,
@@ -58,13 +59,14 @@ export function search({
     default:
       return Promise.reject(new Error(`Unknown data source prefix: '${source}'`))
   }
-  let from = new Date(dateFrom)
-  if ( isNaN( from.getTime() ) ) {
+  if ( !moment(dateFrom).isValid() ) {
       return Promise.reject(new Error(`Unknown date: '${dateFrom}'`))
   }
-  let to = new Date(dateTo)
-  if ( isNaN( to.getTime() ) ) {
+  if ( !moment(dateTo).isValid() ) {
       return Promise.reject(new Error(`Unknown date: '${dateTo}'`))
+  }
+  if ( moment(dateFrom).isAfter(dateTo) ) {
+      return Promise.reject(new Error(`From Date must be before To Date`))
   }
   return axios.get(`https://bf-ia-broker.int.geointservices.io/planet/discover/${itemType}`, {
     params: {
