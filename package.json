@@ -4,7 +4,7 @@
   "description": "User interface for the Beachfront project",
   "scripts": {
     "build": "webpack",
-    "create-ssl-certs": "openssl req -newkey rsa:2048 -keyout .development_ssl_certificate.key -sha256 -x509 -days 99999 -nodes -out .development_ssl_certificate.pem -passin pass:secret -passout pass:secret -subj '/C=US/ST=Unknown/L=Unknown/O=Beachfront/OU=Development/CN=localhost'",
+    "create-ssl-certs": "openssl req -newkey rsa:2048 -keyout .development_ssl_certificate.key -sha256 -x509 -days 99999 -nodes -out .development_ssl_certificate.pem -passin pass:secret -passout pass:secret -subj /C=US/ST=Unknown/L=Unknown/O=Beachfront/OU=Development/CN=localhost",
     "clean": "rimraf report dist beachfront.zip",
     "lint": "tslint '{src,test}/**/*.{ts,tsx}' -t verbose",
     "test": "karma start",
