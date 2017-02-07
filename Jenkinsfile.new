@@ -18,8 +18,7 @@ node {
       sh """
         npm install
         ./node_modules/.bin/typings install
-        NODE_ENV=production
-        npm run build
+        NODE_ENV=production npm run build
         cp nginx.conf dist/
 
         pushd dist > /dev/null
