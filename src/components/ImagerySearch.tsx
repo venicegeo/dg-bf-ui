@@ -19,6 +19,7 @@ const styles: any = require('./ImagerySearch.css')
 import * as React from 'react'
 import {CatalogSearchCriteria} from './CatalogSearchCriteria'
 import {LoadingAnimation} from './LoadingAnimation'
+import * as moment from 'moment'
 
 interface Props {
   bbox: number[]
@@ -87,11 +88,14 @@ export class ImagerySearch extends React.Component<Props, {}> {
   // Internals
   //
 
+  private dateValidation() {
+      return moment(this.props.dateFrom).isSameOrBefore(this.props.dateTo)
+  }
+
   private get canSubmit() {
     return this.props.isSearching === false
         && this.props.catalogApiKey
-        && this.props.dateFrom
-        && this.props.dateTo
+        && this.dateValidation()
   }
 
   private handleSubmit(event) {

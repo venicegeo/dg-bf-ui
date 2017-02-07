@@ -18,6 +18,7 @@ const styles: any = require('./CatalogSearchCriteria.css')
 
 import * as React from 'react'
 import {StaticMinimap} from './StaticMinimap'
+import * as moment from 'moment'
 import {
   SOURCE_PLANETSCOPE,
   SOURCE_RAPIDEYE,
@@ -71,12 +72,13 @@ export const CatalogSearchCriteria = (props: Props) => (
     {(typeof props.dateFrom !== 'undefined' && typeof props.dateTo !== 'undefined') && (
       <div>
         <h3>Date of Capture</h3>
-
         <label className={styles.captureDateFrom}>
           <span>From</span>
           <input
             value={props.dateFrom}
             type="text"
+            pattern="[0-9]{4}-[0-9]{2}-[0-9]{2}"
+            title="YYYY-MM-DD"
             disabled={props.disabled}
             onChange={event => props.onDateChange((event.target as HTMLInputElement).value, props.dateTo)}
           />
@@ -86,10 +88,15 @@ export const CatalogSearchCriteria = (props: Props) => (
           <input
             value={props.dateTo}
             type="text"
+            pattern="[0-9]{4}-[0-9]{2}-[0-9]{2}"
+            title="YYYY-MM-DD"
             disabled={props.disabled}
             onChange={event => props.onDateChange(props.dateFrom, (event.target as HTMLInputElement).value)}
           />
         </label>
+        {isInvalidDate(props.dateFrom) && <div className={styles.invalidDates}>From date is not valid.</div>}
+        {isInvalidDate(props.dateTo) && <div className={styles.invalidDates}>To date is not valid.</div>}
+        {isInvalidDateRange(props.dateFrom, props.dateTo) && <div className={styles.invalidDates}>From date must be before To date.</div>}
       </div>
     )}
 
@@ -107,3 +114,13 @@ export const CatalogSearchCriteria = (props: Props) => (
     </label>
   </div>
 )
+
+function isInvalidDate(sampleDate) {
+    return !moment(sampleDate).isValid()
+}
+
+function isInvalidDateRange(from, to) {
+    const fromMoment = moment(from)
+    const toMoment = moment(to)
+    return !moment(fromMoment).isSameOrBefore(toMoment)
+}

@@ -56,6 +56,10 @@
   composes: field-normal from '../styles/forms.css';
 }
 
+.invalidDates {
+  composes: field-error from '../styles/forms.css';
+}
+
 .cloudCover .value {
   margin: 0 0 0 .5em;
   width: auto;
