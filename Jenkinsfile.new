@@ -1,4 +1,4 @@
-@Library('pipelib@v0.2.3') _
+@Library('pipelib') _
 
 node {
 
