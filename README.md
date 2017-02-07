@@ -7,11 +7,15 @@ User interface for the Beachfront project.
 ```
 $ npm install
 $ npm run typings:install
+$ npm run create-ssl-certs
 $ npm run watch
 ```
 
+> __Note:__ You may need to add `.development_ssl_certificate.pem` to your development machine's SSL trust chain to avoid problems with CORS being blocked by browser SSL security errors.
+
 Open browser to `http://localhost:8080`.  Changes will automatically
 reload the browser.
+
 
 ## Building
 

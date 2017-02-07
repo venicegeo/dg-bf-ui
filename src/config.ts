@@ -28,7 +28,7 @@ export const UPDATE_WORKER_INTERVAL = 15 * time.minute
 export const BASEMAP_TILE_PROVIDERS = [
   {
     name: 'OSM',
-    url: 'https://osm-tiles-{1-4}.stage.geointservices.io/osm_tiles/{z}/{x}/{y}.png64',
+    url: 'https://osm.geointservices.io/osm_tiles/{z}/{x}/{y}.png64',
     attributions: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>',
     maxZoom: 20,
   },

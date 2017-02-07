@@ -58,7 +58,7 @@ export function search({
     default:
       return Promise.reject(new Error(`Unknown data source prefix: '${source}'`))
   }
-  return axios.get(`https://bf-ia-broker.int.geointservices.io/planet/discover/${itemType}`, {
+  return _client.get(`/planet/discover/${itemType}`, {
     params: {
       cloudCover:      cloudCover + .05,
       PL_API_KEY:      catalogApiKey,
