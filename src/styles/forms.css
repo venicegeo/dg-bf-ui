@@ -46,3 +46,9 @@ select {
   line-height: 1em;
   text-align: right;
 }
+
+.field-error {
+  color: red;
+  width: 100%;
+  text-align: center;
+}
