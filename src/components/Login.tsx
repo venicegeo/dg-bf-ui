@@ -23,12 +23,14 @@ import * as React from 'react'
 import {Modal} from './Modal'
 
 export const Login = () => (
-  <Modal className={styles.login} onDismiss={() => {/* noop */}}>
+  <Modal className={styles.parent} onDismiss={() => {/* noop */}}>
     <div className={styles.root}>
       <img src={brand} alt="Beachfront"/>
       <h1>Welcome to Beachfront!</h1>
-      <div className={styles.warning} dangerouslySetInnerHTML={CONSENT_BANNER_TEXT}>
-      </div>
+      <div
+        className={styles.warning}
+        dangerouslySetInnerHTML={CONSENT_BANNER_TEXT}
+      />
       <a className={styles.button} href={API_ROOT + '/login/geoaxis'}>
         <span className={styles.buttonIcons}>
             <span className="fa fa-lock"/>
