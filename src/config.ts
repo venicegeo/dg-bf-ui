@@ -19,6 +19,7 @@ export const CLASSIFICATION_BANNER_FOREGROUND = process.env.CLASSIFICATION_BANNE
 export const CLASSIFICATION_BANNER_TEXT       = process.env.CLASSIFICATION_BANNER_TEXT
 
 export const API_ROOT = process.env.API_ROOT
+export const CONSENT_BANNER_TEXT = {__html: process.env.CONSENT_BANNER_TEXT}
 
 const time = {millisecond: 1, second: 1000, minute: 60000}
 

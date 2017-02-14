@@ -42,7 +42,7 @@ export class Modal extends React.Component<Props, void> {
 
   render() {
     return (
-      <div className={styles.root}>
+      <div className={`${styles.root} ${this.props.className || ''}`}>
         {this.props.children}
       </div>
     )

@@ -115,6 +115,7 @@ module.exports = {
       'process.env.CLASSIFICATION_BANNER_BACKGROUND': JSON.stringify(process.env.CLASSIFICATION_BANNER_BACKGROUND || 'green'),
       'process.env.CLASSIFICATION_BANNER_FOREGROUND': JSON.stringify(process.env.CLASSIFICATION_BANNER_FOREGROUND || 'white'),
       'process.env.CLASSIFICATION_BANNER_TEXT': JSON.stringify(process.env.CLASSIFICATION_BANNER_TEXT || 'UNCLASSIFIED // TESTING & DEVELOPMENT USE ONLY'),
+      'process.env.CONSENT_BANNER_TEXT': JSON.stringify(process.env.CONSENT_BANNER_TEXT || 'Users must accept the terms and conditions.'),
     }),
     new HtmlWebpackPlugin({
       template: 'src/index.html',
