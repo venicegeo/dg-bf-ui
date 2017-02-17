@@ -16,7 +16,7 @@
 
 import * as ol from 'openlayers'
 
-const DMS_PREFIX = /^([NS])(\d{2})(\d{2})(\d{2})\s*([EW])(\d{2,3})(\d{2})(\d{2})$/i
+const DMS_PREFIX = /^([NS]|[+-])(\d{2})(\d{2})(\d{2})\s*([EW]|[+-])(\d{2,3})(\d{2})(\d{2})$/i
 const DMS_POSTFIX = /^(\d{2})(\d{2})(\d{2})([NS])\s*(\d{2,3})(\d{2})(\d{2})([EW])$/i
 const DECIMAL = /^[-+]?([1-8]?\d(\.\d+)?|90(\.0+)?),\s*[-+]?(180(\.0+)?|((1[0-7]\d)|([1-9]?\d))(\.\d+)?)$/
 const MGRS = /^(\d{1,2})([C-HJ-NP-X])\s*([A-HJ-NP-Z])([A-HJ-NP-V])\s*(\d{1,5}\s*\d{1,5})$/i
