@@ -27,6 +27,14 @@
   right: 70px;
 }
 
+.home {
+  left: 50px;
+}
+
+.notHome {
+  left: 450px;
+}
+
 .progress {
   width: 150px;
   transform: translateY(200%);
