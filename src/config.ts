@@ -38,13 +38,13 @@ export const BASEMAP_TILE_PROVIDERS = [
 export const SCENE_TILE_PROVIDERS = [
   {
     prefix: 'planetscope',
-    url: 'https://tiles{0-3}.planet.com/v0/scenes/ortho/__SCENE_ID__/{z}/{x}/{y}.png?api_key=__API_KEY__',
+    url: 'https://tiles{0-3}.planet.com/v1/experimental/tiles/PSOrthoTile/__SCENE_ID__/{z}/{x}/{y}.png?api_key=__API_KEY__',
     maxZoom:  13,
     attributions: '&copy; <a href="https://www.planet.com" target="_blank" rel="noopener">Planet Labs (PlanetScope)</a>',
   },
   {
     prefix: 'rapideye',
-    url: 'https://tiles{0-3}.planet.com/v0/scenes/rapideye/__SCENE_ID__/{z}/{x}/{y}.png?api_key=__API_KEY__',
+    url: 'https://tiles{0-3}.planet.com/v1/experimental/tiles/REOrthoTile/__SCENE_ID__/{z}/{x}/{y}.png?api_key=__API_KEY__',
     maxZoom:  13,
     attributions: '&copy; <a href="https://www.planet.com" target="_blank" rel="noopener">Planet Labs (RapidEye)</a>',
   },
