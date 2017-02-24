@@ -167,6 +167,7 @@ export class Application extends React.Component<Props, State> {
           selectedFeature={this.state.selectedFeature}
           view={this.state.mapView}
           wmsUrl={this.state.geoserver.wmsUrl}
+          shrunk={this.state.route.pathname !== '/'}
           onBoundingBoxChange={this.handleBoundingBoxChange}
           onSearchPageChange={this.handleSearchSubmit}
           onSelectFeature={this.handleSelectFeature}

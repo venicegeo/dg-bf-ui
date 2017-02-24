@@ -87,6 +87,7 @@ interface Props {
   selectedFeature:    beachfront.Job | beachfront.Scene
   view:               MapView
   wmsUrl:             string
+  shrunk:             boolean
   onBoundingBoxChange(bbox: number[])
   onSearchPageChange(page: {count: number, startIndex: number})
   onSelectFeature(feature: beachfront.Job | beachfront.Scene)
@@ -183,6 +184,9 @@ export class PrimaryMap extends React.Component<Props, State> {
       this.clearSelection()
       this.renderImagerySearchResultsOverlay()
     }
+    if (previousProps.shrunk !== this.props.shrunk) {
+      this.updateMapSize()
+    }
     if (previousProps.bbox !== this.props.bbox) {
       this.renderImagerySearchBbox()
     }
@@ -200,7 +204,7 @@ export class PrimaryMap extends React.Component<Props, State> {
   render() {
     const basemapNames = BASEMAP_TILE_PROVIDERS.map(b => b.name)
     return (
-      <main className={`${styles.root} ${this.state.loadingRefCount > 0 ? styles.isLoading : ''}`} ref="container" tabIndex={1}>
+      <main className={`${styles.root} ${this.props.shrunk ? styles.notHome : styles.home} ${this.state.loadingRefCount > 0 ? styles.isLoading : ''}`} ref="container" tabIndex={1}>
         <BasemapSelect
           className={styles.basemapSelect}
           index={this.state.basemapIndex}
@@ -246,6 +250,10 @@ export class PrimaryMap extends React.Component<Props, State> {
 
   private clearSelection() {
     this.selectInteraction.getFeatures().clear()
+  }
+
+  private updateMapSize() {
+    this.map.updateSize()
   }
 
   private deactivateDrawInteraction() {
