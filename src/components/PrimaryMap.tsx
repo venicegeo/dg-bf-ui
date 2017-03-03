@@ -51,7 +51,6 @@ const DEFAULT_CENTER = [-10, 0]
 const MIN_ZOOM = 2.5
 const MAX_ZOOM = 22
 const RESOLUTION_CLOSE = 850
-const RESOLUTION_DISTANT = 13000
 const VIEW_BOUNDS = [-170, -75, 170, 75]
 const STEM_OFFSET = 10000
 const IDENTIFIER_DETECTIONS = 'bfdetections'
@@ -860,7 +859,6 @@ function generateFrameLayer() {
     source: new ol.source.Vector(),
     style(feature: ol.Feature, resolution: number) {
       const isClose = resolution < RESOLUTION_CLOSE
-      const isDistant = resolution > RESOLUTION_DISTANT
       switch (feature.get(KEY_TYPE)) {
         case TYPE_DIVOT_INBOARD:
           return new ol.style.Style({
@@ -899,7 +897,7 @@ function generateFrameLayer() {
           return new ol.style.Style({
             text: new ol.style.Text({
               fill: new ol.style.Fill({
-                color: isDistant ? 'transparent' : 'black',
+                color: isClose ? 'black' : 'transparent',
               }),
               offsetX: 13,
               offsetY: 1,
@@ -915,7 +913,7 @@ function generateFrameLayer() {
           return new ol.style.Style({
             text: new ol.style.Text({
               fill: new ol.style.Fill({
-                color: isDistant ? 'transparent' : 'rgba(0,0,0,.6)',
+                color: isClose ? 'rgba(0,0,0,.6)' : 'transparent',
               }),
               offsetX: 13,
               offsetY: 15,
