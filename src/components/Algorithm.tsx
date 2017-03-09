@@ -25,6 +25,7 @@ interface Props {
   isSubmitting?: boolean
   warningHeading?: string
   warningMessage?: string
+  errorElement?: React.ReactElement<any>
   onSelect?(algorithm: beachfront.Algorithm)
   onSubmit?(algorithm: beachfront.Algorithm)
 }
@@ -38,6 +39,7 @@ export const Algorithm = ({
   warningMessage,
   onSelect,
   onSubmit,
+  errorElement,
 }: Props) => (
   <div className={[
     styles.root,
@@ -63,6 +65,8 @@ export const Algorithm = ({
         <i className="fa fa-warning"/>
       </span>
     </section>
+
+    {errorElement}
 
     <section className={styles.details}>
       <div className={styles.description}>{algorithm.description}</div>
