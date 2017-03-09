@@ -50,6 +50,7 @@ interface State {
   isCreating?: boolean
   name?: string
   shouldAutogenerateName?: boolean
+  algorithmError?: any
 }
 
 export const createSearchCriteria = (): SearchCriteria => ({
@@ -66,6 +67,7 @@ export class CreateJob extends React.Component<Props, State> {
       isCreating: false,
       name: props.selectedScene ? generateName(props.selectedScene.id) : '',
       shouldAutogenerateName: true,
+      algorithmError: '',
     }
     this.handleCreateJob = this.handleCreateJob.bind(this)
     this.handleNameChange = this.handleNameChange.bind(this)
@@ -121,6 +123,7 @@ export class CreateJob extends React.Component<Props, State> {
                 algorithms={this.props.algorithms}
                 sceneMetadata={this.props.selectedScene.properties}
                 isSubmitting={this.state.isCreating}
+                error={this.state.algorithmError}
                 onSubmit={this.handleCreateJob}
               />
             </li>
@@ -152,6 +155,9 @@ export class CreateJob extends React.Component<Props, State> {
         // Release the job
         this.props.onJobCreated(job)
       })
+        .catch(algorithmError => {
+            this.setState({ algorithmError, isCreating: false })
+        })
   }
 
   private handleSearchCloudCoverChange(cloudCover) {

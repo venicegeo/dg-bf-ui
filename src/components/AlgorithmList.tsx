@@ -26,6 +26,7 @@ interface Props {
   selectedId?: string
   warningHeading?: string
   warningMessage?: string
+  error?: any
   onSelect?(algorithm: beachfront.Algorithm)
   onSubmit?(algorithm: beachfront.Algorithm)
 }
@@ -45,6 +46,14 @@ export const AlgorithmList = (props: Props) => (
             warningMessage={props.warningMessage}
             onSelect={props.onSelect}
             onSubmit={props.onSubmit}
+            errorElement={props.error && (
+            <div className={styles.errorMessage}>
+              <h4><i className="fa fa-warning"/> Algorithm failed</h4>
+              <p>Your API key does not allow access to this geographic area.</p>
+              <p>{props.error.response.data}</p>
+              <pre>{props.error.stack}</pre>
+            </div>
+          )}
           />
         </li>
       ))}
