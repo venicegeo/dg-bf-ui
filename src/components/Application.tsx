@@ -377,6 +377,7 @@ export class Application extends React.Component<Props, State> {
     this.setState({
       bbox: null,
       searchResults: null,
+      searchError: null,
       selectedFeature: null,
     })
   }
@@ -472,7 +473,7 @@ export class Application extends React.Component<Props, State> {
       catalogApiKey: this.state.catalogApiKey,
       ...this.state.searchCriteria,
     })
-      .then(searchResults => this.setState({ searchResults, isSearching: false }))
+      .then(searchResults => this.setState({ searchResults, searchError: null, isSearching: false }))
       .catch(searchError => this.setState({ searchError, isSearching: false }))
   }
 
@@ -510,6 +511,7 @@ export class Application extends React.Component<Props, State> {
       selectedFeature,
       bbox: this.state.route.pathname === route.pathname ? this.state.bbox : null,
       searchResults: this.state.route.pathname === route.pathname ? this.state.searchResults : null,
+      searchError: this.state.route.pathname === route.pathname ? this.state.searchError : null,
     })
   }
 
