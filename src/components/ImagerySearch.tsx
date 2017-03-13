@@ -65,7 +65,7 @@ export class ImagerySearch extends React.Component<Props, {}> {
           errorElement={this.props.error && (
             <div className={styles.errorMessage}>
               <h4><i className="fa fa-warning"/> Search failed</h4>
-              <p>Could not search the image catalog because of an error.</p>
+              <p>Could not search the image catalog because of an error.<br/>{this.props.error.response.data}</p>
               <pre>{this.props.error.stack}</pre>
             </div>
           )}
