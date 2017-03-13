@@ -41,3 +41,4 @@ $ npm run lint
 $ npm run test
 $ npm run test:ci  # Will also generate coverage reports
 ```
+
