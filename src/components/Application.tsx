@@ -30,6 +30,7 @@ import {
   PrimaryMap,
   MapView,
   MODE_DRAW_BBOX,
+  MODE_DRAW_LINE,
   MODE_NORMAL,
   MODE_SELECT_IMAGERY,
   MODE_PRODUCT_LINES,
@@ -77,6 +78,7 @@ interface State {
 
   // Map state
   bbox?: [number, number, number, number]
+  lineString?: [number, number, number, number]
   mapView?: MapView
   hoveredFeature?: beachfront.Job
   selectedFeature?: beachfront.Job | beachfront.Scene
@@ -102,6 +104,7 @@ export class Application extends React.Component<Props, State> {
     super(props)
     this.state = props.deserialize()
     this.handleBoundingBoxChange = this.handleBoundingBoxChange.bind(this)
+    this.handleMeasureChange = this.handleMeasureChange.bind(this)
     this.handleCatalogApiKeyChange = this.handleCatalogApiKeyChange.bind(this)
     this.handleClearBbox = this.handleClearBbox.bind(this)
     this.handleDismissJobError = this.handleDismissJobError.bind(this)
@@ -169,6 +172,7 @@ export class Application extends React.Component<Props, State> {
           wmsUrl={this.state.geoserver.wmsUrl}
           shrunk={this.state.route.pathname !== '/'}
           onBoundingBoxChange={this.handleBoundingBoxChange}
+          onMeasureChange={this.handleMeasureChange}
           onSearchPageChange={this.handleSearchSubmit}
           onSelectFeature={this.handleSelectFeature}
           onViewChange={mapView => this.setState({ mapView })}
@@ -299,6 +303,7 @@ export class Application extends React.Component<Props, State> {
   }
 
   private get mapMode() {
+    // TODO: If the Measure Tool is open, return MODE_DRAW_LINE
     switch (this.state.route.pathname) {
       case '/create-job': return (this.state.bbox && this.state.searchResults) ? MODE_SELECT_IMAGERY : MODE_DRAW_BBOX
       case '/create-product-line': return MODE_DRAW_BBOX
@@ -367,6 +372,10 @@ export class Application extends React.Component<Props, State> {
 
   private handleBoundingBoxChange(bbox) {
     this.setState({ bbox })
+  }
+
+  private handleMeasureChange(lineString) {
+    this.setState({ lineString })
   }
 
   private handleCatalogApiKeyChange(catalogApiKey) {

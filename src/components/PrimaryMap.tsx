@@ -25,6 +25,7 @@ import * as debounce from 'lodash/debounce'
 import * as throttle from 'lodash/throttle'
 import {ExportControl} from '../utils/openlayers.ExportControl'
 import {SearchControl} from '../utils/openlayers.SearchControl'
+import {MeasureControl} from '../utils/openlayers.MeasureControl'
 import {BasemapSelect} from './BasemapSelect'
 import {FeatureDetails} from './FeatureDetails'
 import {LoadingAnimation} from './LoadingAnimation'
@@ -70,6 +71,7 @@ const TYPE_STEM = 'STEM'
 const WGS84: ol.proj.ProjectionLike = 'EPSG:4326'
 const WEB_MERCATOR: ol.proj.ProjectionLike = 'EPSG:3857'
 export const MODE_DRAW_BBOX = 'MODE_DRAW_BBOX'
+export const MODE_DRAW_LINE = 'MODE_DRAW_LINE'
 export const MODE_NORMAL = 'MODE_NORMAL'
 export const MODE_PRODUCT_LINES = 'MODE_PRODUCT_LINES'
 export const MODE_SELECT_IMAGERY = 'MODE_SELECT_IMAGERY'
@@ -88,6 +90,7 @@ interface Props {
   wmsUrl:             string
   shrunk:             boolean
   onBoundingBoxChange(bbox: number[])
+  onMeasureChange(lineString: number[])
   onSearchPageChange(page: {count: number, startIndex: number})
   onSelectFeature(feature: beachfront.Job | beachfront.Scene)
   onViewChange(view: MapView)
@@ -111,7 +114,8 @@ export class PrimaryMap extends React.Component<Props, State> {
   private basemapLayers: ol.layer.Tile[]
   private detectionsLayers: {[key: string]: ol.layer.Tile}
   private drawLayer: ol.layer.Vector
-  private drawInteraction: ol.interaction.Draw
+  private bboxDrawInteraction: ol.interaction.Draw
+  private measureDrawInteraction: ol.interaction.Draw
   private featureDetailsOverlay: ol.Overlay
   private frameLayer: ol.layer.Vector
   private highlightLayer: ol.layer.Vector
@@ -231,8 +235,12 @@ export class PrimaryMap extends React.Component<Props, State> {
   // Internals
   //
 
-  private activateDrawInteraction() {
-    this.drawInteraction.setActive(true)
+  private activateBboxDrawInteraction() {
+    this.bboxDrawInteraction.setActive(true)
+  }
+
+  private activateMeasureInteraction() {
+    this.measureDrawInteraction.setActive(true)
   }
 
   private activateSelectInteraction() {
@@ -255,8 +263,12 @@ export class PrimaryMap extends React.Component<Props, State> {
     this.map.updateSize()
   }
 
-  private deactivateDrawInteraction() {
-    this.drawInteraction.setActive(false)
+  private deactivateBboxDrawInteraction() {
+    this.bboxDrawInteraction.setActive(false)
+  }
+
+  private deactivateMeasureInteraction() {
+    this.measureDrawInteraction.setActive(false)
   }
 
   private deactivateSelectInteraction() {
@@ -299,6 +311,16 @@ export class PrimaryMap extends React.Component<Props, State> {
   private handleDrawStart() {
     this.clearDraw()
     this.props.onBoundingBoxChange(null)
+  }
+
+  private handleMeasureEnd(event) {
+    const geometry = event.feature.getGeometry()
+    this.props.onMeasureChange(geometry)
+  }
+
+  private handleMeasureStart() {
+    this.clearDraw()
+    this.props.onMeasureChange(null)
   }
 
   private handleLoadError(event) {
@@ -385,9 +407,13 @@ export class PrimaryMap extends React.Component<Props, State> {
     this.detectionsLayers = {}
     this.previewLayers = {}
 
-    this.drawInteraction = generateDrawInteraction(this.drawLayer)
-    this.drawInteraction.on('drawstart', this.handleDrawStart)
-    this.drawInteraction.on('drawend', this.handleDrawEnd)
+    this.bboxDrawInteraction = generateBboxDrawInteraction(this.drawLayer)
+    this.bboxDrawInteraction.on('drawstart', this.handleDrawStart)
+    this.bboxDrawInteraction.on('drawend', this.handleDrawEnd)
+
+    this.measureDrawInteraction = generateMeasureDrawInteraction(this.drawLayer)
+    this.measureDrawInteraction.on('drawstart', this.handleMeasureStart)
+    this.measureDrawInteraction.on('drawend', this.handleMeasureEnd)
 
     this.selectInteraction = generateSelectInteraction(this.frameLayer, this.imageryLayer)
     this.selectInteraction.on('select', this.handleSelect)
@@ -397,7 +423,7 @@ export class PrimaryMap extends React.Component<Props, State> {
 
     this.map = new ol.Map({
       controls: generateControls(),
-      interactions: generateBaseInteractions().extend([this.drawInteraction, this.selectInteraction]),
+      interactions: generateBaseInteractions().extend([this.bboxDrawInteraction, this.selectInteraction, this.measureDrawInteraction]),
       layers: [
         // Order matters here
         ...this.basemapLayers,
@@ -670,21 +696,30 @@ export class PrimaryMap extends React.Component<Props, State> {
   private updateInteractions() {
     switch (this.props.mode) {
       case MODE_SELECT_IMAGERY:
-        this.deactivateDrawInteraction()
+        this.deactivateBboxDrawInteraction()
+        this.deactivateMeasureInteraction()
         this.activateSelectInteraction()
         break
       case MODE_DRAW_BBOX:
-        this.activateDrawInteraction()
+        this.activateBboxDrawInteraction()
+        this.deactivateMeasureInteraction()
+        this.deactivateSelectInteraction()
+        break
+      case MODE_DRAW_LINE:
+        this.activateMeasureInteraction()
+        this.deactivateBboxDrawInteraction()
         this.deactivateSelectInteraction()
         break
       case MODE_NORMAL:
         this.clearDraw()
-        this.deactivateDrawInteraction()
+        this.deactivateBboxInteraction()
+        this.deactivateMeasureInteraction()
         this.activateSelectInteraction()
         break
       case MODE_PRODUCT_LINES:
         this.clearDraw()
-        this.deactivateDrawInteraction()
+        this.deactivateBboxDrawInteraction()
+        this.deactivateMeasureInteraction()
         this.activateSelectInteraction()
         break
       default:
@@ -782,6 +817,7 @@ function generateControls() {
     new ol.control.FullScreen(),
     new ExportControl(styles.export),
     new SearchControl(styles.search),
+    new MeasureControl(styles.measure),
   ])
 }
 
@@ -816,7 +852,7 @@ function generateDrawLayer() {
   })
 }
 
-function generateDrawInteraction(drawLayer) {
+function generateBboxDrawInteraction(drawLayer) {
   const draw = new ol.interaction.Draw({
     source: drawLayer.getSource(),
     maxPoints: 2,
@@ -827,6 +863,44 @@ function generateDrawInteraction(drawLayer) {
       }
       const [[x1, y1], [x2, y2]] = coordinates
       geometry.setCoordinates([[[x1, y1], [x1, y2], [x2, y2], [x2, y1], [x1, y1]]])
+      return geometry
+    },
+    style: new ol.style.Style({
+      image: new ol.style.RegularShape({
+        stroke: new ol.style.Stroke({
+          color: 'black',
+          width: 1,
+        }),
+        points: 4,
+        radius: 15,
+        radius2: 0,
+        angle: 0,
+      }),
+      fill: new ol.style.Fill({
+        color: 'hsla(202, 70%, 50%, .6)',
+      }),
+      stroke: new ol.style.Stroke({
+        color: 'hsl(202, 70%, 50%)',
+        width: 1,
+        lineDash: [5, 5],
+      }),
+    }),
+  })
+  draw.setActive(false)
+  return draw
+}
+
+function generateMeasureDrawInteraction(drawLayer) {
+  const draw = new ol.interaction.Draw({
+    source: drawLayer.getSource(),
+    maxPoints: 2,
+    type: 'LineString',
+    geometryFunction(coordinates: any, geometry: ol.geom.LineString) {
+      if (!geometry) {
+        geometry = new ol.geom.LineString(null)
+      }
+      const [[x1, y1], [x2, y2]] = coordinates
+      geometry.setCoordinates([[x1, y1], [x2, y2]])
       return geometry
     },
     style: new ol.style.Style({
