@@ -133,6 +133,8 @@ export class PrimaryMap extends React.Component<Props, State> {
     this.handleBasemapChange = this.handleBasemapChange.bind(this)
     this.handleDrawStart = this.handleDrawStart.bind(this)
     this.handleDrawEnd = this.handleDrawEnd.bind(this)
+    this.handleMeasureStart = this.handleMeasureStart.bind(this)
+    this.handleMeasureEnd = this.handleMeasureEnd.bind(this)
     this.handleLoadError = this.handleLoadError.bind(this)
     this.handleLoadStart = this.handleLoadStart.bind(this)
     this.handleLoadStop = this.handleLoadStop.bind(this)
@@ -712,7 +714,7 @@ export class PrimaryMap extends React.Component<Props, State> {
         break
       case MODE_NORMAL:
         this.clearDraw()
-        this.deactivateBboxInteraction()
+        this.deactivateBboxDrawInteraction()
         this.deactivateMeasureInteraction()
         this.activateSelectInteraction()
         break

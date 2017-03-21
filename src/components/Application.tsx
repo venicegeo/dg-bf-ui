@@ -97,6 +97,7 @@ export const createApplication = (element) => render(
   />, element)
 
 export class Application extends React.Component<Props, State> {
+  static measureToolInUse: boolean = false
   private initializationPromise: Promise<any>
   private pollingInstance: number
 
@@ -278,6 +279,14 @@ export class Application extends React.Component<Props, State> {
     }
   }
 
+  public static setMeasureToolInUse(inUse) {
+    Application.measureToolInUse = inUse
+  }
+
+  private isMeasureToolInUse() {
+    return Application.measureToolInUse
+  }
+
   //
   // Internals
   //
@@ -303,12 +312,15 @@ export class Application extends React.Component<Props, State> {
   }
 
   private get mapMode() {
-    // TODO: If the Measure Tool is open, return MODE_DRAW_LINE
-    switch (this.state.route.pathname) {
-      case '/create-job': return (this.state.bbox && this.state.searchResults) ? MODE_SELECT_IMAGERY : MODE_DRAW_BBOX
-      case '/create-product-line': return MODE_DRAW_BBOX
-      case '/product-lines': return MODE_PRODUCT_LINES
-      default: return MODE_NORMAL
+    if (this.isMeasureToolInUse()) {
+      return MODE_DRAW_LINE
+    } else {
+      switch (this.state.route.pathname) {
+        case '/create-job': return (this.state.bbox && this.state.searchResults) ? MODE_SELECT_IMAGERY : MODE_DRAW_BBOX
+        case '/create-product-line': return MODE_DRAW_BBOX
+        case '/product-lines': return MODE_PRODUCT_LINES
+        default: return MODE_NORMAL
+      }
     }
   }
 

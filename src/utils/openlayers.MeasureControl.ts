@@ -15,15 +15,17 @@
  **/
 
 import * as ol from 'openlayers'
+import {Application} from '../components/Application'
 
 const MEASURE_DIALOG = `
 <div style="display: flex; position: relative;">
-  <label>Distance in KM: ${distance}</label>
-  <button class="closeButton" type="reset" style="border: none; background-color: transparent; width: 2em; line-height: 2em; font-size: 1em; color: #555;"><i class="fa fa-close"></i></button>
+  <label>Distance in KM: <span id="distanceInKm"></span></label>
+  <button class="closeButton" type="reset" align='right' style="border: none; background-color: transparent; width: 2em; line-height: 2em; font-size: 1em; color: #555;"><i class="fa fa-close"></i></button>
 </div>`
 
 export class MeasureControl extends ol.control.Control {
   private _dialog: any
+  private _distance: number
 
   constructor(className) {
     const element = document.createElement('div')
@@ -38,16 +40,15 @@ export class MeasureControl extends ol.control.Control {
   getDialog() {
     if (!this._dialog) {
       this._dialog = document.createElement('form')
-      this._dialog.className = 'coordinate-dialog'
+      this._dialog.className = 'measure-dialog'
       this._dialog.style.display = 'block'
       this._dialog.style.position = 'absolute'
-      this._dialog.style.top = '300px'
-      this._dialog.style.left = '50%'
-      this._dialog.style.transform = 'translateX(-50%)'
+      this._dialog.style.top = '50px'
+      this._dialog.style.right = '40px'
       this._dialog.style.fontSize = '16px'
       this._dialog.style.backgroundColor = 'white'
       this._dialog.style.padding = '.25em'
-      this._dialog.style.width = '350px'
+      this._dialog.style.width = '150px'
       this._dialog.style.boxShadow = '0 0 0 1px rgba(0,0,0,.2), 0 5px rgba(0,0,0,.1)'
       this._dialog.style.borderRadius = '2px'
 
@@ -67,11 +68,18 @@ export class MeasureControl extends ol.control.Control {
   }
 
   _closeDialog() {
+    Application.setMeasureToolInUse(false)
     this._dialog.reset()
     this._dialog.style.display = 'none'
   }
 
   _measureClicked() {
+    Application.setMeasureToolInUse(true)
+    // Map mode needs to be updated here
     this.getDialog().style.display = 'block'
+  }
+
+  _setDistance(distInKm) {
+    this._distance = distInKm
   }
 }
