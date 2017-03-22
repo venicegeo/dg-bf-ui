@@ -90,7 +90,6 @@ interface Props {
   wmsUrl:             string
   shrunk:             boolean
   onBoundingBoxChange(bbox: number[])
-  onMeasureChange(lineString: number[])
   onSearchPageChange(page: {count: number, startIndex: number})
   onSelectFeature(feature: beachfront.Job | beachfront.Scene)
   onViewChange(view: MapView)
@@ -106,6 +105,15 @@ export interface MapView {
   basemapIndex: number
   center: number[]
   zoom: number
+}
+
+export class MeasureEvent extends ol.events.Event {
+  geometry: ol.geom.LineString
+
+  constructor(type: string, geometry: ol.geom.LineString) {
+    super(type, null)
+    this.geometry = geometry
+  }
 }
 
 export class PrimaryMap extends React.Component<Props, State> {
@@ -125,6 +133,7 @@ export class PrimaryMap extends React.Component<Props, State> {
   private previewLayers: {[key: string]: ol.layer.Tile}
   private selectInteraction: ol.interaction.Select
   private skipNextViewUpdate: boolean
+  private isMeasureToolInUse: boolean
 
   constructor() {
     super()
@@ -316,23 +325,13 @@ export class PrimaryMap extends React.Component<Props, State> {
   }
 
   private handleMeasureEnd(event) {
-    const geometry = event.feature.getGeometry()
-    const mapProjection = this.map.getView().getProjection().getCode()
-    const c1 = ol.proj.transform(geometry.getFirstCoordinate(), mapProjection, 'EPSG:4326')
-    const c2 = ol.proj.transform(geometry.getLastCoordinate(), mapProjection, 'EPSG:4326')
-    const distance = ol.sphere.WGS84.haversineDistance(c1, c2)
-    let units = 1
-    let unitsValue = (document.getElementById('measureUnits') as HTMLSelectElement).value
-    if (unitsValue === 'km') {
-      units = 1000
-    }
-    document.getElementById('measureDistance').innerText = (distance / units).toFixed(3).toString()
-    this.props.onMeasureChange(geometry.getCoordinates())
+    const geometry = event.feature.getGeometry() as ol.geom.LineString
+    this.map.dispatchEvent(new MeasureEvent('measureEvent', geometry))
   }
 
   private handleMeasureStart() {
     this.clearDraw()
-    this.props.onMeasureChange(null)
+    document.getElementById('measureDistance').innerText = ''
   }
 
   private handleLoadError(event) {
@@ -468,6 +467,15 @@ export class PrimaryMap extends React.Component<Props, State> {
 
     this.map.on('pointermove', this.handleMouseMove)
     this.map.on('moveend', this.emitViewChange)
+
+    this.map.addEventListener('measureToolOpened', () => {
+      this.isMeasureToolInUse = true
+      this.updateInteractions()
+    })
+    this.map.addEventListener('measureToolClosed', () => {
+      this.isMeasureToolInUse = false
+      this.updateInteractions()
+    })
   }
 
   private updateView() {
@@ -706,6 +714,13 @@ export class PrimaryMap extends React.Component<Props, State> {
   }
 
   private updateInteractions() {
+    if (this.isMeasureToolInUse) {
+      this.activateMeasureInteraction()
+      this.deactivateBboxDrawInteraction()
+      this.deactivateSelectInteraction()
+      return
+    }
+
     switch (this.props.mode) {
       case MODE_SELECT_IMAGERY:
         this.deactivateBboxDrawInteraction()
@@ -715,11 +730,6 @@ export class PrimaryMap extends React.Component<Props, State> {
       case MODE_DRAW_BBOX:
         this.activateBboxDrawInteraction()
         this.deactivateMeasureInteraction()
-        this.deactivateSelectInteraction()
-        break
-      case MODE_DRAW_LINE:
-        this.activateMeasureInteraction()
-        this.deactivateBboxDrawInteraction()
         this.deactivateSelectInteraction()
         break
       case MODE_NORMAL:
@@ -738,6 +748,7 @@ export class PrimaryMap extends React.Component<Props, State> {
         console.warn('wat mode=%s', this.props.mode)
         break
     }
+
   }
 
   private updateSelectedFeature() {

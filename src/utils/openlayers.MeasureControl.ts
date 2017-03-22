@@ -15,7 +15,6 @@
  **/
 
 import * as ol from 'openlayers'
-import {Application} from '../components/Application'
 
 const MEASURE_DIALOG = `
 <div style="display: flex; flex-direction: column; position: relative;">
@@ -34,7 +33,6 @@ const MEASURE_DIALOG = `
 
 export class MeasureControl extends ol.control.Control {
   private _dialog: any
-  private _distance: number
 
   constructor(className) {
     const element = document.createElement('div')
@@ -64,6 +62,20 @@ export class MeasureControl extends ol.control.Control {
 
       this._dialog.innerHTML = MEASURE_DIALOG
       this.getMap().getTargetElement().appendChild(this._dialog)
+      this.getMap().on('measureEvent', function(event) {
+        const geometry = event.geometry
+        const mapProjection = event.target.getView().getProjection().getCode()
+        const c1 = ol.proj.transform(geometry.getFirstCoordinate(), mapProjection, 'EPSG:4326')
+        const c2 = ol.proj.transform(geometry.getLastCoordinate(), mapProjection, 'EPSG:4326')
+        const wgs84Sphere = new ol.Sphere(6378137)
+        const distance = wgs84Sphere.haversineDistance(c1, c2)
+        let units = 1
+        let unitsValue = (document.getElementById('measureUnits') as HTMLSelectElement).value
+        if (unitsValue === 'km') {
+          units = 1000
+        }
+        document.getElementById('measureDistance').innerText = (distance / units).toFixed(3).toString()
+      })
 
       const closeDialog = this._dialog.querySelector('.closeButton')
       closeDialog.addEventListener('click', () => this._closeDialog())
@@ -78,19 +90,13 @@ export class MeasureControl extends ol.control.Control {
   }
 
   _closeDialog() {
-    Application.setMeasureToolInUse(false)
+    this.getMap().dispatchEvent('measureToolClosed')
     this._dialog.reset()
     this._dialog.style.display = 'none'
   }
 
   _measureClicked() {
-    Application.setMeasureToolInUse(true)
-    // Map mode needs to be updated here
+    this.getMap().dispatchEvent('measureToolOpened')
     this.getDialog().style.display = 'block'
-  }
-
-  _setDistance(distInKm) {
-    this._distance = distInKm
-    document.getElementById('measureDistance').innerText = distInKm
   }
 }
