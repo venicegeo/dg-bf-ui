@@ -317,7 +317,12 @@ export class PrimaryMap extends React.Component<Props, State> {
 
   private handleMeasureEnd(event) {
     const geometry = event.feature.getGeometry()
-    this.props.onMeasureChange(geometry)
+    const mapProjection = this.map.getView().getProjection().getCode()
+    const c1 = ol.proj.transform(geometry.getFirstCoordinate(), mapProjection, 'EPSG:4326')
+    const c2 = ol.proj.transform(geometry.getLastCoordinate(), mapProjection, 'EPSG:4326')
+    const distance = ol.sphere.WGS84.haversineDistance(c1, c2)
+    document.getElementById('distanceInKm').innerText = (distance / 1000).toFixed(3).toString()
+    this.props.onMeasureChange(geometry.getCoordinates())
   }
 
   private handleMeasureStart() {

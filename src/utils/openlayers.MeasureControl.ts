@@ -20,7 +20,7 @@ import {Application} from '../components/Application'
 const MEASURE_DIALOG = `
 <div style="display: flex; position: relative;">
   <label>Distance in KM: <span id="distanceInKm"></span></label>
-  <button class="closeButton" type="reset" align='right' style="border: none; background-color: transparent; width: 2em; line-height: 2em; font-size: 1em; color: #555;"><i class="fa fa-close"></i></button>
+  <button class="closeButton" type="reset" style="border: none; background-color: transparent; width: 2em; line-height: 2em; font-size: 1em; color: #555;margin-left 17px;"><i class="fa fa-close"></i></button>
 </div>`
 
 export class MeasureControl extends ol.control.Control {
@@ -81,5 +81,6 @@ export class MeasureControl extends ol.control.Control {
 
   _setDistance(distInKm) {
     this._distance = distInKm
+    document.getElementById('distanceInKm').innerText = distInKm
   }
 }
