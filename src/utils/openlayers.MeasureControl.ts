@@ -18,9 +18,18 @@ import * as ol from 'openlayers'
 import {Application} from '../components/Application'
 
 const MEASURE_DIALOG = `
-<div style="display: flex; position: relative;">
-  <label>Distance in KM: <span id="distanceInKm"></span></label>
-  <button class="closeButton" type="reset" style="border: none; background-color: transparent; width: 2em; line-height: 2em; font-size: 1em; color: #555;margin-left 17px;"><i class="fa fa-close"></i></button>
+<div style="display: flex; flex-direction: column; position: relative;">
+  <div style="display: flex; flex-direction: row">
+    <label for="measureUnits">Distance Units:</label>
+    <select id="measureUnits" style="height: 2em; width: 4em;margin-left: 10px">
+      <option selected>m</option>
+      <option>km</option>
+    </select>
+    <div style="padding-left: 7px;">
+      <button class="closeButton" type="reset" style="border: none; background-color: transparent; width: 2em; line-height: 2em; font-size: 1em; color: #555;"><i class="fa fa-close"></i></button>
+    </div>
+  </div>
+  <label id="measureDistance" style="line-height: 2em; font-weight: 500"></label>
 </div>`
 
 export class MeasureControl extends ol.control.Control {
@@ -48,7 +57,8 @@ export class MeasureControl extends ol.control.Control {
       this._dialog.style.fontSize = '16px'
       this._dialog.style.backgroundColor = 'white'
       this._dialog.style.padding = '.25em'
-      this._dialog.style.width = '150px'
+      this._dialog.style.width = '200px'
+      this._dialog.style.height = '70px'
       this._dialog.style.boxShadow = '0 0 0 1px rgba(0,0,0,.2), 0 5px rgba(0,0,0,.1)'
       this._dialog.style.borderRadius = '2px'
 
@@ -81,6 +91,6 @@ export class MeasureControl extends ol.control.Control {
 
   _setDistance(distInKm) {
     this._distance = distInKm
-    document.getElementById('distanceInKm').innerText = distInKm
+    document.getElementById('measureDistance').innerText = distInKm
   }
 }
