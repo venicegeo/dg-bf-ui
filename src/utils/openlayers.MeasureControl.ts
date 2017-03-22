@@ -62,7 +62,7 @@ export class MeasureControl extends ol.control.Control {
 
       this._dialog.innerHTML = MEASURE_DIALOG
       this.getMap().getTargetElement().appendChild(this._dialog)
-      this.getMap().on('measureEvent', function(event) {
+      this.getMap().on('measureEventEnd', function(event) {
         const geometry = event.geometry
         const mapProjection = event.target.getView().getProjection().getCode()
         const c1 = ol.proj.transform(geometry.getFirstCoordinate(), mapProjection, 'EPSG:4326')
@@ -75,6 +75,10 @@ export class MeasureControl extends ol.control.Control {
           units = 1000
         }
         document.getElementById('measureDistance').innerText = (distance / units).toFixed(3).toString()
+      })
+
+      this.getMap().on('measureEventStart', function() {
+        document.getElementById('measureDistance').innerText = ''
       })
 
       const closeDialog = this._dialog.querySelector('.closeButton')

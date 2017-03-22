@@ -71,7 +71,6 @@ const TYPE_STEM = 'STEM'
 const WGS84: ol.proj.ProjectionLike = 'EPSG:4326'
 const WEB_MERCATOR: ol.proj.ProjectionLike = 'EPSG:3857'
 export const MODE_DRAW_BBOX = 'MODE_DRAW_BBOX'
-export const MODE_DRAW_LINE = 'MODE_DRAW_LINE'
 export const MODE_NORMAL = 'MODE_NORMAL'
 export const MODE_PRODUCT_LINES = 'MODE_PRODUCT_LINES'
 export const MODE_SELECT_IMAGERY = 'MODE_SELECT_IMAGERY'
@@ -326,12 +325,12 @@ export class PrimaryMap extends React.Component<Props, State> {
 
   private handleMeasureEnd(event) {
     const geometry = event.feature.getGeometry() as ol.geom.LineString
-    this.map.dispatchEvent(new MeasureEvent('measureEvent', geometry))
+    this.map.dispatchEvent(new MeasureEvent('measureEventEnd', geometry))
   }
 
   private handleMeasureStart() {
     this.clearDraw()
-    document.getElementById('measureDistance').innerText = ''
+    this.map.dispatchEvent('measureEventStart')
   }
 
   private handleLoadError(event) {
