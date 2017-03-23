@@ -959,7 +959,7 @@ function generateMeasureDrawInteraction(drawLayer) {
         points: 4,
         radius: 15,
         radius2: 0,
-        angle: 0.785398,
+        angle: 0.785398,  // In radians
       }),
       fill: new ol.style.Fill({
         color: 'hsla(202, 70%, 50%, .6)',
