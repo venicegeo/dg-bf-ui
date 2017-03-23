@@ -98,6 +98,7 @@ interface State {
   basemapIndex?: number
   loadingRefCount?: number
   tileLoadError?: boolean
+  isMeasureToolInUse?: boolean
 }
 
 export interface MapView {
@@ -133,7 +134,6 @@ export class PrimaryMap extends React.Component<Props, State> {
   private previewLayers: {[key: string]: ol.layer.Tile}
   private selectInteraction: ol.interaction.Select
   private skipNextViewUpdate: boolean
-  private isMeasureToolInUse: boolean
 
   constructor() {
     super()
@@ -210,7 +210,8 @@ export class PrimaryMap extends React.Component<Props, State> {
     if (previousProps.view !== this.props.view && this.props.view) {
       this.updateView()
     }
-    if (previousProps.mode !== this.props.mode) {
+    if ((previousProps.mode !== this.props.mode) ||
+      (previousState.isMeasureToolInUse !== this.state.isMeasureToolInUse)) {
       this.updateInteractions()
     }
   }
@@ -475,12 +476,10 @@ export class PrimaryMap extends React.Component<Props, State> {
     this.map.on('moveend', this.emitViewChange)
 
     this.map.addEventListener('measureToolOpened', () => {
-      this.isMeasureToolInUse = true
-      this.updateInteractions()
+      this.setState({isMeasureToolInUse: true})
     })
     this.map.addEventListener('measureToolClosed', () => {
-      this.isMeasureToolInUse = false
-      this.updateInteractions()
+      this.setState({isMeasureToolInUse: false})
       this.clearMeasure()
     })
   }
@@ -721,7 +720,7 @@ export class PrimaryMap extends React.Component<Props, State> {
   }
 
   private updateInteractions() {
-    if (this.isMeasureToolInUse) {
+    if (this.state.isMeasureToolInUse) {
       this.activateMeasureInteraction()
       this.deactivateBboxDrawInteraction()
       this.deactivateSelectInteraction()

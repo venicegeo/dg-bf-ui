@@ -95,7 +95,7 @@ export class MeasureControl extends ol.control.Control {
 
   _closeDialog() {
     this.getMap().dispatchEvent('measureToolClosed')
-    this._dialog.reset()
+    document.getElementById('measureDistance').innerText = ''
     this._dialog.style.display = 'none'
   }
 
