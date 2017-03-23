@@ -121,6 +121,7 @@ export class PrimaryMap extends React.Component<Props, State> {
   private basemapLayers: ol.layer.Tile[]
   private detectionsLayers: {[key: string]: ol.layer.Tile}
   private drawLayer: ol.layer.Vector
+  private measureLayer: ol.layer.Vector
   private bboxDrawInteraction: ol.interaction.Draw
   private measureDrawInteraction: ol.interaction.Draw
   private featureDetailsOverlay: ol.Overlay
@@ -261,6 +262,10 @@ export class PrimaryMap extends React.Component<Props, State> {
     this.drawLayer.getSource().clear()
   }
 
+  private clearMeasure() {
+    this.measureLayer.getSource().clear()
+  }
+
   private clearFrames() {
     this.frameLayer.getSource().clear()
   }
@@ -329,7 +334,7 @@ export class PrimaryMap extends React.Component<Props, State> {
   }
 
   private handleMeasureStart() {
-    this.clearDraw()
+    this.clearMeasure()
     this.map.dispatchEvent('measureEventStart')
   }
 
@@ -411,6 +416,7 @@ export class PrimaryMap extends React.Component<Props, State> {
   private initializeOpenLayers() {
     this.basemapLayers = generateBasemapLayers(BASEMAP_TILE_PROVIDERS)
     this.drawLayer = generateDrawLayer()
+    this.measureLayer = generateMeasureLayer()
     this.highlightLayer = generateHighlightLayer()
     this.frameLayer = generateFrameLayer()
     this.imageryLayer = generateImageryLayer()
@@ -421,7 +427,7 @@ export class PrimaryMap extends React.Component<Props, State> {
     this.bboxDrawInteraction.on('drawstart', this.handleDrawStart)
     this.bboxDrawInteraction.on('drawend', this.handleDrawEnd)
 
-    this.measureDrawInteraction = generateMeasureDrawInteraction(this.drawLayer)
+    this.measureDrawInteraction = generateMeasureDrawInteraction(this.measureLayer)
     this.measureDrawInteraction.on('drawstart', this.handleMeasureStart)
     this.measureDrawInteraction.on('drawend', this.handleMeasureEnd)
 
@@ -439,6 +445,7 @@ export class PrimaryMap extends React.Component<Props, State> {
         ...this.basemapLayers,
         this.frameLayer,
         this.drawLayer,
+        this.measureLayer,
         this.imageryLayer,
         this.highlightLayer,
       ],
@@ -474,6 +481,7 @@ export class PrimaryMap extends React.Component<Props, State> {
     this.map.addEventListener('measureToolClosed', () => {
       this.isMeasureToolInUse = false
       this.updateInteractions()
+      this.clearMeasure()
     })
   }
 
@@ -912,6 +920,23 @@ function generateBboxDrawInteraction(drawLayer) {
   return draw
 }
 
+function generateMeasureLayer() {
+  return new ol.layer.Vector({
+    source: new ol.source.Vector({
+      wrapX: false,
+    }),
+    style: new ol.style.Style({
+      fill: new ol.style.Fill({
+        color: 'hsla(202, 70%, 50%, .35)',
+      }),
+      stroke: new ol.style.Stroke({
+        color: 'hsla(202, 70%, 50%, .7)',
+        width: 2,
+      }),
+    }),
+  })
+}
+
 function generateMeasureDrawInteraction(drawLayer) {
   const draw = new ol.interaction.Draw({
     source: drawLayer.getSource(),
@@ -941,8 +966,7 @@ function generateMeasureDrawInteraction(drawLayer) {
       }),
       stroke: new ol.style.Stroke({
         color: 'hsl(202, 70%, 50%)',
-        width: 1,
-        lineDash: [5, 5],
+        width: 2,
       }),
     }),
   })
