@@ -163,6 +163,7 @@
 /* OpenLayers Controls: Zoom Slider
    ========================================================================= */
 
+:global(.ol-touch .ol-zoomslider),
 :global(.ol-zoomslider) {
   left: initial;
   top: 120px;
