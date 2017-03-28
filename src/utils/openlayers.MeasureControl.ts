@@ -70,11 +70,13 @@ export class MeasureControl extends ol.control.Control {
         const wgs84Sphere = new ol.Sphere(6378137)
         const distance = wgs84Sphere.haversineDistance(c1, c2)
         let units = 1
+        let decimalPlaces = 1
         let unitsValue = (document.getElementById('measureUnits') as HTMLSelectElement).value
         if (unitsValue === 'km') {
           units = 1000
+          decimalPlaces = 4
         }
-        document.getElementById('measureDistance').innerText = (distance / units).toFixed(3).toString()
+        document.getElementById('measureDistance').innerText = (distance / units).toFixed(decimalPlaces).toString()
       })
 
       this.getMap().on('measureEventStart', function() {
