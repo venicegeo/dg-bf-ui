@@ -926,10 +926,10 @@ function generateMeasureLayer() {
     }),
     style: new ol.style.Style({
       fill: new ol.style.Fill({
-        color: 'hsla(202, 70%, 50%, .35)',
+        color: 'hsla(202, 70%, 0, .35)',
       }),
       stroke: new ol.style.Stroke({
-        color: 'hsla(202, 70%, 50%, .7)',
+        color: 'hsla(202, 70%, 0, .7)',
         width: 2,
       }),
     }),
@@ -961,10 +961,10 @@ function generateMeasureDrawInteraction(drawLayer) {
         angle: 0.785398,  // In radians
       }),
       fill: new ol.style.Fill({
-        color: 'hsla(202, 70%, 50%, .6)',
+        color: 'hsla(202, 70%, 0, .6)',
       }),
       stroke: new ol.style.Stroke({
-        color: 'hsl(202, 70%, 50%)',
+        color: 'hsl(202, 70%, 0)',
         width: 2,
       }),
     }),
