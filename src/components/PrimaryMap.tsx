@@ -98,7 +98,7 @@ interface State {
   basemapIndex?: number
   loadingRefCount?: number
   tileLoadError?: boolean
-  isMeasureToolInUse?: boolean
+  isMeasuring?: boolean
 }
 
 export interface MapView {
@@ -107,24 +107,13 @@ export interface MapView {
   zoom: number
 }
 
-export class MeasureEvent extends ol.events.Event {
-  geometry: ol.geom.LineString
-
-  constructor(type: string, geometry: ol.geom.LineString) {
-    super(type, null)
-    this.geometry = geometry
-  }
-}
-
 export class PrimaryMap extends React.Component<Props, State> {
   refs: any
 
   private basemapLayers: ol.layer.Tile[]
   private detectionsLayers: {[key: string]: ol.layer.Tile}
   private drawLayer: ol.layer.Vector
-  private measureLayer: ol.layer.Vector
   private bboxDrawInteraction: ol.interaction.Draw
-  private measureDrawInteraction: ol.interaction.Draw
   private featureDetailsOverlay: ol.Overlay
   private frameLayer: ol.layer.Vector
   private highlightLayer: ol.layer.Vector
@@ -211,7 +200,7 @@ export class PrimaryMap extends React.Component<Props, State> {
       this.updateView()
     }
     if ((previousProps.mode !== this.props.mode) ||
-      (previousState.isMeasureToolInUse !== this.state.isMeasureToolInUse)) {
+      (previousState.isMeasuring !== this.state.isMeasuring)) {
       this.updateInteractions()
     }
   }
@@ -251,20 +240,12 @@ export class PrimaryMap extends React.Component<Props, State> {
     this.bboxDrawInteraction.setActive(true)
   }
 
-  private activateMeasureInteraction() {
-    this.measureDrawInteraction.setActive(true)
-  }
-
   private activateSelectInteraction() {
     this.selectInteraction.setActive(true)
   }
 
   private clearDraw() {
     this.drawLayer.getSource().clear()
-  }
-
-  private clearMeasure() {
-    this.measureLayer.getSource().clear()
   }
 
   private clearFrames() {
@@ -281,10 +262,6 @@ export class PrimaryMap extends React.Component<Props, State> {
 
   private deactivateBboxDrawInteraction() {
     this.bboxDrawInteraction.setActive(false)
-  }
-
-  private deactivateMeasureInteraction() {
-    this.measureDrawInteraction.setActive(false)
   }
 
   private deactivateSelectInteraction() {
@@ -329,14 +306,16 @@ export class PrimaryMap extends React.Component<Props, State> {
     this.props.onBoundingBoxChange(null)
   }
 
-  private handleMeasureEnd(event) {
-    const geometry = event.feature.getGeometry() as ol.geom.LineString
-    this.map.dispatchEvent(new MeasureEvent('measureEventEnd', geometry))
+  private handleMeasureEnd() {
+    this.setState({
+      isMeasuring: false,
+    })
   }
 
   private handleMeasureStart() {
-    this.clearMeasure()
-    this.map.dispatchEvent('measureEventStart')
+    this.setState({
+      isMeasuring: true,
+    })
   }
 
   private handleLoadError(event) {
@@ -364,6 +343,10 @@ export class PrimaryMap extends React.Component<Props, State> {
   }
 
   private handleMouseMove(event) {
+    if (this.state.isMeasuring) {
+      this.refs.container.classList.remove(styles.isHoveringFeature)
+      return
+    }
     const layerFilter = l => l === this.frameLayer || l === this.imageryLayer
     let foundFeature = false
     this.map.forEachFeatureAtPixel(event.pixel, (feature) => {
@@ -417,7 +400,6 @@ export class PrimaryMap extends React.Component<Props, State> {
   private initializeOpenLayers() {
     this.basemapLayers = generateBasemapLayers(BASEMAP_TILE_PROVIDERS)
     this.drawLayer = generateDrawLayer()
-    this.measureLayer = generateMeasureLayer()
     this.highlightLayer = generateHighlightLayer()
     this.frameLayer = generateFrameLayer()
     this.imageryLayer = generateImageryLayer()
@@ -428,10 +410,6 @@ export class PrimaryMap extends React.Component<Props, State> {
     this.bboxDrawInteraction.on('drawstart', this.handleDrawStart)
     this.bboxDrawInteraction.on('drawend', this.handleDrawEnd)
 
-    this.measureDrawInteraction = generateMeasureDrawInteraction(this.measureLayer)
-    this.measureDrawInteraction.on('drawstart', this.handleMeasureStart)
-    this.measureDrawInteraction.on('drawend', this.handleMeasureEnd)
-
     this.selectInteraction = generateSelectInteraction(this.frameLayer, this.imageryLayer)
     this.selectInteraction.on('select', this.handleSelect)
 
@@ -440,13 +418,12 @@ export class PrimaryMap extends React.Component<Props, State> {
 
     this.map = new ol.Map({
       controls: generateControls(),
-      interactions: generateBaseInteractions().extend([this.bboxDrawInteraction, this.selectInteraction, this.measureDrawInteraction]),
+      interactions: generateBaseInteractions().extend([this.bboxDrawInteraction, this.selectInteraction]),
       layers: [
         // Order matters here
         ...this.basemapLayers,
         this.frameLayer,
         this.drawLayer,
-        this.measureLayer,
         this.imageryLayer,
         this.highlightLayer,
       ],
@@ -475,13 +452,8 @@ export class PrimaryMap extends React.Component<Props, State> {
     this.map.on('pointermove', this.handleMouseMove)
     this.map.on('moveend', this.emitViewChange)
 
-    this.map.addEventListener('measureToolOpened', () => {
-      this.setState({isMeasureToolInUse: true})
-    })
-    this.map.addEventListener('measureToolClosed', () => {
-      this.setState({isMeasureToolInUse: false})
-      this.clearMeasure()
-    })
+    this.map.on('measure:start', this.handleMeasureStart)
+    this.map.on('measure:end', this.handleMeasureEnd)
   }
 
   private updateView() {
@@ -720,8 +692,7 @@ export class PrimaryMap extends React.Component<Props, State> {
   }
 
   private updateInteractions() {
-    if (this.state.isMeasureToolInUse) {
-      this.activateMeasureInteraction()
+    if (this.state.isMeasuring) {
       this.deactivateBboxDrawInteraction()
       this.deactivateSelectInteraction()
       return
@@ -730,24 +701,20 @@ export class PrimaryMap extends React.Component<Props, State> {
     switch (this.props.mode) {
       case MODE_SELECT_IMAGERY:
         this.deactivateBboxDrawInteraction()
-        this.deactivateMeasureInteraction()
         this.activateSelectInteraction()
         break
       case MODE_DRAW_BBOX:
         this.activateBboxDrawInteraction()
-        this.deactivateMeasureInteraction()
         this.deactivateSelectInteraction()
         break
       case MODE_NORMAL:
         this.clearDraw()
         this.deactivateBboxDrawInteraction()
-        this.deactivateMeasureInteraction()
         this.activateSelectInteraction()
         break
       case MODE_PRODUCT_LINES:
         this.clearDraw()
         this.deactivateBboxDrawInteraction()
-        this.deactivateMeasureInteraction()
         this.activateSelectInteraction()
         break
       default:
@@ -912,60 +879,6 @@ function generateBboxDrawInteraction(drawLayer) {
         color: 'hsl(202, 70%, 50%)',
         width: 1,
         lineDash: [5, 5],
-      }),
-    }),
-  })
-  draw.setActive(false)
-  return draw
-}
-
-function generateMeasureLayer() {
-  return new ol.layer.Vector({
-    source: new ol.source.Vector({
-      wrapX: false,
-    }),
-    style: new ol.style.Style({
-      fill: new ol.style.Fill({
-        color: 'hsla(202, 70%, 0, .35)',
-      }),
-      stroke: new ol.style.Stroke({
-        color: 'hsla(202, 70%, 0, .7)',
-        width: 2,
-      }),
-    }),
-  })
-}
-
-function generateMeasureDrawInteraction(drawLayer) {
-  const draw = new ol.interaction.Draw({
-    source: drawLayer.getSource(),
-    maxPoints: 2,
-    type: 'LineString',
-    geometryFunction(coordinates: any, geometry: ol.geom.LineString) {
-      if (!geometry) {
-        geometry = new ol.geom.LineString(null)
-      }
-      const [[x1, y1], [x2, y2]] = coordinates
-      geometry.setCoordinates([[x1, y1], [x2, y2]])
-      return geometry
-    },
-    style: new ol.style.Style({
-      image: new ol.style.RegularShape({
-        stroke: new ol.style.Stroke({
-          color: 'black',
-          width: 1,
-        }),
-        points: 4,
-        radius: 15,
-        radius2: 0,
-        angle: 0.785398,  // In radians
-      }),
-      fill: new ol.style.Fill({
-        color: 'hsla(202, 70%, 0, .6)',
-      }),
-      stroke: new ol.style.Stroke({
-        color: 'hsl(202, 70%, 0)',
-        width: 2,
       }),
     }),
   })

@@ -16,93 +16,180 @@
 
 import * as ol from 'openlayers'
 
-const MEASURE_DIALOG = `
-<div style="display: flex; flex-direction: column; position: relative;">
-  <div style="display: flex; flex-direction: row">
-    <label for="measureUnits">Distance Units:</label>
-    <select id="measureUnits" style="height: 2em; width: 4em;margin-left: 10px">
-      <option selected>m</option>
-      <option>km</option>
-    </select>
-    <div style="padding-left: 7px;">
-      <button class="closeButton" type="reset" style="border: none; background-color: transparent; width: 2em; line-height: 2em; font-size: 1em; color: #555;"><i class="fa fa-close"></i></button>
-    </div>
-  </div>
-  <label id="measureDistance" style="line-height: 2em; font-weight: 500"></label>
-</div>`
+const WGS84_SPHERE = new ol.Sphere(6378137)
+const PRECISION = 100
 
 export class MeasureControl extends ol.control.Control {
-  private _dialog: any
+  private _dialog: HTMLFormElement
+  private _interaction: ol.interaction.Draw
+  private _layer: ol.layer.Vector
+  private _isOpen: boolean
+  private _distanceInMeters: number
 
   constructor(className) {
     const element = document.createElement('div')
-    super({element})
+    super({ element })
     element.className = `${className || ''} ol-unselectable ol-control`
     element.title = 'Measure distance between two points'
-    element.innerHTML = '<button><i class="fa fa-map-o"/></button>'
-    element.addEventListener('click', () => this._measureClicked())
-    element.addEventListener('keyup', (event) => this._escPressed(event))
+    element.innerHTML = `
+      <button style="position: relative;">
+        <svg viewBox="0 0 40 40" preserveAspectRatio="xMinYMin" style="position: absolute; top: 10%; left: 10%; width: 80%; fill: currentColor;">
+          <polygon fill-rule="evenodd" points="38.273059 27.2812229 30.5787737 34.9755082 28.4795901 32.8763246 36.1738754 25.1820393 31.6779573 20.6861213 28.3804065 23.9836721 26.2812229 21.8844885 29.5787737 18.5869377 25.0828557 14.0910197 21.7853049 17.3885705 19.6861213 15.2893869 22.9836721 11.9918361 18.4877541 7.49591803 10.7934688 15.1902033 8.69428524 13.0910197 16.3885705 5.39673442 12.9918361 2 2 12.9918361 29.0081639 40 40 40 40 29.0081639"></polygon>
+        </svg>
+      </button>
+    `
+    element.addEventListener('click', () => this._handleActivationToggle())
+
+    this._layer = generateLayer()
+
+    this._interaction = generateInteraction(this._layer)
+
+    this._interaction.on('drawstart', () => {
+      this._layer.getSource().clear()
+    })
+
+    this._interaction.on('drawend', (event: ol.interaction.DrawEvent) => {
+      const geometry = event.feature.getGeometry() as ol.geom.LineString
+      const c1 = ol.proj.transform(geometry.getFirstCoordinate(), 'EPSG:3857', 'EPSG:4326')
+      const c2 = ol.proj.transform(geometry.getLastCoordinate(), 'EPSG:3857', 'EPSG:4326')
+
+      this._distanceInMeters = WGS84_SPHERE.haversineDistance(c1, c2)
+      this._recalculate()
+    })
+
+    this._dialog = generateDialog()
+    this._dialog.querySelector('.measureControl__units').addEventListener('change', () => this._recalculate())
+    this._dialog.querySelector('.measureControl__close').addEventListener('click', () => this._deactivate())
+
+    // DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG
+    // DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG
+    setTimeout(() => element.click(), 200)
+    // DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG
+    // DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG
   }
 
-  getDialog() {
-    if (!this._dialog) {
-      this._dialog = document.createElement('form')
-      this._dialog.className = 'measure-dialog'
-      this._dialog.style.display = 'block'
-      this._dialog.style.position = 'absolute'
-      this._dialog.style.top = '50px'
-      this._dialog.style.right = '40px'
-      this._dialog.style.fontSize = '16px'
-      this._dialog.style.backgroundColor = 'white'
-      this._dialog.style.padding = '.25em'
-      this._dialog.style.width = '200px'
-      this._dialog.style.height = '70px'
-      this._dialog.style.boxShadow = '0 0 0 1px rgba(0,0,0,.2), 0 5px rgba(0,0,0,.1)'
-      this._dialog.style.borderRadius = '2px'
+  private _activate() {
+    this._isOpen = true
+    this._dialog.style.display = 'block'
+    this._dialog.reset()
 
-      this._dialog.innerHTML = MEASURE_DIALOG
-      this.getMap().getTargetElement().appendChild(this._dialog)
-      this.getMap().on('measureEventEnd', function(event) {
-        const geometry = event.geometry
-        const mapProjection = event.target.getView().getProjection().getCode()
-        const c1 = ol.proj.transform(geometry.getFirstCoordinate(), mapProjection, 'EPSG:4326')
-        const c2 = ol.proj.transform(geometry.getLastCoordinate(), mapProjection, 'EPSG:4326')
-        const wgs84Sphere = new ol.Sphere(6378137)
-        const distance = wgs84Sphere.haversineDistance(c1, c2)
-        let units = 1
-        let decimalPlaces = 1
-        let unitsValue = (document.getElementById('measureUnits') as HTMLSelectElement).value
-        if (unitsValue === 'km') {
-          units = 1000
-          decimalPlaces = 4
-        }
-        document.getElementById('measureDistance').innerText = (distance / units).toFixed(decimalPlaces).toString()
-      })
+    // TODO -- listen for "ESC" on document
 
-      this.getMap().on('measureEventStart', function() {
-        document.getElementById('measureDistance').innerText = ''
-      })
-
-      const closeDialog = this._dialog.querySelector('.closeButton')
-      closeDialog.addEventListener('click', () => this._closeDialog())
+    const map = this.getMap()
+    if (!this._dialog.parentNode) {
+      map.getTargetElement().appendChild(this._dialog)
     }
-    return this._dialog
+
+    map.addLayer(this._layer)
+    map.addInteraction(this._interaction)
+    map.dispatchEvent('measure:start')
   }
 
-  _escPressed(event) {
-    if (event.key === 27) {
-      this._closeDialog()
-    }
-  }
-
-  _closeDialog() {
-    this.getMap().dispatchEvent('measureToolClosed')
-    document.getElementById('measureDistance').innerText = ''
+  private _deactivate() {
+    this._isOpen = false
     this._dialog.style.display = 'none'
+    this._dialog.reset()
+
+    this._distanceInMeters = 0
+    this._recalculate()
+
+    this._layer.getSource().clear()
+
+    const map = this.getMap()
+    map.removeInteraction(this._interaction)
+    map.removeLayer(this._layer)
+    map.dispatchEvent('measure:end')
   }
 
-  _measureClicked() {
-    this.getMap().dispatchEvent('measureToolOpened')
-    this.getDialog().style.display = 'block'
+  private _recalculate() {
+    const isKilometers = this._dialog.querySelector('select').value === 'kilometers'
+    const distance = isKilometers ? this._distanceInMeters / 1000 : this._distanceInMeters
+    this._dialog.querySelector('.measureControl__distance').textContent = (Math.round(distance * PRECISION) / PRECISION).toString()
+  }
+
+  private _handleActivationToggle() {
+    if (this._isOpen) {
+      this._deactivate()
+    }
+    else {
+      this._activate()
+    }
   }
 }
+
+function generateDialog() {
+  const dialog = document.createElement('form')
+  dialog.style.display = 'none'
+  dialog.style.position = 'absolute'
+  dialog.style.top = '40px'
+  dialog.style.right = '70px'
+  dialog.style.fontSize = '16px'
+  dialog.style.backgroundColor = 'white'
+  dialog.style.padding = '.25em'
+  dialog.style.width = '300px'
+  dialog.style.boxShadow = '0 0 0 1px rgba(0,0,0,.2), 0 5px rgba(0,0,0,.1)'
+  dialog.style.borderRadius = '2px'
+  dialog.innerHTML = `
+    <div style="display: flex; align-items: center; justify-content: space-between;">
+      <span>Measure Tool</span>
+      <button class="measureControl__close" type="reset" style="border: none; background-color: transparent; font-size: inherit; color: #555;"><i class="fa fa-close"></i></button>
+    </div>
+    <label style="display: flex; align-items: center; justify-content: flex-end; background-color: #555; color: #fff; padding: .5em;">
+      <code class="measureControl__distance" style="margin-right: .25em; font-size: 1.5em;">0</code>
+      <select class="measureControl__units">
+        <option selected>meters</option>
+        <option>kilometers</option>
+      </select>
+    </label>
+  `
+  return dialog
+}
+
+function generateInteraction(drawLayer): ol.interaction.Draw {
+  return new ol.interaction.Draw({
+    source: drawLayer.getSource(),
+    maxPoints: 2,
+    type: 'LineString',
+    geometryFunction(coordinates: any, geometry: ol.geom.LineString) {
+      if (!geometry) {
+        geometry = new ol.geom.LineString(null)
+      }
+      const [[x1, y1], [x2, y2]] = coordinates
+      geometry.setCoordinates([[x1, y1], [x2, y2]])
+      return geometry
+    },
+    style: new ol.style.Style({
+      image: new ol.style.RegularShape({
+        stroke: new ol.style.Stroke({
+          color: 'black',
+          width: 1,
+        }),
+        points: 4,
+        radius: 15,
+        radius2: 0,
+        angle: 0.785398,  // In radians
+      }),
+      stroke: new ol.style.Stroke({
+        color: '#f04',
+        lineDash: [5, 10],
+        width: 2,
+      }),
+    }),
+  })
+}
+
+function generateLayer() {
+  return new ol.layer.Vector({
+    source: new ol.source.Vector({
+      wrapX: false,
+    }),
+    style: new ol.style.Style({
+      stroke: new ol.style.Stroke({
+        color: '#c03',
+        lineDash: [10, 5],
+        width: 3,
+      }),
+    }),
+  })
+}
+
