@@ -45,6 +45,7 @@ describe('<PrimaryMap/>', () => {
       isSearching:         false,
       mode:                MODE_NORMAL,
       selectedFeature:     null,
+      shrunk:              false,
       wmsUrl:              'http://test-geoserver-url',
       onBoundingBoxChange: sinon.stub(),
       onSearchPageChange:  sinon.stub(),
@@ -65,6 +66,7 @@ describe('<PrimaryMap/>', () => {
         isSearching={_props.isSearching}
         mode={_props.mode}
         selectedFeature={_props.selectedFeature}
+        shrunk={_props.shrunk}
         view={_props.view}
         wmsUrl={_props.wmsUrl}
         onBoundingBoxChange={_props.onBoundingBoxChange}
@@ -89,6 +91,7 @@ describe('<PrimaryMap/>', () => {
         isSearching={_props.isSearching}
         mode={_props.mode}
         selectedFeature={_props.selectedFeature}
+        shrunk={_props.shrunk}
         view={_props.view}
         wmsUrl={_props.wmsUrl}
         onBoundingBoxChange={_props.onBoundingBoxChange}
@@ -113,6 +116,7 @@ describe('<PrimaryMap/>', () => {
         isSearching={_props.isSearching}
         mode={_props.mode}
         selectedFeature={_props.selectedFeature}
+        shrunk={_props.shrunk}
         view={view}
         wmsUrl={_props.wmsUrl}
         onBoundingBoxChange={_props.onBoundingBoxChange}
@@ -192,6 +196,7 @@ describe('<PrimaryMap/>', () => {
         isSearching={_props.isSearching}
         mode={_props.mode}
         selectedFeature={_props.selectedFeature}
+        shrunk={_props.shrunk}
         view={_props.view}
         wmsUrl={_props.wmsUrl}
         onBoundingBoxChange={_props.onBoundingBoxChange}
@@ -245,6 +250,7 @@ describe('<PrimaryMap/>', () => {
         isSearching={_props.isSearching}
         mode={_props.mode}
         selectedFeature={generateScene()}
+        shrunk={_props.shrunk}
         view={_props.view}
         wmsUrl={_props.wmsUrl}
         onBoundingBoxChange={_props.onBoundingBoxChange}
@@ -274,6 +280,7 @@ describe('<PrimaryMap/>', () => {
         isSearching={_props.isSearching}
         mode={_props.mode}
         selectedFeature={generateScene()}
+        shrunk={_props.shrunk}
         view={_props.view}
         wmsUrl={_props.wmsUrl}
         onBoundingBoxChange={_props.onBoundingBoxChange}
