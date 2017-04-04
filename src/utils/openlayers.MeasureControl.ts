@@ -18,6 +18,7 @@ import * as ol from 'openlayers'
 
 const WGS84_SPHERE = new ol.Sphere(6378137)
 const PRECISION = 1000
+const KEY_ESCAPE = 27
 
 export class MeasureControl extends ol.control.Control {
   private _dialog: HTMLFormElement
@@ -61,14 +62,13 @@ export class MeasureControl extends ol.control.Control {
     this._dialog.querySelector('.measureControl__units').addEventListener('change', () => this._recalculate())
     this._dialog.querySelector('.measureControl__close').addEventListener('click', () => this._deactivate())
 
+    this._handleDocumentKeyDown = this._handleDocumentKeyDown.bind(this)
   }
 
   private _activate() {
     this._isOpen = true
     this._dialog.style.display = 'block'
     this._dialog.reset()
-
-    // TODO -- listen for "ESC" on document
 
     const map = this.getMap()
     if (!this._dialog.parentNode) {
@@ -78,6 +78,8 @@ export class MeasureControl extends ol.control.Control {
     map.addLayer(this._layer)
     map.addInteraction(this._interaction)
     map.dispatchEvent('measure:start')
+
+    document.addEventListener('keydown', this._handleDocumentKeyDown)
   }
 
   private _deactivate() {
@@ -94,6 +96,8 @@ export class MeasureControl extends ol.control.Control {
     map.removeInteraction(this._interaction)
     map.removeLayer(this._layer)
     map.dispatchEvent('measure:end')
+
+    document.removeEventListener('keydown', this._handleDocumentKeyDown)
   }
 
   private _recalculate() {
@@ -108,6 +112,12 @@ export class MeasureControl extends ol.control.Control {
     }
     else {
       this._activate()
+    }
+  }
+
+  private _handleDocumentKeyDown(event: KeyboardEvent) {
+    if (event.keyCode === KEY_ESCAPE) {
+      this._deactivate()
     }
   }
 }
