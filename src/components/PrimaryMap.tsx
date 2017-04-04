@@ -25,6 +25,7 @@ import * as debounce from 'lodash/debounce'
 import * as throttle from 'lodash/throttle'
 import {ExportControl} from '../utils/openlayers.ExportControl'
 import {SearchControl} from '../utils/openlayers.SearchControl'
+import {MeasureControl} from '../utils/openlayers.MeasureControl'
 import {BasemapSelect} from './BasemapSelect'
 import {FeatureDetails} from './FeatureDetails'
 import {LoadingAnimation} from './LoadingAnimation'
@@ -97,6 +98,7 @@ interface State {
   basemapIndex?: number
   loadingRefCount?: number
   tileLoadError?: boolean
+  isMeasuring?: boolean
 }
 
 export interface MapView {
@@ -111,7 +113,7 @@ export class PrimaryMap extends React.Component<Props, State> {
   private basemapLayers: ol.layer.Tile[]
   private detectionsLayers: {[key: string]: ol.layer.Tile}
   private drawLayer: ol.layer.Vector
-  private drawInteraction: ol.interaction.Draw
+  private bboxDrawInteraction: ol.interaction.Draw
   private featureDetailsOverlay: ol.Overlay
   private frameLayer: ol.layer.Vector
   private highlightLayer: ol.layer.Vector
@@ -129,6 +131,8 @@ export class PrimaryMap extends React.Component<Props, State> {
     this.handleBasemapChange = this.handleBasemapChange.bind(this)
     this.handleDrawStart = this.handleDrawStart.bind(this)
     this.handleDrawEnd = this.handleDrawEnd.bind(this)
+    this.handleMeasureStart = this.handleMeasureStart.bind(this)
+    this.handleMeasureEnd = this.handleMeasureEnd.bind(this)
     this.handleLoadError = this.handleLoadError.bind(this)
     this.handleLoadStart = this.handleLoadStart.bind(this)
     this.handleLoadStop = this.handleLoadStop.bind(this)
@@ -195,7 +199,8 @@ export class PrimaryMap extends React.Component<Props, State> {
     if (previousProps.view !== this.props.view && this.props.view) {
       this.updateView()
     }
-    if (previousProps.mode !== this.props.mode) {
+    if ((previousProps.mode !== this.props.mode) ||
+      (previousState.isMeasuring !== this.state.isMeasuring)) {
       this.updateInteractions()
     }
   }
@@ -231,8 +236,8 @@ export class PrimaryMap extends React.Component<Props, State> {
   // Internals
   //
 
-  private activateDrawInteraction() {
-    this.drawInteraction.setActive(true)
+  private activateBboxDrawInteraction() {
+    this.bboxDrawInteraction.setActive(true)
   }
 
   private activateSelectInteraction() {
@@ -255,8 +260,8 @@ export class PrimaryMap extends React.Component<Props, State> {
     this.map.updateSize()
   }
 
-  private deactivateDrawInteraction() {
-    this.drawInteraction.setActive(false)
+  private deactivateBboxDrawInteraction() {
+    this.bboxDrawInteraction.setActive(false)
   }
 
   private deactivateSelectInteraction() {
@@ -301,6 +306,18 @@ export class PrimaryMap extends React.Component<Props, State> {
     this.props.onBoundingBoxChange(null)
   }
 
+  private handleMeasureEnd() {
+    this.setState({
+      isMeasuring: false,
+    })
+  }
+
+  private handleMeasureStart() {
+    this.setState({
+      isMeasuring: true,
+    })
+  }
+
   private handleLoadError(event) {
     this.setState({
       loadingRefCount: Math.max(0, this.state.loadingRefCount - 1),
@@ -326,6 +343,10 @@ export class PrimaryMap extends React.Component<Props, State> {
   }
 
   private handleMouseMove(event) {
+    if (this.state.isMeasuring) {
+      this.refs.container.classList.remove(styles.isHoveringFeature)
+      return
+    }
     const layerFilter = l => l === this.frameLayer || l === this.imageryLayer
     let foundFeature = false
     this.map.forEachFeatureAtPixel(event.pixel, (feature) => {
@@ -385,9 +406,9 @@ export class PrimaryMap extends React.Component<Props, State> {
     this.detectionsLayers = {}
     this.previewLayers = {}
 
-    this.drawInteraction = generateDrawInteraction(this.drawLayer)
-    this.drawInteraction.on('drawstart', this.handleDrawStart)
-    this.drawInteraction.on('drawend', this.handleDrawEnd)
+    this.bboxDrawInteraction = generateBboxDrawInteraction(this.drawLayer)
+    this.bboxDrawInteraction.on('drawstart', this.handleDrawStart)
+    this.bboxDrawInteraction.on('drawend', this.handleDrawEnd)
 
     this.selectInteraction = generateSelectInteraction(this.frameLayer, this.imageryLayer)
     this.selectInteraction.on('select', this.handleSelect)
@@ -397,7 +418,7 @@ export class PrimaryMap extends React.Component<Props, State> {
 
     this.map = new ol.Map({
       controls: generateControls(),
-      interactions: generateBaseInteractions().extend([this.drawInteraction, this.selectInteraction]),
+      interactions: generateBaseInteractions().extend([this.bboxDrawInteraction, this.selectInteraction]),
       layers: [
         // Order matters here
         ...this.basemapLayers,
@@ -430,6 +451,9 @@ export class PrimaryMap extends React.Component<Props, State> {
 
     this.map.on('pointermove', this.handleMouseMove)
     this.map.on('moveend', this.emitViewChange)
+
+    this.map.on('measure:start', this.handleMeasureStart)
+    this.map.on('measure:end', this.handleMeasureEnd)
   }
 
   private updateView() {
@@ -668,29 +692,36 @@ export class PrimaryMap extends React.Component<Props, State> {
   }
 
   private updateInteractions() {
+    if (this.state.isMeasuring) {
+      this.deactivateBboxDrawInteraction()
+      this.deactivateSelectInteraction()
+      return
+    }
+
     switch (this.props.mode) {
       case MODE_SELECT_IMAGERY:
-        this.deactivateDrawInteraction()
+        this.deactivateBboxDrawInteraction()
         this.activateSelectInteraction()
         break
       case MODE_DRAW_BBOX:
-        this.activateDrawInteraction()
+        this.activateBboxDrawInteraction()
         this.deactivateSelectInteraction()
         break
       case MODE_NORMAL:
         this.clearDraw()
-        this.deactivateDrawInteraction()
+        this.deactivateBboxDrawInteraction()
         this.activateSelectInteraction()
         break
       case MODE_PRODUCT_LINES:
         this.clearDraw()
-        this.deactivateDrawInteraction()
+        this.deactivateBboxDrawInteraction()
         this.activateSelectInteraction()
         break
       default:
         console.warn('wat mode=%s', this.props.mode)
         break
     }
+
   }
 
   private updateSelectedFeature() {
@@ -782,6 +813,7 @@ function generateControls() {
     new ol.control.FullScreen(),
     new ExportControl(styles.export),
     new SearchControl(styles.search),
+    new MeasureControl(styles.measure),
   ])
 }
 
@@ -816,7 +848,7 @@ function generateDrawLayer() {
   })
 }
 
-function generateDrawInteraction(drawLayer) {
+function generateBboxDrawInteraction(drawLayer) {
   const draw = new ol.interaction.Draw({
     source: drawLayer.getSource(),
     maxPoints: 2,
