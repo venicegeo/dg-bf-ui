@@ -17,7 +17,7 @@
 import * as ol from 'openlayers'
 
 const WGS84_SPHERE = new ol.Sphere(6378137)
-const PRECISION = 100
+const PRECISION = 1000
 
 export class MeasureControl extends ol.control.Control {
   private _dialog: HTMLFormElement
@@ -33,7 +33,7 @@ export class MeasureControl extends ol.control.Control {
     element.title = 'Measure distance between two points'
     element.innerHTML = `
       <button style="position: relative;">
-        <svg viewBox="0 0 40 40" preserveAspectRatio="xMinYMin" style="position: absolute; top: 10%; left: 10%; width: 80%; fill: currentColor;">
+        <svg viewBox="2 2 40 40" preserveAspectRatio="xMinYMin" style="position: absolute; top: 10%; left: 10%; width: 80%; fill: currentColor;">
           <polygon fill-rule="evenodd" points="38.273059 27.2812229 30.5787737 34.9755082 28.4795901 32.8763246 36.1738754 25.1820393 31.6779573 20.6861213 28.3804065 23.9836721 26.2812229 21.8844885 29.5787737 18.5869377 25.0828557 14.0910197 21.7853049 17.3885705 19.6861213 15.2893869 22.9836721 11.9918361 18.4877541 7.49591803 10.7934688 15.1902033 8.69428524 13.0910197 16.3885705 5.39673442 12.9918361 2 2 12.9918361 29.0081639 40 40 40 40 29.0081639"></polygon>
         </svg>
       </button>
@@ -61,11 +61,6 @@ export class MeasureControl extends ol.control.Control {
     this._dialog.querySelector('.measureControl__units').addEventListener('change', () => this._recalculate())
     this._dialog.querySelector('.measureControl__close').addEventListener('click', () => this._deactivate())
 
-    // DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG
-    // DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG
-    setTimeout(() => element.click(), 200)
-    // DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG
-    // DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG
   }
 
   private _activate() {
@@ -145,7 +140,7 @@ function generateDialog() {
   return dialog
 }
 
-function generateInteraction(drawLayer): ol.interaction.Draw {
+function generateInteraction(drawLayer) {
   return new ol.interaction.Draw({
     source: drawLayer.getSource(),
     maxPoints: 2,
