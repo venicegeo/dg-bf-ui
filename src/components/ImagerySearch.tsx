@@ -17,9 +17,10 @@
 const styles: any = require('./ImagerySearch.css')
 
 import * as React from 'react'
+import * as moment from 'moment'
+import {AxiosError} from 'axios'
 import {CatalogSearchCriteria} from './CatalogSearchCriteria'
 import {LoadingAnimation} from './LoadingAnimation'
-import * as moment from 'moment'
 
 interface Props {
   bbox: number[]
@@ -62,13 +63,7 @@ export class ImagerySearch extends React.Component<Props, {}> {
           onCloudCoverChange={this.props.onCloudCoverChange}
           onDateChange={this.props.onDateChange}
           onSourceChange={this.props.onSourceChange}
-          errorElement={this.props.error && (
-            <div className={styles.errorMessage}>
-              <h4><i className="fa fa-warning"/> Search failed</h4>
-              <p>Could not search the image catalog because of an error.<br/>{this.props.error.response.data}</p>
-              <pre>{this.props.error.stack}</pre>
-            </div>
-          )}
+          errorElement={this.renderErrorElement()}
         />
 
         <div className={styles.controls}>
@@ -81,6 +76,55 @@ export class ImagerySearch extends React.Component<Props, {}> {
           </div>
         )}
       </form>
+    )
+  }
+
+  private renderErrorElement() {
+    const error: Error = this.props.error
+    if (!error) {
+      return  // Nothing to do
+    }
+
+    let heading, details, stacktrace
+
+    stacktrace = error.toString()
+
+    const {response} = error as AxiosError
+    switch (response && response.status) {
+      case 401:
+        heading = 'Unauthorized'
+        details = 'Your credentials were rejected by the data source.  Please contact the Beachfront team for technical support.'
+        break
+      case 400:
+        heading = 'Catalog did not understand request'
+        details = 'Please contact the Beachfront team for technical support.'
+        break
+      case 404:
+        heading = 'Catalog did not understand request'
+        details = 'Please contact the Beachfront team for technical support.'
+        break
+      case 500:
+        heading = 'Catalog error'
+        details = 'The Beachfront Catalog has experienced an error.  If this persists, please contact the Beachfront team for technical support.'
+        break
+      case 502:
+      case 503:
+        heading = 'Cannot communicate with Catalog'
+        details = 'Unable to communicate with the Beachfront Catalog.  If this persists, please contact the Beachfront team for technical support.'
+        break
+      default:
+        heading = 'Search failed'
+        details = 'An unknown error has occurred. Please contact the Beachfront team for technical support.'
+        stacktrace = error.stack
+        break
+    }
+
+    return (
+      <div className={styles.errorMessage}>
+        <h4><i className="fa fa-warning"/> {heading}</h4>
+        <p>{details}</p>
+        <pre>{stacktrace}</pre>
+      </div>
     )
   }
 
