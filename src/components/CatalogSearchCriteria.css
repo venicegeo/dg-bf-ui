@@ -62,6 +62,8 @@
 
 .cloudCover .value {
   margin: 0 0 0 .5em;
-  width: auto;
+  width: 3.1em;
   opacity: .5;
+  text-align: left;
+  white-space: nowrap;
 }
