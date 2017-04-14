@@ -36,6 +36,7 @@ import {
 } from './PrimaryMap'
 import {ProductLineList} from './ProductLineList'
 import {SessionExpired} from './SessionExpired'
+import {SessionLoggedOut} from './SessionLoggedOut'
 import {UpdateAvailable} from './UpdateAvailable'
 import * as algorithmsService from '../api/algorithms'
 import * as catalogService from '../api/catalog'
@@ -63,6 +64,7 @@ interface State {
   catalogApiKey?: string
   errors?: any[]
   isLoggedIn?: boolean
+  isSessionLoggedOut?: boolean
   isSessionExpired?: boolean
   isUpdateAvailable?: boolean
   route?: Route
@@ -120,6 +122,7 @@ export class Application extends React.Component<Props, State> {
     this.handleSelectFeature = this.handleSelectFeature.bind(this)
     this.navigateTo = this.navigateTo.bind(this)
     this.panTo = this.panTo.bind(this)
+    this.logout = this.logout.bind(this)
   }
 
   componentDidUpdate(_, prevState: State) {
@@ -151,6 +154,7 @@ export class Application extends React.Component<Props, State> {
     return (
       <div className={styles.root}>
         <ClassificationBanner anchor="top"/>
+        <div className={styles.logout}><a onClick={this.logout}>Sign Out</a></div>
         <Navigation
           activeRoute={this.state.route}
           onClick={this.navigateTo}
@@ -181,6 +185,17 @@ export class Application extends React.Component<Props, State> {
               this.setState({
                 isLoggedIn: false,
                 isSessionExpired: false,
+              })
+            }}
+          />
+        )}
+        {this.state.isSessionLoggedOut && (
+          <SessionLoggedOut
+            onDismiss={() => {
+              sessionStorage.clear()
+              this.setState({
+                isLoggedIn: false,
+                isSessionLoggedOut: false,
               })
             }}
           />
@@ -532,6 +547,13 @@ export class Application extends React.Component<Props, State> {
     ])
   }
 
+  private logout() {
+    this.setState({
+      isSessionLoggedOut: true,
+    })
+    return null
+  }
+
   private startBackgroundTasks() {
     sessionService.onExpired(() => this.setState({ isSessionExpired: true }))
     updateService.startWorker({
@@ -573,6 +595,7 @@ function generateInitialState(): State {
     route: generateRoute(location),
     isLoggedIn: sessionService.initialize(),
     isSessionExpired: false,
+    isSessionLoggedOut: false,
     isUpdateAvailable: false,
 
     // Services

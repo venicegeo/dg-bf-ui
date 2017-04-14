@@ -14,23 +14,23 @@
  * limitations under the License.
  **/
 
-.root {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
+const styles = require('./SessionLoggedOut.css')
+
+import * as React from 'react'
+import {Modal} from './Modal'
+
+interface Props {
+  onDismiss()
 }
 
-.logout {
-  position: absolute;
-  top: 35px;
-  right: 182px;
-  z-index: 999;
-  background-color: white;
-  padding: 1px 3px 0 3px;
-  border: 0;
-  border-bottom: 1px solid rgba(0, 0, 0, .13);
-  box-shadow: 0 0 0 1px rgba(0, 0, 0, .2), 0 5px rgba(0, 0, 0, .1);
-  border-radius: 1px;
-}
+export const SessionLoggedOut = ({ onDismiss }: Props) => (
+  <Modal onDismiss={onDismiss}>
+    <div className={styles.root}>
+      <h1><i className="fa fa-lock"/> You have logged out</h1>
+      <p>You have successfully logged out of Beachfront.</p>
+      <p className={styles.instructions}>
+        Click anywhere or press <kbd>ESC</kbd> to close this message
+      </p>
+    </div>
+  </Modal>
+)
