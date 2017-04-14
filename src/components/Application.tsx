@@ -154,7 +154,7 @@ export class Application extends React.Component<Props, State> {
     return (
       <div className={styles.root}>
         <ClassificationBanner anchor="top"/>
-        <div className={styles.logout}><a onClick={this.logout}>Logout</a></div>
+        <div className={styles.logout}><a onClick={this.logout}>Sign Out</a></div>
         <Navigation
           activeRoute={this.state.route}
           onClick={this.navigateTo}
