@@ -693,8 +693,8 @@ export class PrimaryMap extends React.Component<Props, State> {
 
   private updateInteractions() {
     if (this.state.isMeasuring) {
-      this.deactivateBboxDrawInteraction()
-      this.deactivateSelectInteraction()
+      this.selectInteraction.setActive(false)
+      this.bboxDrawInteraction.setActive(false)
       return
     }
 
