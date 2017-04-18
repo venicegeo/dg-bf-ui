@@ -264,9 +264,11 @@ export class PrimaryMap extends React.Component<Props, State> {
     this.bboxDrawInteraction.setActive(false)
   }
 
-  private deactivateSelectInteraction() {
-    this.clearSelection()
-    this.emitDeselectAll()
+  private deactivateSelectInteraction(skipReset = false) {
+    if (!skipReset) {
+      this.clearSelection()
+      this.emitDeselectAll()
+    }
     this.selectInteraction.setActive(false)
   }
 
@@ -694,7 +696,7 @@ export class PrimaryMap extends React.Component<Props, State> {
   private updateInteractions() {
     if (this.state.isMeasuring) {
       this.deactivateBboxDrawInteraction()
-      this.deactivateSelectInteraction()
+      this.deactivateSelectInteraction(true)
       return
     }
 
