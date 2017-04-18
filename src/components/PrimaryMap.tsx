@@ -264,7 +264,7 @@ export class PrimaryMap extends React.Component<Props, State> {
     this.bboxDrawInteraction.setActive(false)
   }
 
-  private deactivateSelectInteraction(skipReset) {
+  private deactivateSelectInteraction(skipReset = false) {
     if (!skipReset) {
       this.clearSelection()
       this.emitDeselectAll()
