@@ -25,6 +25,7 @@ export const STATUS_INACTIVE = 'Inactive'
 
 export const SOURCE_PLANETSCOPE = 'planetscope'
 export const SOURCE_RAPIDEYE = 'rapideye'
+export const SOURCE_LANDSAT = 'landsat'
 
 // Feature Properties
 export const TYPE_JOB = 'JOB'
