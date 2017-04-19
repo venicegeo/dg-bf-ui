@@ -197,6 +197,8 @@ export class Application extends React.Component<Props, State> {
                 isLoggedIn: false,
                 isSessionLoggedOut: false,
               })
+              const client = sessionService.getClient()
+              client.get(`/logout`)
             }}
           />
         )}
