@@ -20,6 +20,7 @@ import {getClient} from './session'
 import {
   SOURCE_PLANETSCOPE,
   SOURCE_RAPIDEYE,
+  SOURCE_LANDSAT,
 } from '../constants'
 
 let _client: AxiosInstance
@@ -53,6 +54,7 @@ export function search({
   switch (source) {
     case SOURCE_RAPIDEYE:
     case SOURCE_PLANETSCOPE:
+    case SOURCE_LANDSAT:
       itemType = source
       break
     default:
