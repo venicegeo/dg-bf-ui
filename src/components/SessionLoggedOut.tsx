@@ -29,7 +29,7 @@ export const SessionLoggedOut = ({ onDismiss }: Props) => (
       <h1><i className="fa fa-lock"/> You are logging out</h1>
       <p>You are about to log out of Beachfront.</p>
       <p className={styles.instructions}>
-        Click anywhere or press <kbd>ESC</kbd> to log out and return to the login page
+        Click anywhere or press <kbd>ESC</kbd> to sign out and return to the login page
       </p>
     </div>
   </Modal>
