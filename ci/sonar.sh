@@ -19,7 +19,7 @@ npm install
 
 if [ $(uname) == Darwin ]
   then npm run test:ci           # Local development
-  else xvfb-run npm run test:ci  # Jenkins
+  else xvfb-run -fbdir $root/tmp npm run test:ci  # Jenkins
 fi
 
 
