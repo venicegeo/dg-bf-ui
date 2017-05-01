@@ -20,16 +20,17 @@ import * as React from 'react'
 import {Modal} from './Modal'
 
 interface Props {
-  onDismiss()
+  onDismiss(),
+  onInitialize()
 }
 
-export const SessionLoggedOut = ({ onDismiss }: Props) => (
-  <Modal onDismiss={onDismiss}>
+export const SessionLoggedOut = ({ onDismiss, onInitialize }: Props) => (
+  <Modal onDismiss={onDismiss} onInitialize={onInitialize}>
     <div className={styles.root}>
-      <h1><i className="fa fa-lock"/> You are logging out</h1>
-      <p>You are about to log out of Beachfront.</p>
+      <h1><i className="fa fa-lock"/> You have successfully signed out</h1>
+      <p>You are now signed out of Beachfront.</p>
       <p className={styles.instructions}>
-        Click anywhere or press <kbd>ESC</kbd> to sign out and return to the login page
+        Click anywhere or press <kbd>ESC</kbd> to return to the login page
       </p>
     </div>
   </Modal>

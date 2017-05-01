@@ -24,7 +24,7 @@ interface Props {
 }
 
 export const SessionExpired = ({ onDismiss }: Props) => (
-  <Modal onDismiss={onDismiss}>
+  <Modal onDismiss={onDismiss} onInitialize={() => {/* noop */}}>
     <div className={styles.root}>
       <h1><i className="fa fa-lock"/> Your session has expired</h1>
       <p>This happens if you've been idle for a while or if Beachfront has been upgraded after you logged in.</p>
