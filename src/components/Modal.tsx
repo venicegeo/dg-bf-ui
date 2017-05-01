@@ -22,6 +22,7 @@ const ESCAPE = 27
 interface Props {
   className?: string
   onDismiss(): void
+  onInitialize(): void
 }
 
 export class Modal extends React.Component<Props, void> {
@@ -31,6 +32,9 @@ export class Modal extends React.Component<Props, void> {
   }
 
   componentDidMount() {
+    if (this.props.onInitialize()) {
+      this.props.onInitialize()
+    }
     document.addEventListener('click', this.props.onDismiss)
     document.addEventListener('keyup', this.handleKeyPress)
   }

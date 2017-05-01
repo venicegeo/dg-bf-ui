@@ -23,7 +23,7 @@ import * as React from 'react'
 import {Modal} from './Modal'
 
 export const Login = () => (
-  <Modal className={styles.parent} onDismiss={() => {/* noop */}}>
+  <Modal className={styles.parent} onDismiss={() => {/* noop */}} onInitialize={() => {/* noop */}}>
     <div className={styles.root}>
       <img src={brand} alt="Beachfront"/>
       <h1>Welcome to Beachfront!</h1>
