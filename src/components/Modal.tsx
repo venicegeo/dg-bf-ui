@@ -32,7 +32,7 @@ export class Modal extends React.Component<Props, void> {
   }
 
   componentDidMount() {
-    if (this.props.onInitialize()) {
+    if (typeof this.props.onInitialize === 'function') {
       this.props.onInitialize()
     }
     document.addEventListener('click', this.props.onDismiss)
