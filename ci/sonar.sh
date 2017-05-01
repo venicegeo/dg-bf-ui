@@ -7,6 +7,7 @@ popd > /dev/null
 source $root/ci/vars.sh
 
 HOME=$root
+echo $HOME
 
 ## Install Dependencies ########################################################
 
