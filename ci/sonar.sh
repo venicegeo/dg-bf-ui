@@ -14,10 +14,10 @@ npm install
 
 ## Run Tests ###################################################################
 
-# if [ $(uname) == Darwin ]
-#  then npm run test:ci           # Local development
-#  else xvfb-run npm run test:ci  # Jenkins
-# fi
+if [ $(uname) == Darwin ]
+  then npm run test:ci           # Local development
+  else xvfb-run npm run test:ci  # Jenkins
+fi
 
 
 # HACK HACK HACK HACK HACK HACK HACK HACK HACK HACK HACK HACK HACK HACK HACK HACK
