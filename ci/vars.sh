@@ -2,3 +2,4 @@
 
 APP=beachfront
 EXT=zip
+HOME=$WORKSPACE
