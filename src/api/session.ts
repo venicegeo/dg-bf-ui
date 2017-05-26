@@ -29,8 +29,8 @@ export function destroy(): void {
   sessionStorage.clear()
 }
 
-export const LOGIN_URL = `${API_ROOT}/login/temporary_auth?return_url=${encodeURIComponent(location.href.replace(/\/?(\?.*)?$/, '/?logged_in=true'))}`
-export const LOGOUT_URL = `${API_ROOT}/logout?return_url=${encodeURIComponent(location.href.replace(/\/?(\?.*)?$/, '/'))}`
+export const LOGIN_URL = `${API_ROOT}/login/temporary_auth?return_url=${encodeURIComponent(location.protocol + '//' + location.host + '?logged_in=true')}`
+export const LOGOUT_URL = `${API_ROOT}/logout?return_url=${encodeURIComponent(location.protocol + '//' + location.host)}`
 
 export function initialize(): boolean {
 
