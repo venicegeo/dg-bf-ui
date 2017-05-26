@@ -7,11 +7,8 @@ User interface for the Beachfront project.
 ```
 $ npm install
 $ npm run typings:install
-$ npm run create-ssl-certs
 $ npm run watch
 ```
-
-> __Note:__ You may need to add `.development_ssl_certificate.pem` to your development machine's SSL trust chain to avoid problems with CORS being blocked by browser SSL security errors.
 
 Open browser to `http://localhost:8080`.  Changes will automatically
 reload the browser.
@@ -27,11 +24,7 @@ npm run build
 
 | Variable                           | Description                                           |
 |------------------------------------|-------------------------------------------------------|
-| `API_ROOT`                         | A URL pointing at a [`bf-api`](https://github.com/venicegeo/bf-api) instance. |
-| `CLASSIFICATION_BANNER_BACKGROUND` | A color value (e.g., `red`, `green`, `blue`) for the classification banner background. |
-| `CLASSIFICATION_BANNER_FOREGROUND` | A color value (e.g., `red`, `green`, `blue`) for the classification banner foreground. |
-| `CLASSIFICATION_BANNER_TEXT`       | A text value for the classification banner. |
-| `CONSENT_BANNER_TEXT`              | A text value for the consent message shown at the login prompt. |
+| `API_ROOT`                         | A URL pointing at a [`bf-api`](https://github.com/venicegeo/dg-bf-api) instance. |
 
 
 ## Testing
