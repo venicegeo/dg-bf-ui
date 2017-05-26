@@ -152,7 +152,7 @@ export class Application extends React.Component<Props, State> {
   render() {
     return (
       <div className={styles.root}>
-        <div className={styles.logout}><a onClick={this.logout}>Sign Out</a></div>
+        <div className={styles.logout}><a href={sessionService.LOGOUT_URL} onClick={this.logout}>Log Out</a></div>
         <Navigation
           activeRoute={this.state.route}
           onClick={this.navigateTo}
@@ -549,10 +549,7 @@ export class Application extends React.Component<Props, State> {
   }
 
   private logout() {
-    this.setState({
-      isSessionLoggedOut: true,
-    })
-    return null
+    sessionService.destroy()
   }
 
   private startBackgroundTasks() {

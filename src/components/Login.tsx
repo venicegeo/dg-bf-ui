@@ -17,25 +17,21 @@
 const styles: any = require('./Login.css')
 const brand: string = require('../images/brand-small-square.svg')
 
-import {API_ROOT} from '../config'
-import {CONSENT_BANNER_TEXT} from '../config'
 import * as React from 'react'
+
 import {Modal} from './Modal'
+import {LOGIN_URL} from '../api/session'
 
 export const Login = () => (
   <Modal className={styles.parent} onDismiss={() => {/* noop */}} onInitialize={() => {/* noop */}}>
     <div className={styles.root}>
       <img src={brand} alt="Beachfront"/>
       <h1>Welcome to Beachfront!</h1>
-      <div
-        className={styles.warning}
-        dangerouslySetInnerHTML={CONSENT_BANNER_TEXT}
-      />
-      <a className={styles.button} href={API_ROOT + '/login/geoaxis'}>
+      <a className={styles.button} href={LOGIN_URL}>
         <span className={styles.buttonIcons}>
             <span className="fa fa-lock"/>
         </span>
-        Accept and Login with GeoAxis
+        Click here to Log In
       </a>
     </div>
   </Modal>
