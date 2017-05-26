@@ -1,4 +1,4 @@
-@Library('pipelib') _
+@Library('pipelib@master') _
 
 node {
     def NODEJS_HOME = tool 'nodejs_7'
