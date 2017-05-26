@@ -809,7 +809,7 @@ function generateControls() {
     }),
     new ol.control.ZoomSlider(),
     new ol.control.MousePosition({
-      coordinateFormat: ol.coordinate.toStringHDMS,
+      coordinateFormat: ol.coordinate.toStringXY,
       projection: WGS84,
     }),
     new ol.control.FullScreen(),
