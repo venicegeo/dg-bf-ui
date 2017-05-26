@@ -54,7 +54,8 @@ const MAX_ZOOM = 22
 const RESOLUTION_CLOSE = 850
 const VIEW_BOUNDS = [-170, -75, 170, 75]
 const STEM_OFFSET = 10000
-const IDENTIFIER_DETECTIONS = 'bfdetections'
+const IDENTIFIER_DETECTIONS_LAYER = 'all_detections'
+const IDENTIFIER_DETECTIONS_STYLE = 'detections'
 const KEY_SCENE_ID = 'SCENE_ID'
 const KEY_LAYERS = 'LAYERS'
 const KEY_NAME = 'name'
@@ -825,8 +826,8 @@ function generateDetectionsSource(wmsUrl, feature: beachfront.Job|beachfront.Pro
     crossOrigin: 'anonymous',
     url: wmsUrl,
     params: {
-      [KEY_LAYERS]: IDENTIFIER_DETECTIONS,
-      [KEY_STYLES]: IDENTIFIER_DETECTIONS,
+      [KEY_LAYERS]: IDENTIFIER_DETECTIONS_LAYER,
+      [KEY_STYLES]: IDENTIFIER_DETECTIONS_STYLE,
       [KEY_VIEWPARAMS]: (feature.properties.type === TYPE_JOB ? 'jobid:' : 'productlineid:') + feature.id,  // HACK
     },
   })
