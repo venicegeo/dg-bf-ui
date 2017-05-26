@@ -311,13 +311,13 @@ describe('<PrimaryMap/>', () => {
     it('sends correct layer ID to WMS server', () => {
       const wrapper = getComponent([generateCompletedJob()])
       const source = (wrapper.instance() as any as Internals).detectionsLayers['test-job-id'].getSource() as ol.source.TileWMS
-      assert.equal(source.getParams().LAYERS, 'bfdetections')
+      assert.equal(source.getParams().LAYERS, 'all_detections')
     })
 
     it('sends correct style ID to WMS server', () => {
       const wrapper = getComponent([generateCompletedJob()])
       const source = (wrapper.instance() as any as Internals).detectionsLayers['test-job-id'].getSource() as ol.source.TileWMS
-      assert.equal(source.getParams().STYLES, 'bfdetections')
+      assert.equal(source.getParams().STYLES, 'detections')
     })
 
     it('sends correct view parameters to WMS server', () => {
