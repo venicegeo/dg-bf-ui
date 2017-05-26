@@ -50,7 +50,7 @@ import {
 
 const DEFAULT_CENTER = [-10, 0]
 const MIN_ZOOM = 2.5
-const MAX_ZOOM = 22
+const MAX_ZOOM = BASEMAP_TILE_PROVIDERS.reduce((n, p) => Math.max(n, p.maxZoom), 1)
 const RESOLUTION_CLOSE = 850
 const VIEW_BOUNDS = [-170, -75, 170, 75]
 const STEM_OFFSET = 10000

@@ -26,7 +26,7 @@ export const BASEMAP_TILE_PROVIDERS = [
     name: 'OpenStreetMap',
     url: 'https://{a-c}.tile.openstreetmap.org/{z}/{x}/{y}.png',
     attributions: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors',
-    maxZoom: 20,
+    maxZoom: 19,
   },
 ]
 
