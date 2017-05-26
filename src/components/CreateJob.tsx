@@ -22,7 +22,7 @@ import {AlgorithmList} from './AlgorithmList'
 import {ImagerySearch} from './ImagerySearch'
 import {NewJobDetails} from './NewJobDetails'
 import {createJob} from '../api/jobs'
-import {SOURCE_RAPIDEYE} from '../constants'
+import {SOURCE_LANDSAT} from '../constants'
 
 export interface SearchCriteria {
   cloudCover: number
@@ -57,7 +57,7 @@ export const createSearchCriteria = (): SearchCriteria => ({
   cloudCover: 10,
   dateFrom:   moment().subtract(30, 'days').format('YYYY-MM-DD'),
   dateTo:     moment().format('YYYY-MM-DD'),
-  source:     SOURCE_RAPIDEYE,
+  source:     SOURCE_LANDSAT,
 })
 
 export class CreateJob extends React.Component<Props, State> {

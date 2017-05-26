@@ -20,8 +20,6 @@ import * as React from 'react'
 import {StaticMinimap} from './StaticMinimap'
 import * as moment from 'moment'
 import {
-  SOURCE_PLANETSCOPE,
-  SOURCE_RAPIDEYE,
   SOURCE_LANDSAT,
 } from '../constants'
 
@@ -57,8 +55,6 @@ export const CatalogSearchCriteria = (props: Props) => (
       <span>Source</span>
       <select value={props.source} onChange={event => props.onSourceChange((event.target as HTMLSelectElement).value)}>
         <option value={SOURCE_LANDSAT}>Landsat8 (Planet)</option>
-        <option value={SOURCE_RAPIDEYE}>RapidEye (Planet)</option>
-        <option value={SOURCE_PLANETSCOPE}>PlanetScope (Planet)</option>
       </select>
     </label>
     <label className={styles.apiKey}>

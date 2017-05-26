@@ -15,16 +15,16 @@
  **/
 
 :root {
-  --COLOR_TEXT: #555;
-  --COLOR_HEADINGS: #175b82;
+  --COLOR_TEXT: #333;
+  --COLOR_HEADINGS: hsl(250, 0%, 30%);
 
-  --COLOR_BRAND: #3d94c5;
-  --COLOR_BRAND_DARK: #175b82;
-  --COLOR_BRAND_LIGHT: #b3e3ff;
+  --COLOR_BRAND: hsl(40, 5%, 70%);
+  --COLOR_BRAND_DARK: hsl(40, 5%, 60%);
+  --COLOR_BRAND_LIGHT: hsl(40, 5%, 80%);
 
-  --COLOR_CONTROL: #739cb4;
-  --COLOR_CONTROL_DARK: #3c647c;
-  --COLOR_CONTROL_LIGHT: #b3e3ff;
+  --COLOR_CONTROL: hsl(250, 7%, 60%);
+  --COLOR_CONTROL_DARK: hsl(250, 7%, 50%);
+  --COLOR_CONTROL_LIGHT: hsl(250, 7%, 80%);
 
   --COLOR_RED: #f04;
   --COLOR_YELLOW: #fd0;

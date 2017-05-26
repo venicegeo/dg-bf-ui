@@ -15,7 +15,7 @@
  **/
 
 const styles: any = require('./Login.css')
-const brand: string = require('../images/brand-small-square.svg')
+const brand: string = require('../images/brand-small.svg')
 
 import * as React from 'react'
 
@@ -25,8 +25,8 @@ import {LOGIN_URL} from '../api/session'
 export const Login = () => (
   <Modal className={styles.parent} onDismiss={() => {/* noop */}} onInitialize={() => {/* noop */}}>
     <div className={styles.root}>
-      <img src={brand} alt="Beachfront"/>
-      <h1>Welcome to Beachfront!</h1>
+      <img src={brand} alt="CoastLine"/>
+      <h1>Welcome to CoastLine!</h1>
       <a className={styles.button} href={LOGIN_URL}>
         <span className={styles.buttonIcons}>
             <span className="fa fa-lock"/>

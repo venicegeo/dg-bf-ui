@@ -26,9 +26,9 @@ interface Props {
 export const UpdateAvailable = ({ onDismiss }: Props) => (
   <Modal onDismiss={onDismiss} onInitialize={() => {/* noop */}}>
     <div className={styles.root}>
-      <h1><i className="fa fa-ship"/> Beachfront has been updated!</h1>
+      <h1><i className="fa fa-ship"/> CoastLine has been updated!</h1>
       <p>
-        A new version of Beachfront is available.  Reload the page to see the latest version.
+        A new version of CoastLine is available.  Reload the page to see the latest version.
       </p>
 
       <p className={styles.instructions}>
