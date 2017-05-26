@@ -424,8 +424,8 @@ export class PrimaryMap extends React.Component<Props, State> {
       layers: [
         // Order matters here
         ...this.basemapLayers,
-        this.frameLayer,
         this.drawLayer,
+        this.frameLayer,
         this.imageryLayer,
         this.highlightLayer,
       ],
@@ -493,7 +493,7 @@ export class PrimaryMap extends React.Component<Props, State> {
     })
 
     // Additions/Updates
-    const insertionIndex = this.map.getLayers().getArray().indexOf(this.frameLayer)
+    const insertionIndex = this.map.getLayers().getArray().indexOf(this.frameLayer) + 1
     detections.filter(d => shouldRender[d.id] && !alreadyRendered[d.id]).forEach(detection => {
       const layer = new ol.layer.Tile({
         extent: featureToBbox(detection),
@@ -653,7 +653,7 @@ export class PrimaryMap extends React.Component<Props, State> {
     })
 
     // Additions
-    const insertionIndex = this.basemapLayers.length
+    const insertionIndex = this.map.getLayers().getArray().indexOf(this.frameLayer)
     previewables
       .filter(f => shouldRender[f.sceneId] && !alreadyRendered[f.sceneId])
       .forEach(f => {
