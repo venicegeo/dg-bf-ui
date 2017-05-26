@@ -64,6 +64,8 @@ export function getClient(): AxiosInstance {
       baseURL: API_ROOT,
       timeout: DEFAULT_TIMEOUT,
       withCredentials: true,
+      xsrfCookieName: 'csrf_token',
+      xsrfHeaderName: 'X-XSRF-Token',
       headers: {
         'X-Requested-With': 'XMLHttpRequest',
       },
