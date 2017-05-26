@@ -20,7 +20,6 @@ import * as React from 'react'
 import {render} from 'react-dom'
 import * as debounce from 'lodash/debounce'
 import {About} from './About'
-import {ClassificationBanner} from './ClassificationBanner'
 import {CreateJob, SearchCriteria, createSearchCriteria} from './CreateJob'
 import {CreateProductLine} from './CreateProductLine'
 import {JobStatusList} from './JobStatusList'
@@ -153,7 +152,6 @@ export class Application extends React.Component<Props, State> {
   render() {
     return (
       <div className={styles.root}>
-        <ClassificationBanner anchor="top"/>
         <div className={styles.logout}><a onClick={this.logout}>Sign Out</a></div>
         <Navigation
           activeRoute={this.state.route}
@@ -213,7 +211,6 @@ export class Application extends React.Component<Props, State> {
             }}
           />
         )}
-        <ClassificationBanner anchor="bottom"/>
       </div>
     )
   }

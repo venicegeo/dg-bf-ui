@@ -91,10 +91,6 @@ declare namespace beachfront {
 interface BuildEnvironment {
   NODE_ENV: string
   API_ROOT: string
-  CLASSIFICATION_BANNER_BACKGROUND: string
-  CLASSIFICATION_BANNER_FOREGROUND: string
-  CLASSIFICATION_BANNER_TEXT: string
-  CONSENT_BANNER_TEXT: string
 }
 
 declare const process: {

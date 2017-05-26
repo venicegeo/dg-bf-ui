@@ -31,26 +31,26 @@ body {
 .navigation {
   z-index: 10;
   position: absolute;
-  top: var(--CLASSIFICATION_BANNER_HEIGHT);
+  top: 0;
   left: 0;
-  bottom: var(--CLASSIFICATION_BANNER_HEIGHT);
+  bottom: 0;
   width: 50px;
 }
 
 .sidebar {
   z-index: 9;
   position: absolute;
-  top: var(--CLASSIFICATION_BANNER_HEIGHT);
+  top: 0;
   left: 50px;
-  bottom: var(--CLASSIFICATION_BANNER_HEIGHT);
+  bottom: 0;
   width: 400px;
 }
 
 .map {
   z-index: 1;
   position: absolute;
-  top: var(--CLASSIFICATION_BANNER_HEIGHT);
+  top: 0;
   left: 50px;
   right: 0;
-  bottom: var(--CLASSIFICATION_BANNER_HEIGHT);
+  bottom: 0;
 }
