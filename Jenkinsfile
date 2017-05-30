@@ -19,21 +19,13 @@ node {
         }
     }
 
-    stage('Test') {
-        withEnv(["PATH+NODE=${NODEJS_HOME}/bin"]) {
-            sh """
-                npm run test:ci
-            """
-        }
-    }
-
-    stage('Test') {
-        withEnv(["PATH+NODE=${NODEJS_HOME}/bin"]) {
-            sh """
-                npm run test:ci
-            """
-        }
-    }
+    // stage('Test') {
+    //     withEnv(["PATH+NODE=${NODEJS_HOME}/bin"]) {
+    //         sh """
+    //             npm run test:ci
+    //         """
+    //     }
+    // }
 
     stage('Archive') {
         withEnv(["PATH+NODE=${NODEJS_HOME}/bin"]) {
