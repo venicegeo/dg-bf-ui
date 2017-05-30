@@ -22,9 +22,9 @@ npm run build
 
 ### Environment Variables
 
-| Variable                           | Description                                           |
-|------------------------------------|-------------------------------------------------------|
-| `API_ROOT`                         | A URL pointing at a [`bf-api`](https://github.com/venicegeo/dg-bf-api) instance. |
+| Variable   | Description                                           |
+|------------|-------------------------------------------------------|
+| `API_ROOT` | A URL pointing at a [`bf-api`](https://github.com/venicegeo/dg-bf-api) instance. |
 
 
 ## Testing
