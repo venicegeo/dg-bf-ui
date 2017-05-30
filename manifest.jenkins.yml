@@ -1,10 +1,8 @@
 applications:
-- name: beachfront
-  host: beachfront
-  path: beachfront.zip
+- name: coastline
+  host: coastline
+  path: coastline.zip
   buildpack: staticfile_buildpack
   memory: 512M
   instances: 1
   timeout: 15
-env:
-    NPM_CONFIG_CACHE: ~/workspace/venice/beachfront/bf-ui-pipeline/.npmcache

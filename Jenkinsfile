@@ -34,7 +34,7 @@ node {
                 cp nginx.conf dist/
 
                 pushd dist > /dev/null
-                zip -r ../beachfront.zip .
+                zip -r ../coastline.zip .
                 popd > /dev/null
             '''
         }
