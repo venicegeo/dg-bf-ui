@@ -41,12 +41,8 @@ node {
     }
 
     stage('Deploy') {
-        cfPush {
-            cfTarget = 'dev'
-        }
-        cfBgDeploy {
-            cfTarget = 'dev'
-        }
+        cfPush()
+        cfBgDeploy()
     }
 
     stage ('Cleanup') {
