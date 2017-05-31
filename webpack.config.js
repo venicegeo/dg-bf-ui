@@ -111,7 +111,7 @@ module.exports = {
     new webpack.IgnorePlugin(/^\.\/locale$/, /moment$/),
     new webpack.DefinePlugin({
       'process.env.NODE_ENV': JSON.stringify(__environment__),
-      'process.env.API_ROOT': process.env.API_ROOT ? JSON.stringify(process.env.API_ROOT) : (__environment__ === 'development') ? JSON.stringify('//localhost:5000') : "'https://' + location.hostname.replace('beachfront', 'bf-api')",
+      'process.env.API_ROOT': process.env.API_ROOT ? JSON.stringify(process.env.API_ROOT) : (__environment__ === 'development') ? JSON.stringify('//localhost:5000') : "'https://' + location.hostname.replace('coastline', 'coastline-api')",
     }),
     new HtmlWebpackPlugin({
       template: 'src/index.html',
