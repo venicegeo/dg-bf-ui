@@ -823,7 +823,7 @@ function generateControls() {
 function generateDetectionsSource(wmsUrl, feature: beachfront.Job|beachfront.ProductLine) {
   return new ol.source.TileWMS({
     tileLoadFunction,
-    crossOrigin: 'anonymous',
+    crossOrigin: 'use-credentials',
     url: wmsUrl,
     params: {
       [KEY_LAYERS]: IDENTIFIER_DETECTIONS_LAYER,
