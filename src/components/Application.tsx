@@ -531,7 +531,7 @@ export class Application extends React.Component<Props, State> {
     })
   }
 
-  private panTo(point, zoom = 10) {
+  private panTo(point, zoom = 8.5) {
     this.setState({
       mapView: Object.assign({}, this.state.mapView, {
         center: point,
